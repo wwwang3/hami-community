@@ -1,0 +1,50 @@
+version: "3"
+networks:
+  hami_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.3.0/24
+volumes:
+  mysql_data:
+  redis_data:
+
+services:
+  mysql:
+    container_name: mysql
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.11
+    ports:
+      - "8300:3306"
+    volumes:
+      - ./conf/my.cnf:/etc/my.cnf
+      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql-files
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+  redis:
+    container_name: redis
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.12
+    ports:
+      - "8301:6379"
+    volumes:
+      - ./conf/redis.conf:/etc/redis/redis.conf
+      - redis_data:/data
+    environment:
+      - TZ=Asia/Shanghai
+    command: ["redis-server", "/etc/redis/redis.conf", "--appendonly yes"]
+
+
+
+
