@@ -31,7 +31,7 @@ public class JwtTokenService implements TokenService {
     public JwtTokenService(WebSecurityProperties properties, BlacklistStorage blacklistStorage) {
         this.properties = properties;
         this.storage = blacklistStorage;
-        key = new SecretKeySpec(properties.getJwtSecret().getBytes(), algorithm.getJcaName());
+        key = new SecretKeySpec(properties.getSecret().getBytes(), algorithm.getJcaName());
     }
 
     @Override
@@ -39,11 +39,14 @@ public class JwtTokenService implements TokenService {
         //登录用户的ID
         int id = loginUser.getId();
         //有效期 单位s
-        long timeout = properties.getJwtTimeout();
-        long expireAt = timeout * 1000 + System.currentTimeMillis();
+        long timeout = properties.getExpire();
+        Date expiration = new Date(timeout * 1000 + System.currentTimeMillis());
+        //set expireAt, used when setting cookie
+        loginUser.setExpireAt(expiration);
+        //todo 完善
         return Jwts.builder()
                 .signWith(key) //签名
-                .setExpiration(new Date(expireAt)) //过期时间
+                .setExpiration(expiration) //过期时间
                 .setId(UUID.randomUUID().toString()) //jwtId
                 .claim("id", id) //claims
                 .compact();

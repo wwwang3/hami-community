@@ -45,6 +45,13 @@
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>top.wang3</groupId>
+            <artifactId>hami-common</artifactId>
+            <version>0.0.1</version>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

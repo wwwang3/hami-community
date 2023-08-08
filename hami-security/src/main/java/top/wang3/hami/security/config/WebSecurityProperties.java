@@ -3,6 +3,7 @@ package top.wang3.hami.security.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.util.List;
 
@@ -11,33 +12,36 @@ import java.util.List;
 @Data
 public class WebSecurityProperties {
 
-    /**
-     * 默认jwt有效期 7天单位s
-     */
-    private static final long DEFAULT_TIMEOUT = 7 * 24 * 60 * 60;
-
-    public static final String DEFAULT_JWT_NAME = "access_token";
+    public static final String DEFAULT_TOKEN_NAME = "access_token";
 
     public static final String DEFAULT_FORM_LOGIN_API = "/api/v1/auth/login";
+
+    public static final String DEFAULT_LOGOUT_API = "/api/v1/auth/logout";
 
 
     /**
      * jwt秘钥
      */
-    private String jwtSecret;
+    private String secret;
 
     /**
-     * jwt名称 (从cookie或者header中读取jwt时cookie或者header的名称)
+     * token名称 (从cookie或者header中读取token时cookie或者header的名称)
      */
-    private String jwtName = DEFAULT_JWT_NAME ;
+    private String tokenName = "access_token" ;
 
     /**
-     * jwt有效期 单位s
+     * token有效期 单位s
+     * 默认7天
      */
-    private long jwtTimeout;
+    private int expire = 604800;
 
+    @NestedConfigurationProperty
+    private CookieConfig cookie = new CookieConfig();
 
-    private String formLoginApi = DEFAULT_FORM_LOGIN_API;
+    /**
+     * 表单登录接口
+     */
+    private String formLoginApi = "/api/v1/auth/login";
 
     /**
      * 不需要登录访问的接口
@@ -48,4 +52,29 @@ public class WebSecurityProperties {
      * 允许跨域的站点
      */
     private List<String> allowedOrigins;
+
+
+    @Data
+    public static class CookieConfig {
+
+        /**
+         * 是否将token写入cookie, 读取时会从header或者cookie中寻找
+         */
+        boolean enable = true;
+
+        /**
+         * http only
+         */
+        boolean httpOnly = true;
+
+        /**
+         * cookie写入的域名
+         */
+        String domain;
+
+        /**
+         * cookie path
+         */
+        String path = "/";
+    }
 }

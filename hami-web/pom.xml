@@ -23,6 +23,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>top.wang3.hami.security</groupId>
+            <artifactId>hami-security</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>

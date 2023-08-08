@@ -27,7 +27,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenService tokenService) throws Exception {
         //todo 完善配置
-        AuthenticationPostHandler handler = new AuthenticationPostHandler(tokenService);
+        AuthenticationPostHandler handler = new AuthenticationPostHandler(tokenService, properties);
         return http
                 .authorizeHttpRequests(auth -> { //接口访问配置
                     String[] apis = properties.getAllowedApis();

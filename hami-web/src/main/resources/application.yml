@@ -1,2 +1,9 @@
 server:
   port: 8303
+hami:
+  security:
+    cookie:
+      domain: "localhost:8080"
+    secret: "adawdgerwlkgewrkgegjdhwjei43g3jkdnwqjhdqrg34g34rf32gw23r23"
+    expire: 600
+
