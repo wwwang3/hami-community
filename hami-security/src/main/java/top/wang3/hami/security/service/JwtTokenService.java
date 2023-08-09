@@ -29,12 +29,12 @@ public class JwtTokenService implements TokenService {
 
     private final BlacklistStorage storage;
 
-    private final SignatureAlgorithm algorithm = SignatureAlgorithm.HS256;
     private final Key key;
 
     public JwtTokenService(WebSecurityProperties properties, BlacklistStorage blacklistStorage) {
         this.properties = properties;
         this.storage = blacklistStorage;
+        SignatureAlgorithm algorithm = SignatureAlgorithm.HS256;
         key = new SecretKeySpec(properties.getSecret().getBytes(), algorithm.getJcaName());
     }
 
@@ -54,6 +54,7 @@ public class JwtTokenService implements TokenService {
                 .setId(UUID.randomUUID().toString()) //jwtId
                 .claim("id", id) //claims
                 .claim("username", loginUser.getUsername())
+                .claim("email", loginUser.getEmail())
                 .claim("authorities", CollectionUtils.convert(loginUser.getAuthorities(), GrantedAuthority::getAuthority))
                 .compact();
     }
@@ -73,6 +74,7 @@ public class JwtTokenService implements TokenService {
         return LoginUser
                 .withId(claims.get("id", int.class))
                 .username(claims.get("username", String.class))
+                .email(claims.get("email", String.class))
                 .authorities(CollectionUtils.convert(authorities, SimpleGrantedAuthority::new))
                 .expireAt(claims.getExpiration())
                 .build();

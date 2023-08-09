@@ -17,4 +17,9 @@ public class LoginUserContext {
         SecurityContext context = SecurityContextHolder.getContext();
         return (LoginUser) context.getAuthentication();
     }
+
+    public static int getLoginUserId() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser == null ? -1 : loginUser.getId();
+    }
 }

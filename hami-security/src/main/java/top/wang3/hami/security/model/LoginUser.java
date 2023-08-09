@@ -31,6 +31,11 @@ public class LoginUser implements UserDetails, CredentialsContainer {
     private String username;
 
     /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
      * 密码
      */
     @JsonIgnore
@@ -106,6 +111,8 @@ public class LoginUser implements UserDetails, CredentialsContainer {
         int id;
         Date expireAt;
         String username;
+
+        String email;
         String password;
 
         List<GrantedAuthority> authorities;
@@ -122,6 +129,11 @@ public class LoginUser implements UserDetails, CredentialsContainer {
 
         public LoginUserBuilder username(String username) {
             this.username = username;
+            return this;
+        }
+
+        public LoginUserBuilder email(String email) {
+            this.email = email;
             return this;
         }
 
@@ -177,7 +189,7 @@ public class LoginUser implements UserDetails, CredentialsContainer {
         }
 
         public LoginUser build() {
-            return new LoginUser(id, username, password, authorities, expireAt);
+            return new LoginUser(id, username, email, password, authorities, expireAt);
         }
     }
 }

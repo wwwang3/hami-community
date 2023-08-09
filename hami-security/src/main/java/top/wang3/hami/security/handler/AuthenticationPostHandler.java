@@ -60,15 +60,14 @@ public class AuthenticationPostHandler {
         writeResponse(response, result);
     }
 
-
     public void handleLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
         //退出登录, 调用invalidate方法使token失效
-        //从cookie中移除token
         String token = tokenService.getToken(request, properties.getTokenName());
         Assert.notNull(token, "token can not be null");
+        //添加黑名单成功
         if (tokenService.invalidate(token)) {
-            //添加黑名单成功
+            //从cookie中移除token
             if (properties.getCookie().isEnable()) {
                 Cookie cookie = new Cookie(properties.getTokenName(), "");
                 cookie.setMaxAge(0);

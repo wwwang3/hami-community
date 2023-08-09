@@ -9,7 +9,7 @@ public interface BlacklistStorage {
     /**
      * 将jwt添加进黑名单
      * @param jwtId jwt的Id
-     * @param expireAt jwt过期时间(毫秒级时间戳)
+     * @param expireAt jwt过期时间(毫秒)
      */
     boolean add(String jwtId, long expireAt);
 
