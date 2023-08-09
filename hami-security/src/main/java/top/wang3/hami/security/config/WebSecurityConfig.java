@@ -48,7 +48,9 @@ public class WebSecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> { //接口访问配置
                     String[] apis = properties.getAllowedApis();
-                    auth.requestMatchers(apis).permitAll();
+                    if (apis != null) {
+                        auth.requestMatchers(apis).permitAll();
+                    }
                     auth.anyRequest().authenticated();
                 })
                 .csrf(CsrfConfigurer::disable) //csrf配置

@@ -1,7 +1,6 @@
 package top.wang3.hami.security.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -98,27 +97,10 @@ public class JwtTokenService implements TokenService {
                     .build()
                     .parse(jwt)
                     .getBody();
-        } catch (JwtException e) {
-            log.debug("parse jwt failed, error_class: {}, error_msg: {}", e.getClass().getName(),
+        } catch (Exception e) {
+            log.debug("parse jwt failed, error_class: {}, error_msg: {}", e.getClass().getSimpleName(),
                     e.getMessage());
             return null;
         }
     }
-
-    public static void main(String[] args) throws ClassNotFoundException {
-        String key = "awdkawjkgsadawddawdawfgsegregergerg";
-        Key signedKey = new SecretKeySpec(key.getBytes(), SignatureAlgorithm.HS256.getJcaName());
-        for (int i = 0; i < 100; i++) {
-            long start = System.currentTimeMillis();
-            String jwt = Jwts.builder()
-                    .setId(UUID.randomUUID().toString())
-                    .signWith(signedKey)
-                    .claim("id", 123)
-                    .setExpiration(new Date(System.currentTimeMillis() + 100000))
-                    .compact();
-            long end = System.currentTimeMillis();
-            System.out.println(end - start);
-        }
-    }
-
 }

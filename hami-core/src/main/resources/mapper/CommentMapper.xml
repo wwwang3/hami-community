@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.wang3.hami.core.mapper.CommentMapper">
+  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.Comment">
+    <!--@mbg.generated-->
+    <!--@Table `comment`-->
+    <id column="id" property="id" />
+    <result column="article_id" property="articleId" />
+    <result column="user_id" property="userId" />
+    <result column="is_author" property="isAuthor" />
+    <result column="ip_info" property="ipInfo" />
+    <result column="content" property="content" />
+    <result column="content_img" property="contentImg" />
+    <result column="root_id" property="rootId" />
+    <result column="parent_id" property="parentId" />
+    <result column="reply_to" property="replyTo" />
+    <result column="deleted" property="deleted" />
+    <result column="ctime" property="ctime" />
+    <result column="mtime" property="mtime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, article_id, user_id, is_author, ip_info, content, content_img, root_id, parent_id, 
+    reply_to, deleted, ctime, mtime
+  </sql>
+</mapper>

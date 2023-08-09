@@ -12,8 +12,6 @@ public class HamiCommonConfig {
 
     @Bean
     public Ip2RegionSearcher ip2RegionSearcher(@Autowired ResourceLoader resourceLoader) {
-        int a = 100;
-        System.out.println(a);
         return new Ip2RegionSearcherImpl(resourceLoader);
     }
 }
