@@ -5,6 +5,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import top.wang3.hami.common.util.CollectionUtils;
 import top.wang3.hami.security.config.WebSecurityProperties;
 import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.storage.BlacklistStorage;
@@ -12,6 +15,7 @@ import top.wang3.hami.security.storage.BlacklistStorage;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -49,9 +53,12 @@ public class JwtTokenService implements TokenService {
                 .setExpiration(expiration) //过期时间
                 .setId(UUID.randomUUID().toString()) //jwtId
                 .claim("id", id) //claims
+                .claim("username", loginUser.getUsername())
+                .claim("authorities", CollectionUtils.convert(loginUser.getAuthorities(), GrantedAuthority::getAuthority))
                 .compact();
     }
 
+    @SuppressWarnings(value = {"unchecked"})
     @Override
     public LoginUser resolveToken(String jwt) {
         Claims claims = parseJwt(jwt);
@@ -61,23 +68,28 @@ public class JwtTokenService implements TokenService {
         if (storage.contains(jwtId)) {
             return null;
         }
+        //unchecked
+        List<String> authorities = claims.get("authorities", List.class);
         return LoginUser
                 .withId(claims.get("id", int.class))
+                .username(claims.get("username", String.class))
+                .authorities(CollectionUtils.convert(authorities, SimpleGrantedAuthority::new))
+                .expireAt(claims.getExpiration())
                 .build();
     }
 
     @Override
     public boolean invalidate(String jwt) {
         //将jwt加入到黑名单
-        //解析时会判断是否在黑名单中
         Claims claims = parseJwt(jwt);
-        //解析失败了 说明token已经无效了
-        if (claims == null) return true;
+        //解析失败了 说明token已经无效了 返回invalid token信息
+        if (claims == null) return false;
         return storage.add(claims.getId(), claims.getExpiration().getTime());
     }
 
 
     private Claims parseJwt(String jwt) {
+        //解析token, jwt不合法或者解析失败返回bull
         try {
             return (Claims) Jwts.parserBuilder()
                     .setSigningKey(key)

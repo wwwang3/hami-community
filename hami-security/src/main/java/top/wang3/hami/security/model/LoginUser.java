@@ -8,7 +8,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * UserDetails实现类，兼容username-password登录
@@ -45,17 +48,9 @@ public class LoginUser implements UserDetails, CredentialsContainer {
      */
     private Date expireAt;
 
-    public static LoginUserBuilder withId(int id) {
-        return builder().id(id);
-    }
-
-    public static LoginUserBuilder builder() {
-        return new LoginUserBuilder();
-    }
-
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    public List<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
@@ -67,7 +62,7 @@ public class LoginUser implements UserDetails, CredentialsContainer {
     @JsonIgnore
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @JsonIgnore
@@ -99,6 +94,14 @@ public class LoginUser implements UserDetails, CredentialsContainer {
         this.password = null;
     }
 
+    public static LoginUserBuilder withId(int id) {
+        return builder().id(id);
+    }
+
+    public static LoginUserBuilder builder() {
+        return new LoginUserBuilder();
+    }
+
     public static class LoginUserBuilder {
         int id;
         Date expireAt;
@@ -127,6 +130,11 @@ public class LoginUser implements UserDetails, CredentialsContainer {
             return this;
         }
 
+        /**
+         * 添加角色信息
+         * @param roles 角色
+         * @return LoginUserBuilder
+         */
         public LoginUserBuilder roles(String... roles) {
             if (this.authorities == null) {
                 this.authorities = new ArrayList<>();
@@ -139,6 +147,11 @@ public class LoginUser implements UserDetails, CredentialsContainer {
             return this;
         }
 
+        /**
+         * 添加权限信息
+         * @param permissions 权限
+         * @return LoginUserBuilder
+         */
         public LoginUserBuilder permissions(String... permissions) {
             if (authorities == null) {
                 authorities = new ArrayList<>();
@@ -148,6 +161,18 @@ public class LoginUser implements UserDetails, CredentialsContainer {
                             .map(SimpleGrantedAuthority::new)
                             .toList()
             );
+            return this;
+        }
+
+        /**
+         * 直接设置角色权限信息
+         * @param authorities 权限
+         * @return LoginUserBuilder
+         */
+        public LoginUserBuilder authorities(List<GrantedAuthority> authorities) {
+            if (authorities != null) {
+                this.authorities = authorities;
+            }
             return this;
         }
 

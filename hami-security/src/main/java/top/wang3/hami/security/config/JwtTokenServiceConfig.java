@@ -10,7 +10,7 @@ import top.wang3.hami.security.storage.BlacklistStorage;
 import top.wang3.hami.security.storage.DefaultBlackListStorage;
 
 @Configuration
-public class TokenServiceConfig {
+public class JwtTokenServiceConfig {
 
     @Bean
     @ConditionalOnMissingBean

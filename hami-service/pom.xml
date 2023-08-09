@@ -24,6 +24,11 @@
             <artifactId>hami-common</artifactId>
             <version>0.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>top.wang3.hami.security</groupId>
+            <artifactId>hami-security</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
 </project>

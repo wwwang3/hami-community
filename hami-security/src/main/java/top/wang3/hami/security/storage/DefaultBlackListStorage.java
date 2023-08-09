@@ -24,7 +24,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
     @Override
     public boolean add(String jwtId, long expireAt) {
         log.debug("add jwt: {}", jwtId);
-        blackList.put(jwtId, expireAt);
+        blackList.putIfAbsent(jwtId, expireAt);
         return true;
     }
 

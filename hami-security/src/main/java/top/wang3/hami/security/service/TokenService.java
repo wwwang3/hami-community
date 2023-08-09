@@ -1,5 +1,8 @@
 package top.wang3.hami.security.service;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.Assert;
 import top.wang3.hami.security.model.LoginUser;
 
 public interface TokenService {
@@ -20,7 +23,29 @@ public interface TokenService {
     LoginUser resolveToken(String token);
 
     /**
-     * 使token失效
+     * 从header或者cookie中获取token的默认实现
+     * @param request HttpServletRequest
+     * @param tokenName token名称
+     * @return token, 没有则返回kon
+     */
+    default String getToken(HttpServletRequest request, String tokenName) {
+        Assert.notNull(tokenName, "tokenName can not be null");
+        //从请求中获取
+        String token = request.getHeader(tokenName);
+        if (token != null) return token;
+        //从cookie中获取
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+        for (Cookie cookie : cookies) {
+            if (tokenName.equalsIgnoreCase(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 使token失效, 退出登录时使用
      * @param token 用户登录token
      * @return 是否加入成功
      */

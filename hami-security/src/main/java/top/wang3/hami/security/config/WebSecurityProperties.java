@@ -12,13 +12,6 @@ import java.util.List;
 @Data
 public class WebSecurityProperties {
 
-    public static final String DEFAULT_TOKEN_NAME = "access_token";
-
-    public static final String DEFAULT_FORM_LOGIN_API = "/api/v1/auth/login";
-
-    public static final String DEFAULT_LOGOUT_API = "/api/v1/auth/logout";
-
-
     /**
      * jwt秘钥
      */
@@ -42,6 +35,11 @@ public class WebSecurityProperties {
      * 表单登录接口
      */
     private String formLoginApi = "/api/v1/auth/login";
+
+    /**
+     * 退出登录接口
+     */
+    private String logoutApi = "/api/v1/auth/logout";
 
     /**
      * 不需要登录访问的接口

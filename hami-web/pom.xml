@@ -24,8 +24,8 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>top.wang3.hami.security</groupId>
-            <artifactId>hami-security</artifactId>
+            <groupId>top.wang3.hami.service</groupId>
+            <artifactId>hami-service</artifactId>
             <version>0.0.1</version>
         </dependency>
     </dependencies>
