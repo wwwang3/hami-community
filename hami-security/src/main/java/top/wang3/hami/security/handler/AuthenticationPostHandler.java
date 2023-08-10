@@ -5,7 +5,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -46,7 +45,7 @@ public class AuthenticationPostHandler {
     }
 
     public void handleError(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        log.debug("login failed: error_class: {}, error_msg: {}", e.getClass().getName(), e.getMessage());
+        log.debug("login failed: error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         Result<?> result;
         if (e instanceof AccessDeniedException ae) {
             // 登录成功, 校验权限失败
@@ -90,7 +89,7 @@ public class AuthenticationPostHandler {
     }
 
     private <T> void writeResponse(HttpServletResponse response, Result<T> result) {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType("application/json;charset=UTF-8");
         try {
             response.getWriter().write(result.toJsonString());
         } catch (IOException e) {
