@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import top.wang3.hami.security.service.JwtTokenService;
 import top.wang3.hami.security.service.TokenService;
 import top.wang3.hami.security.storage.BlacklistStorage;
@@ -31,8 +31,8 @@ public class JwtTokenServiceConfig {
     }
 
     @Bean("redisBlackListStorage")
-    @ConditionalOnBean(RedisTemplate.class)
-    public BlacklistStorage redisBlackListStorage(RedisTemplate<String, Object> redisTemplate) {
+    @ConditionalOnBean(StringRedisTemplate.class)
+    public BlacklistStorage redisBlackListStorage(StringRedisTemplate redisTemplate) {
         return new RedisBlackListStorage(redisTemplate);
     }
 

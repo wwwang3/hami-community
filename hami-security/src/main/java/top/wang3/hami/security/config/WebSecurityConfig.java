@@ -4,8 +4,10 @@ package top.wang3.hami.security.config;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -17,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import top.wang3.hami.security.filter.RequestTimeDebugFilter;
 import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
 import top.wang3.hami.security.service.TokenService;
@@ -86,6 +89,14 @@ public class WebSecurityConfig {
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
+    }
+
+    @Bean
+    FilterRegistrationBean<RequestTimeDebugFilter> filterFilterRegistrationBean() {
+        var bean = new FilterRegistrationBean<>(new RequestTimeDebugFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        bean.addUrlPatterns("/*");
+        return bean;
     }
 
 }

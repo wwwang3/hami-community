@@ -1,6 +1,6 @@
 package top.wang3.hami.security.storage;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
 
@@ -11,9 +11,9 @@ public class RedisBlackListStorage implements BlacklistStorage {
 
     public static final String BLACK_LIST_PREFIX = "blacklist:";
 
-    RedisTemplate<String, Object> redisTemplate;
+    StringRedisTemplate redisTemplate;
 
-    public RedisBlackListStorage(RedisTemplate<String, Object> redisTemplate) {
+    public RedisBlackListStorage(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
