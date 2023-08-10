@@ -24,8 +24,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
     @Override
     public boolean add(String jwtId, long expireAt) {
         log.debug("add jwtId: {}", jwtId);
-        blackList.putIfAbsent(jwtId, expireAt);
-        return true;
+        return blackList.putIfAbsent(jwtId, expireAt) == null;
     }
 
     @Override
@@ -37,6 +36,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
      * 自动清理
      */
     private void autoClear() {
+        log.debug("Start periodic cleaning of expired tokens");
         service.schedule(() -> {
             Iterator<Map.Entry<String, Long>> iterator = blackList.entrySet().iterator();
             while (iterator.hasNext()) {

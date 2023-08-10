@@ -1,5 +1,6 @@
 package top.wang3.hami.security.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,11 +14,13 @@ import top.wang3.hami.security.storage.DefaultBlackListStorage;
 import top.wang3.hami.security.storage.RedisBlackListStorage;
 
 @Configuration
+@Slf4j
 public class JwtTokenServiceConfig {
 
     @Bean("jwtTokenService")
     @ConditionalOnMissingBean
     public TokenService jwtTokenService(@Autowired WebSecurityProperties properties,  @Autowired BlacklistStorage storage) {
+        log.debug("storage impl: {}", storage.getClass().getSimpleName());
         return new JwtTokenService(properties, storage);
     }
 

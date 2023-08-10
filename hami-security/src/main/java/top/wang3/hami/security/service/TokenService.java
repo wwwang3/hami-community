@@ -47,7 +47,7 @@ public interface TokenService {
     /**
      * 使token失效, 退出登录时使用
      * @param token 用户登录token
-     * @return 是否加入成功
+     * @return 是否加入成功 token为空或者解析失败返回false
      */
     boolean invalidate(String token);
 }

@@ -2,6 +2,7 @@ package top.wang3.hami.security.config;
 
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import top.wang3.hami.security.service.TokenService;
 @Configuration
 @EnableConfigurationProperties(WebSecurityProperties.class)
 @EnableWebSecurity
+@Slf4j
 public class WebSecurityConfig {
 
     private final WebSecurityProperties properties;
@@ -34,6 +36,7 @@ public class WebSecurityConfig {
     @PostConstruct
     private void setSecurityStrategy() {
         SecurityContextHolder.setStrategyName("top.wang3.hami.security.context.TtlSecurityContextHolderStrategy");
+        log.debug("security-strategy: {}", SecurityContextHolder.getContextHolderStrategy().getClass().getSimpleName());
     }
 
     @Bean
@@ -43,6 +46,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenService tokenService) throws Exception {
+        log.debug("token-service: {}", tokenService.getClass().getSimpleName());
         AuthenticationPostHandler handler = new AuthenticationPostHandler(tokenService, properties);
         TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter(tokenService, properties.getTokenName());
         return http
@@ -77,7 +81,6 @@ public class WebSecurityConfig {
                 )
                 .logout(conf -> conf
                         .logoutUrl(properties.getLogoutApi())
-                        .permitAll()
                         .logoutSuccessHandler(handler::handleLogoutSuccess)
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)

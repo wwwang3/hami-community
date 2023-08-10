@@ -19,7 +19,6 @@ import java.util.UUID;
 
 /**
  * TokenService实现类 token类型为JWT
- * todo 完善
  */
 @Slf4j
 public class JwtTokenService implements TokenService {
@@ -46,7 +45,6 @@ public class JwtTokenService implements TokenService {
         Date expiration = new Date(timeout * 1000 + System.currentTimeMillis());
         //set expireAt, used when setting cookie
         loginUser.setExpireAt(expiration);
-        //todo 完善
         return Jwts.builder()
                 .signWith(key) //签名
                 .setExpiration(expiration) //过期时间
@@ -61,17 +59,16 @@ public class JwtTokenService implements TokenService {
     @SuppressWarnings(value = {"unchecked"})
     @Override
     public LoginUser resolveToken(String jwt) {
+        //null判断交给parseJwt
         Claims claims = parseJwt(jwt);
-        if (claims == null) return null;
-        String jwtId = claims.getId();
-        //在黑名单中
-        if (storage.contains(jwtId)) {
+        //解析失败 或者在 黑名单中
+        if (invalided(claims)) {
             return null;
         }
         //unchecked
         List<String> authorities = claims.get("authorities", List.class);
         return LoginUser
-                .withId(claims.get("id", int.class))
+                .withId(claims.get("id", Integer.class))
                 .username(claims.get("username", String.class))
                 .email(claims.get("email", String.class))
                 .authorities(CollectionUtils.convert(authorities, SimpleGrantedAuthority::new))
@@ -83,8 +80,11 @@ public class JwtTokenService implements TokenService {
     public boolean invalidate(String jwt) {
         //将jwt加入到黑名单
         Claims claims = parseJwt(jwt);
-        //解析失败了 说明token已经无效了 返回invalid token信息
-        if (claims == null) return false;
+        //token解析失败了 说明没有携带token或者token失效 返回invalid token信息
+        //已经于黑名单中, 应该提示token无效, 而不是退出成功
+        if (invalided(claims)) {
+            return false;
+        }
         return storage.add(claims.getId(), claims.getExpiration().getTime());
     }
 
@@ -102,5 +102,9 @@ public class JwtTokenService implements TokenService {
                     e.getMessage());
             return null;
         }
+    }
+
+    private boolean invalided(Claims claims) {
+        return claims == null || storage.contains(claims.getId());
     }
 }

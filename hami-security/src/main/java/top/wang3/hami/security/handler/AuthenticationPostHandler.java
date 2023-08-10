@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.util.Assert;
 import top.wang3.hami.security.config.WebSecurityProperties;
 import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.Result;
@@ -45,13 +44,13 @@ public class AuthenticationPostHandler {
     }
 
     public void handleError(HttpServletRequest request, HttpServletResponse response, Exception e) {
-        log.debug("login failed: error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
+        log.debug("auth failed: error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         Result<?> result;
         if (e instanceof AccessDeniedException ae) {
-            // 登录成功, 校验权限失败
+            //登录成功, 校验权限失败
             result = Result.error(403, ae.getMessage());
         } else if (e instanceof AuthenticationException ae) {
-            //登录数失败
+            //登录或者请求接口时认证失败
             result = Result.error(400, ae.getMessage());
         } else {
             result = Result.error(e.getMessage());
@@ -61,21 +60,17 @@ public class AuthenticationPostHandler {
 
     public void handleLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
+        //LogoutFilter在TokenAuthenticationFilter之前
         //退出登录, 调用invalidate方法使token失效
         String token = tokenService.getToken(request, properties.getTokenName());
-        Assert.notNull(token, "token can not be null");
-        //添加黑名单成功
+        //使token失效
         if (tokenService.invalidate(token)) {
-            //从cookie中移除token
-            if (properties.getCookie().isEnable()) {
-                Cookie cookie = new Cookie(properties.getTokenName(), "");
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
-            }
-            writeResponse(response, Result.success());
-        } else {
-            writeResponse(response, Result.error("invalid token"));
+            //删除cookie
+            removeCookie(response);
+            writeResponse(response, Result.success("退出登录成功"));
+            return;
         }
+        writeResponse(response, Result.error(400, "token无效"));
     }
 
     private void writeCookie(HttpServletResponse response, String token, LoginUser loginUser) {
@@ -84,8 +79,18 @@ public class AuthenticationPostHandler {
         cookie.setDomain(config.getDomain());
         cookie.setPath(config.getPath());
         cookie.setHttpOnly(config.isHttpOnly());
-        cookie.setMaxAge((int) (loginUser.getExpireAt().getTime() / 1000));
+        cookie.setMaxAge((int) (loginUser.getExpireAt().getTime() - System.currentTimeMillis()) / 1000);
         response.addCookie(cookie);
+    }
+
+    private void removeCookie(HttpServletResponse response) {
+        WebSecurityProperties.CookieConfig config = properties.getCookie();
+        if (config.isEnable()) {
+            Cookie cookie = new Cookie(properties.getTokenName(), "");
+            cookie.setDomain(config.getDomain());
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+        }
     }
 
     private <T> void writeResponse(HttpServletResponse response, Result<T> result) {
@@ -93,8 +98,7 @@ public class AuthenticationPostHandler {
         try {
             response.getWriter().write(result.toJsonString());
         } catch (IOException e) {
-            log.error("write response failed: error_class: {}, error_msg: {}",
-                    e.getClass().getName(), e.getMessage());
+            log.error("write response failed: error_msg: {}", e.getMessage());
         }
     }
 }
