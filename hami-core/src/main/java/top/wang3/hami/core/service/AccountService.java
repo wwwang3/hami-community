@@ -5,5 +5,5 @@ import top.wang3.hami.common.model.Account;
 
 public interface AccountService extends IService<Account> {
 
-    Account getUserByUsername(String username);
+    Account getAccountByEmailOrUsername(String username);
 }

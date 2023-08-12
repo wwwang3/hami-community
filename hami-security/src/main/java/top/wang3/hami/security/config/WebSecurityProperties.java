@@ -20,7 +20,7 @@ public class WebSecurityProperties {
     /**
      * token名称 (从cookie或者header中读取token时cookie或者header的名称)
      */
-    private String tokenName = "access_token" ;
+    private String tokenName = "access_token";
 
     /**
      * token有效期 单位s
@@ -35,6 +35,16 @@ public class WebSecurityProperties {
      * 表单登录接口
      */
     private String formLoginApi = "/api/v1/auth/login";
+
+    /**
+     * 表单登录的用户名参数
+     */
+    private String usernameParameter = "account";
+
+    /**
+     * 表单登录的密码参数
+     */
+    private String passwordParameter = "password";
 
     /**
      * 退出登录接口
