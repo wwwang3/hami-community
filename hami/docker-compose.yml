@@ -9,7 +9,7 @@ networks:
 volumes:
   mysql_data:
   redis_data:
-
+  rabbitmq_data:
 services:
   mysql:
     container_name: mysql
@@ -44,7 +44,23 @@ services:
     environment:
       - TZ=Asia/Shanghai
     command: ["redis-server", "/etc/redis/redis.conf", "--appendonly yes"]
-
+  rabbitmq:
+    container_name: rabbitmq
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    networks:
+      hami-net:
+        ipv4_address: 192.168.3.13
+    ports:
+      - "8302:5672"
+      - "8303:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/mysql
+    environment:
+      - TZ=Asia/Shanghai
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=123456
 
 
 

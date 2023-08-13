@@ -3,6 +3,7 @@
 ```text
 mysql: 8300
 redis: 8301
-spring-boot: 8302
-front-end: 8303
+rabbitmq: 8302, 8303
+spring-boot: 8304
+front-end: 8305
 ```
