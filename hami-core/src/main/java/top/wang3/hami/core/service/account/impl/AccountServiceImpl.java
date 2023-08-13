@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.impl;
+package top.wang3.hami.core.service.account.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.core.mapper.AccountMapper;
-import top.wang3.hami.core.service.AccountService;
+import top.wang3.hami.core.service.account.AccountService;
 
 @Service
 @Slf4j

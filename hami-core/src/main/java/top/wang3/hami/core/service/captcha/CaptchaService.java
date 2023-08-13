@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.captcha;
 
+import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 
 /**
@@ -14,5 +15,5 @@ public interface CaptchaService {
      */
     void sendCaptcha(Captcha captcha) throws CaptchaServiceException;
 
-    boolean verify(String type, String item, String captcha);
+    boolean verify(String type, String item, String value);
 }

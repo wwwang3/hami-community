@@ -7,15 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import top.wang3.hami.common.util.IpUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+@Component
 @Slf4j
 public class Ip2RegionSearcherImpl implements Ip2RegionSearcher {
-
 
     public static final String XDB_FILE = "classpath:ip2region/ip2region.xdb";
     private final ResourceLoader resourceLoader;

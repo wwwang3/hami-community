@@ -1,5 +1,6 @@
 package top.wang3.hami.security.storage;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
@@ -17,9 +18,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
 
     ScheduledExecutorService service = new ScheduledThreadPoolExecutor(1);
 
-    public DefaultBlackListStorage() {
-        autoClear();
-    }
+    public DefaultBlackListStorage() {}
 
     @Override
     public boolean add(String jwtId, long expireAt) {
@@ -35,6 +34,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
     /**
      * 自动清理
      */
+    @PostConstruct
     private void autoClear() {
         log.debug("Start periodic cleaning of expired tokens");
         service.schedule(() -> {

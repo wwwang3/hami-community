@@ -50,13 +50,13 @@ services:
       context: ./rabbitmq
       dockerfile: Dockerfile
     networks:
-      hami-net:
+      hami_net:
         ipv4_address: 192.168.3.13
     ports:
       - "8302:5672"
       - "8303:15672"
     volumes:
-      - rabbitmq_data:/var/lib/mysql
+      - rabbitmq_data:/var/lib/rabbitmq
     environment:
       - TZ=Asia/Shanghai
       - RABBITMQ_DEFAULT_USER=root

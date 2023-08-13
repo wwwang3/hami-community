@@ -1,7 +1,6 @@
 package top.wang3.hami.security.config;
 
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +16,8 @@ public class FilterBeanConfig {
 
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter(TokenService tokenService,
-                                                               @Value("${hami.security.tokenName}") String tokenName) {
-        return new TokenAuthenticationFilter(tokenService, tokenName);
+                                                               WebSecurityProperties properties) {
+        return new TokenAuthenticationFilter(tokenService, properties.getTokenName());
     }
 
     @Bean

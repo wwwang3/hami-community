@@ -1,5 +1,6 @@
 package top.wang3.hami.security.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -7,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * redis黑名单实现
  */
+@Slf4j
 public class RedisBlackListStorage implements BlacklistStorage {
 
     public static final String BLACK_LIST_PREFIX = "blacklist:";

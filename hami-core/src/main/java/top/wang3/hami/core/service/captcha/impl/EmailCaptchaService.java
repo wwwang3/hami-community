@@ -1,20 +1,17 @@
-package top.wang3.hami.core.service.captcha;
+package top.wang3.hami.core.service.captcha.impl;
 
-import org.springframework.data.redis.core.StringRedisTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.core.exception.CaptchaServiceException;
+import top.wang3.hami.core.service.captcha.CaptchaService;
 
 /**
  * 邮箱验证码服务实现
  */
+@Service
+@Slf4j
 public class EmailCaptchaService implements CaptchaService {
-
-
-    private final StringRedisTemplate redisTemplate;
-
-    public EmailCaptchaService(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
-
 
     @Override
     public void sendCaptcha(Captcha captcha) throws CaptchaServiceException {
@@ -24,7 +21,7 @@ public class EmailCaptchaService implements CaptchaService {
     }
 
     @Override
-    public boolean verify(String type, String item, String captcha) {
+    public boolean verify(String type, String item, String value) {
         return false;
     }
 }

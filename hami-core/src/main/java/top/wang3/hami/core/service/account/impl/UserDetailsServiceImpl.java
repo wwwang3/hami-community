@@ -1,10 +1,10 @@
-package top.wang3.hami.core.service.impl;
+package top.wang3.hami.core.service.account.impl;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.model.Account;
-import top.wang3.hami.core.service.AccountService;
+import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.security.model.LoginUser;
 
 @Service

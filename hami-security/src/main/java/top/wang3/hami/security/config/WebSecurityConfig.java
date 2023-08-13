@@ -4,9 +4,13 @@ package top.wang3.hami.security.config;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.AuthenticationEventPublisher;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -20,12 +24,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import top.wang3.hami.security.filter.LoginUserContextFilter;
 import top.wang3.hami.security.filter.TokenAuthenticationFilter;
+import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
+import top.wang3.hami.security.listener.AuthenticationEventListener;
 import top.wang3.hami.security.service.TokenService;
 
 @Configuration
 @EnableConfigurationProperties(WebSecurityProperties.class)
 @EnableWebSecurity
+@Import(value = {JwtTokenServiceConfig.class, FilterBeanConfig.class})
 @Slf4j
 public class WebSecurityConfig {
 
@@ -50,6 +57,18 @@ public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @ConditionalOnBean(AuthenticationEventHandler.class)
+    public AuthenticationEventPublisher authenticationEventPublisher() {
+        return new DefaultAuthenticationEventPublisher();
+    }
+
+    @Bean(initMethod = "init")
+    @ConditionalOnBean(AuthenticationEventHandler.class)
+    public AuthenticationEventListener authenticationEventListener(AuthenticationEventHandler handler) {
+        return new AuthenticationEventListener(handler);
     }
 
     @Bean

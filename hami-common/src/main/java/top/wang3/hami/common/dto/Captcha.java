@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.captcha;
+package top.wang3.hami.common.dto;
 
 public class Captcha {
 
