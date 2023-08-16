@@ -1,4 +1,4 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

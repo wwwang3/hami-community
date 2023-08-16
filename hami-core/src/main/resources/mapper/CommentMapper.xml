@@ -8,7 +8,7 @@
     <result column="article_id" property="articleId" />
     <result column="user_id" property="userId" />
     <result column="is_author" property="isAuthor" />
-    <result column="ip_info" property="ipInfo" />
+    <result column="ip_info" property="ipInfo" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
     <result column="content" property="content" />
     <result column="content_img" property="contentImg" />
     <result column="root_id" property="rootId" />

@@ -3,7 +3,7 @@ package top.wang3.hami.security.context;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
-import top.wang3.hami.common.model.IpInfo;
+import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.security.model.LoginUser;
 
 /**

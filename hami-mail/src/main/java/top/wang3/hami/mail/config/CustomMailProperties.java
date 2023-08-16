@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "mail")
+@ConfigurationProperties(prefix = "hami.mail")
 @Data
 public class CustomMailProperties {
 

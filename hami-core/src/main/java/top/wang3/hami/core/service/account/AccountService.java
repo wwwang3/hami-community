@@ -7,5 +7,7 @@ public interface AccountService extends IService<Account> {
 
     Account getAccountByEmailOrUsername(String username);
 
-//    Account register();
+    void sendRegisterEmailCaptcha(String email);
+
+    void sendRestEmailCaptcha(String email);
 }

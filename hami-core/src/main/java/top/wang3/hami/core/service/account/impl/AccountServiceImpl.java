@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.core.mapper.AccountMapper;
 import top.wang3.hami.core.service.account.AccountService;
@@ -20,5 +21,16 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
                 .or()
                 .eq(Account::getEmail, account);
         return super.getOne(wrapper);
+    }
+
+    @Override
+    public void sendRegisterEmailCaptcha(String email) {
+        String type = Constants.REGISTER_EMAIL_CAPTCHA;
+
+    }
+
+    @Override
+    public void sendRestEmailCaptcha(String email) {
+
     }
 }

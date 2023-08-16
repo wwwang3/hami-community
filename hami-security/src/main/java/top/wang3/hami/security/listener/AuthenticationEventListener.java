@@ -8,7 +8,7 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.core.Authentication;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import top.wang3.hami.common.model.IpInfo;
+import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.common.util.IpUtils;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.model.LoginUser;
@@ -31,7 +31,6 @@ public class AuthenticationEventListener {
 
     @EventListener
     public void onSuccess(AuthenticationSuccessEvent success) {
-        // ...
         Authentication authentication = success.getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

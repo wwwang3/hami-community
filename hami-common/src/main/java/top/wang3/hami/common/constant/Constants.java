@@ -7,5 +7,13 @@ public final class Constants {
 
     public static final String EMAIL_ROUTING = "email";
 
-    public static final String EMAIL_REGISTER_CAPTCHA = "email:register";
+    /**
+     * 注册邮箱验证码
+     */
+    public static final String REGISTER_EMAIL_CAPTCHA = "email:register";
+
+    /**
+     * 重置密码邮箱验证码
+     */
+    public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass";
 }

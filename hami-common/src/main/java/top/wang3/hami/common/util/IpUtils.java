@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.common.component.Ip2RegionSearcher;
-import top.wang3.hami.common.model.IpInfo;
+import top.wang3.hami.common.dto.IpInfo;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -72,11 +72,11 @@ public final class IpUtils {
     }
 
     /**
-     * 获取IP
+     * 获取IPV4地址
      * @param request HttpServletRequest
      * @return ip
      */
-    private static String getIp(HttpServletRequest request) {
+    public static String getIp(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
@@ -100,7 +100,7 @@ public final class IpUtils {
      * @param ip 获得的IP地址
      * @return 第一个非unknown IP地址
      */
-    public static String getMultistageReverseProxyIp(String ip) {
+    private static String getMultistageReverseProxyIp(String ip) {
         // 多级反向代理检测
         if (ip != null && ip.indexOf(",") > 0) {
             final String[] ips = ip.trim().split(",");

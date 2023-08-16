@@ -3,7 +3,6 @@ package top.wang3.hami.mail.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -19,7 +18,7 @@ import java.util.*;
  * 多Mail源自动配置类
  */
 @AutoConfiguration
-@EnableConfigurationProperties({CustomMailProperties.class, MailProperties.class})
+@EnableConfigurationProperties({CustomMailProperties.class})
 @Slf4j
 public class CustomMailAutoConfiguration {
 
@@ -43,7 +42,7 @@ public class CustomMailAutoConfiguration {
             applyProperties(config, sender);
             senders.add(new CustomMailSender(config.getKey(), sender));
         });
-        log.info("load {} mail-services", senders.size());
+        log.debug("load {} mail-services", senders.size());
         return senders;
     }
 

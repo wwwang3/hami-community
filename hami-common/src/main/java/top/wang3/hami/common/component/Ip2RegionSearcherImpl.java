@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Component
+@ConditionalOnWebApplication
 @Slf4j
 public class Ip2RegionSearcherImpl implements Ip2RegionSearcher {
 

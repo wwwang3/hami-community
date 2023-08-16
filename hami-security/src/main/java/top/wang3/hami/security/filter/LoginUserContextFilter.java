@@ -5,7 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
-import top.wang3.hami.common.model.IpInfo;
+import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.common.util.IpUtils;
 import top.wang3.hami.security.context.LoginUserContext;
 

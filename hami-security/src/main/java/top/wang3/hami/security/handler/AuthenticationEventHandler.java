@@ -1,6 +1,6 @@
 package top.wang3.hami.security.handler;
 
-import top.wang3.hami.common.model.IpInfo;
+import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.security.model.LoginUser;
 
 import java.util.Date;
