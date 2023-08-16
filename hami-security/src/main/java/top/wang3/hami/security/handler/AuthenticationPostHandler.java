@@ -51,7 +51,7 @@ public class AuthenticationPostHandler {
             result = Result.error(403, ae.getMessage());
         } else if (e instanceof AuthenticationException ae) {
             //登录或者请求接口时认证失败
-            result = Result.error(400, ae.getMessage());
+            result = Result.error(401, ae.getMessage());
         } else {
             result = Result.error(e.getMessage());
         }
@@ -70,7 +70,7 @@ public class AuthenticationPostHandler {
             writeResponse(response, Result.success("退出登录成功"));
             return;
         }
-        writeResponse(response, Result.error(400, "token无效"));
+        writeResponse(response, Result.error(401, "token无效"));
     }
 
     private void writeCookie(HttpServletResponse response, String token, LoginUser loginUser) {

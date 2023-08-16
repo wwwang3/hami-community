@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "account")
+@Builder
 public class Account {
     /**
      * 用户ID
@@ -71,4 +73,5 @@ public class Account {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
 }

@@ -24,6 +24,9 @@ public class User {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
+    @TableField(value = "user_id")
+    private Integer userId;
+
     /**
      * 用户名
      */
@@ -83,4 +86,9 @@ public class User {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
+    public User(Integer userId, String username) {
+        this.userId = userId;
+        this.username = username;
+    }
 }

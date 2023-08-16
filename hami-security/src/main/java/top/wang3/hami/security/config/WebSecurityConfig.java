@@ -2,7 +2,6 @@ package top.wang3.hami.security.config;
 
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,7 +21,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import top.wang3.hami.security.filter.LoginUserContextFilter;
 import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
@@ -42,11 +40,6 @@ public class WebSecurityConfig {
         this.properties = properties;
     }
 
-    @Resource
-    private TokenAuthenticationFilter tokenFilter;
-
-    @Resource
-    private LoginUserContextFilter userFilter;
 
     @PostConstruct
     private void setSecurityStrategy() {
@@ -54,7 +47,7 @@ public class WebSecurityConfig {
         log.debug("security-strategy: {}", SecurityContextHolder.getContextHolderStrategy().getClass().getSimpleName());
     }
 
-    @Bean
+    @Bean //exist circular dependency
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -75,12 +68,15 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenService tokenService) throws Exception {
         log.debug("token-service: {}", tokenService.getClass().getSimpleName());
         AuthenticationPostHandler handler = new AuthenticationPostHandler(tokenService, properties);
+        TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter(tokenService, properties.getTokenName());
         return http
                 .authorizeHttpRequests(auth -> { //接口访问配置
                     String[] apis = properties.getAllowedApis();
                     if (apis != null) {
                         auth.requestMatchers(apis).permitAll();
                     }
+                    auth.requestMatchers("/api/v1/auth/captcha/register").permitAll();
+                    auth.requestMatchers("/api/v1/auth/captcha/reset").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .csrf(CsrfConfigurer::disable) //csrf配置
@@ -112,7 +108,6 @@ public class WebSecurityConfig {
                         .logoutSuccessHandler(handler::handleLogoutSuccess)
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(userFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }

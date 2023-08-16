@@ -20,6 +20,5 @@ public class CollectionUtils {
         return Optional.ofNullable(origin)
                 .map(t -> t.stream().map(mapper).toList())
                 .orElse(Collections.emptyList());
-
     }
 }

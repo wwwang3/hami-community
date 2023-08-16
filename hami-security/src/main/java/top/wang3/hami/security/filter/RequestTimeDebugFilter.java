@@ -16,8 +16,11 @@ public class RequestTimeDebugFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         long start = System.currentTimeMillis();
-        filterChain.doFilter(request, response);
-        long end = System.currentTimeMillis();
-        log.debug("request: {}, use: {}ms", request.getRequestURI(), end - start);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            long end = System.currentTimeMillis();
+            log.debug("request: {}, use: {}ms", request.getRequestURI(), end - start);
+        }
     }
 }

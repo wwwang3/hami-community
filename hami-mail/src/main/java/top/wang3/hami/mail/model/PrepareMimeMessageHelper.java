@@ -29,9 +29,7 @@ public class PrepareMimeMessageHelper {
 
     private final MailSenderSupplier supplier;
     private final CustomMailSender boundCustomSender;
-
     private final JavaMailSenderImpl mailSender;
-
     private final List<MessageWrapper> messages = new ArrayList<>();
 
     public PrepareMimeMessageHelper(MailSenderSupplier supplier) {
@@ -216,14 +214,24 @@ public class PrepareMimeMessageHelper {
                 var cc = convertToInternetAddress(this.ccs, encoding);
                 var to = convertToInternetAddress(this.tos, encoding);
                 helper.setFrom(from);
-                helper.setBcc(bcc);
-                helper.setCc(cc);
+                if (bcc != null) {
+                    helper.setBcc(bcc);
+                }
+                if (cc != null) {
+                    helper.setCc(cc);
+                }
                 helper.setTo(to);
-                helper.setReplyTo(this.replyTo.getAddress(), this.replyTo.getPersonal());
+                if (replyTo != null) {
+                    helper.setReplyTo(this.replyTo.getAddress(), this.replyTo.getPersonal());
+                }
                 helper.setSentDate(date);
                 helper.setSubject(subject);
-                helper.setText(this.plainText.toString());
-                helper.setText(htmlText.toString(), true);
+                if (htmlText != null) {
+                    helper.setText(htmlText.toString(), true);
+                }
+                if (plainText != null) {
+                    helper.setText(plainText.toString());
+                }
                 for (Attachment attachment : attachments) {
                     if (attachment.getName() != null && attachment.getDataSource() != null) {
                         helper.addAttachment(attachment.getName(), attachment.getDataSource());

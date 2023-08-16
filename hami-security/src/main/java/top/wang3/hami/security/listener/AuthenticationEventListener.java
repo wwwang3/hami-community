@@ -6,10 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import top.wang3.hami.common.dto.IpInfo;
-import top.wang3.hami.common.util.IpUtils;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.model.LoginUser;
 
@@ -33,10 +31,10 @@ public class AuthenticationEventListener {
     public void onSuccess(AuthenticationSuccessEvent success) {
         Authentication authentication = success.getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        IpInfo ipInfo = (attributes == null) ? null : IpUtils.getIpInfo(attributes.getRequest());
+        //从ThreadLocal中获取
+        IpInfo info = IpContext.getIpInfo();
         //async
-        CompletableFuture.runAsync(() -> handler.handleSuccess(loginUser, ipInfo, new Date()));
+        CompletableFuture.runAsync(() -> handler.handleSuccess(loginUser, info, new Date()));
     }
 
     @EventListener

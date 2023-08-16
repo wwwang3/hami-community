@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class Captcha {
 
     /**
-     * 类型
+     * 类型 作为redis-key前缀
      */
     private String type;
 
