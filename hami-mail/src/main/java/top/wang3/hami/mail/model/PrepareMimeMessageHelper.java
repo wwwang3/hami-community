@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.util.StringUtils;
 import top.wang3.hami.mail.sender.CustomMailSender;
 import top.wang3.hami.mail.supplier.MailSenderSupplier;
 
@@ -105,18 +106,17 @@ public class PrepareMimeMessageHelper {
             tos.add(new Address(to));
             return this;
         }
-        public MessageWrapper to(String ...to) {
-            return to(Arrays.asList(to));
+        public MessageWrapper to(String ...tos) {
+            if (tos != null) {
+                for (String to : tos) {
+                    this.tos.add(new Address(to));
+                }
+            }
+            return this;
         }
 
         public MessageWrapper to(String to, String personal) {
             tos.add(new Address(to, personal));
-            return this;
-        }
-
-        public MessageWrapper to(Collection<String> to) {
-            List<Address> list = to.stream().map(Address::new).toList();
-            tos.addAll(list);
             return this;
         }
 
@@ -224,7 +224,7 @@ public class PrepareMimeMessageHelper {
                 if (replyTo != null) {
                     helper.setReplyTo(this.replyTo.getAddress(), this.replyTo.getPersonal());
                 }
-                helper.setSentDate(date);
+                helper.setSentDate(date == null ? new Date() : date);
                 helper.setSubject(subject);
                 if (htmlText != null) {
                     helper.setText(htmlText.toString(), true);
@@ -248,17 +248,19 @@ public class PrepareMimeMessageHelper {
             if (addresses == null || addresses.isEmpty()) {
                 return null;
             }
-            var internetAddresses = new InternetAddress[addresses.size()];
             try {
-                for (int i = 0; i < addresses.size(); i++) {
-                    var address = addresses.get(i);
-                    internetAddresses[i] = new InternetAddress(address.getAddress(), address.getPersonal(), encoding);
+                List<InternetAddress> list = new ArrayList<>();
+                for (Address address : addresses) {
+                    if (address != null && StringUtils.hasText(address.getAddress())) {
+                        InternetAddress internetAddress = new InternetAddress(address.getAddress(), address.getPersonal());
+                        list.add(internetAddress);
+                    }
                 }
+                return list.toArray(new InternetAddress[0]);
             } catch (UnsupportedEncodingException e) {
                 log.error("unsupported encoding, ignore address");
                 return null;
             }
-            return internetAddresses;
         }
 
     }

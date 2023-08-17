@@ -44,6 +44,12 @@ public class AccountController {
         return Result.success("注册成功");
     }
 
+    public Result<Void> resetPassword() {
+        //todo
+//        accountService.resetPassword()
+        return Result.success("重置密码成功");
+    }
+
 
     private String resolveType(String type) {
         return "register".equals(type) ? Constants.REGISTER_EMAIL_CAPTCHA : Constants.RESET_EMAIL_CAPTCHA;
