@@ -13,9 +13,9 @@ import top.wang3.hami.common.model.User;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.AccountMapper;
+import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
-import top.wang3.hami.core.service.user.UserService;
 
 @Service
 @Slf4j
@@ -24,14 +24,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
 
     private final EmailCaptchaService captchaService;
 
-    private final UserService userService;
+    private final UserMapper userMapper;
 
     @Resource
     private PasswordEncoder passwordEncoder;
 
-    public AccountServiceImpl(EmailCaptchaService captchaService, UserService userMapper) {
+    public AccountServiceImpl(EmailCaptchaService captchaService, UserMapper userMapper) {
         this.captchaService = captchaService;
-        this.userService = userMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         String email = param.getEmail();
         String username = param.getUsername();
         String captcha = param.getCaptcha();
-        if (!captchaService.verify(Constants.RESET_EMAIL_CAPTCHA, email, captcha)) {
+        if (!captchaService.verify(Constants.REGISTER_EMAIL_CAPTCHA, email, captcha)) {
             throw new CaptchaServiceException("验证码无效或过期");
         }
         //判断用户名和邮箱是否被注册过
@@ -59,16 +59,19 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         if (checkEmail(email)) {
             throw new ServiceException("邮箱已被注册");
         }
+        //删除验证码
+        captchaService.deleteCaptcha(Constants.REGISTER_EMAIL_CAPTCHA, email);
         //加密密码
         String encryptedPassword = passwordEncoder.encode(param.getPassword());
         Account account = Account.builder()
                 .username(username)
                 .email(email)
                 .role("user")
+                .state((byte) 1)
                 .password(encryptedPassword)
                 .build();
         super.save(account);
-        userService.save(new User(account.getId(), username));
+        userMapper.insert(new User(account.getId(), username));
     }
 
     public boolean checkUsername(String username) {

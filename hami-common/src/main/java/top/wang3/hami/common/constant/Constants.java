@@ -18,4 +18,8 @@ public final class Constants {
     public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass";
 
     public static final String CAPTCHA_RATE_LIMIT = "captcha:rate:limit";
+
+    public static final Byte ONE = (byte) 1;
+
+    public static final Byte ZERO = (byte) 0;
 }

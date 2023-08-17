@@ -47,7 +47,7 @@ public class WebSecurityConfig {
         log.debug("security-strategy: {}", SecurityContextHolder.getContextHolderStrategy().getClass().getSimpleName());
     }
 
-    @Bean //exist circular dependency
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -75,8 +75,7 @@ public class WebSecurityConfig {
                     if (apis != null) {
                         auth.requestMatchers(apis).permitAll();
                     }
-                    auth.requestMatchers("/api/v1/auth/captcha/register").permitAll();
-                    auth.requestMatchers("/api/v1/auth/captcha/reset").permitAll();
+                    auth.requestMatchers("/error").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .csrf(CsrfConfigurer::disable) //csrf配置
