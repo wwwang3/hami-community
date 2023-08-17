@@ -2,6 +2,7 @@ package top.wang3.hami.web.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class AccountController {
     }
 
     @GetMapping("/captcha")
-    public Result<Void> getRegisterCaptcha(@RequestParam("email") @Email String email,
+    public Result<Void> getRegisterCaptcha(@RequestParam("email") @NotBlank @Email String email,
                                            @RequestParam("type") @Pattern(regexp = "(register|reset)") String type) {
         String captchaType = resolveType(type);
         //6位验证码 有效期五分钟

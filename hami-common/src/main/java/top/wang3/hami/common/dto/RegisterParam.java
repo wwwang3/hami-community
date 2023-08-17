@@ -1,7 +1,7 @@
 package top.wang3.hami.common.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class RegisterParam {
     private String username;
 
     @Email
-    @NotEmpty
+    @NotBlank
     private String email;
 
     @Length(min = 6, max = 6)

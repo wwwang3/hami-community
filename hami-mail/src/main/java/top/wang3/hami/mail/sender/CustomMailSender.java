@@ -31,16 +31,16 @@ public class CustomMailSender {
         try {
             javaMailSender.send(mimeMessages);
             log.info("current mail-sender [{}] send mail success", key);
-            return MailSendResult.success();
+            return MailSendResult.success(key);
         } catch (MailSendException e) {
             log.debug("send mail failed: error_class: {}, if set retry, will retry",
                     e.getClass().getSimpleName());
-            return MailSendResult.failed(e.getMessage(), getFailedMimeMessage(e));
+            return MailSendResult.failed(key, e.getMessage(), getFailedMimeMessage(e));
         } catch (Exception e) {
             //其他错误不重试
             log.debug("send mail failed: error_class: {}, error_msg: {}",
                     e.getClass().getSimpleName(), e.getMessage());
-            return MailSendResult.failed(e.getMessage(), null);
+            return MailSendResult.failed(key, e.getMessage(), null);
         }
     }
 
