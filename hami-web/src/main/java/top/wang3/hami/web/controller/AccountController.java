@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.RegisterParam;
+import top.wang3.hami.common.dto.ResetPassParam;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
 import top.wang3.hami.security.model.Result;
@@ -45,9 +46,9 @@ public class AccountController {
         return Result.success("注册成功");
     }
 
-    public Result<Void> resetPassword() {
-        //todo
-//        accountService.resetPassword()
+    @PostMapping("/reset-pass")
+    public Result<Void> resetPassword(@RequestBody @Valid ResetPassParam param) {
+        accountService.resetPassword(param);
         return Result.success("重置密码成功");
     }
 
