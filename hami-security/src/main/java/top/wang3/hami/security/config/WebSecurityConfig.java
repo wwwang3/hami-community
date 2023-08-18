@@ -32,6 +32,7 @@ import top.wang3.hami.security.service.TokenService;
 @EnableWebSecurity
 @Import(value = {JwtTokenServiceConfig.class, FilterBeanConfig.class})
 @Slf4j
+//todo RateLimit
 public class WebSecurityConfig {
 
     private final WebSecurityProperties properties;
