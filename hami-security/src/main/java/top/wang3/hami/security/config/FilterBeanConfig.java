@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import top.wang3.hami.security.filter.IpContextFilter;
+import top.wang3.hami.security.filter.RateLimiterFilter;
 import top.wang3.hami.security.filter.RequestTimeDebugFilter;
+import top.wang3.hami.security.ratelimit.RateLimiter;
 
 @Configuration
 public class FilterBeanConfig {
@@ -26,6 +28,15 @@ public class FilterBeanConfig {
     public FilterRegistrationBean<RequestTimeDebugFilter> requestTimeDebugFilterBean() {
         var bean = new FilterRegistrationBean<>(new RequestTimeDebugFilter());
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        bean.addUrlPatterns("/*");
+        return bean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<RateLimiterFilter> rateLimiterFilterFilter(RateLimiter rateLimiter) {
+        RateLimiterFilter filter = new RateLimiterFilter(rateLimiter);
+        var bean = new FilterRegistrationBean<>(filter);
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
         bean.addUrlPatterns("/*");
         return bean;
     }

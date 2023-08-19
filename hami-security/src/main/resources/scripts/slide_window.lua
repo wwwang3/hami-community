@@ -1,0 +1,30 @@
+local key = KEYS[1]
+local m_key = KEYS[2]
+
+local rate = tonumber(ARGV[1])  -- 速率
+local capacity = tonumber(ARGV[2]) -- 最大容量
+local current = tonumber(ARGV[3]) -- 当前时间戳(单位s)
+
+local window_size = tonumber(capacity / rate) -- 窗口大小(时间间隔)
+-- 比如capacity=200，rate=20，window_size = 10 表示10秒内的最大请求数为200
+
+local last_requests = 0
+local exists = redis.call("exists", key)
+
+if (exists == 1) then
+    redis.call("zremrangebyscore", 0, current - window_size)
+    last_requests = redis.call("zcard", key)
+end
+
+local allowed = 0
+if (last_requests < capacity) {
+    allowed = 1
+    redis.call("zadd", key, current, m_key)
+}
+end
+
+redis.call("expire", key, window_size)
+
+return allowed
+
+
