@@ -12,7 +12,7 @@ local last_requests = 0
 local exists = redis.call("exists", key)
 
 if (exists == 1) then
-    redis.call("zremrangebyscore", 0, current - window_size)
+    redis.call('zremrangebyscore', key, 0, current - window_size)
     last_requests = redis.call("zcard", key)
 end
 

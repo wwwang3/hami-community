@@ -50,11 +50,10 @@ public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
 
     @Override
     public boolean isAllowed(String key, int rate, int capacity) {
-        log.debug("rate: {}, capacity: {}", rate, capacity);
         long current = Instant.now().getEpochSecond();
         List<String> keys = Arrays.asList(key, String.valueOf(System.currentTimeMillis()));
-        List<String> args = Arrays.asList(String.valueOf(rate), String.valueOf(capacity), String.valueOf(current));
-        Long allowed = (Long) redisTemplate.execute(redisScript, keys, args);
+        //fix 传入的参数不应为List
+        Long allowed = (Long) redisTemplate.execute(redisScript, keys, rate, capacity, current);
         return allowed != null && allowed ==  1L;
     }
 

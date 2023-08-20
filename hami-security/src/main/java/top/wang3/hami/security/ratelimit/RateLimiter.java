@@ -34,8 +34,8 @@ public class RateLimiter implements ApplicationContextAware {
         String scope = model.getScope();
         RateLimiterHandler handler = getHandler(algorithm);
         RateLimitKeyResolver resolver = getResolver(scope);
-        String key = "rate:limit:" + algorithm + resolver.resolve(model);
-        return handler.isAllowed(key, model.getRate(), model.getCapacity());
+        String key = "rate:limit:" + algorithm +  ":" + resolver.resolve(model);
+        return !handler.isAllowed(key, model.getRate(), model.getCapacity());
     }
 
     private RateLimiterHandler getHandler(String algorithm) {

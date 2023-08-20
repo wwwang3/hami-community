@@ -6,16 +6,15 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.Ordered;
-import top.wang3.hami.security.filter.RateLimiterFilter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import top.wang3.hami.security.filter.RateLimitFilter;
 import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.ratelimit.RateLimiter;
 
 @Configuration
-@ComponentScan(basePackages = {"top.wang3.hami.security.ratelimit", "top.wang3.hami.security.aspect"})
+@ComponentScan(basePackages = {"top.wang3.hami.security.ratelimit"})
 @ConditionalOnProperty(value = "hami.security.rate-limit.enable")
-@EnableAspectJAutoProxy
 @Slf4j
 public class RateLimitConfig {
 
@@ -26,14 +25,16 @@ public class RateLimitConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<RateLimiterFilter> rateLimiterFilter(RateLimiter rateLimiter) {
+    public FilterRegistrationBean<RateLimitFilter> rateLimiterFilter(RateLimiter rateLimiter,
+                                                                     RequestMappingHandlerMapping requestMappingHandlerMapping) {
         WebSecurityProperties.RateLimitConfig config = properties.getRateLimit();
-        RateLimiterFilter filter = new RateLimiterFilter();
+        RateLimitFilter filter = new RateLimitFilter();
         filter.setRateLimiter(rateLimiter);
         filter.setScope(config.getScope());
         filter.setCapacity(config.getCapacity());
         filter.setRate(config.getRate());
         filter.setAlgorithm(config.getAlgorithm());
+        filter.setRequestMappingHandlerMapping(requestMappingHandlerMapping);
         var bean = new FilterRegistrationBean<>(filter);
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
         log.debug("rate-limiter-filter configured for use: {}", config);
