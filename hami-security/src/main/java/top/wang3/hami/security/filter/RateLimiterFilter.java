@@ -4,52 +4,52 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
 import top.wang3.hami.common.util.IpUtils;
-import top.wang3.hami.security.annotation.RateLimit;
 import top.wang3.hami.security.model.RateLimiterModel;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.RateLimiter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * 限流过滤器
  */
 @Slf4j
+@Setter
 public class RateLimiterFilter extends OncePerRequestFilter {
 
-    private RateLimit.Scope scope;
-    private RateLimit.Algorithm algorithm;
+    private String scope;
+    private String algorithm;
     private int rate;
     private int capacity;
 
     private RateLimiter rateLimiter;
 
-    public RateLimiterFilter(RateLimiter rateLimiter) {
-        this.rateLimiter = rateLimiter;
+    public RateLimiterFilter() {
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String ip = Optional.ofNullable(IpUtils.getIp(request))
-                .orElse("unknown");
-        RateLimiterModel model = new RateLimiterModel();
-        model.setAlgorithm(algorithm);
-        model.setScope(scope);
-        model.setIp(ip);
-        model.setUri(request.getRequestURI());
-        model.setRate(rate);
-        model.setCapacity(capacity);
+        RateLimiterModel model = RateLimiterModel.builder()
+                .algorithm(algorithm)
+                .scope(scope)
+                .rate(rate)
+                .capacity(capacity)
+                .ip(IpUtils.getIp(request))
+                .build();
         if (rateLimiter.limited(model)) {
             //被限制
-            log.debug("{}:操作频繁", request.getRequestURI());
+            log.debug("{}: 操作频繁", request.getRequestURI());
             writeBlockedMessage(response);
+            return;
         }
+        request.setAttribute("RATE_LIMITED", false);
         filterChain.doFilter(request, response);
+        request.removeAttribute("RATE_LIMITED");
     }
 
     private void writeBlockedMessage(HttpServletResponse response) throws IOException {

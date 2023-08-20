@@ -25,6 +25,7 @@ import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
 import top.wang3.hami.security.listener.AuthenticationEventListener;
+import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.service.TokenService;
 
 @Configuration
@@ -32,7 +33,6 @@ import top.wang3.hami.security.service.TokenService;
 @EnableWebSecurity
 @Import(value = {JwtTokenServiceConfig.class, FilterBeanConfig.class, RateLimitConfig.class})
 @Slf4j
-//todo RateLimit
 public class WebSecurityConfig {
 
     private final WebSecurityProperties properties;

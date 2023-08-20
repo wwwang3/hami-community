@@ -1,9 +1,10 @@
-package top.wang3.hami.security.config;
+package top.wang3.hami.security.model;
 
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import top.wang3.hami.security.annotation.RateLimit;
 
 import java.util.List;
 
@@ -61,6 +62,8 @@ public class WebSecurityProperties {
      */
     private List<String> allowedOrigins;
 
+    @NestedConfigurationProperty
+    private RateLimitConfig rateLimit;
 
     @Data
     public static class CookieConfig {
@@ -84,5 +87,32 @@ public class WebSecurityProperties {
          * cookie path
          */
         String path = "/";
+    }
+
+
+    @Data
+    public static class RateLimitConfig {
+
+        boolean enable;
+
+        /**
+         * 限流算法
+         */
+        String algorithm = RateLimit.Algorithm.SLIDE_WINDOW.getName();
+
+        /**
+         * 应用范围, GLOBAL, IP, URI
+         */
+        String scope = "ip";
+
+        /**
+         * 请求速率
+         */
+        int rate = 10;
+
+        /**
+         * 最大容量
+         */
+       int capacity = 200;
     }
 }

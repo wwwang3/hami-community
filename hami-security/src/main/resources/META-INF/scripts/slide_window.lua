@@ -17,10 +17,9 @@ if (exists == 1) then
 end
 
 local allowed = 0
-if (last_requests < capacity) {
+if (last_requests < capacity) then
     allowed = 1
     redis.call("zadd", key, current, m_key)
-}
 end
 
 redis.call("expire", key, window_size)

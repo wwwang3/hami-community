@@ -1,16 +1,19 @@
 package top.wang3.hami.security.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import top.wang3.hami.security.annotation.RateLimit;
 
 /**
  * 限流属性
  */
 @Data
+@Builder
+@AllArgsConstructor
 public class RateLimiterModel {
 
-    private RateLimit.Algorithm algorithm;
-    private RateLimit.Scope scope;
+    private String algorithm;
+    private String scope;
     private int capacity;
     private int rate;
 

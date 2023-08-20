@@ -35,20 +35,22 @@ public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
     @PostConstruct
     private void loadScript() {
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
-        String path = "/scripts/slide_window.lua";
+        String path = "/META-INF/scripts/slide_window.lua";
         ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
         script.setScriptSource(source);
         script.setResultType(Long.class);
         this.redisScript = script;
+        log.debug("success load lua script: {}", path);
     }
 
     @Override
-    public boolean support(RateLimit.Algorithm algorithm) {
-        return RateLimit.Algorithm.SLIDE_WINDOW.equals(algorithm);
+    public String getSupportedAlgorithm() {
+        return RateLimit.Algorithm.SLIDE_WINDOW.getName();
     }
 
     @Override
     public boolean isAllowed(String key, int rate, int capacity) {
+        log.debug("rate: {}, capacity: {}", rate, capacity);
         long current = Instant.now().getEpochSecond();
         List<String> keys = Arrays.asList(key, String.valueOf(System.currentTimeMillis()));
         List<String> args = Arrays.asList(String.valueOf(rate), String.valueOf(capacity), String.valueOf(current));

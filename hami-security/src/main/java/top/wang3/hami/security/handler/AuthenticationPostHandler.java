@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import top.wang3.hami.security.config.WebSecurityProperties;
 import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.service.TokenService;
 
 import java.io.IOException;

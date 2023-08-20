@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.service.JwtTokenService;
 import top.wang3.hami.security.service.TokenService;
 import top.wang3.hami.security.storage.BlacklistStorage;
@@ -19,7 +20,7 @@ public class JwtTokenServiceConfig {
 
     @Bean("jwtTokenService")
     @ConditionalOnMissingBean
-    public TokenService jwtTokenService(WebSecurityProperties properties,  BlacklistStorage storage) {
+    public TokenService jwtTokenService(WebSecurityProperties properties, BlacklistStorage storage) {
         log.debug("storage impl: {}", storage.getClass().getSimpleName());
         return new JwtTokenService(properties, storage);
     }

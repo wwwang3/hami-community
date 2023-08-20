@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import top.wang3.hami.common.util.CollectionUtils;
-import top.wang3.hami.security.config.WebSecurityProperties;
 import top.wang3.hami.security.model.LoginUser;
+import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.storage.BlacklistStorage;
 
 import javax.crypto.spec.SecretKeySpec;

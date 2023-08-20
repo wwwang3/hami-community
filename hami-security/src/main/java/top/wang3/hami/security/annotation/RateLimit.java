@@ -19,7 +19,7 @@ public @interface RateLimit {
      * 限流算法
      * @return algorithm
      */
-    Algorithm algorithm() default Algorithm.SLIDE_WINDOW;
+    String algorithm() default "slide_window";
 
     /**
      * 最大容量
@@ -36,31 +36,25 @@ public @interface RateLimit {
      * 范围, 决定key生成
      * @return scope
      */
-    Scope scope() default Scope.URI;
+    String scope() default "ip";
 
 
     @Getter
     enum Algorithm {
-        /*
-        固定窗口
-         */
-        FIXED_WINDOW("rate:limit:fixed_window"),
+//        /*
+//        固定窗口
+//         */
+//        FIXED_WINDOW("fixed_window"),
         /**
          * 滑动窗口
          */
-        SLIDE_WINDOW("rate:limit:slide_window");
+        SLIDE_WINDOW("slide_window");
 
-        private final String prefix;
+        private final String name;
 
-        Algorithm(String prefix) {
-            this.prefix = prefix;
+        Algorithm(String name) {
+            this.name = name;
         }
-
     }
 
-    enum Scope {
-        GLOBAL, //全局
-        IP, //IP
-        URI; //请求接口;
-    }
 }
