@@ -1,4 +1,4 @@
-package top.wang3.hami.web.controller;
+package top.wang3.hami.web.controller.user;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.RegisterParam;
-import top.wang3.hami.common.dto.ResetPassParam;
+import top.wang3.hami.common.dto.request.RegisterParam;
+import top.wang3.hami.common.dto.request.ResetPassParam;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
 import top.wang3.hami.security.model.Result;

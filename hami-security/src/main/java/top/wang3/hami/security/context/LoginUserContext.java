@@ -3,6 +3,7 @@ package top.wang3.hami.security.context;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import top.wang3.hami.common.dto.IpInfo;
+import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.LoginUser;
 
 /**
@@ -16,12 +17,13 @@ public class LoginUserContext {
      */
     public static LoginUser getLoginUser() {
         SecurityContext context = SecurityContextHolder.getContext();
-        return (LoginUser) context.getAuthentication();
+        return (LoginUser) context.getAuthentication().getPrincipal();
     }
 
-    public static int getLoginUserId() {
+    public static int getLoginUserId() throws NotLoginException {
         LoginUser loginUser = getLoginUser();
-        return loginUser == null ? -1 : loginUser.getId();
+        if (loginUser == null) throw new NotLoginException("未登录");
+        return loginUser.getId();
     }
 
     public IpInfo getIpInfo() {

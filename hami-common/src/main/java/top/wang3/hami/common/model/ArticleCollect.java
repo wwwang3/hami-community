@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 文章收藏表
- */
+    * 文章收藏表
+    */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,6 +41,12 @@ public class ArticleCollect {
      */
     @TableField(value = "article_id")
     private Integer articleId;
+
+    /**
+     * 状态
+     */
+    @TableField(value = "`state`")
+    private Byte state;
 
     /**
      * 是否删除

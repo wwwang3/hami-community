@@ -22,4 +22,10 @@ public final class Constants {
     public static final Byte ONE = (byte) 1;
 
     public static final Byte ZERO = (byte) 0;
+
+    public static final Byte DELETED = ONE;
+    public static final Byte NOT_DELETED = ZERO;
+
+    public static final Integer LIKE_TYPE_ARTICLE = 1;
+    public static final Integer LIKE_TYPE_COMMENT = 2;
 }

@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 点赞通用表
- */
+    * 点赞通用表
+    */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "`like`")
+@TableName(value = "tb_like")
 public class Like {
     /**
      * 主键ID

@@ -18,8 +18,9 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName(value = "`user`")
 public class User {
+
     /**
-     * 用户ID
+     * ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;

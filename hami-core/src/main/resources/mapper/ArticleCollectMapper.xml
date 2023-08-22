@@ -8,12 +8,13 @@
     <result column="fid" property="fid" />
     <result column="user_id" property="userId" />
     <result column="article_id" property="articleId" />
+    <result column="state" property="state" />
     <result column="deleted" property="deleted" />
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, fid, user_id, article_id, deleted, ctime, mtime
+    id, fid, user_id, article_id, `state`, deleted, ctime, mtime
   </sql>
 </mapper>

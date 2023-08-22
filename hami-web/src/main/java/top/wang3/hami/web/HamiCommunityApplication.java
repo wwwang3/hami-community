@@ -5,12 +5,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import top.wang3.hami.core.HamiCoreConfig;
 import top.wang3.hami.security.EnableSecurity;
 
 @SpringBootApplication
 @Import(value = {HamiCoreConfig.class})
 @EnableSecurity
+@EnableTransactionManagement
 @Slf4j
 public class HamiCommunityApplication {
 

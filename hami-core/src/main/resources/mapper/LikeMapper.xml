@@ -3,7 +3,7 @@
 <mapper namespace="top.wang3.hami.core.mapper.LikeMapper">
   <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.Like">
     <!--@mbg.generated-->
-    <!--@Table `like`-->
+    <!--@Table tb_like-->
     <id column="id" property="id" />
     <result column="item_id" property="itemId" />
     <result column="item_type" property="itemType" />
