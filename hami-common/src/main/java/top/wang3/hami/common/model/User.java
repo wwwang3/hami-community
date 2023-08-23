@@ -1,6 +1,5 @@
 package top.wang3.hami.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,14 +17,10 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName(value = "`user`")
 public class User {
-
     /**
-     * ID
+     * 用户账号ID
      */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-
-    @TableField(value = "user_id")
+    @TableId(value = "user_id")
     private Integer userId;
 
     /**
@@ -71,7 +66,7 @@ public class User {
     private String tag;
 
     /**
-     * 是否删除 0-删除 1-未删除
+     * 是否删除 0-未删除 1-删除
      */
     @TableField(value = "deleted")
     private Byte deleted;

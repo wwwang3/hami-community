@@ -3,6 +3,8 @@ package top.wang3.hami.common.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * 进入首页时获取, 以此判断是否登录
  */
@@ -33,6 +35,8 @@ public class LoginProfile {
      * 标签
      */
     private String tag;
+
+    private Date ctime;
 
     /**
      * 我点赞的文章数

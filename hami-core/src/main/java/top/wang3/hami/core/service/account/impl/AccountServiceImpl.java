@@ -2,10 +2,13 @@ package top.wang3.hami.core.service.account.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.request.RegisterParam;
 import top.wang3.hami.common.dto.request.ResetPassParam;
@@ -22,6 +25,7 @@ import java.util.function.Supplier;
 
 @Service
 @Slf4j
+@Setter
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         implements AccountService {
 
@@ -31,6 +35,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
 
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
 
     public AccountServiceImpl(EmailCaptchaService captchaService, UserMapper userMapper) {
         this.captchaService = captchaService;
@@ -92,10 +99,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
             throw new ServiceException("用户不存在");
         }
         String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        throwIfFalse(() -> super.update()
-                .set("`password`", encryptedPassword)
-                .eq("email", email)
-                .update(), "系统错误");
+        transactionTemplate.execute(status -> {
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("`password`", encryptedPassword)
+                    .eq("email", email)
+                    .update();
+        });
     }
 
     /**

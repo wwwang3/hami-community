@@ -50,8 +50,6 @@ public class JwtTokenService implements TokenService {
                 .setExpiration(expiration) //过期时间
                 .setId(UUID.randomUUID().toString()) //jwtId
                 .claim("id", id) //claims
-                .claim("username", loginUser.getUsername())
-                .claim("email", loginUser.getEmail())
                 .claim("authorities", CollectionUtils.convert(loginUser.getAuthorities(), GrantedAuthority::getAuthority))
                 .compact();
     }

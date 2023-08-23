@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 public class RegisterParam {
 
-    @Pattern(regexp = "^([a-zA-Z0-9_\\u4e00-\\u9fa5]{2,16})$")
+    @Pattern(regexp = "^([a-zA-Z0-9_\\u4e00-\\u9fa5]{2,20})$")
     private String username;
 
     @Email

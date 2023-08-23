@@ -15,4 +15,7 @@ public interface AccountService extends IService<Account> {
     void register(RegisterParam param) throws ServiceException;
 
     void resetPassword(ResetPassParam param);
+
+
+    boolean checkUsername(String username);
 }

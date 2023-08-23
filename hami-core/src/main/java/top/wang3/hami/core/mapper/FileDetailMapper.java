@@ -2,8 +2,8 @@ package top.wang3.hami.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
-import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.model.FileDetail;
 
 @Mapper
-public interface UserMapper extends BaseMapper<User> {
+public interface FileDetailMapper extends BaseMapper<FileDetail> {
 }

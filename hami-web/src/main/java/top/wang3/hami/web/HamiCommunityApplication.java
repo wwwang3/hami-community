@@ -1,5 +1,6 @@
 package top.wang3.hami.web;
 
+import cn.xuyanwu.spring.file.storage.spring.EnableFileStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +14,7 @@ import top.wang3.hami.security.EnableSecurity;
 @Import(value = {HamiCoreConfig.class})
 @EnableSecurity
 @EnableTransactionManagement
+@EnableFileStorage
 @Slf4j
 public class HamiCommunityApplication {
 
