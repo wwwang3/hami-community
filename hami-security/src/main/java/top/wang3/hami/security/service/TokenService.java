@@ -30,6 +30,7 @@ public interface TokenService {
      */
     default String getToken(HttpServletRequest request, String tokenName) {
         Assert.notNull(tokenName, "tokenName can not be null");
+        if (request == null) return null;
         //从请求中获取
         String token = request.getHeader(tokenName);
         if (token != null) return token;
@@ -50,4 +51,9 @@ public interface TokenService {
      * @return 是否加入成功 token为空或者解析失败返回false
      */
     boolean invalidate(String token);
+
+    /**
+     * 踢出当前用户, 清除用户的全部登录态
+     */
+    void kickout();
 }

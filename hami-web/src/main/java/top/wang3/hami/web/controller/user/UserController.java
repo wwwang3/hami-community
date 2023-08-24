@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.converter.UserConverter;
+import top.wang3.hami.common.dto.AccountInfo;
 import top.wang3.hami.common.dto.UserProfile;
 import top.wang3.hami.common.dto.request.UserProfileParam;
 import top.wang3.hami.common.model.User;
@@ -33,6 +34,12 @@ public class UserController {
     public Result<UserProfile> getUserProfile() {
         UserProfile profile = userService.getUserProfile();
         return Result.success(profile);
+    }
+
+    @GetMapping("/account")
+    public Result<AccountInfo> getAccountInfo() {
+        AccountInfo accountInfo = accountService.getAccountInfo();
+        return Result.success(accountInfo);
     }
 
     @PostMapping("/avatar/upload")

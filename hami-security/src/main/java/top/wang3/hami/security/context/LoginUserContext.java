@@ -1,7 +1,11 @@
 package top.wang3.hami.security.context;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.LoginUser;
@@ -26,8 +30,16 @@ public class LoginUserContext {
         return loginUser.getId();
     }
 
-    public IpInfo getIpInfo() {
+    public static IpInfo getIpInfo() {
         return IpContext.getIpInfo();
+    }
+
+    public static HttpServletRequest getRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes attr) {
+            return attr.getRequest();
+        }
+        return null;
     }
 
 }

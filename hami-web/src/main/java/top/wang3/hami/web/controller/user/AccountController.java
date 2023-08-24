@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.request.RegisterParam;
 import top.wang3.hami.common.dto.request.ResetPassParam;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
+import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
 import top.wang3.hami.security.model.Result;
 
 import java.util.concurrent.TimeUnit;
@@ -31,8 +31,8 @@ public class AccountController {
 
     @GetMapping("/captcha")
     public Result<Void> getRegisterCaptcha(@RequestParam("email") @NotBlank @Email String email,
-                                           @RequestParam("type") @Pattern(regexp = "(register|reset)") String type) {
-        String captchaType = resolveType(type);
+                                           @RequestParam("type") @Pattern(regexp = "(register|reset|update)") String type) {
+        String captchaType = EmailCaptchaService.resolveCaptchaType(type);
         //6位验证码 有效期五分钟
         captchaService.sendCaptcha(captchaType, email, 6, TimeUnit.MINUTES.toSeconds(5));
         return Result.success("发送成功");
@@ -46,15 +46,17 @@ public class AccountController {
         return Result.success("注册成功");
     }
 
+    @PostMapping("/update-pass")
+    public Result<Void> updatePassword(@RequestBody @Valid ResetPassParam param) {
+        accountService.updatePassword(param);
+        return Result.success("修改成功");
+    }
+
     @PostMapping("/reset-pass")
     public Result<Void> resetPassword(@RequestBody @Valid ResetPassParam param) {
         accountService.resetPassword(param);
         return Result.success("重置密码成功");
     }
 
-
-    private String resolveType(String type) {
-        return "register".equals(type) ? Constants.REGISTER_EMAIL_CAPTCHA : Constants.RESET_EMAIL_CAPTCHA;
-    }
 
 }

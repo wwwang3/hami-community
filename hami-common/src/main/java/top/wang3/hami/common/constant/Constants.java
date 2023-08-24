@@ -13,9 +13,14 @@ public final class Constants {
     public static final String REGISTER_EMAIL_CAPTCHA = "email:register";
 
     /**
-     * 重置密码邮箱验证码
+     * 忘记密码邮箱验证码
      */
     public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass";
+
+    /**
+     * 更新密码邮箱验证码
+     */
+    public static final String UPDATE_EMAIL_CAPTCHA = "email:reset:pass";
 
     public static final String CAPTCHA_RATE_LIMIT = "captcha:rate:limit";
 

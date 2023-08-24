@@ -3,10 +3,12 @@ package top.wang3.hami.security.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import top.wang3.hami.common.util.CollectionUtils;
+import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.storage.BlacklistStorage;
@@ -79,11 +81,21 @@ public class JwtTokenService implements TokenService {
         //将jwt加入到黑名单
         Claims claims = parseJwt(jwt);
         //token解析失败了 说明没有携带token或者token失效 返回invalid token信息
-        //已经于黑名单中, 应该提示token无效, 而不是退出成功
+        //已经于黑名单中或者claims为空, 应该提示token无效, 而不是退出成功
         if (invalided(claims)) {
             return false;
         }
         return storage.add(claims.getId(), claims.getExpiration().getTime());
+    }
+
+
+    @Override
+    public void kickout() {
+        //jwt黑名单机制，无法做到清除全部登录态，除非使用白名单机制，在服务器保存token，这样又回到token-session模型了
+        //违背了jwt的初衷，黑名单机制其实违背了
+        HttpServletRequest request = LoginUserContext.getRequest();
+        String token = getToken(request, properties.getTokenName());
+        invalidate(token);
     }
 
 

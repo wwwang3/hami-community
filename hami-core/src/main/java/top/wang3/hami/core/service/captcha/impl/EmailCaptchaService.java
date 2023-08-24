@@ -71,6 +71,15 @@ public class EmailCaptchaService implements CaptchaService {
         }
     }
 
+    public static String resolveCaptchaType(String type) {
+        return switch (type) {
+            case "register" -> Constants.REGISTER_EMAIL_CAPTCHA;
+            case "reset" -> Constants.RESET_EMAIL_CAPTCHA;
+            case "update" -> Constants.UPDATE_EMAIL_CAPTCHA;
+            default -> throw new IllegalArgumentException(type);
+        };
+    }
+
 
     private String limitKey() {
         return Constants.CAPTCHA_RATE_LIMIT + IpContext.getIpInfo().getIp();

@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.converter.AccountConverter;
+import top.wang3.hami.common.dto.AccountInfo;
 import top.wang3.hami.common.dto.request.RegisterParam;
 import top.wang3.hami.common.dto.request.ResetPassParam;
 import top.wang3.hami.common.model.Account;
@@ -20,6 +22,8 @@ import top.wang3.hami.core.mapper.AccountMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
+import top.wang3.hami.security.context.LoginUserContext;
+import top.wang3.hami.security.service.TokenService;
 
 import java.util.function.Supplier;
 
@@ -34,10 +38,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
     private final UserMapper userMapper;
 
     @Resource
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
 
     @Resource
     TransactionTemplate transactionTemplate;
+
+    @Resource
+    TokenService tokenService;
 
     public AccountServiceImpl(EmailCaptchaService captchaService, UserMapper userMapper) {
         this.captchaService = captchaService;
@@ -80,32 +87,29 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
                 .state((byte) 1)
                 .password(encryptedPassword)
                 .build();
-        super.save(account);
-        userMapper.insert(new User(account.getId(), username));
+        transactionTemplate.execute(status -> {
+            super.save(account);
+            return userMapper.insert(new User(account.getId(), username));
+        });
     }
 
     @Override
     public void resetPassword(ResetPassParam param) {
         //校验验证码
-        String type = Constants.RESET_EMAIL_CAPTCHA;
-        String email = param.getEmail();
-        boolean verify = captchaService.verify(type, email, param.getCaptcha());
-        if (!verify) {
-            throw new CaptchaServiceException("验证码无效或过期");
-        }
-        captchaService.deleteCaptcha(type, email);
-        //用户不存在
-        if (!checkEmail(param.getEmail())) {
-            throw new ServiceException("用户不存在");
-        }
-        String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        transactionTemplate.execute(status -> {
-            return ChainWrappers.updateChain(getBaseMapper())
-                    .set("`password`", encryptedPassword)
-                    .eq("email", email)
-                    .update();
-        });
+        restPassword(param, "reset");
     }
+
+
+    @Override
+    public void updatePassword(ResetPassParam param) {
+        //修改密码
+        //清除用户所有的登录态
+        boolean success = restPassword(param, "update");
+        if (success) {
+            tokenService.kickout();
+        }
+    }
+
 
     /**
      * 检查用户名是否存在
@@ -118,6 +122,17 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         return super.getBaseMapper().exists(wrapper);
     }
 
+
+    @Override
+    public AccountInfo getAccountInfo() {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        Account account = ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "email")
+                .eq("id", loginUserId)
+                .one();
+        return AccountConverter.INSTANCE.toAccountInfo(account);
+    }
+
     /**
      * 检查邮箱是否存在
      * @param email 邮箱
@@ -127,6 +142,29 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         var wrapper = Wrappers.query(Account.class)
                 .eq("email", email);
         return super.getBaseMapper().exists(wrapper);
+    }
+
+
+    private boolean restPassword(ResetPassParam param, String type) {
+        String captchaType = EmailCaptchaService.resolveCaptchaType(type);
+        String email = param.getEmail();
+        boolean verify = captchaService.verify(captchaType, email, param.getCaptcha());
+        if (!verify) {
+            throw new CaptchaServiceException("验证码无效或过期");
+        }
+        captchaService.deleteCaptcha(captchaType, email);
+        //用户不存在
+        if (!checkEmail(param.getEmail())) {
+            throw new ServiceException("用户不存在");
+        }
+        String encryptedPassword = passwordEncoder.encode(param.getPassword());
+        Boolean updated = transactionTemplate.execute(status -> {
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("`password`", encryptedPassword)
+                    .eq("email", email)
+                    .update();
+        });
+        return updated != null && updated;
     }
 
     private void throwIfFalse(Supplier<Boolean> supplier, String error_msg) {
