@@ -127,7 +127,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
     public AccountInfo getAccountInfo() {
         int loginUserId = LoginUserContext.getLoginUserId();
         Account account = ChainWrappers.queryChain(getBaseMapper())
-                .select("user_id", "email")
+                .select("id", "email")
                 .eq("id", loginUserId)
                 .one();
         return AccountConverter.INSTANCE.toAccountInfo(account);

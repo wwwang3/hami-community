@@ -1,4 +1,4 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.model.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,66 +11,54 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 文章表
- */
+    * 文章数据记录表
+    */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "article")
-public class Article {
+@TableName(value = "article_stat")
+public class ArticleStat {
     /**
-     * 文章id
+     * 主键ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 文章草稿ID
+     * 文章ID
      */
-    @TableId(value = "draft_id", type = IdType.AUTO)
-    private Long draftId;
+    @TableField(value = "article_id")
+    private Integer articleId;
 
     /**
-     * 作者id
+     * 用户ID
      */
     @TableField(value = "user_id")
     private Integer userId;
 
     /**
-     * 分类id
+     * 阅读量
      */
-    @TableField(value = "category_id")
-    private Integer categoryId;
+    @TableField(value = "views")
+    private Integer views;
 
     /**
-     * 文章标题
+     * 点赞数
      */
-    @TableField(value = "title")
-    private String title;
+    @TableField(value = "likes")
+    private Integer likes;
 
     /**
-     * 文章简介
+     * 评论数
      */
-    @TableField(value = "summary")
-    private String summary;
+    @TableField(value = "comments")
+    private Integer comments;
 
     /**
-     * 文章内容
+     * 收藏数
      */
-    @TableField(value = "content")
-    private String content;
-
-    /**
-     * 文章封面
-     */
-    @TableField(value = "picture")
-    private String picture;
-
-    /**
-     * 是否删除 0-未删除 1-已删除
-     */
-    @TableField(value = "deleted")
-    private Byte deleted;
+    @TableField(value = "collects")
+    private Integer collects;
 
     /**
      * 创建时间

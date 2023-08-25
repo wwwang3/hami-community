@@ -1,4 +1,4 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.model.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,18 +11,30 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 文章详情表
- */
+    * 文章收藏表
+    */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "article_detail")
-public class ArticleDetail {
+@TableName(value = "article_collect")
+public class ArticleCollect {
     /**
      * 主键ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
+
+    /**
+     * 收藏夹ID (备用/先不搞收藏夹)
+     */
+    @TableField(value = "fid")
+    private Integer fid;
+
+    /**
+     * 用户ID
+     */
+    @TableField(value = "user_id")
+    private Integer userId;
 
     /**
      * 文章ID
@@ -31,16 +43,10 @@ public class ArticleDetail {
     private Integer articleId;
 
     /**
-     * 版本号
+     * 状态
      */
-    @TableField(value = "version")
-    private Integer version;
-
-    /**
-     * 文章内容
-     */
-    @TableField(value = "content")
-    private String content;
+    @TableField(value = "`state`")
+    private Byte state;
 
     /**
      * 是否删除

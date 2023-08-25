@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import top.wang3.hami.security.model.LoginUser;
@@ -47,10 +48,13 @@ public class AuthenticationPostHandler {
         log.debug("auth failed: error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         Result<?> result;
         if (e instanceof AccessDeniedException ae) {
-            //登录成功, 校验权限失败
+            //登录成功, 权限不足
             result = Result.error(403, ae.getMessage());
+        } else if (e instanceof InsufficientAuthenticationException ie) {
+            //凭证不足, 访问了需要登录的接口但token校验失败
+            result = Result.error("token无效或过期");
         } else if (e instanceof AuthenticationException ae) {
-            //登录或者请求接口时认证失败
+            //其他Authentication异常
             result = Result.error(401, ae.getMessage());
         } else {
             result = Result.error(e.getMessage());

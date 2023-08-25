@@ -36,7 +36,7 @@ public class UserController {
         return Result.success(profile);
     }
 
-    @GetMapping("/account")
+    @GetMapping("/account/info")
     public Result<AccountInfo> getAccountInfo() {
         AccountInfo accountInfo = accountService.getAccountInfo();
         return Result.success(accountInfo);

@@ -1,4 +1,4 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.model.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -11,63 +11,39 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 文章表
+ * 标签管理表
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "article")
-public class Article {
+@TableName(value = "tag")
+public class Tag {
     /**
-     * 文章id
+     * 主键ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 文章草稿ID
+     * 标签名称
      */
-    @TableId(value = "draft_id", type = IdType.AUTO)
-    private Long draftId;
+    @TableField(value = "`name`")
+    private String name;
 
     /**
-     * 作者id
+     * 标签类型：1-系统标签，2-自定义标签
      */
-    @TableField(value = "user_id")
-    private Integer userId;
+    @TableField(value = "`type`")
+    private Integer type;
 
     /**
-     * 分类id
+     * 类目ID
      */
     @TableField(value = "category_id")
     private Integer categoryId;
 
     /**
-     * 文章标题
-     */
-    @TableField(value = "title")
-    private String title;
-
-    /**
-     * 文章简介
-     */
-    @TableField(value = "summary")
-    private String summary;
-
-    /**
-     * 文章内容
-     */
-    @TableField(value = "content")
-    private String content;
-
-    /**
-     * 文章封面
-     */
-    @TableField(value = "picture")
-    private String picture;
-
-    /**
-     * 是否删除 0-未删除 1-已删除
+     * 是否删除
      */
     @TableField(value = "deleted")
     private Byte deleted;
@@ -79,7 +55,7 @@ public class Article {
     private Date ctime;
 
     /**
-     * 更新时间
+     * 最后更新时间
      */
     @TableField(value = "mtime")
     private Date mtime;

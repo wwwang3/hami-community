@@ -5,18 +5,20 @@
     <!--@mbg.generated-->
     <!--@Table article-->
     <id column="id" property="id" />
+    <id column="draft_id" property="draftId" />
     <result column="user_id" property="userId" />
+    <result column="category_id" property="categoryId" />
     <result column="title" property="title" />
     <result column="summary" property="summary" />
-    <result column="category_id" property="categoryId" />
+    <result column="content" property="content" />
     <result column="picture" property="picture" />
-    <result column="state" property="state" />
     <result column="deleted" property="deleted" />
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, title, summary, category_id, picture, `state`, deleted, ctime, mtime
+    id, draft_id, user_id, category_id, title, summary, content, picture, deleted, ctime, 
+    mtime
   </sql>
 </mapper>
