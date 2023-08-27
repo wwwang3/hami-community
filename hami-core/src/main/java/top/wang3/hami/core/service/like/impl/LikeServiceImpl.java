@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.like;
+package top.wang3.hami.core.service.like.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Like;
 import top.wang3.hami.core.mapper.LikeMapper;
+import top.wang3.hami.core.service.like.LikeService;
 
 
 @Service

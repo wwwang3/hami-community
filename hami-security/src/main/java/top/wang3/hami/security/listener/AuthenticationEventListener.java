@@ -13,11 +13,15 @@ import top.wang3.hami.security.model.LoginUser;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Slf4j
 public class AuthenticationEventListener {
 
     private final AuthenticationEventHandler handler;
+
+    Executor executor = Executors.newFixedThreadPool(4);
 
     public AuthenticationEventListener(AuthenticationEventHandler handler) {
         this.handler = handler;
@@ -34,7 +38,7 @@ public class AuthenticationEventListener {
         //从ThreadLocal中获取
         IpInfo info = IpContext.getIpInfo();
         //async
-        CompletableFuture.runAsync(() -> handler.handleSuccess(loginUser, info, new Date()));
+        CompletableFuture.runAsync(() -> handler.handleSuccess(loginUser, info, new Date()), executor);
     }
 
     @EventListener

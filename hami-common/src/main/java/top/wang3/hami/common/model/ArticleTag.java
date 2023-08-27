@@ -53,4 +53,10 @@ public class ArticleTag {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
+
+    public ArticleTag(Integer articleId, Integer tagId) {
+        this.articleId = articleId;
+        this.tagId = tagId;
+    }
 }

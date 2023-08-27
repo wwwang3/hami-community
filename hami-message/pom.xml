@@ -32,6 +32,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>top.wang3</groupId>
+            <artifactId>hami-core</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>

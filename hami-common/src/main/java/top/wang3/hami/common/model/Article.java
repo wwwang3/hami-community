@@ -24,11 +24,6 @@ public class Article {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    /**
-     * 文章草稿ID
-     */
-    @TableId(value = "draft_id", type = IdType.AUTO)
-    private Long draftId;
 
     /**
      * 作者id

@@ -5,7 +5,6 @@
     <!--@mbg.generated-->
     <!--@Table article-->
     <id column="id" property="id" />
-    <id column="draft_id" property="draftId" />
     <result column="user_id" property="userId" />
     <result column="category_id" property="categoryId" />
     <result column="title" property="title" />
@@ -18,7 +17,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, draft_id, user_id, category_id, title, summary, content, picture, deleted, ctime, 
+    id, user_id, category_id, title, summary, content, picture, deleted, ctime,
     mtime
   </sql>
 </mapper>

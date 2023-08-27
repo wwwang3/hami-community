@@ -71,4 +71,9 @@ public class ArticleStat {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
+    public ArticleStat(Integer articleId, Integer userId) {
+        this.articleId = articleId;
+        this.userId = userId;
+    }
 }

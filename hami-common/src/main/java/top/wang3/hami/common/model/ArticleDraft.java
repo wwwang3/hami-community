@@ -1,15 +1,13 @@
 package top.wang3.hami.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
     * 文章草稿表
@@ -19,11 +17,18 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName(value = "article_draft")
 public class ArticleDraft {
+
     /**
      * 主键ID,草稿ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 文章ID, 没有发表时为空
+     */
+    @TableField(value = "article_id")
+    private Integer articleId;
 
     /**
      * 用户ID
@@ -43,6 +48,9 @@ public class ArticleDraft {
     @TableField(value = "picture")
     private String picture;
 
+    @TableField(value = "summary")
+    private String summary;
+
     /**
      * 文章内容
      */
@@ -53,7 +61,7 @@ public class ArticleDraft {
      * 文章标签
      */
     @TableField(value = "article_tags", typeHandler = JacksonTypeHandler.class)
-    private String articleTags;
+    private List<Integer> articleTags;
 
     /**
      * 分类ID
@@ -71,6 +79,7 @@ public class ArticleDraft {
      * 版本号
      */
     @TableField(value = "version")
+    @Version
     private Long version;
 
     /**

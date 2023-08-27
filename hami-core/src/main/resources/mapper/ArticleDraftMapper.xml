@@ -5,6 +5,7 @@
     <!--@mbg.generated-->
     <!--@Table article_draft-->
     <id column="id" property="id" />
+    <result column="article_id" property="articleId" />
     <result column="user_id" property="userId" />
     <result column="title" property="title" />
     <result column="picture" property="picture" />
@@ -17,9 +18,46 @@
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
+
+  <resultMap id="ArticleDraftDTOMap" type="top.wang3.hami.common.dto.ArticleDraftDTO">
+    <!--@mbg.generated-->
+    <!--@Table article_draft-->
+    <id column="id" property="id" />
+    <result column="article_id" property="articleId" />
+    <result column="user_id" property="userId" />
+    <result column="title" property="title" />
+    <result column="picture" property="picture" />
+    <result column="summary" property="summary" />
+    <result column="content" property="content" />
+    <result column="article_tags" property="articleTags" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    <result column="category_id" property="categoryId" />
+    <result column="state" property="state" />
+    <result column="version" property="version" />
+    <result column="ctime" property="ctime" />
+    <result column="mtime" property="mtime" />
+  </resultMap>
+
+
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, title, picture, content, article_tags, category_id, `state`, version,
+    id, user_id, article_id, title, picture, summary, content, article_tags, category_id, `state`, version,
     deleted, ctime, mtime
   </sql>
+
+  <sql id="ArticleDraftDTO_Column_List">
+    <!--@mbg.generated-->
+    t1.id as id, t2.article_id as article_id, t1.user_id as user_id,
+    t1.title as title, t1.picture as picture, t1.summary as summary,
+    t1.content as content, t1.article_tags as article_tags,
+    t1.category_id as category_id, t1.`state` as `state`, t1.version as version,
+    t1.deleted as deleted, t1.ctime as ctime, t1.mtime as mtime
+  </sql>
+
+  <select id="selectArticleDraftsByUserId" resultMap="ArticleDraftDTOMap">
+    select <include refid="ArticleDraftDTO_Column_List" />
+    from article_draft t1
+    join article t2
+    on t1.id = t2.draft_id and t2.deleted = 0
+    where t1.user_id = #{userId} and t1.deleted = 0 and t1.`state` = #{state}
+  </select>
 </mapper>
