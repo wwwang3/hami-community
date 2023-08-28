@@ -48,8 +48,8 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
 
     @Override
     @Transactional
-    public void saveTags(Integer articleId, List<Integer> articleTags) {
-        batchSave(articleId, articleTags);
+    public void saveTags(Integer articleId, List<Integer> tagIds) {
+        batchSave(articleId, tagIds);
     }
 
     public void batchSave(Integer articleId, List<Integer> tags) {

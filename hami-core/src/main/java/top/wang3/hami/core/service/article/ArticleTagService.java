@@ -9,5 +9,5 @@ public interface ArticleTagService extends IService<ArticleTag> {
 
     void updateTags(Integer articleId, List<Integer> newTags);
 
-    void saveTags(Integer id, List<Integer> articleTags);
+    void saveTags(Integer id, List<Integer> tagIds);
 }

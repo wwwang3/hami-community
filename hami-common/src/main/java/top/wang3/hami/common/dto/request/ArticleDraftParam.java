@@ -1,6 +1,9 @@
 package top.wang3.hami.common.dto.request;
 
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -16,6 +19,7 @@ public class ArticleDraftParam {
     /**
      * 标题
      */
+    @Size(min = 1, max = 128)
     private String title;
 
     /**
@@ -26,22 +30,27 @@ public class ArticleDraftParam {
     /**
      * 简介
      */
+    @Size(min = 50, max = 200)
     private String summary;
 
     /**
      * 文章内容
      */
+    @NotEmpty
     private String content;
 
     /**
      * 分类ID
      */
+    @NotNull
     private Integer categoryId;
 
     /**
      * 文章标签
      */
-    private List<Integer> articleTags;
+    @NotEmpty
+    @Size(min = 1, max = 3)
+    private List<Integer> tagIds;
 
 
 }

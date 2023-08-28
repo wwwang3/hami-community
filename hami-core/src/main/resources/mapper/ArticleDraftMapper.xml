@@ -10,7 +10,7 @@
     <result column="title" property="title" />
     <result column="picture" property="picture" />
     <result column="content" property="content" />
-    <result column="article_tags" property="articleTags" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    <result column="article_tags" property="tagIds" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
     <result column="category_id" property="categoryId" />
     <result column="state" property="state" />
     <result column="version" property="version" />
@@ -29,7 +29,7 @@
     <result column="picture" property="picture" />
     <result column="summary" property="summary" />
     <result column="content" property="content" />
-    <result column="article_tags" property="articleTags" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    <result column="article_tags" property="tagIds" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
     <result column="category_id" property="categoryId" />
     <result column="state" property="state" />
     <result column="version" property="version" />

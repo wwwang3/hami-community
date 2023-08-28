@@ -16,7 +16,7 @@ public class ArticleDraftDTO {
     private Long id;
 
     /**
-     * 文章ID, 可为空
+     * 文章ID, 没有发表时为空
      */
     private Integer articleId;
 
@@ -36,6 +36,11 @@ public class ArticleDraftDTO {
     private String picture;
 
     /**
+     * 简介
+     */
+    private String summary;
+
+    /**
      * 文章内容
      */
     private String content;
@@ -43,7 +48,7 @@ public class ArticleDraftDTO {
     /**
      * 文章标签
      */
-    private List<Integer> articleTags;
+    private List<TagDTO> tags;
 
     /**
      * 分类ID
@@ -54,11 +59,6 @@ public class ArticleDraftDTO {
      * 草稿状态 0-未发表 1-已发表
      */
     private Byte state;
-
-    /**
-     * 版本号
-     */
-    private Long version;
 
     /**
      * 创建时间
