@@ -30,6 +30,11 @@ public class LoginUserContext {
         return loginUser.getId();
     }
 
+    public static Integer getLoginUserIdDefaultNull() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser == null ? null : loginUser.getId();
+    }
+
     public static IpInfo getIpInfo() {
         return IpContext.getIpInfo();
     }

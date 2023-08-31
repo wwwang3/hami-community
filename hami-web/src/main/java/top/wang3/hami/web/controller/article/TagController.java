@@ -1,4 +1,4 @@
-package top.wang3.hami.web.controller.tag;
+package top.wang3.hami.web.controller.article;
 
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,11 +29,12 @@ public class TagController {
         return Result.success(tags);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/list")
     public Result<PageData<Tag>> getTagsByPage(@RequestParam("pageNum") long pageNum,
                                                @RequestParam("pageSize") long pageSize) {
         PageData<Tag> tags = tagService.getTagByPage(new PageParam(pageNum, pageSize));
         return Result.success(tags);
     }
+
 
 }

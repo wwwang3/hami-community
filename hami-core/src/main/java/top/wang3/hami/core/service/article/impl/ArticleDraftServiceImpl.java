@@ -7,11 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
+import jakarta.validation.Validator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleDraftDTO;
@@ -26,16 +27,14 @@ import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleDraftMapper;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
-import top.wang3.hami.core.service.article.ArticleDraftService;
-import top.wang3.hami.core.service.article.ArticleService;
-import top.wang3.hami.core.service.article.ArticleTagService;
-import top.wang3.hami.core.service.article.TagService;
+import top.wang3.hami.core.service.article.*;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, ArticleDraft>
         implements ArticleDraftService {
 
@@ -43,18 +42,15 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
     private final ArticleTagService articleTagService;
     private final ArticleStatMapper articleStatMapper;
 
+    private final CategoryService categoryService;
     private final TagService tagService;
 
     @Resource
     RabbitTemplate rabbitTemplate;
 
-    public ArticleDraftServiceImpl(ArticleService articleService, ArticleTagService articleTagService,
-                                   ArticleStatMapper articleStatMapper, TagService tagService) {
-        this.articleService = articleService;
-        this.articleTagService = articleTagService;
-        this.articleStatMapper = articleStatMapper;
-        this.tagService = tagService;
-    }
+    @Resource
+    Validator validator;
+
 
     @Override
     public PageData<ArticleDraftDTO> getArticleDrafts(PageParam param, byte state) {
@@ -82,54 +78,87 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
         return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
     }
 
+    /**
+     * 创建文章草稿
+     * @param param 参数
+     * @return ArticleDraft
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ArticleDraft saveOrUpdateArticleDraft(ArticleDraftParam param) {
+    public ArticleDraft createDraft(ArticleDraftParam param) {
+        if (param == null || param.getId() != null) {
+            return null;
+        }
         ArticleDraft draft = ArticleConverter.INSTANCE.toArticleDraft(param);
-        draft.setArticleId(null); //内部查询一次articleId
-        boolean saved = saveOrUpdateDraft(draft);
+        boolean saved = super.save(draft);
         return saved ? draft : null;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ArticleDraft updateDraft(ArticleDraftParam param) {
+        //更新草稿
+        ArticleDraft draft = ArticleConverter.INSTANCE.toArticleDraft(param);
+        if (draft.getId() == null) {
+            throw new ServiceException("参数错误");
+        }
+        //获取旧的 会保证是当前用户的
+        ArticleDraft oldDraft = getOldDraft(draft.getId());
+        UpdateWrapper<ArticleDraft> wrapper = Wrappers.update(draft)
+                .set("version", oldDraft.getVersion() + 1)
+                .eq("id", draft.getId())
+                .eq("version", oldDraft.getVersion());
+        return super.update(draft, wrapper) ? draft : null;
+    }
 
     /**
-     * todo 文章审核 校验分类ID, 标签ID合法性
-     * @param param 参数
+     * todo 文章审核
+     * @param draftId 草稿ID
      * @return ArticleDraft
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ArticleDraft publishArticle(ArticleDraftParam param) {
+    public ArticleDraft publishArticle(Long draftId) {
         //检查参数, 文章ID, 其他都不能为空
         //发表文章
         int loginUserId = LoginUserContext.getLoginUserId();
-        ArticleDraft draft = saveOrUpdateArticleDraft(param);
-        Article article = ArticleConverter.INSTANCE.toArticle(draft);
-        //设置作者
-        article.setUserId(loginUserId);
+        //null-safe
+        ArticleDraft oldDraft = getOldDraft(draftId);
+        //校验draft
+        checkDraft(oldDraft);
+        //文章
+        Article article = ArticleConverter.INSTANCE.toArticle(oldDraft);
         //保存文章
-        boolean success1 = articleService.save(article);
-        //保存文章标签
-        articleTagService.saveTags(article.getId(), draft.getTagIds());
-        //文章数据表
-        articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
-        //更新或者保存草稿
-        draft.setArticleId(article.getId());
-        draft.setState(Constants.ONE);
-        boolean success2 = saveOrUpdateDraft(draft);
+        boolean success1;
+        if (article.getId() == null) {
+            //插入
+            success1 = articleService.save(article);
+            oldDraft.setArticleId(article.getId());
+            oldDraft.setState(Constants.ONE);
+            //插入文章标签
+            articleTagService.saveTags(article.getId(), oldDraft.getTagIds());
+            //初始化文章数据
+            articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
+            super.updateById(oldDraft);
+        } else {
+            //更新
+            success1 = articleService.updateById(article);
+            articleTagService.updateTags(article.getId(), oldDraft.getTagIds());
+        }
         //发布文章发表消息
         rabbitTemplate.convertAndSend(Constants.NOTIFY_EXCHANGE, Constants.NOTIFY_ROUTING,
                 new ArticlePublishMsg(article.getId(), article.getUserId(), article.getTitle()));
-        return success2 && success1 ? draft : null;
+        return success1 ? oldDraft : null;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteDraft(long draftId) {
         //刪除草稿
-//        int userId = LoginUserContext.getLoginUserId();
+        int userId = LoginUserContext.getLoginUserId();
         QueryWrapper<ArticleDraft> wrapper = Wrappers.query(getEntityClass())
                 .eq("id", draftId)
+                .eq("user_id", userId)
                 .eq("`state`", Constants.ZERO);//0为草稿
         return super.remove(wrapper);
     }
@@ -138,77 +167,50 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
     @Override
     public boolean deleteArticle(int articleId) {
         //删除文章
+        int userId = LoginUserContext.getLoginUserId();
         QueryWrapper<Article> wrapper = Wrappers.query(articleService.getEntityClass())
+                .eq("user_id", userId)
                 .eq("id", articleId);
         boolean deleted = articleService.remove(wrapper);
         //删除草稿
         if (deleted) {
             QueryWrapper<ArticleDraft> draftQueryWrapper = Wrappers.query(getEntityClass())
+                    .eq("user_id", userId)
                     .eq("article_id", articleId);
             return super.remove(draftQueryWrapper);
         }
         return false;
     }
 
+    private void checkDraft(ArticleDraft draft) {
+        validator.validate(draft);
+        //校验分类
+        if (categoryService.getById(draft.getCategoryId()) == null) {
+            throw new ServiceException("请选择一个分类");
+        }
+        ///校验标签 若有个tagId不存在抛出错误
+        List<Integer> tagIds = draft.getTagIds();
+        Long count = ChainWrappers.queryChain(tagService.getBaseMapper())
+                .in("id", tagIds)
+                .count();
+        if (count == null || count.intValue() != tagIds.size()) {
+            throw new ServiceException("参数错误");
+        }
+    }
 
     /**
-     * 内部调用
-     * @param draft draft
-     * @return boolean
+     * 获取旧的草稿
+     * @param draftId 草稿ID
+     * @return ArticleDraft
+     * @throws ServiceException 不存在时抛出异常
      */
-    private boolean saveOrUpdateDraft(ArticleDraft draft) {
-        if (draft == null) return false;
-        Long id = draft.getId();
-        if (id == null) { //插入记录
-            return insertDraft(draft);
-        }
-        //检查是否合法
-        ArticleDraft oldDraft = checkDraft(draft);
-        //存在ID时更新记录
-        UpdateWrapper<ArticleDraft> wrapper = Wrappers.update(draft)
-                .set("version", oldDraft.getVersion() + 1)
-                .eq("id", draft.getId())
-                .eq("version", oldDraft.getVersion());
-        boolean success = super.update(draft, wrapper);
-        if (success && oldDraft.getArticleId() != null) {
-            draft.setArticleId(oldDraft.getArticleId());
-            updateArticle(draft); //更新文章
-        }
-        return success;
-    }
-
-
-    private boolean insertDraft(ArticleDraft draft) {
+    private ArticleDraft getOldDraft(Long draftId) {
         int userId = LoginUserContext.getLoginUserId();
-        draft.setUserId(userId); //设置用户
-        return super.save(draft);
-    }
-
-    private ArticleDraft checkDraft(ArticleDraft draft) {
-        ArticleDraft oldDraft = getById(draft.getId());
-        if (oldDraft == null) {
-            log.debug("draft-id 参数异常: {}", draft.getId());
-            throw new ServiceException("draftId参数异常");
-        }
-        if (oldDraft.getArticleId() != null && draft.getArticleId() != null) {
-            //发布文章时可能发生
-            if (!oldDraft.getArticleId().equals(draft.getArticleId())) {
-                //不一致
-                log.debug("文章Id参数异常, old-{} new-{}", oldDraft.getArticleId(), draft.getArticleId());
-                throw new ServiceException("文章ID参数异常");
-            }
-        }
-        return oldDraft;
-    }
-
-    private void updateArticle(ArticleDraft draft) {
-        //更新文章
-        Article article = ArticleConverter.INSTANCE.toArticle(draft);
-        Assert.notNull(article.getId(), "articleId can not be null");
-        articleService.updateById(article);
-        //更新标签
-        List<Integer> tagIds = draft.getTagIds();
-        articleTagService.updateTags(article.getId(), tagIds);
+        return ChainWrappers.queryChain(getBaseMapper())
+                .eq("id", draftId)
+                .eq("user_id", userId) //当前登录用户的草稿
+                .oneOpt()
+                .orElseThrow(() -> new ServiceException("草稿不存在"));
     }
 
     private List<ArticleDraftDTO> buildDrafts(List<ArticleDraft> drafts) {

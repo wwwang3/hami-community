@@ -31,6 +31,9 @@ public interface ArticleConverter {
 
 
     @Mapping(target = "id", source = "articleId")
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "mtime", ignore = true)
+    @Mapping(target = "ctime", ignore = true)
     Article toArticle(ArticleDraft draft);
 
     @Mapping(target = "tagName", source = "name")

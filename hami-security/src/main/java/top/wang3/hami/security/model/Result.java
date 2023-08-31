@@ -3,6 +3,10 @@ package top.wang3.hami.security.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+
 public record Result<T>(int code, String msg, T data) {
 
 
@@ -34,5 +38,26 @@ public record Result<T>(int code, String msg, T data) {
     @SneakyThrows
     public String toJsonString() {
         return MAPPER.writeValueAsString(this);
+    }
+
+
+    public static <R> Result<R> successIfTrue(boolean r) {
+        return successIfTrue(r, "error");
+    }
+
+    public static <R> Result<R> successIfTrue(boolean r, String errorMsg) {
+        return r ? Result.success() : Result.error(errorMsg);
+    }
+
+    public static <R> Result<R> successIfNonNull(R o) {
+        return Objects.nonNull(o) ? Result.success(o) : Result.error("error");
+    }
+
+    public static <R> Result<R> successIfNoNull(Supplier<R> supplier) {
+        if (supplier == null) return Result.error("error");
+        return Optional
+                .ofNullable(supplier.get())
+                .map(Result::successData)
+                .orElse(Result.error("error"));
     }
 }

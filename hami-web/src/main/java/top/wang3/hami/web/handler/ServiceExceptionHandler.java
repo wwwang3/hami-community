@@ -28,6 +28,12 @@ public class ServiceExceptionHandler {
         return Result.error(400, "参数错误");
     }
 
+    @ExceptionHandler(value = {Exception.class})
+    public Result<Void> resolveException(Exception e) {
+        logError(e);
+        return Result.error(e.getMessage());
+    }
+
 
     private void logError(Exception e) {
         log.warn("resolved exception: [{}: {}]", e.getClass(), e.getMessage());

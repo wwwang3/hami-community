@@ -1,4 +1,4 @@
-package top.wang3.hami.web.controller.category;
+package top.wang3.hami.web.controller.article;
 
 
 import org.springframework.web.bind.annotation.GetMapping;

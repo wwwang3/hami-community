@@ -1,10 +1,10 @@
 package top.wang3.hami.core.service.user.impl;
 
-import cn.xuyanwu.spring.file.storage.FileInfo;
 import cn.xuyanwu.spring.file.storage.FileStorageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
@@ -18,34 +18,28 @@ import top.wang3.hami.common.model.User;
 import top.wang3.hami.core.mapper.AccountMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.article.ArticleCollectService;
+import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
+
+    @Resource
+    ImageService imageService;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
 
     private final LikeService likeService;
     private final ArticleCollectService articleCollectService;
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
-
     private final AccountMapper accountMapper;
-
-    @Resource
-    TransactionTemplate transactionTemplate;
-
-    public UserServiceImpl(LikeService likeService, ArticleCollectService articleCollectService,
-                           UserFollowService userFollowService, FileStorageService fileStorageService,
-                           AccountMapper accountMapper) {
-        this.likeService = likeService;
-        this.articleCollectService = articleCollectService;
-        this.userFollowService = userFollowService;
-        this.fileStorageService = fileStorageService;
-        this.accountMapper = accountMapper;
-    }
 
     @Override
     public LoginProfile getLoginProfile() {
@@ -83,12 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public String updateAvatar(MultipartFile avatar) {
         //更新头像, 登录后才能上传
         int loginUserId = LoginUserContext.getLoginUserId();
-        FileInfo info = fileStorageService.of(avatar)
-                .image(img -> img.size(120, 120))
-                .setObjectId(loginUserId)
-                .setObjectType("avatar")
-                .upload();
-        String url = info.getUrl();
+        String url = imageService.upload(avatar, "avatar", th -> th.size(120, 120));
         //更新头像地址
         transactionTemplate.execute(status ->
                 ChainWrappers.updateChain(getBaseMapper())

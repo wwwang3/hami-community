@@ -25,21 +25,19 @@ public interface ArticleDraftService extends IService<ArticleDraft> {
      */
     ArticleDraftDTO getArticleDraftById(long draftId);
 
-    /**
-     * 保存或者更新文章草稿
-     * @param param 参数
-     * @return ArticleDraft
-     */
-    ArticleDraft saveOrUpdateArticleDraft(ArticleDraftParam param);
+    ArticleDraft createDraft(ArticleDraftParam param);
+
+    ArticleDraft updateDraft(ArticleDraftParam param);
 
     /**
      * 发表文章
-     * @param param 参数
+     * @param draftId 参数
      * @return ArticleDraft
      */
-    ArticleDraft publishArticle(ArticleDraftParam param);
+    ArticleDraft publishArticle(Long draftId);
 
     boolean deleteDraft(long draftId);
 
     boolean deleteArticle(int articleId);
+
 }
