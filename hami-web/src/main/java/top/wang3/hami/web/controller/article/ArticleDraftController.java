@@ -74,8 +74,8 @@ public class ArticleDraftController {
 
     @PostMapping("/delete/draft")
     public Result<Void> deleteDraft(@RequestParam("draftId") long draftId) {
-        articleDraftService.deleteDraft(draftId);
-        return Result.success("刪除成功");
+        boolean success = articleDraftService.deleteDraft(draftId);
+        return Result.successIfTrue(success);
     }
 
     @PostMapping("/delete/article")

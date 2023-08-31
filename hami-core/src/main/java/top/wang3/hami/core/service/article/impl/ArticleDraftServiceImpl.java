@@ -17,13 +17,13 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleDraftDTO;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.TagDTO;
 import top.wang3.hami.common.dto.notify.ArticlePublishMsg;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleDraftMapper;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -72,9 +72,11 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     @Override
     public ArticleDraftDTO getArticleDraftById(long draftId) {
-        ArticleDraft draft = super.getById(draftId);
+        ArticleDraft draft = super.getOptById(draftId)
+                .orElseThrow(() -> new ServiceException("草稿不存在"));
+        log.debug("draft-{}", draft);
         List<Integer> tagsIds = draft.getTagIds();
-        List<TagDTO> tags = tagService.getTagByIds(tagsIds);
+        List<Tag> tags = tagService.getTagsByIds(tagsIds);
         return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
     }
 
@@ -90,6 +92,10 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
             return null;
         }
         ArticleDraft draft = ArticleConverter.INSTANCE.toArticleDraft(param);
+        //fix: Field 'user_id' doesn't have a default value
+        int userId = LoginUserContext.getLoginUserId();
+        draft.setUserId(userId);
+        draft.setState(Constants.ZERO);
         boolean saved = super.save(draft);
         return saved ? draft : null;
     }
@@ -104,7 +110,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
         }
         //获取旧的 会保证是当前用户的
         ArticleDraft oldDraft = getOldDraft(draft.getId());
-        UpdateWrapper<ArticleDraft> wrapper = Wrappers.update(draft)
+        UpdateWrapper<ArticleDraft> wrapper = Wrappers.<ArticleDraft>update()
                 .set("version", oldDraft.getVersion() + 1)
                 .eq("id", draft.getId())
                 .eq("version", oldDraft.getVersion());
@@ -128,7 +134,6 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
         checkDraft(oldDraft);
         //文章
         Article article = ArticleConverter.INSTANCE.toArticle(oldDraft);
-        //保存文章
         boolean success1;
         if (article.getId() == null) {
             //插入
@@ -139,7 +144,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
             articleTagService.saveTags(article.getId(), oldDraft.getTagIds());
             //初始化文章数据
             articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
-            super.updateById(oldDraft);
+            super.updateById(new ArticleDraft(oldDraft.getId(), article.getId(), Constants.ONE));
         } else {
             //更新
             success1 = articleService.updateById(article);
@@ -217,7 +222,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
         return drafts.stream()
                 .map(draft -> {
                     List<Integer> tagsIds = draft.getTagIds();
-                    List<TagDTO> tags = tagService.getTagByIds(tagsIds);
+                    List<Tag> tags = tagService.getTagsByIds(tagsIds);
                     return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
                 }).toList();
     }

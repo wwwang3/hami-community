@@ -15,5 +15,7 @@ public interface TagService extends IService<Tag> {
 
     PageData<Tag> getTagByPage(PageParam pageParam);
 
-    List<TagDTO> getTagByIds(Collection<Integer> tagIds);
+    List<TagDTO> getTagDTOsByIds(Collection<Integer> tagIds);
+
+    List<Tag> getTagsByIds(Collection<Integer> tagIds);
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.security.exception.NotLoginException;
@@ -28,8 +29,15 @@ public class ServiceExceptionHandler {
         return Result.error(400, "参数错误");
     }
 
+    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
+    public Result<Void> handleMethodArgsException(Exception e) {
+        logError(e);
+        return Result.error("参数错误");
+    }
+
     @ExceptionHandler(value = {Exception.class})
     public Result<Void> resolveException(Exception e) {
+        e.printStackTrace();
         logError(e);
         return Result.error(e.getMessage());
     }

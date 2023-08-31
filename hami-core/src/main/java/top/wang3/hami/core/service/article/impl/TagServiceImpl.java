@@ -4,15 +4,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.TagDTO;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.core.handler.ListMapperHandler;
 import top.wang3.hami.core.mapper.TagMapper;
 import top.wang3.hami.core.service.article.TagService;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
@@ -26,20 +30,23 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
     @Override
     public PageData<Tag> getTagByPage(PageParam pageParam) {
         Page<Tag> page = pageParam.toPage();
-        List<Tag> tags = ChainWrappers.queryChain(getBaseMapper())
-                .list(page);
+        List<Tag> tags = ChainWrappers.queryChain(getBaseMapper()).list(page);
         page.setRecords(tags);
         return PageData.build(page);
     }
 
     @Override
-    public List<TagDTO> getTagByIds(Collection<Integer> tagIds) {
+    public List<TagDTO> getTagDTOsByIds(Collection<Integer> tagIds) {
+        if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
         List<Tag> tags = super.listByIds(tagIds);
-        if (tags == null) return null;
-        return tags.stream()
-                .map(t -> new TagDTO(t.getId(), t.getName()))
-                .toList();
+        return ListMapperHandler.listTo(tags, t -> new TagDTO(t.getId(), t.getName()));
+    }
 
+    @Override
+    public List<Tag> getTagsByIds(Collection<Integer> tagIds) {
+        if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
+        return Optional.ofNullable(super.listByIds(tagIds))
+                .orElse(Collections.emptyList());
     }
 
 }

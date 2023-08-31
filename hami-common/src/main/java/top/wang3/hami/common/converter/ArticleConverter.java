@@ -40,5 +40,5 @@ public interface ArticleConverter {
     @Mapping(target = "tagId", source = "id")
     TagDTO toTagDTO(Tag tag);
 
-    ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<TagDTO> tags);
+    ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<Tag> tags);
 }

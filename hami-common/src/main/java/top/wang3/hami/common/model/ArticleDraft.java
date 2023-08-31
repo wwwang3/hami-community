@@ -17,12 +17,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
-    * 文章草稿表
-    */
+ * 文章草稿表
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "article_draft")
+@TableName(value = "article_draft", autoResultMap = true) //fix: 没有设置autoResultMap导致查询时没有反序列化tagIds
 @Valid
 public class ArticleDraft {
 
@@ -114,4 +114,10 @@ public class ArticleDraft {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
+    public ArticleDraft(Long id, Integer articleId, Byte state) {
+        this.id = id;
+        this.articleId = articleId;
+        this.state = state;
+    }
 }

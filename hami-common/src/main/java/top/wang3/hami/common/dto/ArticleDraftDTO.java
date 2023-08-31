@@ -2,6 +2,7 @@ package top.wang3.hami.common.dto;
 
 
 import lombok.Data;
+import top.wang3.hami.common.model.Tag;
 
 import java.util.Date;
 import java.util.List;
@@ -48,7 +49,7 @@ public class ArticleDraftDTO {
     /**
      * 文章标签
      */
-    private List<TagDTO> tags;
+    private List<Tag> tags;
 
     /**
      * 分类ID
