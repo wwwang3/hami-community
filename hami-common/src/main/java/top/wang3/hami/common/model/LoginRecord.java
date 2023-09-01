@@ -18,7 +18,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "login_record")
+@TableName(value = "login_record", autoResultMap = true)
 public class LoginRecord {
     /**
      * 主键ID

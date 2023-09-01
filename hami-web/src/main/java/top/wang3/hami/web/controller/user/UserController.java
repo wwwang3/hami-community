@@ -2,33 +2,37 @@ package top.wang3.hami.web.controller.user;
 
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.AccountInfo;
+import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.UserProfile;
+import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserProfileParam;
+import top.wang3.hami.common.model.LoginRecord;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.account.AccountService;
+import top.wang3.hami.core.service.account.LoginRecordService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 
 @RestController
 @RequestMapping("/api/v1/user")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
     private final AccountService accountService;
 
-    public UserController(UserService userService, AccountService accountService) {
-        this.userService = userService;
-        this.accountService = accountService;
-    }
+    private final LoginRecordService loginRecordService;
+
 
     @GetMapping("/profile")
     public Result<UserProfile> getUserProfile() {
@@ -62,5 +66,12 @@ public class UserController {
         User user = UserConverter.INSTANCE.toUser(userProfileParam);
         boolean success = userService.updateProfile(user);
         return success ? Result.success() : Result.error("更新失败");
+    }
+
+    @GetMapping("/login/log")
+    public Result<PageData<LoginRecord>> getLoginRecords(@RequestParam("pageNum") long pageNum,
+                                                         long pageSize) {
+        PageData<LoginRecord> records = loginRecordService.getRecordsByPage(new PageParam(pageNum, pageSize));
+        return Result.successData(records);
     }
 }

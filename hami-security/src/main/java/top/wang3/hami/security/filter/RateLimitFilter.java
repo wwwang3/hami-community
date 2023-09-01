@@ -52,7 +52,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             model.setMethodName(handlerMethod.getMethod().getName());
             model.setClassName(handlerMethod.getBeanType().getName());
         }
-        log.debug("model: {}", model);
         if (rateLimiter.limited(model)) {
             //被限制
             log.debug("{}: 操作频繁", request.getRequestURI());
@@ -65,12 +64,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
    private HandlerMethod getHandlerMethod(HttpServletRequest request) {
        try {
            HandlerExecutionChain handler = requestMappingHandlerMapping.getHandler(request);
-           if (handler != null) return (HandlerMethod) handler.getHandler();
+           if (handler != null && handler.getHandler() instanceof HandlerMethod h) {
+               return h;
+           }
+           return null;
        } catch (Exception e) {
            log.debug(e.getMessage());
            return null;
        }
-       return null;
    }
 
     private void writeBlockedMessage(HttpServletResponse response) throws IOException {
