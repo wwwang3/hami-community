@@ -17,7 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "tb_like")
-public class Like {
+public class LikeItem {
     /**
      * 主键ID
      */
@@ -59,4 +59,10 @@ public class Like {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
+    public LikeItem(Integer itemId, Byte itemType, Integer likerId) {
+        this.itemId = itemId;
+        this.itemType = itemType;
+        this.likerId = likerId;
+    }
 }

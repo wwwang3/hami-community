@@ -51,7 +51,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 .one();
         final LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
         //获取登录用户点赞的文章数
-        Long likes = likeService.getUserLikes(loginUserId, Constants.LIKE_TYPE_ARTICLE);
+        Long likes = likeService.getUserLikeCount(loginUserId, Constants.LIKE_TYPE_ARTICLE);
         loginProfile.setLikes(likes);
         //获取登录用户收藏的文章数
         Long collects = articleCollectService.getUserCollects(loginUserId);

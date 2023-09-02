@@ -19,4 +19,10 @@ public interface UserFollowService extends IService<UserFollow> {
      * @return 粉丝数
      */
     Long getUserFollowers(Integer userId);
+
+
+    boolean follow(int userId, int followingId);
+
+    boolean unFollow(int userId, int followingId);
+
 }

@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.article.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.PageData;
@@ -23,6 +24,8 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         implements TagService {
 
 
+    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'CATEGORY_LIST'")
+    @Override
     public List<Tag> getAllTags() {
         return super.list();
     }

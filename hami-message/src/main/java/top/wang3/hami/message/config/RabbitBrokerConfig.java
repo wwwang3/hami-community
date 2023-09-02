@@ -4,10 +4,12 @@ package top.wang3.hami.message.config;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import top.wang3.hami.common.constant.Constants;
 
 @Configuration
+@ComponentScan(basePackages = {"top.wang3.hami.message"})
 public class RabbitBrokerConfig {
 
     @Bean(Constants.EMAIL_EXCHANGE)
@@ -43,7 +45,7 @@ public class RabbitBrokerConfig {
     @Bean(Constants.NOTIFY_QUEUE)
     public Queue notifyQueue() {
         return QueueBuilder
-                .durable(Constants.EMAIL_QUEUE)
+                .durable(Constants.NOTIFY_QUEUE)
                 .build();
     }
 
@@ -53,7 +55,7 @@ public class RabbitBrokerConfig {
         return BindingBuilder
                 .bind(queue)
                 .to(exchange)
-                .with(Constants.EMAIL_ROUTING);
+                .with(Constants.NOTIFY_ROUTING);
     }
 
 

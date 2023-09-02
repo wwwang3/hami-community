@@ -22,6 +22,7 @@
             <groupId>top.wang3</groupId>
             <artifactId>hami-common</artifactId>
             <version>0.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>top.wang3</groupId>
@@ -36,6 +37,7 @@
             <groupId>top.wang3</groupId>
             <artifactId>hami-core</artifactId>
             <version>0.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

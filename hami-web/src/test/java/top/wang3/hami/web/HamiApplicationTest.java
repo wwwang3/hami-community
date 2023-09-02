@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.model.ArticleCollect;
-import top.wang3.hami.common.model.Like;
+import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.core.service.article.ArticleCollectService;
@@ -76,11 +76,11 @@ public class HamiApplicationTest {
         }
 
         int seq = 1;
-        ArrayList<Like> list2 = new ArrayList<>(2560);
+        ArrayList<LikeItem> list2 = new ArrayList<>(2560);
         for (int userId : userIds) {
             int rounds = start + random1.nextInt(end - start);
             while (rounds > 0) {
-                list2.add(new Like(null, seq++, (byte) 1, userId, (byte) 1, null, null));
+                list2.add(new LikeItem(null, seq++, (byte) 1, userId, (byte) 1, null, null));
                 rounds--;
             }
             if (list2.size() >= 1000) {

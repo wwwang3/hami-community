@@ -6,4 +6,7 @@ import top.wang3.hami.common.model.UserFollow;
 
 @Mapper
 public interface UserFollowMapper extends BaseMapper<UserFollow> {
+
+
+
 }

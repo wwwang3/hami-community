@@ -6,4 +6,6 @@ import top.wang3.hami.common.model.User;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
+
+
 }

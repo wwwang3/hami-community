@@ -65,7 +65,7 @@ public class UserController {
         }
         User user = UserConverter.INSTANCE.toUser(userProfileParam);
         boolean success = userService.updateProfile(user);
-        return success ? Result.success() : Result.error("更新失败");
+        return Result.successIfTrue(success, "error");
     }
 
     @GetMapping("/login/log")

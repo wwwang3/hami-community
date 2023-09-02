@@ -6,4 +6,9 @@ import top.wang3.hami.common.model.ArticleCollect;
 public interface ArticleCollectService extends IService<ArticleCollect> {
 
     Long getUserCollects(Integer userId);
+
+    boolean collectArticle(int userId, int articleId);
+
+    boolean cancelCollectArticle(int userId, int articleId);
+
 }

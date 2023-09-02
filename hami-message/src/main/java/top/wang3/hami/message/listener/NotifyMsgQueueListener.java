@@ -44,7 +44,7 @@ public class NotifyMsgQueueListener {
             //该作者的粉丝
             List<UserFollow> follows = ChainWrappers.queryChain(userFollowService.getBaseMapper())
                     .eq("following", authorId)
-                    .eq("`state`", 0)
+                    .eq("`state`", Constants.ONE)
                     .list();
             List<NotifyMsg> msgs = follows.stream().map(follower -> {
                 NotifyMsg notifyMsg = new NotifyMsg();

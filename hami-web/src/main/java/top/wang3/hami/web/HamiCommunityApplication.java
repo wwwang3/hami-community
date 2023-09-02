@@ -4,10 +4,12 @@ import cn.xuyanwu.spring.file.storage.spring.EnableFileStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import top.wang3.hami.core.HamiCoreConfig;
+import top.wang3.hami.message.EnableMessage;
 import top.wang3.hami.security.EnableSecurity;
 
 @SpringBootApplication
@@ -15,6 +17,8 @@ import top.wang3.hami.security.EnableSecurity;
 @EnableSecurity
 @EnableTransactionManagement
 @EnableFileStorage
+@EnableMessage
+@EnableCaching
 @Slf4j
 public class HamiCommunityApplication {
 

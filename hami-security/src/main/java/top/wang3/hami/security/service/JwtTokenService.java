@@ -108,8 +108,8 @@ public class JwtTokenService implements TokenService {
                     .parse(jwt)
                     .getBody();
         } catch (Exception e) {
-            log.debug("parse jwt failed, error_class: {}, error_msg: {}", e.getClass().getSimpleName(),
-                    e.getMessage());
+//            log.debug("parse jwt failed, error_class: {}, error_msg: {}", e.getClass().getSimpleName(),
+//                    e.getMessage());
             return null;
         }
     }

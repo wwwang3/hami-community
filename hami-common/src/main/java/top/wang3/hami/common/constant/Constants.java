@@ -40,8 +40,8 @@ public final class Constants {
     /**
      * 点赞类型
      */
-    public static final Integer LIKE_TYPE_ARTICLE = 1;
-    public static final Integer LIKE_TYPE_COMMENT = 2;
+    public static final Byte LIKE_TYPE_ARTICLE = 1;
+    public static final Byte LIKE_TYPE_COMMENT = 2;
 
     /**
      * 通知类型: 0-系统，1-评论，2-回复 3-点赞 4-收藏 5-关注 6-关注的用户发布新文章
