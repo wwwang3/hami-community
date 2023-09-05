@@ -1,5 +1,6 @@
 package top.wang3.hami.common.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ public class UserDTO {
     /**
      * 用户ID
      */
+    @TableField
     private Integer userId;
 
     /**
@@ -53,13 +55,14 @@ public class UserDTO {
     private Date ctime;
 
     /**
-     * 更新时间
-     */
-    private Date mtime;
-
-    /**
      * 用户数据
      */
     private UserStat stat;
+
+    /**
+     * 是否关注
+     */
+    private  boolean followed;
+
 
 }

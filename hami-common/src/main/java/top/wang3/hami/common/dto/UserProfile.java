@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 public class UserProfile {
 
-
     /**
      * 用户ID
      */

@@ -62,6 +62,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.otter</groupId>-->
+<!--            <artifactId>canal.client</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.otter</groupId>
+            <artifactId>canal.protocol</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

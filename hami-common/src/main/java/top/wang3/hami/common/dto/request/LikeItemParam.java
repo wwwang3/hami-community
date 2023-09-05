@@ -7,5 +7,5 @@ import lombok.Data;
 public class LikeItemParam {
 
     private int itemId;
-    private int itemType;
+    private byte itemType;
 }

@@ -29,7 +29,7 @@ public class ArticleDraftController {
                                                        @RequestParam("pageSize") long pageSize) {
         PageParam param = new PageParam(pageNum, pageSize);
         PageData<ArticleDraftDTO> articleDrafts = articleDraftService.getArticleDrafts(param, Constants.ZERO);
-        return Result.success(articleDrafts);
+        return Result.successData(articleDrafts);
     }
 
     @GetMapping("/articles")
@@ -37,13 +37,13 @@ public class ArticleDraftController {
                                                          @RequestParam("pageSize") long pageSize) {
         PageParam param = new PageParam(pageNum, pageSize);
         PageData<ArticleDraftDTO> drafts = articleDraftService.getArticleDrafts(param, Constants.ONE);
-        return Result.success(drafts);
+        return Result.successData(drafts);
     }
 
     @GetMapping("/get")
     public Result<ArticleDraftDTO> getDraft(@RequestParam("draftId") long draftId) {
         ArticleDraftDTO draft = articleDraftService.getArticleDraftById(draftId);
-        return Result.success(draft);
+        return Result.successData(draft);
     }
 
     @PostMapping("/upload/pic")

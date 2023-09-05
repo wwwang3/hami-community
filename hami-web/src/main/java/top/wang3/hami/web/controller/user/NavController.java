@@ -21,6 +21,6 @@ public class NavController {
     @GetMapping("/profile")
     public Result<LoginProfile> getLoProfile() {
         LoginProfile profile = userService.getLoginProfile();
-        return Result.success(profile);
+        return Result.successData(profile);
     }
 }

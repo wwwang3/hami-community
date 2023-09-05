@@ -2,14 +2,20 @@ package top.wang3.hami.message.config;
 
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import top.wang3.hami.common.constant.Constants;
 
 @Configuration
-@ComponentScan(basePackages = {"top.wang3.hami.message"})
+@ComponentScan(basePackages = {
+        "top.wang3.hami.message.listener",
+        "top.wang3.hami.message.handler",
+})
 public class RabbitBrokerConfig {
 
     @Bean(Constants.EMAIL_EXCHANGE)
@@ -58,5 +64,43 @@ public class RabbitBrokerConfig {
                 .with(Constants.NOTIFY_ROUTING);
     }
 
+
+    @Bean(Constants.CANAL_EXCHANGE)
+    public DirectExchange canalExchange() {
+        return ExchangeBuilder
+                .directExchange(Constants.CANAL_EXCHANGE)
+                .build();
+    }
+
+    @Bean(Constants.CANAL_QUEUE)
+    public Queue canalQueue() {
+        return QueueBuilder
+                .durable(Constants.CANAL_QUEUE)
+                .build();
+    }
+
+    @Bean
+    public Binding canalBinding(@Qualifier(Constants.CANAL_EXCHANGE) DirectExchange exchange,
+                                @Qualifier(Constants.CANAL_QUEUE) Queue queue) {
+        return BindingBuilder
+                .bind(queue)
+                .to(exchange)
+                .with(Constants.CANAL_ROUTING);
+    }
+
+    /**
+     * RabbitMQ消息转化器
+     * @return Jackson2JsonMessageConverter
+     */
+    @Bean("rabbitMQJacksonConverter")
+    @ConditionalOnMissingBean
+    public Jackson2JsonMessageConverter rabbitMQMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean("simpleMessageConverter")
+    public SimpleMessageConverter simpleMessageConverter() {
+        return new SimpleMessageConverter();
+    }
 
 }

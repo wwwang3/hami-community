@@ -10,7 +10,7 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.TagDTO;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.Tag;
-import top.wang3.hami.core.handler.ListMapperHandler;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.mapper.TagMapper;
 import top.wang3.hami.core.service.article.TagService;
 
@@ -24,7 +24,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         implements TagService {
 
 
-    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'CATEGORY_LIST'")
+    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'TAG_LIST'")
     @Override
     public List<Tag> getAllTags() {
         return super.list();

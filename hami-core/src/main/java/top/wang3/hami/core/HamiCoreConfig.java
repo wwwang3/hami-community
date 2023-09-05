@@ -10,6 +10,7 @@ import top.wang3.hami.common.HamiCommonConfig;
         "top.wang3.hami.core.config",
         "top.wang3.hami.core.service",
         "top.wang3.hami.core.handler",
+        "top.wang3.hami.core.component",
 })
 @Import(value = {HamiCommonConfig.class})
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")

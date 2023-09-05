@@ -1,4 +1,4 @@
-package top.wang3.hami.core.handler;
+package top.wang3.hami.common.util;
 
 import org.springframework.util.CollectionUtils;
 
@@ -35,9 +35,9 @@ public class ListMapperHandler {
                 .orElse(Collections.emptyMap());
     }
 
-    public static <T, K, U> Map<? extends K, ? extends U> listToMap(List<T> data,
-                                                                    Function<? super T, ? extends K> keyMapper,
-                                                                    Function<? super T, ? extends U> valueMapper) {
+    public static <T, K, U> Map<K, U> listToMap(List<T> data,
+                                                                    Function<T, K> keyMapper,
+                                                                    Function<T, U> valueMapper) {
         return Optional.ofNullable(data)
                 .map(d -> d.stream().collect(Collectors.toMap(keyMapper, valueMapper)))
                 .orElse(Collections.emptyMap());

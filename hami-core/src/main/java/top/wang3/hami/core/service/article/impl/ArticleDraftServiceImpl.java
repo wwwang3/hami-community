@@ -10,7 +10,6 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
@@ -24,6 +23,7 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleDraftMapper;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -44,9 +44,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     private final CategoryService categoryService;
     private final TagService tagService;
-
-    @Resource
-    RabbitTemplate rabbitTemplate;
+    private final NotifyMsgPublisher notifyMsgPublisher;
 
     @Resource
     Validator validator;
@@ -151,8 +149,9 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
             articleTagService.updateTags(article.getId(), oldDraft.getTagIds());
         }
         //发布文章发表消息
-        rabbitTemplate.convertAndSend(Constants.NOTIFY_EXCHANGE, Constants.NOTIFY_ROUTING,
-                new ArticlePublishMsg(article.getId(), article.getUserId(), article.getTitle()));
+        ArticlePublishMsg articlePublishMsg = new ArticlePublishMsg(article.getId(), article.getUserId(), article.getTitle());
+        notifyMsgPublisher.publishNotify(articlePublishMsg);
+
         return success1 ? oldDraft : null;
     }
 

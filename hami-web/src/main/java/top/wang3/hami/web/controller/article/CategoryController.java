@@ -1,6 +1,7 @@
 package top.wang3.hami.web.controller.article;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/category")
+@Slf4j
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -23,6 +25,6 @@ public class CategoryController {
     @GetMapping("/all")
     public Result<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
-        return Result.success(categories);
+        return Result.successData(categories);
     }
 }

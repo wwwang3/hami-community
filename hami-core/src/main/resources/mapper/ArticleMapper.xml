@@ -15,9 +15,55 @@
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
+  
+  <resultMap id="ArticleDTOResultMap" type="top.wang3.hami.common.dto.ArticleDTO">
+    <id column="t1.id" property="id"/>
+    <result column="t1.title" property="title" />
+    <result column="t1.summary" property="summary" />
+    <result column="t1.content" property="content" />
+    <result column="t1.picture" property="picture" />
+    <result column="t1.ctime" property="ctime" />
+    <result column="t1.mtime" property="mtime" />
+    <association property="category" javaType="top.wang3.hami.common.dto.CategoryDTO" columnPrefix="t2.">
+      <id column="id" property="categoryId" />
+      <result column="name" property="categoryName" />
+    </association>
+    <association property="author" javaType="top.wang3.hami.common.dto.UserDTO" columnPrefix="t3.">
+      <id column="user_id" property="userId" />
+      <result column="username" property="username" />
+      <result column="avatar" property="avatar" />
+      <result column="profile" property="profile" />
+      <result column="company" property="company" />
+      <result column="position" property="position" />
+      <result column="blog" property="blog" />
+      <result column="ctime" property="ctime" />
+    </association>
+  </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, user_id, category_id, title, summary, content, picture, deleted, ctime,
     mtime
   </sql>
+
+  <sql id="ArticleDTO_Column_List">
+    t1.id, t1.title, t1.summary, t1.content, t1.picture, t1.ctime, t1.mtime,
+    t2.id, t2.name,
+    t3.user_id, t3.username, t3.avatar, t3.profile, t3.company, t3.position, t3.blog, t3.ctime
+  </sql>
+
+  <select id="selectArticlesByCategoryId" resultMap="ArticleDTOResultMap">
+    select
+      <include refid="ArticleDTO_Column_List">
+      </include>
+    from article t1
+    left join category t2 on t1.category_id = t2.id
+    left join user t3 on t1.user_id = t3.user_id
+    <where>
+      <if test="categoeyId != null">
+          t1.category_id = #{categoryId}
+      </if>
+        and t1.deleted = 0
+    </where>
+    order by t1.ctime desc
+  </select>
 </mapper>

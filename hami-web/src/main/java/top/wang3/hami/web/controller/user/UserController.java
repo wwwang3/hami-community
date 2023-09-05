@@ -37,13 +37,13 @@ public class UserController {
     @GetMapping("/profile")
     public Result<UserProfile> getUserProfile() {
         UserProfile profile = userService.getUserProfile();
-        return Result.success(profile);
+        return Result.successData(profile);
     }
 
     @GetMapping("/account/info")
     public Result<AccountInfo> getAccountInfo() {
         AccountInfo accountInfo = accountService.getAccountInfo();
-        return Result.success(accountInfo);
+        return Result.successData(accountInfo);
     }
 
     @PostMapping("/avatar/upload")

@@ -39,3 +39,4 @@ hami/data/**
 /**/src/main/resources/application.yml
 
 /hami-message/src/main/resources/application.yaml
+/hami/logs/
