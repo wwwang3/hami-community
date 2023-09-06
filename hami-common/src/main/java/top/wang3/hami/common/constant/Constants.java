@@ -49,5 +49,19 @@ public final class Constants {
     public static final Byte LIKE_TYPE_ARTICLE = 1;
     public static final Byte LIKE_TYPE_COMMENT = 2;
 
+    public static final String CaffeineCacheManager = "caffeineCacheManager";
+
+    public static final String RedisCacheManager = "redisCacheManager";
+
+    /**
+     * 计数服务常量
+     */
+    public static final String COUNT_ARTICLE_STAT_V2 = "article:stat:v2:";
+    public static final String COUNT_ARTICLE_STAT = "article:stat:";
+    public static final String COUNT_LIKES = "likes";
+    public static final String COUNT_COLLECTS = "collects";
+    public static final String COUNT_COMMENTS = "comments";
+    public static final String COUNT_VIEWS = "views";
+
 
 }

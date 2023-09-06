@@ -20,4 +20,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
     boolean isArticleExist(Integer articleId);
 
     List<ArticleDTO> selectArticlesByCategoryId(Page<Article> page, @Param("categoryId") Integer categoryId);
+
+    List<Article> selectArticlesByCateIdAndTag(Page<Article> page,
+                                               @Param("cateId") Integer cateId, @Param("tagId") Integer tagId);
+
 }

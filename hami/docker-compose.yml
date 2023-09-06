@@ -61,33 +61,33 @@ services:
       - TZ=Asia/Shanghai
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=123456
-  canal:
-    container_name: canal
-    build:
-      context: ./canal
-      dockerfile: Dockerfile
-    depends_on:
-      - rabbitmq
-    networks:
-      hami_net:
-        ipv4_address: 192.168.3.14
-    ports:
-      - "8386:11111"
-    volumes:
-      - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example 里面 的启动日志了
-      - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
-    environment:
-      - canal.destinations=example
-      - canal.serverMode=rabbitMQ
-      - canal.mq.flatMessage=false
-      - canal.mq.topic=/canal
-      - rabbitmq.host=192.168.3.13
-      - rabbitmq.virtual.host=/
-      - rabbitmq.exchange=hami-canal
-      - rabbitmq.username=root
-      - rabbitmq.password=123456
-      - rabbitmq.deliveryMode=direct
-      - rabbitmq.routingKey=/canal
-      - rabbitmq.queue=hami-canal-queue
+#  canal:
+#    container_name: canal
+#    build:
+#      context: ./canal
+#      dockerfile: Dockerfile
+#    depends_on:
+#      - rabbitmq
+#    networks:
+#      hami_net:
+#        ipv4_address: 192.168.3.14
+#    ports:
+#      - "8386:11111"
+#    volumes:
+#      - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example 里面 的启动日志了
+#      - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+#    environment:
+#      - canal.destinations=example
+#      - canal.serverMode=rabbitMQ
+#      - canal.mq.flatMessage=false
+#      - canal.mq.topic=/canal
+#      - rabbitmq.host=192.168.3.13
+#      - rabbitmq.virtual.host=/
+#      - rabbitmq.exchange=hami-canal
+#      - rabbitmq.username=root
+#      - rabbitmq.password=123456
+#      - rabbitmq.deliveryMode=direct
+#      - rabbitmq.routingKey=/canal
+#      - rabbitmq.queue=hami-canal-queue
 
 

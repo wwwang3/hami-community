@@ -23,7 +23,7 @@ public class ArticleController {
     @PostMapping("/list/recommend")
     public Result<PageData<ArticleDTO>> listRecommendArticles(@RequestBody
                                                               @Valid ArticlePageParam param) {
-        PageData<ArticleDTO> data = articleService.listRecommendsArticles(param);
+        PageData<ArticleDTO> data = articleService.listNewestArticles(param);
         return Result.ofNullable(data)
                 .orElse("获取失败");
     }

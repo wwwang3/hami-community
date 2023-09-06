@@ -4,13 +4,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.ArticleDraftDTO;
-import top.wang3.hami.common.dto.TagDTO;
+import top.wang3.hami.common.dto.*;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
-import top.wang3.hami.common.model.Article;
-import top.wang3.hami.common.model.ArticleDraft;
-import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.common.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper
@@ -41,4 +39,30 @@ public interface ArticleConverter {
     TagDTO toTagDTO(Tag tag);
 
     ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<Tag> tags);
+
+    default List<ArticleDTO> toArticleDTOList(List<Article> articles) {
+        if (articles == null) return null;
+        ArrayList<ArticleDTO> list = new ArrayList<>(articles.size());
+        for (Article article : articles) {
+            list.add(toArticleDTO(article));
+        }
+        return list;
+    }
+
+    @Mappings(value = {
+            @Mapping(target = "collected", ignore = true),
+            @Mapping(target = "category", ignore = true),
+            @Mapping(target = "author", ignore = true),
+            @Mapping(target = "liked", ignore = true),
+            @Mapping(target = "stat", ignore = true),
+            @Mapping(target = "tags", ignore = true)
+    })
+    ArticleDTO toArticleDTO(Article article);
+
+    @Mapping(target = "categoryId", source = "id")
+    @Mapping(target = "categoryName", source = "name")
+    CategoryDTO toCategoryDTO(Category category);
+
+    ArticleStatDTO toArticleStatDTO(ArticleStat stat);
+    List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
 }

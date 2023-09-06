@@ -9,13 +9,15 @@ import java.util.List;
 @Data
 public class ArticleDTO {
 
-    private Integer id;
+    private int id;
+
+    private int userId;
+
+    private int categoryId;
 
     private String title;
 
     private String summary;
-
-    private String content;
 
     private String picture;
 
@@ -28,6 +30,8 @@ public class ArticleDTO {
     private List<TagDTO> tags;
 
     private UserDTO author;
+
+    private ArticleStatDTO stat;
 
     /**
      * 是否点赞文章

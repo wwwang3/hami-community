@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import top.wang3.hami.common.HamiCommonConfig;
 
 @ComponentScan(basePackages = {
@@ -15,6 +16,7 @@ import top.wang3.hami.common.HamiCommonConfig;
 @Import(value = {HamiCommonConfig.class})
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")
 @Configuration
+@EnableScheduling()
 public class HamiCoreConfig {
 
 }

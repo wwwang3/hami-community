@@ -6,11 +6,14 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.dto.ArticleTagDTO;
 import top.wang3.hami.common.model.ArticleTag;
 import top.wang3.hami.core.mapper.ArticleTagMapper;
 import top.wang3.hami.core.service.article.ArticleTagService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -51,6 +54,14 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     @Transactional
     public void saveTags(Integer articleId, List<Integer> tagIds) {
         batchSave(articleId, tagIds);
+    }
+
+    @Override
+    public List<ArticleTagDTO> listArticleTagByArticleIds(List<Integer> articleIds) {
+        if (CollectionUtils.isEmpty(articleIds)) {
+            return Collections.emptyList();
+        }
+        return getBaseMapper().getArticleTagByArticleIds(articleIds);
     }
 
     @Transactional

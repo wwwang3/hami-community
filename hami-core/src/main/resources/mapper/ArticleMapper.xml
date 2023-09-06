@@ -41,6 +41,12 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
+    id, user_id, category_id, title, summary, picture, deleted, ctime,
+    mtime
+  </sql>
+
+  <sql id="Full_Base_Column_List">
+    <!--@mbg.generated-->
     id, user_id, category_id, title, summary, content, picture, deleted, ctime,
     mtime
   </sql>
@@ -56,8 +62,8 @@
       <include refid="ArticleDTO_Column_List">
       </include>
     from article t1
-    left join category t2 on t1.category_id = t2.id
-    left join user t3 on t1.user_id = t3.user_id
+    join category t2 on t1.category_id = t2.id
+    join user t3 on t1.user_id = t3.user_id
     <where>
       <if test="categoeyId != null">
           t1.category_id = #{categoryId}
@@ -65,5 +71,13 @@
         and t1.deleted = 0
     </where>
     order by t1.ctime desc
+  </select>
+
+  <select id="selectArticlesByCateIdAndTag" resultMap="BaseResultMap">
+    select t1.id, t1.user_id, t1.category_id, t1.summary, t1.title, t1.ctime, t1.mtime, t1.picture
+    from article t1
+    left join article_tag t2 on t1.id = t2.article_id
+    where t1.deleted = 0 and t1.category_id = #{cateId} and t2.tag_id = #{tagId}
+    order by t1.id
   </select>
 </mapper>

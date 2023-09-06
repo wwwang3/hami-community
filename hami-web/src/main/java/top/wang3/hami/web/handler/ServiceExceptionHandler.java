@@ -2,6 +2,7 @@ package top.wang3.hami.web.handler;
 
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,7 +30,7 @@ public class ServiceExceptionHandler {
         return Result.error(400, "参数错误");
     }
 
-    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
     public Result<Void> handleMethodArgsException(Exception e) {
         logError(e);
         return Result.error("参数错误");

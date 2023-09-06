@@ -1,15 +1,10 @@
 package top.wang3.hami.common.util;
 
-import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -286,5 +281,81 @@ public class RedisClient {
      */
     public static boolean exist(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
+
+    /**
+     * 设置Map
+     * @param key
+     * @param value
+     * @param <T>
+     */
+    public static <T> void hMSet(String key, Map<String, T> value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
+        RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+        final Map<byte[], byte[]> map = serializeMap(value);
+        final byte[] k = keySerializer.serialize(key);
+        Objects.requireNonNull(k);
+        redisTemplate.execute((RedisCallback) connection -> {
+            connection.hashCommands().hMSet(k, map);
+            return null;
+        });
+    }
+
+    /**
+     * 获取Map
+     * @param key
+     * @param clazz
+     * @return
+     * @param <T>
+     */
+    public static <T> Map<String, T> hMGetAll(String key) {
+        final RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+        final byte[] redisKey = keySerializer.serialize(key);
+        Objects.requireNonNull(redisKey);
+        return (Map<String, T>) redisTemplate.execute((RedisCallback<Map<String, T>>) connection -> {
+            Map<byte[], byte[]> byteMap = connection.hashCommands()
+                    .hGetAll(redisKey);
+            return deserializeMap(byteMap);
+        });
+    }
+
+    public static <T> void hIncr(String key, String field, Integer cnt) {
+        redisTemplate.execute((RedisCallback) connection -> {
+            connection.hashCommands()
+                    .hIncrBy(keyBytes(key), hashKeyBytes(field), cnt);
+            return null;
+        });
+    }
+
+    private static <K, V> Map<byte[], byte[]> serializeMap(Map<K, V> map) {
+        RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
+        RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
+        HashMap<byte[], byte[]> serializeredMap = new HashMap<>();
+        map.forEach((k, v) -> serializeredMap.put(hashKeySerializer.serialize(k), hashValueSerializer.serialize(v)));
+        return serializeredMap;
+    }
+
+    private static <T> Map<String, T> deserializeMap(Map<byte[], byte[]> byteMap) {
+        if (byteMap == null) return Collections.emptyMap();
+        Map<String, T> map = new HashMap<>();
+        final RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
+        final RedisSerializer<T> hashValueSerializer = redisTemplate.getHashValueSerializer();
+        byteMap.forEach((k, v) -> {
+            String key1 = (String) hashKeySerializer.deserialize(k);
+            T value = hashValueSerializer.deserialize(v);
+            map.put(key1, value);
+        });
+        return map;
+    }
+
+    private static <T> byte[] keyBytes(T k) {
+        RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+        return Objects.requireNonNull(keySerializer.serialize(k));
+    }
+
+    private static <T> byte[] hashKeyBytes(T hashKey) {
+        RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
+        return Objects.requireNonNull(hashKeySerializer.serialize(hashKey));
     }
 }

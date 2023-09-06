@@ -7,5 +7,6 @@ import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.model.Article;
 
 public interface ArticleService extends IService<Article> {
-    PageData<ArticleDTO> listRecommendsArticles(ArticlePageParam param);
+
+    PageData<ArticleDTO> listNewestArticles(ArticlePageParam param);
 }

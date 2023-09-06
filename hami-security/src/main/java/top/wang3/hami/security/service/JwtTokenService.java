@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import top.wang3.hami.common.util.CollectionUtils;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.WebSecurityProperties;
@@ -52,7 +52,7 @@ public class JwtTokenService implements TokenService {
                 .setExpiration(expiration) //过期时间
                 .setId(UUID.randomUUID().toString()) //jwtId
                 .claim("id", id) //claims
-                .claim("authorities", CollectionUtils.convert(loginUser.getAuthorities(), GrantedAuthority::getAuthority))
+                .claim("authorities", ListMapperHandler.listTo(loginUser.getAuthorities(), GrantedAuthority::getAuthority))
                 .compact();
     }
 
@@ -71,7 +71,7 @@ public class JwtTokenService implements TokenService {
                 .withId(claims.get("id", Integer.class))
                 .username(claims.get("username", String.class))
                 .email(claims.get("email", String.class))
-                .authorities(CollectionUtils.convert(authorities, SimpleGrantedAuthority::new))
+                .authorities(ListMapperHandler.listTo(authorities, SimpleGrantedAuthority::new))
                 .expireAt(claims.getExpiration())
                 .build();
     }
