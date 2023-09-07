@@ -20,11 +20,14 @@ public class RedisClient {
         redisTemplate = template;
     }
 
+    public static RedisTemplate getTemplate() {
+        return redisTemplate;
+    }
 
     /**
      * 缓存基本的对象，Integer、String、实体类等
      *
-     * @param key 缓存的键值
+     * @param key   缓存的键值
      * @param value 缓存的值
      */
     public static <T> void setCacheObject(final String key, final T value) {
@@ -32,11 +35,12 @@ public class RedisClient {
     }
 
     /**
-     *  缓存基本的对象，Integer、String、实体类等
-     * @param key 缓存的键
-     * @param value 缓存的对象
+     * 缓存基本的对象，Integer、String、实体类等
+     *
+     * @param key     缓存的键
+     * @param value   缓存的对象
      * @param timeout 缓存时间，默认单位为秒
-     * @param <T> 缓存对象的泛型
+     * @param <T>     缓存对象的泛型
      */
     public static <T> void setCacheObject(final String key, final T value, final long timeout) {
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
@@ -44,20 +48,21 @@ public class RedisClient {
 
     /**
      * 缓存基本的对象，Integer、String、实体类等
-     * @param key 缓存的键值
-     * @param value 缓存的值
-     * @param timeout 有效期
+     *
+     * @param key      缓存的键值
+     * @param value    缓存的值
+     * @param timeout  有效期
      * @param timeUnit 时间颗粒度
      */
     public static <T> void setCacheObject(final String key, final T value,
-                                   final long timeout, final TimeUnit timeUnit) {
+                                          final long timeout, final TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
 
     /**
      * 设置有效时间
      *
-     * @param key Redis键
+     * @param key     Redis键
      * @param timeout 超时时间
      * @return true=设置成功；false=设置失败
      */
@@ -68,9 +73,9 @@ public class RedisClient {
     /**
      * 设置有效时间
      *
-     * @param key Redis键
+     * @param key     Redis键
      * @param timeout 超时时间
-     * @param unit 时间单位
+     * @param unit    时间单位
      * @return true=设置成功；false=设置失败
      */
     public static boolean expire(final String key, final long timeout, final TimeUnit unit) {
@@ -111,7 +116,7 @@ public class RedisClient {
     /**
      * 缓存List数据
      *
-     * @param key 缓存的键值
+     * @param key      缓存的键值
      * @param dataList 待缓存的List数据
      * @return 缓存的对象
      */
@@ -130,7 +135,7 @@ public class RedisClient {
      * 获得缓存的list对象
      *
      * @param key 缓存的键值
-     * @return 缓存键值对应的数据,key不存在时会返回空列表
+     * @return 缓存键值对应的数据, key不存在时会返回空列表
      */
     public static <T> List<T> getCacheList(final String key) {
         return (List<T>) redisTemplate.opsForList().range(key, 0, -1);
@@ -139,10 +144,10 @@ public class RedisClient {
     /**
      * 获得缓存的list对象
      *
-     * @param key 缓存的键值
+     * @param key   缓存的键值
      * @param start 其实索引
-     * @param end 结束索引
-     * @return 缓存键值对应的数据,key不存在时会返回空列表
+     * @param end   结束索引
+     * @return 缓存键值对应的数据, key不存在时会返回空列表
      */
     public static <T> List<T> getCacheList(final String key, long start, long end) {
         return (List<T>) redisTemplate.opsForList().range(key, start, end);
@@ -150,6 +155,7 @@ public class RedisClient {
 
     /**
      * 获取缓存的list的大小
+     *
      * @param key 缓存key
      * @return list大小
      */
@@ -160,12 +166,11 @@ public class RedisClient {
     /**
      * 缓存Set
      *
-     * @param key 缓存键值
+     * @param key     缓存键值
      * @param dataSet 缓存的数据
      * @return 缓存数据的对象
      */
-    public static <T> BoundSetOperations<String, T> setCacheSet(final String key, final Set<T> dataSet)
-    {
+    public static <T> BoundSetOperations<String, T> setCacheSet(final String key, final Set<T> dataSet) {
         BoundSetOperations<String, T> setOperation = redisTemplate.boundSetOps(key);
         for (T t : dataSet) {
             setOperation.add(t);
@@ -186,7 +191,7 @@ public class RedisClient {
     /**
      * 缓存Map
      *
-     * @param key 缓存key
+     * @param key     缓存key
      * @param dataMap 待缓存的Map集合对象
      */
     public static <T> void setCacheMap(final String key, final Map<String, T> dataMap) {
@@ -208,8 +213,8 @@ public class RedisClient {
     /**
      * 往Hash中存入数据
      *
-     * @param key Redis键
-     * @param hKey Hash键
+     * @param key   Redis键
+     * @param hKey  Hash键
      * @param value 值
      */
     public static <T> void setCacheMapValue(final String key, final String hKey, final T value) {
@@ -219,7 +224,7 @@ public class RedisClient {
     /**
      * 获取Hash中的数据
      *
-     * @param key Redis键
+     * @param key     Redis键
      * @param hashKey Hash键
      * @return Hash中的对象
      */
@@ -231,7 +236,7 @@ public class RedisClient {
     /**
      * 删除Hash中的数据
      *
-     * @param key 缓存key
+     * @param key     缓存key
      * @param hashKey 缓存hashmap key
      */
     public static void delCacheMapValue(final String key, final String hashKey) {
@@ -242,7 +247,7 @@ public class RedisClient {
     /**
      * 获取多个Hash中的数据
      *
-     * @param key Redis键
+     * @param key   Redis键
      * @param hKeys Hash键集合
      * @return Hash对象集合
      */
@@ -265,9 +270,9 @@ public class RedisClient {
      *
      * @param key 缓存对象的key
      * @return 剩余的过期时间 单位为秒
-     *  redisTemplate.getExpire
-     *  返回-2 表示key不存在
-     *  返回-1 表示键没有设置过期时间 这两种情况都返回0
+     * redisTemplate.getExpire
+     * 返回-2 表示key不存在
+     * 返回-1 表示键没有设置过期时间 这两种情况都返回0
      */
     public static long getExpire(String key) {
         Long ttl = redisTemplate.getExpire(key);
@@ -276,6 +281,7 @@ public class RedisClient {
 
     /**
      * 判断key是否存在
+     *
      * @param key key
      * @return true-存在 false-不存在
      */
@@ -283,8 +289,63 @@ public class RedisClient {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
+
+    //ZSet操作
+    public static <T> boolean zAdd(String key, T value, double score) {
+        return Boolean.TRUE.equals(redisTemplate.opsForZSet()
+                .add(key, value, score));
+    }
+
+
+    public static <T> boolean zAddIfAbsent(String key, T value, double score) {
+        return Boolean.TRUE.equals(redisTemplate.opsForZSet()
+                .addIfAbsent(key, value, score)
+        );
+    }
+
+    public static <T> Long zRemove(String key, List<T> members) {
+        return redisTemplate.opsForZSet()
+                .remove(key, members.toArray());
+    }
+
+    public static <T> boolean zContains(String key, T member) {
+        Double score = redisTemplate.opsForZSet()
+                .score(key, member);
+        return score != null;
+    }
+
+    //shit
+    public static <T> Map<T, Boolean> zMContains(String key, List<T> members) {
+        List<Double> scores = redisTemplate.opsForZSet()
+                .score(key, members.toArray());
+        if (scores == null || scores.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        HashMap<T, Boolean> map = new HashMap<>(members.size());
+        for (int i = 0; i < members.size(); i++) {
+            map.put(members.get(i), scores.get(i) == null);
+        }
+        return map;
+    }
+
+    public static <T> Long zCard(String key) {
+        return redisTemplate.opsForZSet()
+                .zCard(key);
+    }
+
+    public static <T> List<T> zPage(String key, long current, long pageSize) {
+        long size = Math.min(20, pageSize);
+        long min = (current - 1) * pageSize;
+        long max = min + pageSize - 1;
+        Set set = redisTemplate.opsForZSet()
+                .range(key, min, max);
+        if (set == null) return Collections.emptyList();
+        return new ArrayList<>(set);
+    }
+
     /**
      * 设置Map
+     *
      * @param key
      * @param value
      * @param <T>
@@ -304,10 +365,10 @@ public class RedisClient {
 
     /**
      * 获取Map
+     *
      * @param key
-     * @param clazz
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> Map<String, T> hMGetAll(String key) {
         final RedisSerializer keySerializer = redisTemplate.getKeySerializer();

@@ -1,19 +1,24 @@
 package top.wang3.hami.core.service.user.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.UserFollow;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.UserFollowMapper;
 import top.wang3.hami.core.service.user.UserFollowService;
 
+import java.util.List;
+
 @Service
 public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFollow>
         implements UserFollowService {
+
     @Override
-    public Long getUserFollowings(Integer userId) {
+    public Long getUserFollowingCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("user_id")
                 .eq("user_id", userId)
@@ -22,12 +27,31 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     }
 
     @Override
-    public Long getUserFollowers(Integer userId) {
+    public Long getUserFollowerCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("following")
                 .eq("following", userId)
                 .eq("`state`", Constants.ONE)
                 .count();
+    }
+
+
+    @Override
+    public List<Integer> getUserFollowings(Page<UserFollow> page, int userId) {
+        List<UserFollow> followings = ChainWrappers.queryChain(getBaseMapper())
+                .eq("user_id", userId)
+                .eq("`state`", Constants.ONE)
+                .list(page);
+        return ListMapperHandler.listTo(followings, UserFollow::getFollowing);
+    }
+
+    @Override
+    public List<Integer> getUserFollowers(Page<UserFollow> page,int userId) {
+        List<UserFollow> followers = ChainWrappers.queryChain(getBaseMapper())
+                .eq("following", userId)
+                .eq("`state`", Constants.ONE)
+                .list(page);
+        return ListMapperHandler.listTo(followers, UserFollow::getUserId);
     }
 
     @Override
@@ -49,10 +73,10 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         } else if (userFollow.getState() == 0) {
             //修改关注状态
             return ChainWrappers.updateChain(getBaseMapper())
-                    .set("`state`", 1)
+                    .set("`state`", Constants.ONE)
                     .eq("user_id", userId)
                     .eq("following", followingId)
-                    .eq("`state`", 0)
+                    .eq("`state`", Constants.ZERO)
                     .update();
         }
         return false;

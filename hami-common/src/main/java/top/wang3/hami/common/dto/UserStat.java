@@ -14,45 +14,35 @@ public class UserStat {
     /**
      * 文章数
      */
-    private int articles;
+    private Long articles = 0L;
 
     /**
      * 文章总阅读量
      */
-    private int views;
-
-    /**
-     * 我点赞的文章数
-     */
-    private int likes;
+    private Long totalViews = 0L;
 
     /**
      * 我收藏的文章数
      */
-    private int collects;
+    private Long totalCollects = 0L;
 
     /**
-     * 文章被收藏总数
+     * 文章获得的总点赞数
      */
-    private int gotCollects;
+    private Long totalLikes = 0L;
 
     /**
-     * 文章评论总数
+     * 总评论数
      */
-    private int gotComments;
-
-    /**
-     * 文章的获得的点赞总数
-     */
-    private int gotLikes;
+    private Long totalComments = 0L;
 
     /**
      * 粉丝数
      */
-    private int followers;
+    private Long followers = 0L;
 
     /**
      * 关注总数
      */
-    private int followings;
+    private Long followings = 0L;
 }

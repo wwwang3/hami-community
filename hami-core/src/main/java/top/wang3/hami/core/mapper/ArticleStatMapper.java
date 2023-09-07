@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
         limit #{batchSize};
     """)
     List<ArticleStat> scanBatchStats(@Param("lastArticleId") int lastArticle,@Param("batchSize") int batchSize);
+
+    List<UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
+
+    UserStat selectUserStat(@Param("userId") int userId);
 }

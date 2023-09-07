@@ -1,11 +1,10 @@
 package top.wang3.hami.common.dto;
 
+
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
-public class UserDTO {
+public class SimpleUserDTO {
 
     /**
      * 用户ID
@@ -47,20 +46,19 @@ public class UserDTO {
      */
     private String tag;
 
-    /**
-     * 创建时间
-     */
-    private Date ctime;
 
     /**
-     * 用户数据
+     * 粉丝数
      */
-    private UserStat stat;
+    private Long followers;
 
     /**
-     * 是否关注
+     * 关注数
      */
-    private  boolean followed;
+    private Long followings;
 
-
+    /**
+     * 当前登录用户是否关注此用户
+     */
+    private boolean followed;
 }

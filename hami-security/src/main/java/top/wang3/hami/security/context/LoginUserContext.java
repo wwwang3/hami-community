@@ -1,6 +1,8 @@
 package top.wang3.hami.security.context;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
@@ -9,6 +11,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.LoginUser;
+
+import java.util.Optional;
 
 /**
  * 登录用户上下文, 快速获取LoginUser对象
@@ -21,7 +25,17 @@ public class LoginUserContext {
      */
     public static LoginUser getLoginUser() {
         SecurityContext context = SecurityContextHolder.getContext();
-        return (LoginUser) context.getAuthentication().getPrincipal();
+        Authentication authentication = context.getAuthentication();
+        if (authentication == null) return null;
+        //fix: 匿名登录时, 获取的principal不是LoginUser而是anonymousUser
+        if (!(authentication instanceof UsernamePasswordAuthenticationToken)) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof LoginUser user) {
+            return user;
+        }
+        return null;
     }
 
     public static int getLoginUserId() throws NotLoginException {
@@ -33,6 +47,11 @@ public class LoginUserContext {
     public static Integer getLoginUserIdDefaultNull() {
         LoginUser loginUser = getLoginUser();
         return loginUser == null ? null : loginUser.getId();
+    }
+
+    public static Optional<Integer> getOptLoginUserId() {
+        LoginUser loginUser = getLoginUser();
+        return Optional.ofNullable(loginUser == null ? null : loginUser.getId());
     }
 
     public static IpInfo getIpInfo() {

@@ -79,8 +79,11 @@ public class ListMapperHandler {
             return;
         }
         data.forEach(d -> {
+            //忽略null
             U value = assemble.get(getter.apply(d));
-            setter.accept(d, value);
+            if (value != null) {
+                setter.accept(d, value);
+            }
         });
     }
 }

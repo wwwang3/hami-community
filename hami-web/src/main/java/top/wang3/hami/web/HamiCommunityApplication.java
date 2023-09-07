@@ -26,4 +26,5 @@ public class HamiCommunityApplication {
         ConfigurableApplicationContext context = SpringApplication.run(HamiCommunityApplication.class, args);
     }
 
+
 }

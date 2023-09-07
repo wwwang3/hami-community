@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleStatDTO;
+import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.service.article.ArticleStatService;
@@ -33,15 +34,19 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
     }
 
     @Override
+    public UserStat getUserStatistics(int userId) {
+        return getBaseMapper().selectUserStat(userId);
+    }
+
+    @Override
+    public List<UserStat> getUserStatistics(List<Integer> userId) {
+        return getBaseMapper().selectUserStatsByUserIds(userId);
+    }
+
+    @Override
     public List<ArticleStat> scanArticleStats(int lastArticle, int batchSize) {
         int limit = Math.min(100, batchSize);
         return getBaseMapper().scanBatchStats(lastArticle, limit);
-    }
-
-
-    public ArticleStatDTO getArticleStat(int articleId) {
-        //依次查询阅读量/收藏数量/评论数/收藏数
-        return null;
     }
 
     @Override

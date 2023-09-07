@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.common;
 
 import top.wang3.hami.common.dto.ArticleStatDTO;
+import top.wang3.hami.common.dto.UserStat;
 
 /**
  * 计数业务接口
@@ -11,4 +12,6 @@ import top.wang3.hami.common.dto.ArticleStatDTO;
 public interface CountService {
 
     ArticleStatDTO getArticleStatById(int articleId);
+
+    UserStat getUserStatById(Integer userId);
 }

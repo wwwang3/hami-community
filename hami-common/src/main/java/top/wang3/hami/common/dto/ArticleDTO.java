@@ -29,7 +29,7 @@ public class ArticleDTO {
 
     private List<TagDTO> tags;
 
-    private UserDTO author;
+    private SimpleUserDTO author;
 
     private ArticleStatDTO stat;
 

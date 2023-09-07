@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.TagDTO;
 import top.wang3.hami.common.dto.request.PageParam;
@@ -23,8 +24,7 @@ import java.util.Optional;
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         implements TagService {
 
-
-    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'TAG_LIST'")
+    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'TAG_LIST'", cacheManager = Constants.RedisCacheManager)
     @Override
     public List<Tag> getAllTags() {
         return super.list();

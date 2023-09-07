@@ -18,4 +18,25 @@
     <!--@mbg.generated-->
     id, article_id, user_id, views, likes, comments, collects, ctime, mtime
   </sql>
+
+
+  <select id="selectUserStatsByUserIds" resultType="top.wang3.hami.common.dto.UserStat">
+    select
+        count(id) as articles, count(views) as total_views, count(likes) as total_likes,
+        count(comments) as total_comments, count(collects) as total_collects, user_id
+    from article_stat
+    where user_id in
+    <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+      #{userId}
+    </foreach>
+    group by user_id;
+  </select>
+
+  <select id="selectUserStat" resultType="top.wang3.hami.common.dto.UserStat">
+    select
+      count(id) as articles, count(views) as total_views, count(likes) as total_likes,
+      count(comments) as total_comments, count(collects) as total_collects, user_id
+    from article_stat
+    where user_id = #{userId};
+  </select>
 </mapper>

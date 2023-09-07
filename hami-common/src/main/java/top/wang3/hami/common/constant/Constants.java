@@ -64,4 +64,12 @@ public final class Constants {
     public static final String COUNT_VIEWS = "views";
 
 
+    public static final String COUNT_TYPE_ARTICLE = "#article:";
+    public static final String COUNT_TYPE_USER = "#user:";
+
+    public static final String LIST_USER_FOLLOWING = "user:following:list:";
+
+    public static final String LIST_USER_COLLECT = "user:collect:list:";
+
+    public static final String LIST_USER_LIKE = "user:like:list:";
 }

@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.article;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.ArticleStatDTO;
+import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 
 import java.util.List;
@@ -12,7 +13,8 @@ public interface ArticleStatService extends IService<ArticleStat> {
 
     List<ArticleStatDTO> getArticleStatByArticleIds(List<Integer> articleIds);
 
-    List<ArticleStat> scanArticleStats(int lastArticle, int batchSize);
+    UserStat getUserStatistics(int userId);
+    List<UserStat> getUserStatistics(List<Integer> userId);
 
     boolean increaseViews(int articleId, int count);
 
@@ -28,4 +30,6 @@ public interface ArticleStatService extends IService<ArticleStat> {
 
     boolean decreaseComments(int articleId, int count);
 
+
+    List<ArticleStat> scanArticleStats(int lastArticle, int batchSize);
 }

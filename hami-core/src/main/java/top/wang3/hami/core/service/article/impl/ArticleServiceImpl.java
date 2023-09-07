@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
@@ -17,10 +18,12 @@ import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.article.ArticleTagService;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.common.CountService;
-import top.wang3.hami.core.service.user.UserInteractService;
+import top.wang3.hami.core.service.common.UserInteractService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -93,9 +96,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     public void buildArticleTags(List<ArticleDTO> dtos, List<Integer> articleIds) {
         List<ArticleTagDTO> tags = articleTagService.listArticleTagByArticleIds(articleIds);
-        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, tags, ArticleTagDTO::getArticleId, (d, t) -> {
-            d.setTags(t != null ? t.getTags() : null);
-        });
+        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, tags, ArticleTagDTO::getArticleId,
+                (d, t) -> d.setTags(t != null ? t.getTags() : null));
     }
 
     public void buildArticleStat(List<ArticleDTO> dtos, List<Integer> articleIds) {
@@ -110,10 +112,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     public void buildArticleAuthor(List<ArticleDTO> dtos, List<Integer> userIds) {
-
+        List<SimpleUserDTO> authors = userService.getAuthorInfoByIds(userIds);
+        ListMapperHandler
+                .doAssemble(dtos, ArticleDTO::getUserId, authors, SimpleUserDTO::getUserId, ArticleDTO::setAuthor);
     }
 
     public void buildInteract(List<ArticleDTO> dtos, List<Integer> articleIds) {
-
+        //是否点赞
+        //是否收藏
+        Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
+        if (loginUserId == null) return;
+        Map<Integer, Boolean> liked =
+                userInteractService.hasLiked(loginUserId, articleIds, Constants.LIKE_TYPE_ARTICLE);
+        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, liked, ArticleDTO::setLiked);
+        Map<Integer, Boolean> collected =
+                userInteractService.hasCollected(loginUserId, articleIds, Constants.LIKE_TYPE_ARTICLE);
+        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, collected, ArticleDTO::setCollected);
     }
 }
