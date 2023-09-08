@@ -115,7 +115,7 @@ public class ArticleDraft {
     @TableField(value = "mtime")
     private Date mtime;
 
-    public ArticleDraft(Long id, Integer articleId, Byte state) {
+    public ArticleDraft(Long id, Integer articleId, Byte state, Long version) {
         this.id = id;
         this.articleId = articleId;
         this.state = state;

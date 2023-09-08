@@ -24,7 +24,7 @@ import java.util.Optional;
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         implements TagService {
 
-    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'TAG_LIST'", cacheManager = Constants.RedisCacheManager)
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'TAG_LIST'", cacheManager = Constants.CaffeineCacheManager)
     @Override
     public List<Tag> getAllTags() {
         return super.list();
@@ -50,6 +50,12 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag>
         if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
         return Optional.ofNullable(super.listByIds(tagIds))
                 .orElse(Collections.emptyList());
+    }
+
+    @Override
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'tag'+#id", cacheManager = Constants.CaffeineCacheManager)
+    public Tag getTagById(int id) {
+        return super.getById(id);
     }
 
 }

@@ -14,4 +14,6 @@ public interface CountService {
     ArticleStatDTO getArticleStatById(int articleId);
 
     UserStat getUserStatById(Integer userId);
+
+    void increaseViews(Integer id);
 }

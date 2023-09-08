@@ -53,16 +53,25 @@ public final class Constants {
 
     public static final String RedisCacheManager = "redisCacheManager";
 
+    public static final String REDIS_CACHE_NAME = "HAMI_CACHE_REDIS_";
+    public static final String CAFFEINE_CACHE_NAME = "HAMI_CACHE_LOCAL_";
+
     /**
      * 计数服务常量
      */
-    public static final String COUNT_ARTICLE_STAT_V2 = "article:stat:v2:";
     public static final String COUNT_ARTICLE_STAT = "article:stat:";
-    public static final String COUNT_LIKES = "likes";
-    public static final String COUNT_COLLECTS = "collects";
-    public static final String COUNT_COMMENTS = "comments";
-    public static final String COUNT_VIEWS = "views";
+    public static final String ARTICLE_LIKES = "likes";
+    public static final String ARTICLE_COLLECTS = "collects";
+    public static final String ARTICLE_COMMENTS = "comments";
+    public static final String ARTICLE_VIEWS = "views";
 
+    public static final String USER_TOTAL_LIKES = "total_likes";
+    public static final String USER_TOTAL_COMMENTS = "total_comments";
+    public static final String USER_TOTAL_COLLECTS = "total_collects";
+    public static final String USER_TOTAL_FOLLOWINGS = "total_followings";
+    public static final String USER_TOTAL_FOLLOWERS = "total_followers";
+    public static final String USER_TOTAL_ARTICLES = "total_articles";
+    public static final String USER_TOTAL_VIEWS = "total_views";
 
     public static final String COUNT_TYPE_ARTICLE = "#article:";
     public static final String COUNT_TYPE_USER = "#user:";

@@ -80,6 +80,8 @@ public class Comment {
     @TableField(value = "reply_to")
     private Integer replyTo;
 
+    private Integer likes = 0;
+
     /**
      * 是否删除
      */

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @TableName(value = "notify_msg")
 public class NotifyMsg {
     /**
@@ -64,7 +66,7 @@ public class NotifyMsg {
      * 类型: 0-系统，1-评论，2-回复 3-点赞 4-收藏 5-关注
      */
     @TableField(value = "`type`")
-    private Byte type;
+    private Integer type;
 
     /**
      * 阅读状态: 0-未读，1-已读

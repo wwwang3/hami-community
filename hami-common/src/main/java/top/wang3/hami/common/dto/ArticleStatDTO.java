@@ -18,15 +18,17 @@ public class ArticleStatDTO {
     /**
      * 阅读量
      */
-    private Integer views;
+    private Integer views = 0;
 
     /**
      * 点赞数
      */
-    private Integer likes;
+    private Integer likes = 0;
 
     /**
      * 评论数
      */
-    private Integer comments;
+    private Integer comments = 0;
+
+    private Integer collects = 0;
 }

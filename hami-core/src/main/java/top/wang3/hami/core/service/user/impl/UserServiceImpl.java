@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.LoginProfile;
-import top.wang3.hami.common.dto.SimpleUserDTO;
+import top.wang3.hami.common.dto.UserDTO;
 import top.wang3.hami.common.dto.UserProfile;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.Account;
@@ -71,8 +71,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Long collects = articleCollectService.getUserCollects(loginUserId);
         loginProfile.setCollects(collects);
         //获取登录用户关注的用户数
-        Long followings = userFollowService.getUserFollowingCount(loginUserId);
-        Long followers = userFollowService.getUserFollowerCount(loginUserId);
+        Integer followings = userFollowService.getUserFollowingCount(loginUserId);
+        Integer followers = userFollowService.getUserFollowerCount(loginUserId);
         loginProfile.setFollowers(followers);
         loginProfile.setFollowings(followings);
         return loginProfile;
@@ -120,12 +120,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public List<SimpleUserDTO> getAuthorInfoByIds(List<Integer> userIds) {
+    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds) {
         List<User> user = ChainWrappers.queryChain(getBaseMapper())
                 .select(USER_PROFILE_FIELDS)
                 .in("user_id", userIds)
                 .list();
-        List<SimpleUserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(user);
+        List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(user);
         //查询用户的粉丝数据
         //查询关注状态
         buildUserStat(dtos);
@@ -133,24 +133,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return dtos;
     }
 
-    private void buildUserStat(List<SimpleUserDTO> userDTOS) {
+    @Override
+    public UserDTO getAuthorInfoById(int userId) {
+        User user = ChainWrappers.queryChain(getBaseMapper())
+                .select(USER_PROFILE_FIELDS)
+                .eq("user_id", userId)
+                .one();
+        UserDTO dto = UserConverter.INSTANCE.toUserDTO(user);
+        UserStat stat = countService.getUserStatById(userId);
+        dto.setStat(stat);
+        buildFollowState(dto);
+        return dto;
+    }
+
+    private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
         userDTOS.forEach(dto -> {
             UserStat stat = countService.getUserStatById(dto.getUserId());
-            dto.setFollowers(stat.getFollowers());
-            dto.setFollowings(stat.getFollowings());
+            dto.setStat(stat);
         });
     }
 
-    private void buildFollowState(List<SimpleUserDTO> userDTOS) {
+    private void buildFollowState(List<UserDTO> userDTOS) {
         LoginUserContext.getOptLoginUserId()
                 .ifPresent(id -> {
                     //待判定的用户
-                    List<Integer> followings = ListMapperHandler.listTo(userDTOS, SimpleUserDTO::getUserId);
+                    List<Integer> followings = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
                     Map<Integer, Boolean> followed = userInteractService.hasFollowed(id, followings);
                     if (followed.isEmpty()) return;
-                    ListMapperHandler.doAssemble(userDTOS, SimpleUserDTO::getUserId, followed,
-                            SimpleUserDTO::setFollowed);
+                    ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, followed,
+                            UserDTO::setFollowed);
+                });
+    }
+
+    private void buildFollowState(UserDTO userDTO) {
+        LoginUserContext.getOptLoginUserId()
+                .ifPresent((loginUserId) -> {
+                    userDTO.setFollowed(userInteractService.hasFollowed(loginUserId, userDTO.getUserId()));
                 });
     }
 }

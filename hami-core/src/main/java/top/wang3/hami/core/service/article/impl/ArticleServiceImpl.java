@@ -34,6 +34,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
 
     private final String[] fields =  {"id", "user_id", "title", "summary", "picture", "category_id", "ctime", "mtime"};
+    private final String[] full_fields =  {"id", "user_id", "title", "summary", "content", "picture", "category_id", "ctime", "mtime"};
 
     private final ArticleTagService articleTagService;
     private final CategoryService categoryService;
@@ -76,6 +77,40 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
                 .build();
     }
 
+    @Override
+    public ArticleContentDTO getArticleContentById(int articleId) {
+        Article article = ChainWrappers.queryChain(getBaseMapper())
+                .select(full_fields)
+                .eq("id", articleId)
+                .one();
+        if (article == null) {
+            return null;
+        }
+        //todo 增加文章阅读量
+        countService.increaseViews(article.getId());
+        //todo 增加用户阅读历史记录
+        ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(article);
+        //文章分类
+        CategoryDTO category = categoryService.getCategoryDTOById(dto.getCategoryId());
+        dto.setCategory(category);
+
+        //文章标签
+        List<TagDTO> tags = articleTagService.getArticleTagByArticleId(dto.getId());
+        dto.setTags(tags);
+
+        //文章数据
+        ArticleStatDTO stat = countService.getArticleStatById(articleId);
+        dto.setStat(stat);
+
+        //作者信息
+        UserDTO author = userService.getAuthorInfoById(dto.getUserId());
+        dto.setAuthor(author);
+
+        //用户行为
+        buildInteract(dto);
+        return dto;
+    }
+
     private List<Article> listArticleByCate(Page<Article> page, Integer cateId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(fields)
@@ -102,19 +137,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     public void buildArticleStat(List<ArticleDTO> dtos, List<Integer> articleIds) {
         //查询文章数据
-//        dtos.forEach(dto -> {
-//            ArticleStatDTO stat = countService.getArticleStatById(dto.getId());
-//            dto.setStat(stat);
-//        });
-        List<ArticleStatDTO> stats = articleStatService.getArticleStatByArticleIds(articleIds);
-        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats,
-                ArticleStatDTO::getArticleId, ArticleDTO::setStat);
+        dtos.forEach(dto -> {
+            ArticleStatDTO stat = countService.getArticleStatById(dto.getId());
+            dto.setStat(stat);
+        });
+//        List<ArticleStatDTO> stats = articleStatService.getArticleStatByArticleIds(articleIds);
+//        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats,
+//                ArticleStatDTO::getArticleId, ArticleDTO::setStat);
     }
 
     public void buildArticleAuthor(List<ArticleDTO> dtos, List<Integer> userIds) {
-        List<SimpleUserDTO> authors = userService.getAuthorInfoByIds(userIds);
+        List<UserDTO> authors = userService.getAuthorInfoByIds(userIds);
         ListMapperHandler
-                .doAssemble(dtos, ArticleDTO::getUserId, authors, SimpleUserDTO::getUserId, ArticleDTO::setAuthor);
+                .doAssemble(dtos, ArticleDTO::getUserId, authors, UserDTO::getUserId, ArticleDTO::setAuthor);
     }
 
     public void buildInteract(List<ArticleDTO> dtos, List<Integer> articleIds) {
@@ -128,5 +163,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         Map<Integer, Boolean> collected =
                 userInteractService.hasCollected(loginUserId, articleIds, Constants.LIKE_TYPE_ARTICLE);
         ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, collected, ArticleDTO::setCollected);
+    }
+
+    private void buildInteract(final ArticleDTO articleDTO) {
+        LoginUserContext.getOptLoginUserId()
+                .ifPresent(loginUserId -> {
+                    boolean liked =
+                            userInteractService.hasLiked(loginUserId, articleDTO.getId(), Constants.LIKE_TYPE_ARTICLE);
+                    boolean collected =
+                            userInteractService.hasCollected(loginUserId, articleDTO.getId(), Constants.LIKE_TYPE_ARTICLE);
+                    articleDTO.setLiked(liked);
+                    articleDTO.setCollected(collected);
+                });
     }
 }

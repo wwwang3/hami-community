@@ -24,4 +24,9 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<Article> selectArticlesByCateIdAndTag(Page<Article> page,
                                                @Param("cateId") Integer cateId, @Param("tagId") Integer tagId);
 
+    @Select("""
+        select user_id from article where id = #{articleId};
+    """
+    )
+    Integer getArticleAuthorId(Integer articleId);
 }

@@ -18,15 +18,14 @@ import java.util.List;
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         implements CategoryService {
 
-
-    @Cacheable(cacheNames = "HAMI_CACHE_", key = "'CATEGORY_LIST'", cacheManager = Constants.RedisCacheManager)
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'CATEGORY_LIST'", cacheManager = Constants.CaffeineCacheManager)
     @Override
     public List<Category> getAllCategories() {
         log.debug("1111");
         return super.list();
     }
 
-    @Cacheable(cacheNames = "HAMI_CACHE_LOCAL", key = "'cate:'+#id")
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'cate:'+#id", cacheManager = Constants.CaffeineCacheManager)
     @Override
     public CategoryDTO getCategoryDTOById(Integer id) {
         Category category = super.getById(id);

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -48,6 +49,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, LikeItem>
         return ListMapperHandler.listTo(items, LikeItem::getItemId);
     }
 
+    @Transactional
     @Override
     public boolean doLike(int likerId, int itemId, byte itemType) {
         LikeItem likeItem = ChainWrappers.queryChain(getBaseMapper())
@@ -73,6 +75,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, LikeItem>
         return false;
     }
 
+    @Transactional
     @Override
     public boolean cancelLike(int likerId, int itemId, byte itemType) {
         return ChainWrappers.updateChain(getBaseMapper())

@@ -14,7 +14,8 @@ import top.wang3.hami.mail.service.MailSenderService;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RabbitListener(messageConverter = "#{rabbitMQJacksonConverter}", queues = Constants.EMAIL_QUEUE)
+@RabbitListener(messageConverter = "#{rabbitMQJacksonConverter}",
+        queues = Constants.EMAIL_QUEUE, concurrency = "2")
 @Slf4j
 public class EmailQueueListener {
 

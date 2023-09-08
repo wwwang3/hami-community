@@ -5,14 +5,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.dto.notify.CollectMsg;
+import top.wang3.hami.common.dto.notify.FollowMsg;
+import top.wang3.hami.common.dto.notify.LikeMsg;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.CommentMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.article.ArticleCollectService;
+import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.common.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
@@ -32,6 +39,8 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final UserFollowService userFollowService;
     private final LikeService likeService;
     private final ArticleCollectService articleCollectService;
+    private final NotifyMsgPublisher notifyMsgPublisher;
+    private final ArticleStatService articleStatService;
 
     @Resource
     ArticleMapper articleMapper;
@@ -42,45 +51,103 @@ public class UserInteractServiceImpl implements UserInteractService {
     @Resource
     UserMapper userMapper;
 
+    @Resource
+    TransactionTemplate transactionTemplate;
+
+    @Transactional
     @Override
     public boolean follow(int followingId) {
+        //用户关注
+        //被关注用户的粉丝数+1
+        //用户的关注数+1 (有Canal发送MQ消费)
+        //发送关注消息
         int loginUserId = LoginUserContext.getLoginUserId();
         //check user
         checkUserExist(followingId);
-        return userFollowService.follow(loginUserId, followingId);
+        //关注
+        boolean success = userFollowService.follow(loginUserId, followingId);
+        //发布关注消息
+        if (success) {
+            notifyMsgPublisher.publishNotify(new FollowMsg(loginUserId, followingId));
+        }
+        return success;
     }
 
     @Override
     public boolean unFollow(int followingId) {
+        //用户取消关注
+        //被关注用户的粉丝数-1
+        //用户的关注数-1 (有Canal发送MQ消费)
         int loginUserId = LoginUserContext.getLoginUserId();
         return userFollowService.unFollow(loginUserId, followingId);
     }
 
     @Override
     public boolean like(int itemId, byte type) {
+        //用户点赞
+        //文章点赞数+1
+        //用户的赞过+1 (有Canal发送MQ消费)
+        //发送点赞消息
         int loginUserId = LoginUserContext.getLoginUserId();
         checkItemExist(itemId, type);
-        //todo 更新文章点赞数
-        return likeService.doLike(loginUserId, itemId, type);
+        Boolean updated = transactionTemplate.execute(status -> {
+            boolean success = likeService.doLike(loginUserId, itemId, type);
+            if (!success) return false;
+            boolean added;
+            //todo 感觉点赞单独起一个服务，有该服务维护点赞数和获取点赞列表，判断是否点赞等
+            //更新文章点赞数
+            if (Constants.LIKE_TYPE_ARTICLE == type) {
+                added = articleStatService.increaseLikes(itemId, 1);
+            } else {
+                added = commentMapper.updateLikes(itemId) == 1;
+            }
+            return added;
+        });
+        if (Boolean.TRUE.equals(updated) && Constants.LIKE_TYPE_ARTICLE == type) {
+            //文章点赞 评论先不管
+            notifyMsgPublisher.publishNotify(new LikeMsg(loginUserId, itemId, type));
+        }
+        return true;
     }
 
+    @Transactional
     @Override
     public boolean cancelLike(int itemId, byte type) {
+        //用户取消
+        //文章点赞数-1
+        //用户的赞过-1 (Canal发送MQ消费,然后更新Redis)
         int loginUserId = LoginUserContext.getLoginUserId();
-        return likeService.cancelLike(loginUserId, itemId, type);
+        boolean cancelled = likeService.cancelLike(loginUserId, itemId, type);
+        if (!cancelled) return false;
+        //todo 应该发消息异步更新的 用户行为引起的变化感觉不应该在主页内
+        return articleStatService.decreaseLikes(itemId, 1);
     }
 
     @Override
     public boolean collect(int articleId) {
+        //用户收藏
+        //文章收藏+1
+        //用户的收藏+1 (有Canal发送MQ消费)
+        //发送收藏消息
         int loginUserId = LoginUserContext.getLoginUserId();
         checkItemExist(articleId, Constants.LIKE_TYPE_ARTICLE);
-        //todo 更新文章收藏数
-        return articleCollectService.collectArticle(loginUserId, articleId);
+        Boolean success = transactionTemplate.execute(status -> {
+            boolean collected = articleCollectService.collectArticle(loginUserId, articleId);
+            if (!collected) return false;
+            return articleStatService.increaseCollects(articleId, 1);
+        });
+        if (Boolean.FALSE.equals(success)) return false;
+        notifyMsgPublisher.publishNotify(new CollectMsg(loginUserId, articleId));
+        return true;
     }
 
     @Override
-    public boolean cancelCollect(int userId) {
-        return false;
+    public boolean cancelCollect(int articleId) {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        boolean success = articleCollectService.cancelCollectArticle(loginUserId, articleId);
+        if (!success) return false;
+        //decrease
+        return articleStatService.decreaseCollects(articleId, 1);
     }
 
     @Override

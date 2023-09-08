@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleTagDTO;
 import top.wang3.hami.common.dto.TagDTO;
 import top.wang3.hami.common.model.ArticleTag;
+import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.mapper.ArticleTagMapper;
 import top.wang3.hami.core.service.article.ArticleTagService;
 import top.wang3.hami.core.service.article.TagService;
@@ -42,10 +45,13 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     @Override
     public List<TagDTO> getArticleTagByArticleId(int articleId) {
          List<ArticleTag> tags = ChainWrappers.queryChain(getBaseMapper())
+                 .select("tag_id") //todo 直接冗余tag_name 修改标签名直接新增一个标签即可
                 .eq("article_id", articleId)
-                .eq("`state`", 0)
                 .list();
-         return null;
+        return ListMapperHandler.listTo(tags, articleTag -> {
+            Tag tag = tagService.getTagById(articleTag.getTagId());
+            return ArticleConverter.INSTANCE.toTagDTO(tag);
+        });
     }
 
     public List<ArticleTag> listArticleTags(Integer articleId) {
@@ -58,7 +64,7 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     @Override
     public void updateTags(Integer articleId, List<Integer> newTags) {
         List<ArticleTag> oldTags = listArticleTags(articleId);
-        List<Integer> toDelete  = new ArrayList<>();
+        List<Integer> toDelete = new ArrayList<>();
         oldTags.forEach(tag -> {
             if (newTags.contains(tag.getTagId())) {
                 //存在了, 不需要再添加了

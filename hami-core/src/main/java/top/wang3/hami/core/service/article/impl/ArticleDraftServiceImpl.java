@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleDraftDTO;
@@ -48,6 +49,9 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     @Resource
     Validator validator;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
 
 
     @Override
@@ -108,11 +112,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
         }
         //获取旧的 会保证是当前用户的
         ArticleDraft oldDraft = getOldDraft(draft.getId());
-        UpdateWrapper<ArticleDraft> wrapper = Wrappers.<ArticleDraft>update()
-                .set("version", oldDraft.getVersion() + 1)
-                .eq("id", draft.getId())
-                .eq("version", oldDraft.getVersion());
-        return super.update(draft, wrapper) ? draft : null;
+        return handleUpdate(oldDraft);
     }
 
     /**
@@ -121,38 +121,44 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
      * @return ArticleDraft
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public ArticleDraft publishArticle(Long draftId) {
         //检查参数, 文章ID, 其他都不能为空
         //发表文章
         int loginUserId = LoginUserContext.getLoginUserId();
         //null-safe
-        ArticleDraft oldDraft = getOldDraft(draftId);
+        final ArticleDraft oldDraft = getOldDraft(draftId);
         //校验draft
         checkDraft(oldDraft);
         //文章
         Article article = ArticleConverter.INSTANCE.toArticle(oldDraft);
-        boolean success1;
-        if (article.getId() == null) {
-            //插入
-            success1 = articleService.save(article);
-            oldDraft.setArticleId(article.getId());
-            oldDraft.setState(Constants.ONE);
-            //插入文章标签
-            articleTagService.saveTags(article.getId(), oldDraft.getTagIds());
-            //初始化文章数据
-            articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
-            super.updateById(new ArticleDraft(oldDraft.getId(), article.getId(), Constants.ONE));
-        } else {
-            //更新
-            success1 = articleService.updateById(article);
-            articleTagService.updateTags(article.getId(), oldDraft.getTagIds());
+        Boolean success = transactionTemplate.execute(status -> {
+            boolean success1;
+            if (article.getId() == null) {
+                //插入
+                success1 = articleService.save(article);
+                oldDraft.setArticleId(article.getId());
+                oldDraft.setState(Constants.ONE);
+                //插入文章标签
+                articleTagService.saveTags(article.getId(), oldDraft.getTagIds());
+                //初始化文章数据
+                articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
+                ArticleDraft draft = new ArticleDraft(oldDraft.getId(), article.getId(), Constants.ONE, oldDraft.getVersion());
+                handleUpdate(draft);
+            } else {
+                //更新
+                success1 = articleService.updateById(article);
+                articleTagService.updateTags(article.getId(), oldDraft.getTagIds());
+            }
+            return success1;
+        });
+        if (Boolean.TRUE.equals(success)) {
+            //发布文章发表消息
+            ArticlePublishMsg articlePublishMsg = new ArticlePublishMsg(article.getId(), article.getUserId(), article.getTitle());
+            notifyMsgPublisher.publishNotify(articlePublishMsg);
+            return oldDraft;
         }
-        //发布文章发表消息
-        ArticlePublishMsg articlePublishMsg = new ArticlePublishMsg(article.getId(), article.getUserId(), article.getTitle());
-        notifyMsgPublisher.publishNotify(articlePublishMsg);
+        return null;
 
-        return success1 ? oldDraft : null;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -215,6 +221,14 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
                 .eq("user_id", userId) //当前登录用户的草稿
                 .oneOpt()
                 .orElseThrow(() -> new ServiceException("草稿不存在"));
+    }
+
+    private ArticleDraft handleUpdate(ArticleDraft oldDraft) {
+        UpdateWrapper<ArticleDraft> wrapper = Wrappers.<ArticleDraft>update()
+                .set("version", oldDraft.getVersion() + 1)
+                .eq("id", oldDraft.getId())
+                .eq("version", oldDraft.getVersion());
+        return super.update(oldDraft, wrapper) ? oldDraft : null;
     }
 
     private List<ArticleDraftDTO> buildDrafts(List<ArticleDraft> drafts) {

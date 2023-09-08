@@ -14,14 +14,14 @@ public interface UserFollowService extends IService<UserFollow> {
      * @param userId 用户ID
      * @return 关注数
      */
-    Long getUserFollowingCount(Integer userId);
+    Integer getUserFollowingCount(Integer userId);
 
     /**
      * 获取用户粉丝数
      * @param userId 用户ID
      * @return 粉丝数
      */
-    Long getUserFollowerCount(Integer userId);
+    Integer getUserFollowerCount(Integer userId);
 
     List<Integer> getUserFollowings(Page<UserFollow> page, int userId);
 

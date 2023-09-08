@@ -11,6 +11,11 @@ import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.common.CountService;
 import top.wang3.hami.core.service.user.UserFollowService;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * todo 优化
  */
@@ -22,41 +27,76 @@ public class CountServiceImpl implements CountService {
 
     private final UserFollowService userFollowService;
 
+    private final Lock lock = new ReentrantLock();
+
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
         String redisKey = Constants.COUNT_TYPE_ARTICLE + articleId;
-        ArticleStatDTO dto = RedisClient.getCacheObject(redisKey);
-        if (dto != null) return dto;
-        synchronized (this) {
-            dto = RedisClient.getCacheObject(redisKey);
-            if (dto != null) return dto;
-            ArticleStatDTO stat = articleStatService.getArticleStatByArticleId(articleId);
-            //回写
-            //todo 设置缓存时间
-            RedisClient.setCacheObject(redisKey, stat);
-            return stat;
-        }
+        Map<String, Integer> data = RedisClient.getCacheMap(redisKey);
+        return readArticleStatFromMap(data);
     }
 
     @Override
     public UserStat getUserStatById(Integer userId) {
         String redisKey = Constants.COUNT_TYPE_USER + userId;
-        UserStat stat = RedisClient.getCacheObject(redisKey);
+        Map<String, Integer> data = RedisClient.hMGetAll(redisKey);
+        UserStat stat = readUserStatFromMap(data);
         if (stat != null) return stat;
-        //并发高就g了
-        synchronized (this) {
-            stat = RedisClient.getCacheObject(redisKey);
-            if (stat != null) return stat;
-            stat = articleStatService.getUserStatistics(userId);
-            if (stat == null) {
-                stat = new UserStat();
-            }
-            Long followerCount = userFollowService.getUserFollowerCount(userId);
-            Long followingCount = userFollowService.getUserFollowingCount(userId);
-            stat.setFollowers(followerCount);
-            stat.setFollowings(followingCount);
-            RedisClient.setCacheObject(redisKey, stat);
-            return stat;
-        }
+        //不回表查询了，完全将Redis当数据库用(我是Σ(☉▽☉"a)
+        //通过Canal监听Binlog同步二者数据 (通过hIncr)
+        //没有说明没有人点赞，评论，关注
+        return new UserStat();
+    }
+
+    @Override
+    public void increaseViews(Integer id) {
+
+    }
+
+    private ArticleStatDTO readArticleStatFromMap(Map<String, Integer> data) {
+        if (data == null || data.isEmpty()) return new ArticleStatDTO();
+        ArticleStatDTO dto = new ArticleStatDTO();
+        dto.setViews(data.get(Constants.ARTICLE_VIEWS));
+        dto.setLikes(data.get(Constants.ARTICLE_LIKES));
+        dto.setComments(data.get(Constants.ARTICLE_COMMENTS));
+        dto.setCollects(data.get(Constants.ARTICLE_COLLECTS));
+        return dto;
+    }
+
+
+    private UserStat readUserStatFromMap(Map<String, Integer> data) {
+        if (data == null || data.isEmpty()) return null;
+        UserStat stat1 = new UserStat();
+        stat1.setFollowings(data.get(Constants.USER_TOTAL_FOLLOWINGS));
+        stat1.setFollowers(data.get(Constants.USER_TOTAL_FOLLOWERS));
+        stat1.setTotalLikes(data.get(Constants.USER_TOTAL_LIKES));
+        stat1.setTotalComments(data.get(Constants.USER_TOTAL_COMMENTS));
+        stat1.setTotalCollects(data.get(Constants.USER_TOTAL_COLLECTS));
+        stat1.setArticles(data.get(Constants.USER_TOTAL_ARTICLES));
+        stat1.setTotalViews(data.get(Constants.USER_TOTAL_VIEWS));
+        return stat1;
+    }
+
+    private Map<String, Integer> setUserStatToMap(UserStat userStat) {
+        if (userStat == null)
+            userStat = new UserStat();
+        HashMap<String, Integer> data = new HashMap<>();
+        data.put(Constants.USER_TOTAL_FOLLOWINGS, userStat.getFollowings());
+        data.put(Constants.USER_TOTAL_FOLLOWERS, userStat.getFollowers());
+        data.put(Constants.USER_TOTAL_LIKES, userStat.getTotalLikes());
+        data.put(Constants.USER_TOTAL_COMMENTS, userStat.getTotalComments());
+        data.put(Constants.USER_TOTAL_COLLECTS, userStat.getTotalCollects());
+        data.put(Constants.USER_TOTAL_ARTICLES, userStat.getArticles());
+        data.put(Constants.USER_TOTAL_VIEWS, userStat.getTotalViews());
+        return data;
+    }
+
+    private Map<String, Integer> setArticleStaToMap(ArticleStatDTO dto) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put(Constants.ARTICLE_VIEWS, dto.getViews());
+        map.put(Constants.ARTICLE_LIKES, dto.getLikes());
+        map.put(Constants.ARTICLE_COMMENTS, dto.getComments());
+        map.put(Constants.ARTICLE_COLLECTS, dto.getCollects());
+        return map;
     }
 }

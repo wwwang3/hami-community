@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 @EnableConfigurationProperties(CacheProperties.class)
 @Slf4j
+@SuppressWarnings(value = {"rawtypes"})
 public class CacheConfig {
 
     @Bean
@@ -46,17 +47,21 @@ public class CacheConfig {
         };
     }
 
-    @Bean(Constants.CaffeineCacheManager)
-    @Primary
-    public CacheManager caffeineCacheManager() {
-        Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
+    @Bean
+    public Caffeine<Object, Object> caffeine() {
+        return Caffeine.newBuilder()
                 .expireAfterWrite(1, TimeUnit.HOURS)
                 .initialCapacity(256)
                 .maximumSize(512)
                 .removalListener((k, v, reason) -> {
                     log.info("##cache k: {} v: {} removed cause: {}", k, v, reason.name());
                 });
-        CaffeineCacheManager manager = new CaffeineCacheManager("HAMI_CACHE_LOCAL");
+    }
+
+    @Bean(Constants.CaffeineCacheManager)
+    @Primary
+    public CacheManager caffeineCacheManager(Caffeine<Object, Object> caffeine) {
+        CaffeineCacheManager manager = new CaffeineCacheManager("HAMI_CACHE_LOCAL_");
         manager.setCaffeine(caffeine);
         manager.setAllowNullValues(false);
         return manager;

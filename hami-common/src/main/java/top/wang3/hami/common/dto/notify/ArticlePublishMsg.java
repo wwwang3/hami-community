@@ -8,9 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ArticlePublishMsg {
+public class ArticlePublishMsg implements Notify {
 
     private int articleId;
     private int authorId;
     private String title;
+
+    @Override
+    public int getNotifyType() {
+        return NotifyType.PUBLISH_ARTICLE.type;
+    }
 }

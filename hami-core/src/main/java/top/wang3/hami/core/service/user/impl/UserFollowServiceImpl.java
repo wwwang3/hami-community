@@ -18,21 +18,21 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         implements UserFollowService {
 
     @Override
-    public Long getUserFollowingCount(Integer userId) {
+    public Integer getUserFollowingCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("user_id")
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
     @Override
-    public Long getUserFollowerCount(Integer userId) {
+    public Integer getUserFollowerCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("following")
                 .eq("following", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
 

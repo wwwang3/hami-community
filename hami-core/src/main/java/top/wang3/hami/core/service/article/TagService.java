@@ -18,4 +18,6 @@ public interface TagService extends IService<Tag> {
     List<TagDTO> getTagDTOsByIds(Collection<Integer> tagIds);
 
     List<Tag> getTagsByIds(Collection<Integer> tagIds);
+
+    Tag getTagById(int id);
 }

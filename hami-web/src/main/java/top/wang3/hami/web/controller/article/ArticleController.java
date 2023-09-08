@@ -3,10 +3,8 @@ package top.wang3.hami.web.controller.article;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import top.wang3.hami.common.dto.ArticleContentDTO;
 import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
@@ -26,5 +24,11 @@ public class ArticleController {
         PageData<ArticleDTO> data = articleService.listNewestArticles(param);
         return Result.ofNullable(data)
                 .orElse("获取失败");
+    }
+
+    @GetMapping("/detail")
+    public Result<ArticleContentDTO> getArticleContentById(@RequestParam("articleId") int articleId) {
+        ArticleContentDTO articleContentDTO = articleService.getArticleContentById(articleId);
+        return Result.successData(articleContentDTO);
     }
 }

@@ -38,8 +38,8 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {Exception.class})
     public Result<Void> resolveException(Exception e) {
-        e.printStackTrace();
         logError(e);
+        e.printStackTrace();
         return Result.error(e.getMessage());
     }
 

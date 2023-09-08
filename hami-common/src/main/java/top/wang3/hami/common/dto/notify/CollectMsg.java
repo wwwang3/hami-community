@@ -9,8 +9,13 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class CollectMsg {
+public class CollectMsg implements Notify {
 
     private int userId;
     private int articleId;
+
+    @Override
+    public int getNotifyType() {
+        return NotifyType.COLLECT.type;
+    }
 }

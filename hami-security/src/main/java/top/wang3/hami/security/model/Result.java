@@ -50,6 +50,7 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
     public static <T> Result<T> successData(T data) {
         return new Result<>(200, "success", data, null);
     }
+
     public static <T> Result<T> success(String msg) {
         return new Result<>(200, msg, null, null);
     }

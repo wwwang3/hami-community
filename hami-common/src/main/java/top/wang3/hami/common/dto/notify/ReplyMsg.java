@@ -9,9 +9,16 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class ReplyMsg {
+public class ReplyMsg implements Notify {
     private int userId;
     private int replyTo;
+    private int parent;
     private int replyId;
     private int articleId;
+    private String content;
+
+    @Override
+    public int getNotifyType() {
+        return NotifyType.REPLY.type;
+    }
 }

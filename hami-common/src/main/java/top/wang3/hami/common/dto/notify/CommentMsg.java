@@ -6,11 +6,17 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CommentMsg {
+public class CommentMsg implements Notify {
 
     private int userId;
     private int commentId;
     private int commentTo;
     private int articleId;
+    //评论内容一般不会修改
+    private String content;
 
+    @Override
+    public int getNotifyType() {
+        return NotifyType.COMMENT.type;
+    }
 }

@@ -1,4 +1,4 @@
-package top.wang3.hami.message.handler;
+package top.wang3.hami.message.canal;
 
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.baomidou.mybatisplus.annotation.TableField;

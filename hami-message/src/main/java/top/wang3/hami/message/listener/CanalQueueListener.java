@@ -11,9 +11,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.message.handler.CanalEntryHandler;
-import top.wang3.hami.message.handler.CanalEntryHandlerFactory;
-import top.wang3.hami.message.handler.CanalEntryMapper;
+import top.wang3.hami.message.canal.CanalEntryHandler;
+import top.wang3.hami.message.canal.CanalEntryHandlerFactory;
+import top.wang3.hami.message.canal.CanalEntryMapper;
 
 import java.util.List;
 

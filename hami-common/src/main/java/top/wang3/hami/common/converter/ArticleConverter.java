@@ -51,13 +51,23 @@ public interface ArticleConverter {
 
     @Mappings(value = {
             @Mapping(target = "collected", ignore = true),
+            @Mapping(target = "liked", ignore = true),
             @Mapping(target = "category", ignore = true),
             @Mapping(target = "author", ignore = true),
-            @Mapping(target = "liked", ignore = true),
             @Mapping(target = "stat", ignore = true),
             @Mapping(target = "tags", ignore = true)
     })
     ArticleDTO toArticleDTO(Article article);
+
+    @Mappings(value = {
+            @Mapping(target = "collected", ignore = true),
+            @Mapping(target = "liked", ignore = true),
+            @Mapping(target = "category", ignore = true),
+            @Mapping(target = "author", ignore = true),
+            @Mapping(target = "stat", ignore = true),
+            @Mapping(target = "tags", ignore = true)
+    })
+    ArticleContentDTO toArticleContentDTO(Article article);
 
     @Mapping(target = "categoryId", source = "id")
     @Mapping(target = "categoryName", source = "name")
