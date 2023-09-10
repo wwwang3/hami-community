@@ -17,7 +17,6 @@ import top.wang3.hami.common.constant.Constants;
 @Configuration
 @ComponentScan(basePackages = {
         "top.wang3.hami.message.listener",
-        "top.wang3.hami.message.canal",
 })
 public class RabbitBrokerConfig {
 

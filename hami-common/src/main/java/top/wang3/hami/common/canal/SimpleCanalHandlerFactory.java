@@ -1,24 +1,23 @@
-package top.wang3.hami.message.canal;
+package top.wang3.hami.common.canal;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import top.wang3.hami.message.annotation.CanalListener;
+import top.wang3.hami.common.annotation.CanalListener;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
-@SuppressWarnings(value = {"unchecked", "rawtypes"})
+@SuppressWarnings(value = {"rawtypes"})
 public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, ApplicationContextAware {
 
-    private Map<String, CanalEntryHandler<?>> handlerMap;
+    private Map<String, List<CanalEntryHandler<?>>> handlerMap;
 
     @Override
-    public <T> CanalEntryHandler<T> getHandler(String tableName) {
-        return handlerMap == null ? null : (CanalEntryHandler<T>) handlerMap.get(tableName);
+    public List<CanalEntryHandler<?>> getHandler(String tableName) {
+        return handlerMap == null ? Collections.emptyList() : handlerMap.get(tableName);
     }
 
     @Override
@@ -26,11 +25,13 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, Appl
         Map<String, CanalEntryHandler> handlers = applicationContext.getBeansOfType(CanalEntryHandler.class);
         if (handlers.isEmpty()) return;
         handlerMap = new HashMap<>();
+
         handlers.forEach((k, v) -> {
             CanalListener annotation = v.getClass().getAnnotation(CanalListener.class);
-            if (annotation != null && StringUtils.hasText(annotation.value())) {
-                handlerMap.putIfAbsent(annotation.value(), v);
-            }
+            List<CanalEntryHandler<?>> handler = handlerMap.computeIfAbsent(annotation.value(), (key) -> new ArrayList<>());
+            handler.add(v);
         });
+        //排序
+        handlerMap.values().forEach(OrderComparator::sort);
     }
 }

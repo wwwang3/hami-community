@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(value = {
         "top.wang3.hami.common.component",
         "top.wang3.hami.common.config",
+        "top.wang3.hami.common.canal",
 })
 public class HamiCommonConfig {
 

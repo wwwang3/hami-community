@@ -37,8 +37,7 @@ public class CountServiceImpl implements CountService {
         String redisKey = Constants.COUNT_TYPE_ARTICLE + articleId;
         ArticleStatDTO stat = RedisClient.getCacheObject(redisKey);
         return stat == null ? new ArticleStatDTO() : stat;
-//        Map<String, Integer> data = RedisClient.getCacheMap(redisKey);
-//        return readArticleStatFromMap(data);
+
     }
 
     @Override

@@ -10,10 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import top.wang3.hami.common.canal.CanalEntryHandler;
+import top.wang3.hami.common.canal.CanalEntryHandlerFactory;
+import top.wang3.hami.common.canal.CanalEntryMapper;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.message.canal.CanalEntryHandler;
-import top.wang3.hami.message.canal.CanalEntryHandlerFactory;
-import top.wang3.hami.message.canal.CanalEntryMapper;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
  * todo FlatMessage支持
  */
 @Component
-@RabbitListener(queues = {Constants.CANAL_QUEUE})
+@RabbitListener(queues = {Constants.CANAL_QUEUE}, messageConverter = "simpleMessageConverter")
 @Slf4j
 public class CanalQueueListener {
 
@@ -44,22 +44,26 @@ public class CanalQueueListener {
             if (CanalEntry.EntryType.ROWDATA.equals(entry.getEntryType())) {
                 try {
                     String tableName = entry.getHeader().getTableName();
-                    CanalEntryHandler<?> handler = factory.getHandler(tableName);
-                    if (handler != null) {
+                    List<CanalEntryHandler<?>> handlers = factory.getHandler(tableName);
+                    if (handlers != null && !handlers.isEmpty()) {
+                        //todo 批量消费
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
                         log.debug(rowChange.getSql());
                         List<CanalEntry.RowData> rowDataList = rowChange.getRowDatasList();
                         for (CanalEntry.RowData rowData : rowDataList) {
-                            processRowData(rowData, handler, rowChange.getEventType());
+                            for (CanalEntryHandler<?> handler : handlers) {
+                                processRowData(rowData, handler, rowChange.getEventType());
+                            }
                         }
                     }
                 } catch (Exception e) {
+                    //todo 处理失败重试
                     log.debug("process CanalEntry failed: {}", e.getMessage());
                 }
             }
         }
         long end = System.currentTimeMillis();
-        log.debug("## cost: {}", end - start);
+        log.debug("## process mysql data change cost: {}", end - start);
     }
 
     private <T> void processRowData(CanalEntry.RowData rowData, CanalEntryHandler<T> handler, CanalEntry.EventType type) throws Exception {

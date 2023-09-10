@@ -128,13 +128,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         String ip = IpContext.getIp();
         if (ip == null) return false;
         String redisKey = "view:limit:" + ip + articleId;
+        //todo fix 还是有并发问题
         if (RedisClient.exist(redisKey)) {
+            log.debug("ip: {} access repeat", ip);
             return false;
         } else {
             RedisClient.setCacheObject(redisKey, 1, 10);
             //发布消息
             String exchange = Constants.HAMI_DIRECT_EXCHANGE2;
-            rabbitTemplate.convertAndSend(exchange, Constants.ADD_VIEWS_ROUTING, new ArticleView(articleId, authorId));
+            rabbitTemplate.convertAndSend(exchange, Constants.ADD_VIEWS_ROUTING, articleId);
             LoginUserContext.getOptLoginUserId()
                     .ifPresent(id -> {
                         rabbitTemplate.convertAndSend(exchange, Constants.READING_RECORD_ROUTING,

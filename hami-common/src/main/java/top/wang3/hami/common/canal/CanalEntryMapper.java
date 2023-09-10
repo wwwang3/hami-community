@@ -1,4 +1,4 @@
-package top.wang3.hami.message.canal;
+package top.wang3.hami.common.canal;
 
 import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -132,7 +132,7 @@ public class CanalEntryMapper {
             String name = column.getName();
             Field field = fieldMap.get(name);
             field.setAccessible(true);
-            field.set(t, CanalEntryMapper.convertType(field.getType(),column.getValue()));
+            field.set(t, CanalEntryMapper.convertType(field.getType(), column.getValue()));
         }
         return t;
     }

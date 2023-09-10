@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Component
 @RabbitListener(queues = Constants.ADD_VIEWS_QUEUE,
-        messageConverter = "simpleMessageConverter", containerFactory = "batchRabbitContainerFactory",
+        messageConverter = "rabbitMQJacksonConverter", containerFactory = "batchRabbitContainerFactory",
         concurrency = "2")
 @RequiredArgsConstructor
 public class ArticleViewListener {

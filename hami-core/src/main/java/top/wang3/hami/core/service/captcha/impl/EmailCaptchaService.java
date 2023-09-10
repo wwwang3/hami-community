@@ -33,7 +33,7 @@ public class EmailCaptchaService implements CaptchaService {
                 throw new CaptchaServiceException("请求频繁");
             }
             //发送验证码
-            rabbitTemplate.convertAndSend(Constants.EMAIL_EXCHANGE, Constants.EMAIL_ROUTING,
+            rabbitTemplate.convertAndSend(Constants.HAMI_DIRECT_EXCHANGE1, Constants.EMAIL_ROUTING,
                     captcha);
             //将验证码存储在Redis
             String captchaKey = captcha.getType() + captcha.getItem();

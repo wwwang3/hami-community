@@ -1,4 +1,4 @@
-package top.wang3.hami.message.annotation;
+package top.wang3.hami.common.annotation;
 
 
 import java.lang.annotation.ElementType;

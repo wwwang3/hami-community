@@ -1,4 +1,4 @@
-package top.wang3.hami.message.canal;
+package top.wang3.hami.common.canal;
 
 /**
  *
