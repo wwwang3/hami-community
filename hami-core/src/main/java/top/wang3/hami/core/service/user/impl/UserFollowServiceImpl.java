@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -82,6 +83,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         return false;
     }
 
+    @Transactional
     @Override
     public boolean unFollow(int userId, int followingId) {
         return ChainWrappers.updateChain(getBaseMapper())

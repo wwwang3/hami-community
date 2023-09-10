@@ -18,6 +18,12 @@ public class IpContext {
         return CONTEXT.get();
     }
 
+    public static String getIp() {
+        IpInfo ipInfo = CONTEXT.get();
+        if (ipInfo != null) return ipInfo.getIp();
+        return null;
+    }
+
     public static void clear() {
         CONTEXT.remove();
     }

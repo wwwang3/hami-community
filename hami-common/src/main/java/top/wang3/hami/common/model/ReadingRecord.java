@@ -37,32 +37,14 @@ public class ReadingRecord {
     private Integer articleId;
 
     /**
-     * 状态 0-未读 1-已读
-     */
-    @TableField(value = "`state`")
-    private Byte state;
-
-    /**
      * 阅读时间
      */
-    @TableField(value = "reading_time")
+    @TableField(value = "reading_time", update = "now()")
     private Date readingTime;
 
-    /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Integer deleted;
 
-    /**
-     * 创建时间
-     */
-    @TableField(value = "ctime")
-    private Date ctime;
-
-    /**
-     * 更新时间
-     */
-    @TableField(value = "mtime")
-    private Date mtime;
+    public ReadingRecord(Integer userId, Integer articleId) {
+        this.userId = userId;
+        this.articleId = articleId;
+    }
 }

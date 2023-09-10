@@ -12,4 +12,6 @@ public interface ArticleService extends IService<Article> {
     PageData<ArticleDTO> listNewestArticles(ArticlePageParam param);
 
     ArticleContentDTO getArticleContentById(int articleId);
+
+    boolean checkArticleViewLimit(int articleId, int authorId);
 }

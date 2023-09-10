@@ -14,6 +14,6 @@ public class NotifyMsgPublisher {
     }
 
     public void publishNotify(Object o) {
-        rabbitTemplate.convertAndSend(Constants.NOTIFY_EXCHANGE, Constants.NOTIFY_ROUTING, o);
+        rabbitTemplate.convertAndSend(Constants.HAMI_DIRECT_EXCHANGE1, Constants.NOTIFY_ROUTING, o);
     }
 }

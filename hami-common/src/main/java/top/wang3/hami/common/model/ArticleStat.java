@@ -1,6 +1,5 @@
 package top.wang3.hami.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -11,23 +10,17 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
-    * 文章数据记录表
-    */
+ * 文章数据记录表
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "article_stat")
 public class ArticleStat {
     /**
-     * 主键ID
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-
-    /**
      * 文章ID
      */
-    @TableField(value = "article_id")
+    @TableId(value = "article_id")
     private Integer articleId;
 
     /**
@@ -39,7 +32,7 @@ public class ArticleStat {
     /**
      * 阅读量
      */
-    @TableField(value = "views")
+    @TableField(value = "views", update = "%s+#{et.views}") //就给个%s+1挺恶心的
     private Integer views;
 
     /**

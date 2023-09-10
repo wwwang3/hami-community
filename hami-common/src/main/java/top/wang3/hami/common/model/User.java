@@ -2,6 +2,7 @@ package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,6 +70,7 @@ public class User {
      * 是否删除 0-未删除 1-删除
      */
     @TableField(value = "deleted")
+    @TableLogic
     private Byte deleted;
 
     /**

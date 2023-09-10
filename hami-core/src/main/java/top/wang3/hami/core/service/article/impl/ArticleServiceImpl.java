@@ -3,15 +3,20 @@ package top.wang3.hami.core.service.article.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ArticleStatService;
@@ -20,6 +25,7 @@ import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.common.CountService;
 import top.wang3.hami.core.service.common.UserInteractService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
@@ -32,6 +38,8 @@ import java.util.Map;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         implements ArticleService {
 
+    @Resource
+    RabbitTemplate rabbitTemplate;
 
     private final String[] fields =  {"id", "user_id", "title", "summary", "picture", "category_id", "ctime", "mtime"};
     private final String[] full_fields =  {"id", "user_id", "title", "summary", "content", "picture", "category_id", "ctime", "mtime"};
@@ -42,6 +50,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     private final UserInteractService userInteractService;
     private final CountService countService;
     private final ArticleStatService articleStatService;
+
+    @Resource
+    ApplicationContext applicationContext;
 
     @Override
     public PageData<ArticleDTO> listNewestArticles(ArticlePageParam param) {
@@ -86,9 +97,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         if (article == null) {
             return null;
         }
-        //todo 增加文章阅读量
-        countService.increaseViews(article.getId());
-        //todo 增加用户阅读历史记录
         ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(article);
         //文章分类
         CategoryDTO category = categoryService.getCategoryDTOById(dto.getCategoryId());
@@ -101,7 +109,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         //文章数据
         ArticleStatDTO stat = countService.getArticleStatById(articleId);
         dto.setStat(stat);
-
+        //todo 增加文章阅读量
+        //todo 增加用户阅读历史记录
+        if (checkArticleViewLimit(articleId, article.getUserId())) {
+            dto.getStat().setViews(stat.getViews() + 1);
+        }
         //作者信息
         UserDTO author = userService.getAuthorInfoById(dto.getUserId());
         dto.setAuthor(author);
@@ -109,6 +121,27 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         //用户行为
         buildInteract(dto);
         return dto;
+    }
+
+    @Override
+    public boolean checkArticleViewLimit(int articleId, int authorId) {
+        String ip = IpContext.getIp();
+        if (ip == null) return false;
+        String redisKey = "view:limit:" + ip + articleId;
+        if (RedisClient.exist(redisKey)) {
+            return false;
+        } else {
+            RedisClient.setCacheObject(redisKey, 1, 10);
+            //发布消息
+            String exchange = Constants.HAMI_DIRECT_EXCHANGE2;
+            rabbitTemplate.convertAndSend(exchange, Constants.ADD_VIEWS_ROUTING, new ArticleView(articleId, authorId));
+            LoginUserContext.getOptLoginUserId()
+                    .ifPresent(id -> {
+                        rabbitTemplate.convertAndSend(exchange, Constants.READING_RECORD_ROUTING,
+                                new ReadingRecord(id, articleId));
+                    });
+            return true;
+        }
     }
 
     private List<Article> listArticleByCate(Page<Article> page, Integer cateId) {

@@ -39,6 +39,7 @@ public class ArticleTag {
     /**
      * 是否删除
      */
+    @TableField(value = "deleted")
     private Byte deleted; //no logic
 
     /**

@@ -1,9 +1,6 @@
 package top.wang3.hami.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -101,6 +98,7 @@ public class ArticleDraft {
      * 是否删除 0-未删除 1-删除
      */
     @TableField(value = "deleted")
+    @TableLogic
     private Byte deleted;
 
     /**

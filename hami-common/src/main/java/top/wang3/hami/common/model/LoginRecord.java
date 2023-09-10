@@ -45,12 +45,6 @@ public class LoginRecord {
     private Date loginTime;
 
     /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Byte deleted;
-
-    /**
      * 创建时间
      */
     @TableField(value = "ctime")

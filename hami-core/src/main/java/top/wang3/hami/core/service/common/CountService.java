@@ -2,6 +2,9 @@ package top.wang3.hami.core.service.common;
 
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.model.ArticleStat;
+
+import java.util.Collection;
 
 /**
  * 计数业务接口
@@ -15,5 +18,6 @@ public interface CountService {
 
     UserStat getUserStatById(Integer userId);
 
-    void increaseViews(Integer id);
+    void increaseViews(Collection<ArticleStat> stats);
+
 }

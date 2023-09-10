@@ -3,14 +3,17 @@ package top.wang3.hami.core.service.common.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.common.CountService;
 import top.wang3.hami.core.service.user.UserFollowService;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -32,8 +35,10 @@ public class CountServiceImpl implements CountService {
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
         String redisKey = Constants.COUNT_TYPE_ARTICLE + articleId;
-        Map<String, Integer> data = RedisClient.getCacheMap(redisKey);
-        return readArticleStatFromMap(data);
+        ArticleStatDTO stat = RedisClient.getCacheObject(redisKey);
+        return stat == null ? new ArticleStatDTO() : stat;
+//        Map<String, Integer> data = RedisClient.getCacheMap(redisKey);
+//        return readArticleStatFromMap(data);
     }
 
     @Override
@@ -48,9 +53,10 @@ public class CountServiceImpl implements CountService {
         return new UserStat();
     }
 
+    @Transactional
     @Override
-    public void increaseViews(Integer id) {
-
+    public void increaseViews(Collection<ArticleStat> stats) {
+        articleStatService.updateBatchById(stats);
     }
 
     private ArticleStatDTO readArticleStatFromMap(Map<String, Integer> data) {

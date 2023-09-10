@@ -389,6 +389,14 @@ public class RedisClient {
         });
     }
 
+    public static <T> void hSet(String key, String field, T value) {
+        redisTemplate.execute((RedisCallback<Boolean>) connection -> {
+            return connection.hashCommands()
+                    .hSet(keyBytes(key), hashKeyBytes(field), hashValueBytes(value));
+
+        });
+    }
+
     private static <K, V> Map<byte[], byte[]> serializeMap(Map<K, V> map) {
         RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
         RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
@@ -418,5 +426,10 @@ public class RedisClient {
     private static <T> byte[] hashKeyBytes(T hashKey) {
         RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
         return Objects.requireNonNull(hashKeySerializer.serialize(hashKey));
+    }
+
+    private static <T> byte[] hashValueBytes(T value) {
+        RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
+        return hashValueSerializer.serialize(value);
     }
 }

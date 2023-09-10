@@ -75,12 +75,6 @@ public class NotifyMsg {
     private Byte state;
 
     /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Integer deleted;
-
-    /**
      * 创建时间
      */
     @TableField(value = "ctime")

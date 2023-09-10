@@ -27,12 +27,6 @@ public class PageParam {
     private long pageSize;
 
     public <T> Page<T> toPage() {
-        if (pageNum < 1) {
-            pageNum = 1;
-        }
-        if (pageSize < 0) {
-            pageSize = 10;
-        }
         return Page.of(pageNum, pageSize);
     }
 }

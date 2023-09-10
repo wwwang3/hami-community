@@ -4,8 +4,7 @@
   <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.ArticleStat">
     <!--@mbg.generated-->
     <!--@Table article_stat-->
-    <id column="id" property="id" />
-    <result column="article_id" property="articleId" />
+    <id column="article_id" property="articleId" />
     <result column="user_id" property="userId" />
     <result column="views" property="views" />
     <result column="likes" property="likes" />
@@ -16,14 +15,14 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, article_id, user_id, views, likes, comments, collects, ctime, mtime
+    article_id, user_id, views, likes, comments, collects, ctime, mtime
   </sql>
 
 
   <select id="selectUserStatsByUserIds" resultType="top.wang3.hami.common.dto.UserStat">
     select
-        count(id) as articles, count(views) as total_views, count(likes) as total_likes,
-        count(comments) as total_comments, count(collects) as total_collects, user_id
+        user_id, count(article_id) as articles, sum(views) as total_views, sum(likes) as total_likes,
+        sum(comments) as total_comments, sum(collects) as total_collects
     from article_stat
     where user_id in
     <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
@@ -34,8 +33,8 @@
 
   <select id="selectUserStat" resultType="top.wang3.hami.common.dto.UserStat">
     select
-      count(id) as articles, count(views) as total_views, count(likes) as total_likes,
-      count(comments) as total_comments, count(collects) as total_collects, user_id
+      user_id, count(article_id) as articles, sum(views) as total_views, sum(likes) as total_likes,
+      sum(comments) as total_comments, sum(collects) as total_collects
     from article_stat
     where user_id = #{userId};
   </select>

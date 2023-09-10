@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.notify.CollectMsg;
@@ -54,7 +53,6 @@ public class UserInteractServiceImpl implements UserInteractService {
     @Resource
     TransactionTemplate transactionTemplate;
 
-    @Transactional
     @Override
     public boolean follow(int followingId) {
         //用户关注
@@ -65,12 +63,15 @@ public class UserInteractServiceImpl implements UserInteractService {
         //check user
         checkUserExist(followingId);
         //关注
-        boolean success = userFollowService.follow(loginUserId, followingId);
+        Boolean success = transactionTemplate.execute(status -> {
+            return userFollowService.follow(loginUserId, followingId);
+        });
         //发布关注消息
-        if (success) {
+        if (Boolean.TRUE.equals(success)) {
             notifyMsgPublisher.publishNotify(new FollowMsg(loginUserId, followingId));
+            return true;
         }
-        return success;
+        return false;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class UserInteractServiceImpl implements UserInteractService {
         return true;
     }
 
-    @Transactional
+
     @Override
     public boolean cancelLike(int itemId, byte type) {
         //用户取消

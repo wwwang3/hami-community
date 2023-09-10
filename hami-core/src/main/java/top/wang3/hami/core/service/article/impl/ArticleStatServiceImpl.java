@@ -4,6 +4,7 @@ package top.wang3.hami.core.service.article.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
@@ -49,6 +50,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
         return getBaseMapper().scanBatchStats(lastArticle, limit);
     }
 
+    @Transactional
     @Override
     public boolean increaseViews(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -57,6 +59,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean increaseCollects(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -65,6 +68,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean increaseComments(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -73,6 +77,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean increaseLikes(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -81,6 +86,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean decreaseCollects(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -89,6 +95,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean decreaseLikes(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -97,6 +104,7 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
                 .update();
     }
 
+    @Transactional
     @Override
     public boolean decreaseComments(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())

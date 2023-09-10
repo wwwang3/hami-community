@@ -2,12 +2,13 @@ package top.wang3.hami.common.constant;
 
 public final class Constants {
 
-    public static final String EMAIL_EXCHANGE = "hami-email-exchange";
+
+    public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
+
+    public static final String HAMI_DIRECT_EXCHANGE2 = "hami-direct-exchange-2";
     public static final String EMAIL_QUEUE = "hami-email-queue";
 
     public static final String EMAIL_ROUTING = "email";
-
-    public static final String NOTIFY_EXCHANGE = "hami-notify-exchange";
 
     public static final String NOTIFY_QUEUE = "hami-notify-queue";
 
@@ -18,6 +19,12 @@ public final class Constants {
     public static final String CANAL_QUEUE = "hami-canal-queue";
 
     public static final String CANAL_ROUTING = "/canal";
+    public static final String ADD_VIEWS_QUEUE = "hami-add-views-queue";
+    public static final String READING_RECORD_QUEUE = "hami-reading-record-queue";
+
+    public static final String ADD_VIEWS_ROUTING = "/views";
+
+    public static final String READING_RECORD_ROUTING = "/reading-record";
 
     /**
      * 注册邮箱验证码
