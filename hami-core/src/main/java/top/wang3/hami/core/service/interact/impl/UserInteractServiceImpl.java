@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.common.impl;
+package top.wang3.hami.core.service.interact.impl;
 
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import top.wang3.hami.core.mapper.CommentMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 import top.wang3.hami.core.service.article.ArticleStatService;
-import top.wang3.hami.core.service.common.UserInteractService;
+import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -95,7 +95,7 @@ public class UserInteractServiceImpl implements UserInteractService {
             boolean success = likeService.doLike(loginUserId, itemId, type);
             if (!success) return false;
             boolean added;
-            //todo 感觉点赞单独起一个服务，有该服务维护点赞数和获取点赞列表，判断是否点赞等
+            //感觉点赞单独起一个服务，有该服务维护点赞数和获取点赞列表，判断是否点赞等
             //更新文章点赞数
             if (Constants.LIKE_TYPE_ARTICLE == type) {
                 added = articleStatService.increaseLikes(itemId, 1);
@@ -120,7 +120,6 @@ public class UserInteractServiceImpl implements UserInteractService {
         int loginUserId = LoginUserContext.getLoginUserId();
         boolean cancelled = likeService.cancelLike(loginUserId, itemId, type);
         if (!cancelled) return false;
-        //todo 应该发消息异步更新的 用户行为引起的变化感觉不应该在主页内
         return articleStatService.decreaseLikes(itemId, 1);
     }
 
@@ -188,6 +187,38 @@ public class UserInteractServiceImpl implements UserInteractService {
     public Map<Integer, Boolean> hasCollected(int userId, List<Integer> items, byte itemType) {
         String redisKey = Constants.LIST_USER_COLLECT + userId;
         return RedisClient.zMContains(redisKey, items);
+    }
+
+    @Override
+    public Integer getUserLikes(Integer userId) {
+        //获取用户点赞的文章数
+        String redisKey = Constants.LIST_USER_LIKE + userId;
+        Long count = RedisClient.zCard(redisKey);
+        return count != null ? count.intValue() : 0;
+    }
+
+    @Override
+    public Integer getUserCollects(Integer userId) {
+        //获取用户点赞的文章数
+        String redisKey = Constants.LIST_USER_COLLECT + userId;
+        Long count = RedisClient.zCard(redisKey);
+        return count != null ? count.intValue() : 0;
+    }
+
+    @Override
+    public Integer getUserFollowings(Integer userId) {
+        //获取用户点赞的文章数
+        String redisKey = Constants.LIST_USER_FOLLOWING + userId;
+        Long count = RedisClient.zCard(redisKey);
+        return count != null ? count.intValue() : 0;
+    }
+
+    @Override
+    public Integer getUserFollowers(Integer userId) {
+        //获取用户点赞的文章数
+        String redisKey = Constants.LIST_USER_FOLLOWER + userId;
+        Long count = RedisClient.zCard(redisKey);
+        return count != null ? count.intValue() : 0;
     }
 
     private void checkItemExist(int itemId, int itemType) {

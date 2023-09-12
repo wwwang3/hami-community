@@ -117,5 +117,6 @@ public class ArticleDraft {
         this.id = id;
         this.articleId = articleId;
         this.state = state;
+        this.version = version;
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.core.service.common.CountService;
+import top.wang3.hami.core.service.article.ArticleStatService;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,13 +21,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ArticleViewListener {
 
-    private final CountService countService;
+    private final ArticleStatService articleStatService;
 
     @RabbitHandler
     public void handleMessage(List<Integer> views) {
         Map<Integer, ArticleStat> map = new HashMap<Integer, ArticleStat>();
         for (Integer articleId : views) {
-
             ArticleStat stat = map.computeIfAbsent(articleId, (id) -> {
                 ArticleStat newStat = new ArticleStat();
                 newStat.setArticleId(id);
@@ -37,6 +36,6 @@ public class ArticleViewListener {
             stat.setViews(stat.getViews() + 1);
         }
         Collection<ArticleStat> stats = map.values();
-        countService.increaseViews(stats);
+        articleStatService.updateBatchById(stats);
     }
 }

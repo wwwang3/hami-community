@@ -6,13 +6,16 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.dto.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.UserFollowMapper;
 import top.wang3.hami.core.service.user.UserFollowService;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFollow>
@@ -34,6 +37,20 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .eq("following", userId)
                 .eq("`state`", Constants.ONE)
                 .count().intValue();
+    }
+
+    @Override
+    public List<FollowCountItem> getUserFollowingCount(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) return Collections.emptyList();
+        return getBaseMapper().selectUserFollowingCount(userIds);
+    }
+
+    @Override
+    public List<FollowCountItem> getUserFollowerCount(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return getBaseMapper().selectUserFollowerCount(userIds);
     }
 
 
@@ -67,11 +84,11 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
             UserFollow follow = new UserFollow();
             follow.setUserId(userId);
             follow.setFollowing(followingId);
-            follow.setState(1);
+            follow.setState(Constants.ONE);
             return super.save(follow);
-        } else if (userFollow.getState() == 1) {
+        } else if (Objects.equals(userFollow.getState(), Constants.ONE)) {
             throw new ServiceException("重复关注");
-        } else if (userFollow.getState() == 0) {
+        } else if (Objects.equals(userFollow.getState(), Constants.ZERO)) {
             //修改关注状态
             return ChainWrappers.updateChain(getBaseMapper())
                     .set("`state`", Constants.ONE)

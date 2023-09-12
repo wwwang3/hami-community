@@ -1,8 +1,6 @@
-package top.wang3.hami.core.handler;
+package top.wang3.hami.core.service.stat.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.constant.Constants;
@@ -10,8 +8,8 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
 
-@Component
-@Order(1)
+
+
 @CanalListener(value = "article_stat")
 @Slf4j
 public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {

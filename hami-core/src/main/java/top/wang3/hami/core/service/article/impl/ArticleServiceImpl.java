@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
@@ -22,8 +23,8 @@ import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.article.ArticleTagService;
 import top.wang3.hami.core.service.article.CategoryService;
-import top.wang3.hami.core.service.common.CountService;
-import top.wang3.hami.core.service.common.UserInteractService;
+import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -109,8 +110,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         //文章数据
         ArticleStatDTO stat = countService.getArticleStatById(articleId);
         dto.setStat(stat);
-        //todo 增加文章阅读量
-        //todo 增加用户阅读历史记录
         if (checkArticleViewLimit(articleId, article.getUserId())) {
             dto.getStat().setViews(stat.getViews() + 1);
         }
@@ -146,10 +145,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
     }
 
+    @Transactional
+    @Override
+    public boolean deleteByArticleId(Integer userId, Integer articleId) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .eq("user_id", userId)
+                .eq("id", articleId)
+                .remove();
+    }
+
     private List<Article> listArticleByCate(Page<Article> page, Integer cateId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(fields)
-                .eq(cateId != null, "category_id", cateId) //创建时间正常情况下都会递增
+                .eq(cateId != null, "category_id", cateId)
+                .orderByDesc("id")   //创建时间正常情况下都会随ID递增
                 .list(page);
     }
 
@@ -171,14 +180,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     public void buildArticleStat(List<ArticleDTO> dtos, List<Integer> articleIds) {
-        //查询文章数据
-        dtos.forEach(dto -> {
-            ArticleStatDTO stat = countService.getArticleStatById(dto.getId());
-            dto.setStat(stat);
-        });
-//        List<ArticleStatDTO> stats = articleStatService.getArticleStatByArticleIds(articleIds);
-//        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats,
-//                ArticleStatDTO::getArticleId, ArticleDTO::setStat);
+        List<ArticleStatDTO> stats = countService.getArticleStatByIds(articleIds);
+        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats, ArticleStatDTO::getArticleId, ArticleDTO::setStat);
     }
 
     public void buildArticleAuthor(List<ArticleDTO> dtos, List<Integer> userIds) {

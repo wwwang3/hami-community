@@ -24,4 +24,6 @@ public interface UserService extends IService<User> {
 
     UserDTO getAuthorInfoById(int userId);
 
+    List<Integer> scanUserIds(int lastUserId, int batchSize);
+
 }

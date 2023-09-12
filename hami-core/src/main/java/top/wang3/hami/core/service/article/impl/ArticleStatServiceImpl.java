@@ -12,6 +12,7 @@ import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -40,14 +41,14 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
     }
 
     @Override
-    public List<UserStat> getUserStatistics(List<Integer> userId) {
-        return getBaseMapper().selectUserStatsByUserIds(userId);
+    public List<UserStat> getUserStatistics(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) return Collections.emptyList();
+        return getBaseMapper().selectUserStatsByUserIds(userIds);
     }
 
     @Override
     public List<ArticleStat> scanArticleStats(int lastArticle, int batchSize) {
-        int limit = Math.min(100, batchSize);
-        return getBaseMapper().scanBatchStats(lastArticle, limit);
+        return getBaseMapper().scanBatchStats(lastArticle, batchSize);
     }
 
     @Transactional

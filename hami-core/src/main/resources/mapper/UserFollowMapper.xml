@@ -15,4 +15,23 @@
     <!--@mbg.generated-->
     id, user_id, `following`, `state`, ctime, mtime
   </sql>
+
+  <select id="selectUserFollowingCount" resultType="top.wang3.hami.common.dto.FollowCountItem">
+    select user_id, count(following) as count
+    from user_follow
+    where `state` = 1 and user_id in
+    <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+      #{userId}
+    </foreach>
+    group by user_id;
+  </select>
+  <select id="selectUserFollowerCount" resultType="top.wang3.hami.common.dto.FollowCountItem">
+    select user_follow.following as user_id, count(user_follow.user_id), 0 as count
+    from user_follow
+    where `state` = 1 and following in
+    <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+      #{userId}
+    </foreach>
+    group by following;
+  </select>
 </mapper>

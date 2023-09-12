@@ -4,7 +4,7 @@ package top.wang3.hami.web.controller.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.request.LikeItemParam;
-import top.wang3.hami.core.service.common.UserInteractService;
+import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.security.model.Result;
 
 /**

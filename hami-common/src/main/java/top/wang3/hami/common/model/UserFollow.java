@@ -40,7 +40,7 @@ public class UserFollow {
      * 状态 0-未关注 1关注
      */
     @TableField(value = "`state`")
-    private Integer state;
+    private Byte state;
 
     /**
      * 创建时间

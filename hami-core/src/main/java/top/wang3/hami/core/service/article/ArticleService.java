@@ -14,4 +14,6 @@ public interface ArticleService extends IService<Article> {
     ArticleContentDTO getArticleContentById(int articleId);
 
     boolean checkArticleViewLimit(int articleId, int authorId);
+
+    boolean deleteByArticleId(Integer userId, Integer articleId);
 }

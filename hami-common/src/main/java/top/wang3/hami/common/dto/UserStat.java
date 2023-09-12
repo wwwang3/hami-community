@@ -14,7 +14,7 @@ public class UserStat {
     /**
      * 文章数
      */
-    private Integer articles = 0;
+    private Integer totalArticles = 0;
 
     /**
      * 文章总阅读量

@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.user;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import top.wang3.hami.common.dto.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 
 import java.util.List;
@@ -22,6 +23,10 @@ public interface UserFollowService extends IService<UserFollow> {
      * @return 粉丝数
      */
     Integer getUserFollowerCount(Integer userId);
+
+    List<FollowCountItem> getUserFollowingCount(List<Integer> userId);
+
+    List<FollowCountItem> getUserFollowerCount(List<Integer> userIds);
 
     List<Integer> getUserFollowings(Page<UserFollow> page, int userId);
 

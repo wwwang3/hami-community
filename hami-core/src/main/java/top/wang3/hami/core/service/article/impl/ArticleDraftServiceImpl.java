@@ -84,6 +84,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     /**
      * 创建文章草稿
+     *
      * @param param 参数
      * @return ArticleDraft
      */
@@ -117,6 +118,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     /**
      * todo 文章审核
+     *
      * @param draftId 草稿ID
      * @return ArticleDraft
      */
@@ -166,11 +168,11 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
     public boolean deleteDraft(long draftId) {
         //刪除草稿
         int userId = LoginUserContext.getLoginUserId();
-        QueryWrapper<ArticleDraft> wrapper = Wrappers.query(getEntityClass())
+        return ChainWrappers.updateChain(getBaseMapper())
                 .eq("id", draftId)
                 .eq("user_id", userId)
-                .eq("`state`", Constants.ZERO);//0为草稿
-        return super.remove(wrapper);
+                .eq("`state`", Constants.ZERO) //0为草稿
+                .remove();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -178,18 +180,21 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
     public boolean deleteArticle(int articleId) {
         //删除文章
         int userId = LoginUserContext.getLoginUserId();
-        QueryWrapper<Article> wrapper = Wrappers.query(articleService.getEntityClass())
-                .eq("user_id", userId)
-                .eq("id", articleId);
-        boolean deleted = articleService.remove(wrapper);
+        boolean deleted = articleService.deleteByArticleId(userId, articleId);
         //删除草稿
         if (deleted) {
-            QueryWrapper<ArticleDraft> draftQueryWrapper = Wrappers.query(getEntityClass())
-                    .eq("user_id", userId)
-                    .eq("article_id", articleId);
-            return super.remove(draftQueryWrapper);
+            boolean success1 = deleteDraftByArticleId(userId, articleId);
+            boolean success2 = articleStatMapper.deleteById(articleId) == 1;
+            return success1 && success2;
         }
         return false;
+    }
+
+    private boolean deleteDraftByArticleId(Integer userId, Integer articleId) {
+        QueryWrapper<ArticleDraft> draftQueryWrapper = Wrappers.query(getEntityClass())
+                .eq("user_id", userId)
+                .eq("article_id", articleId);
+        return super.remove(draftQueryWrapper);
     }
 
     private void checkDraft(ArticleDraft draft) {
@@ -210,6 +215,7 @@ public class ArticleDraftServiceImpl extends ServiceImpl<ArticleDraftMapper, Art
 
     /**
      * 获取旧的草稿
+     *
      * @param draftId 草稿ID
      * @return ArticleDraft
      * @throws ServiceException 不存在时抛出异常

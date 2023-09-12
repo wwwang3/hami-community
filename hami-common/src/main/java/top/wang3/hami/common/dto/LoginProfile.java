@@ -36,6 +36,9 @@ public class LoginProfile {
      */
     private String tag;
 
+    /**
+     * 加入时间
+     */
     private Date ctime;
 
     /**
@@ -49,12 +52,12 @@ public class LoginProfile {
     private long collects;
 
     /**
-     * 粉丝数
+     * 我的粉丝数
      */
     private long followers;
 
     /**
-     * 关注总数
+     * 我的关注数
      */
     private long followings;
 }

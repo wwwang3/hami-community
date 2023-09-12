@@ -1,6 +1,9 @@
 package top.wang3.hami.common.model;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,13 +47,6 @@ public class ArticleCollect {
      */
     @TableField(value = "`state`")
     private Byte state;
-
-    /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    @TableLogic
-    private Byte deleted;
 
     /**
      * 创建时间

@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.common;
+package top.wang3.hami.core.service.interact;
 
 import java.util.List;
 import java.util.Map;
@@ -28,5 +28,11 @@ public interface UserInteractService {
     boolean hasCollected(int userId, int itemId, byte itemType);
     Map<Integer, Boolean> hasCollected(int userId, List<Integer> itemId, byte itemType);
 
+    Integer getUserLikes(Integer userId);
 
+    Integer getUserCollects(Integer userId);
+
+    Integer getUserFollowings(Integer userId);
+
+    Integer getUserFollowers(Integer userId);
 }

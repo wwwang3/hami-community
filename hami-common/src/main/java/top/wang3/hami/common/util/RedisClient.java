@@ -1,6 +1,7 @@
 package top.wang3.hami.common.util;
 
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.time.Duration;
@@ -303,7 +304,12 @@ public class RedisClient {
         );
     }
 
-    public static <T> Long zRemove(String key, List<T> members) {
+    public static <T> Long zRem(String key, T member) {
+        return redisTemplate.opsForZSet()
+                .remove(key, member);
+    }
+
+    public static <T> Long zRem(String key, List<T> members) {
         return redisTemplate.opsForZSet()
                 .remove(key, members.toArray());
     }
@@ -431,5 +437,9 @@ public class RedisClient {
     private static <T> byte[] hashValueBytes(T value) {
         RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
         return hashValueSerializer.serialize(value);
+    }
+
+    public static <T> T excuteScript(RedisScript<T> script, List<String> keys, Object... args) {
+        return (T) redisTemplate.execute(script, keys, args);
     }
 }

@@ -13,7 +13,13 @@ public interface ArticleStatService extends IService<ArticleStat> {
 
     List<ArticleStatDTO> getArticleStatByArticleIds(List<Integer> articleIds);
 
+    /**
+     * 获取用户数据，不包含关注数据
+     * @param userId 用户ID
+     * @return UserStat
+     */
     UserStat getUserStatistics(int userId);
+
     List<UserStat> getUserStatistics(List<Integer> userId);
 
     boolean increaseViews(int articleId, int count);

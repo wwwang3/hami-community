@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class CanalEntryMapper {
 
-    public static final Map<Class<?>, Map<String, Field>> ENTRY_CACHE = new ConcurrentHashMap<>(16);
+    public static final Map<Class<?>, Map<String, Field>> ENTRY_CACHE = new ConcurrentHashMap<>(32);
 
-    private static final Map<Class<? extends CanalEntryHandler>, Class> ENTRY_TYPE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends CanalEntryHandler>, Class> ENTRY_TYPE_CACHE = new ConcurrentHashMap<>(16);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -135,5 +135,11 @@ public class CanalEntryMapper {
             field.set(t, CanalEntryMapper.convertType(field.getType(), column.getValue()));
         }
         return t;
+    }
+
+    protected static void initEntryClassCache(CanalEntryHandler handler) {
+        //init cache
+        Class<Object> clazz = getTableClass(handler);
+        getFieldMap(clazz);
     }
 }

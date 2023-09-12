@@ -21,10 +21,10 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.mapper.AccountMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.article.ArticleCollectService;
-import top.wang3.hami.core.service.common.CountService;
 import top.wang3.hami.core.service.common.ImageService;
-import top.wang3.hami.core.service.common.UserInteractService;
+import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
+import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserFollowService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -146,12 +146,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return dto;
     }
 
+    @Override
+    public List<Integer> scanUserIds(int lastUserId, int batchSize) {
+        return getBaseMapper().scanUserIds(lastUserId, batchSize);
+    }
+
     private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
-        userDTOS.forEach(dto -> {
-            UserStat stat = countService.getUserStatById(dto.getUserId());
-            dto.setStat(stat);
-        });
+        List<Integer> userIds = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
+        List<UserStat> stats = countService.getUserStatByUserIds(userIds);
+        ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, stats, UserStat::getUserId, UserDTO::setStat);
     }
 
     private void buildFollowState(List<UserDTO> userDTOS) {

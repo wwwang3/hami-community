@@ -46,6 +46,13 @@ public class UserController {
         return Result.successData(accountInfo);
     }
 
+    @GetMapping("/login/log")
+    public Result<PageData<LoginRecord>> getLoginRecords(@RequestParam("pageNum") long pageNum,
+                                                         long pageSize) {
+        PageData<LoginRecord> records = loginRecordService.getRecordsByPage(new PageParam(pageNum, pageSize));
+        return Result.successData(records);
+    }
+
     @PostMapping("/avatar/upload")
     public Result<String> updateAvatar(@RequestParam("avatar") MultipartFile avatar) {
         String url = userService.updateAvatar(avatar);
@@ -68,10 +75,4 @@ public class UserController {
         return Result.successIfTrue(success, "error");
     }
 
-    @GetMapping("/login/log")
-    public Result<PageData<LoginRecord>> getLoginRecords(@RequestParam("pageNum") long pageNum,
-                                                         long pageSize) {
-        PageData<LoginRecord> records = loginRecordService.getRecordsByPage(new PageParam(pageNum, pageSize));
-        return Result.successData(records);
-    }
 }
