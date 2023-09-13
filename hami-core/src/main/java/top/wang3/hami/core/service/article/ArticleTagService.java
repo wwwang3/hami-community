@@ -9,11 +9,12 @@ import java.util.List;
 
 public interface ArticleTagService extends IService<ArticleTag> {
 
-    void updateTags(Integer articleId, List<Integer> newTags);
-
-    void saveTags(Integer id, List<Integer> tagIds);
 
     List<ArticleTagDTO> listArticleTagByArticleIds(List<Integer> articleIds);
 
     List<TagDTO> getArticleTagByArticleId(int articleId);
+
+    void updateTags(Integer articleId, List<Integer> newTags);
+
+    void saveTags(Integer id, List<Integer> tagIds);
 }

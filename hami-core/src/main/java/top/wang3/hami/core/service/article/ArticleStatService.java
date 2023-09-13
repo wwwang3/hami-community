@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.model.HotCounter;
 
 import java.util.List;
 
@@ -21,6 +22,10 @@ public interface ArticleStatService extends IService<ArticleStat> {
     UserStat getUserStatistics(int userId);
 
     List<UserStat> getUserStatistics(List<Integer> userId);
+
+    List<HotCounter> getHotArticlesByCateId(Integer categoryId);
+
+    List<HotCounter> getOverallHotArticles();
 
     boolean increaseViews(int articleId, int count);
 

@@ -5,20 +5,16 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
-import top.wang3.hami.core.service.user.UserFollowService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class CachedCountServiceImpl implements CountService {
+public class CachedCountService implements CountService {
 
-    private final ArticleStatService articleStatService;
-
-    private final UserFollowService userFollowService;
+    private final CountService origin;
 
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
@@ -60,21 +56,16 @@ public class CachedCountServiceImpl implements CountService {
     }
 
     private ArticleStatDTO loadArticleStatCache(String redisKey, Integer articleId) {
-        //todo 加锁
-        ArticleStatDTO articleStat = articleStatService.getArticleStatByArticleId(articleId);
-        RedisClient.setCacheObject(redisKey, articleStat);
-        return articleStat;
+        //并发安全问题
+        ArticleStatDTO stat = origin.getArticleStatById(articleId);
+        RedisClient.setCacheObject(redisKey, stat);
+        return stat;
     }
 
     private UserStat loadUserStatCache(String redisKey, Integer userId) {
-        //todo 加锁
-        UserStat statistics = articleStatService.getUserStatistics(userId);
-        Integer followings = userFollowService.getUserFollowingCount(userId);
-        Integer followers = userFollowService.getUserFollowerCount(userId);
-        statistics.setFollowings(followings);
-        statistics.setFollowers(followers);
-        Map<String, Integer> map = CountService.setUserStatToMap(statistics);
+        UserStat stat = origin.getUserStatById(userId);
+        Map<String, Integer> map = CountService.setUserStatToMap(stat);
         RedisClient.hMSet(redisKey, map);
-        return statistics;
+        return stat;
     }
 }

@@ -93,6 +93,7 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
         batchSave(articleId, tagIds);
     }
 
+
     @Transactional
     public void batchSave(Integer articleId, List<Integer> tags) {
         List<ArticleTag> tagList = tags

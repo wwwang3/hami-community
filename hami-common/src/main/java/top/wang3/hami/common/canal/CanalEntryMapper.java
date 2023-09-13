@@ -39,6 +39,7 @@ public class CanalEntryMapper {
             Field[] fields = clazz.getDeclaredFields();
             map = Arrays.stream(fields)
                     .collect(Collectors.toMap(CanalEntryMapper::getColumnName, Function.identity()));
+            ENTRY_CACHE.putIfAbsent(clazz, map);
         }
         return map;
     }
@@ -139,7 +140,7 @@ public class CanalEntryMapper {
 
     protected static void initEntryClassCache(CanalEntryHandler handler) {
         //init cache
-        Class<Object> clazz = getTableClass(handler);
+        Class<?> clazz = getTableClass(handler);
         getFieldMap(clazz);
     }
 }

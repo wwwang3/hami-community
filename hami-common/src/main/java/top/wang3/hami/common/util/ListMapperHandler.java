@@ -2,10 +2,7 @@ package top.wang3.hami.common.util;
 
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,6 +24,13 @@ public class ListMapperHandler {
         return Optional.ofNullable(origin)
                 .map(o -> o.stream().map(mapper).toList())
                 .orElse(Collections.emptyList());
+    }
+
+    public static <T, R> Set<R> listToSet(List<T> origin, Function<T, R> mapper) {
+        return Optional.ofNullable(origin)
+                .map(o -> o.stream().map(mapper)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     public static <T, K> Map<K, T> listToMap(List<T> origin, Function<? super T, K> keyMapper) {

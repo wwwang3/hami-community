@@ -25,7 +25,7 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
-		<boot.version>${parent.version}</boot.version>
+		<boot.version>${project.parent.version}</boot.version>
 		<mysql.version>8.0.30</mysql.version>
 		<mp.version>3.5.3.2</mp.version>
 		<mybatis.version>3.0.2</mybatis.version>
@@ -38,7 +38,7 @@
 		<spring.file.version>1.0.3</spring.file.version>
 		<ttl.version>2.14.3</ttl.version>
 		<canal.version>1.1.6</canal.version>
-		<redission.verson>3.23.4</redission.verson>
+		<redisson.version>3.23.4</redisson.version>
 	</properties>
 	<!--packing -->
 	<packaging>pom</packaging>

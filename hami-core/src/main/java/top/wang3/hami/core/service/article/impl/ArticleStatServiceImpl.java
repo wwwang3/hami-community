@@ -9,6 +9,7 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
@@ -37,13 +38,24 @@ public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, Artic
 
     @Override
     public UserStat getUserStatistics(int userId) {
-        return getBaseMapper().selectUserStat(userId);
+        UserStat stat = getBaseMapper().selectUserStat(userId);
+        return stat == null ? new UserStat() : stat;
     }
 
     @Override
     public List<UserStat> getUserStatistics(List<Integer> userIds) {
         if (userIds == null || userIds.isEmpty()) return Collections.emptyList();
         return getBaseMapper().selectUserStatsByUserIds(userIds);
+    }
+
+    @Override
+    public List<HotCounter> getHotArticlesByCateId(Integer categoryId) {
+        return getBaseMapper().selectHotArticlesByCateId(categoryId);
+    }
+
+    @Override
+    public List<HotCounter> getOverallHotArticles() {
+        return getBaseMapper().selectHotArticles();
     }
 
     @Override

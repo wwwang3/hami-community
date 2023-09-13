@@ -13,8 +13,11 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.service.stat.CountService;
+import top.wang3.hami.core.service.stat.impl.SimpleCountService;
 
 import java.util.List;
+import java.util.Map;
 
 
 @CanalListener("article_stat")
@@ -22,6 +25,8 @@ import java.util.List;
 public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
 
     private RedisScript<Long> redisScript;
+
+    private SimpleCountService simpleCountService;
 
     @PostConstruct
     public void loadFollowScript() {
@@ -38,7 +43,13 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     public void processInsert(ArticleStat entity) {
         String key = getKey(entity.getUserId());
         //增加一条文章数据记录，表示新增了一篇文章
-        RedisClient.hIncr(key, Constants.USER_TOTAL_ARTICLES, 1);
+        if (!RedisClient.exist(key)) {
+            UserStat stat = simpleCountService.getUserStatById(entity.getUserId());
+            Map<String, Integer> map = CountService.setUserStatToMap(stat);
+            RedisClient.hMSet(key, map);
+        } else {
+            RedisClient.hIncr(key, Constants.USER_TOTAL_ARTICLES, 1);
+        }
         log.debug("insert success");
     }
 
@@ -55,8 +66,8 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     public void processDelete(ArticleStat deletedEntity) {
         String key = getKey(deletedEntity.getUserId());
         //删除
-        RedisClient.excuteScript(redisScript, List.of(key), -deletedEntity.getViews(), - deletedEntity.getLikes(),
-                deletedEntity.getComments(), deletedEntity.getCollects());
+        RedisClient.excuteScript(redisScript, List.of(key), -1 * deletedEntity.getViews(), -1 * deletedEntity.getLikes(),
+                -1 * deletedEntity.getComments(), -1 * deletedEntity.getCollects());
     }
 
     private UserStat calculate(ArticleStat before, ArticleStat after) {

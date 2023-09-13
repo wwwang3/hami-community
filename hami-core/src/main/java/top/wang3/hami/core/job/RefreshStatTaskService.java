@@ -15,7 +15,7 @@ import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
-import top.wang3.hami.core.service.stat.impl.SimpleCountServiceImpl;
+import top.wang3.hami.core.service.stat.impl.SimpleCountService;
 import top.wang3.hami.core.service.user.UserFollowService;
 import top.wang3.hami.core.service.user.UserService;
 
@@ -25,17 +25,17 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HamiScheduledTaskService {
+public class RefreshStatTaskService {
 
     private final ArticleStatService articleStatService;
     private final UserService userService;
     private final UserFollowService userFollowService;
 
-    private SimpleCountServiceImpl simpleCountService;
+    private SimpleCountService simpleCountService;
 
     @PostConstruct
     public void init() {
-        simpleCountService = new SimpleCountServiceImpl(articleStatService, userFollowService);
+        simpleCountService = new SimpleCountService(articleStatService, userFollowService);
     }
 
     /**

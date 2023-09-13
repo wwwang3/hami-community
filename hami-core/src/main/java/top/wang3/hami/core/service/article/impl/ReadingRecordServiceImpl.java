@@ -4,15 +4,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import top.wang3.hami.common.converter.ArticleConverter;
+import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.ReadingRecord;
+import top.wang3.hami.common.model.ReadingRecordDTO;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.mapper.ReadingRecordMapper;
+import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ReadingRecordService;
+import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
 
@@ -20,11 +27,13 @@ import java.util.List;
 @Service
 @SuppressWarnings("unused")
 @Slf4j
+@RequiredArgsConstructor
 public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, ReadingRecord>
         implements ReadingRecordService {
     @Resource
     TransactionTemplate transactionTemplate;
 
+    private final ArticleService articleService;
 
     @Transactional
     public boolean record(List<ReadingRecord> records) {
@@ -42,6 +51,30 @@ public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, R
                 .orderByDesc("reading_time")
                 .page(page);
         return PageData.build(page);
+    }
+
+    @Override
+    public PageData<ReadingRecordDTO> getReadingRecords(PageParam param) {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        PageData<ReadingRecord> page = this.getReadingRecordByPage(param, loginUserId);
+        List<ReadingRecord> records = page.getData();
+        if (records == null || records.isEmpty()) {
+            return null;
+        }
+        List<Integer> articleIds = ListMapperHandler.listTo(records, ReadingRecord::getArticleId);
+        ArticleService.OptionsBuilder builder = new ArticleService.OptionsBuilder()
+                .noTags()
+                .noInteract();
+        List<ArticleDTO> articleDTOS = articleService.getArticleByIds(articleIds, builder);
+        List<ReadingRecordDTO> data = ArticleConverter.INSTANCE.toReadingRecordDTO(records);
+        ListMapperHandler.doAssemble(data, ReadingRecordDTO::getArticleId, articleDTOS,
+                ArticleDTO::getId, ReadingRecordDTO::setContent);
+        return PageData.<ReadingRecordDTO>builder()
+                .total(page.getTotal())
+                .pageSize(page.getPageSize())
+                .pageNum(page.getPageNum())
+                .data(data)
+                .build();
     }
 
     @Override

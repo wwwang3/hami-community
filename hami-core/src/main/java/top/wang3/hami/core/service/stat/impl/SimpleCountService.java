@@ -1,7 +1,6 @@
 package top.wang3.hami.core.service.stat.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.FollowCountItem;
@@ -14,10 +13,9 @@ import top.wang3.hami.core.service.user.UserFollowService;
 import java.util.List;
 
 
-@Service
-@ConditionalOnProperty(prefix = "hami.count-cache", name = "enable", havingValue = "false")
+@Service("simpleCountService")
 @RequiredArgsConstructor
-public class SimpleCountServiceImpl implements CountService {
+public class SimpleCountService implements CountService {
 
     private final ArticleStatService articleStatService;
     private final UserFollowService userFollowService;

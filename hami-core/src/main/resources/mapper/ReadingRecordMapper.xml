@@ -8,11 +8,10 @@
     <result column="user_id" property="userId" />
     <result column="article_id" property="articleId" />
     <result column="reading_time" property="readingTime" />
-    <result column="ctime" property="ctime" />
-    <result column="mtime" property="mtime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, article_id, `state`, reading_time, deleted, ctime, mtime
+    id, user_id, article_id, reading_time
   </sql>
+
 </mapper>

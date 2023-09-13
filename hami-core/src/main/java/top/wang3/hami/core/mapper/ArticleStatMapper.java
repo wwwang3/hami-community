@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.model.HotCounter;
 
 import java.util.List;
 
@@ -24,4 +25,8 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
     List<UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
 
     UserStat selectUserStat(@Param("userId") int userId);
+
+    List<HotCounter> selectHotArticlesByCateId(@Param("categoryId") Integer categoryId);
+
+    List<HotCounter> selectHotArticles();
 }

@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
@@ -29,6 +30,7 @@ import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,18 +71,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
         List<ArticleDTO> articleDTOS = ArticleConverter.INSTANCE.toArticleDTOList(articles);
         articles = null;
-        List<Integer> articleIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getId);
-        List<Integer> userIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getUserId);
-        //查询文章分类
-        buildCategory(articleDTOS);
-        //查询文章标签
-        buildArticleTags(articleDTOS, articleIds);
-        //查询作者信息
-        buildArticleAuthor(articleDTOS, userIds);
-        //查询文章数据
-        buildArticleStat(articleDTOS, articleIds);
-        //查询用户行为(点赞，收藏)
-        buildInteract(articleDTOS, articleIds);
+        buildArticleDTOs(articleDTOS, new OptionsBuilder());
         return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
@@ -91,6 +82,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Override
     public ArticleContentDTO getArticleContentById(int articleId) {
+        //性能瓶颈还在MySQL
         Article article = ChainWrappers.queryChain(getBaseMapper())
                 .select(full_fields)
                 .eq("id", articleId)
@@ -145,6 +137,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
     }
 
+    @Override
+    public List<ArticleDTO> getArticleByIds(List<Integer> ids, OptionsBuilder builder) {
+        List<Article> articles = listArticleByIds(ids);
+        List<ArticleDTO> dtos = ArticleConverter.INSTANCE.toArticleDTOList(articles);
+        buildArticleDTOs(dtos, builder);
+        return dtos;
+    }
+
     @Transactional
     @Override
     public boolean deleteByArticleId(Integer userId, Integer articleId) {
@@ -164,6 +164,41 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     private List<Article> listArticleByCateAndTag(Page<Article> page, Integer cateId, Integer tagId) {
         return getBaseMapper().selectArticlesByCateIdAndTag(page, cateId, tagId);
+    }
+
+    private List<Article> listArticleByIds(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select(fields)
+                .in("id", ids)
+                .list();
+
+    }
+
+    private void buildArticleDTOs(List<ArticleDTO> articleDTOS,
+                                  OptionsBuilder builder) {
+        List<Integer> articleIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getId);
+        List<Integer> userIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getUserId);
+        //查询文章分类
+        builder.ifCate(() -> {
+            buildCategory(articleDTOS);
+        });
+        //查询文章标签
+        builder.ifTags(() -> {
+            buildArticleTags(articleDTOS, articleIds);
+        });
+        //查询作者信息
+        builder.ifAuthor(() -> {
+            buildArticleAuthor(articleDTOS, userIds);
+        });
+        //查询文章数据
+        builder.ifStat(() -> {
+            buildArticleStat(articleDTOS, articleIds);
+        });
+        //查询用户行为(点赞，收藏)
+        builder.ifInteract(() -> {
+            buildInteract(articleDTOS, articleIds);
+        });
     }
 
     public void buildCategory(List<ArticleDTO> dtos) {

@@ -90,4 +90,7 @@ public final class Constants {
     public static final String LIST_USER_COLLECT = "user:collect:list:";
 
     public static final String LIST_USER_LIKE = "user:like:list:";
+
+    public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
+    public static final String HOT_ARTICLE = "rank:article:";
 }

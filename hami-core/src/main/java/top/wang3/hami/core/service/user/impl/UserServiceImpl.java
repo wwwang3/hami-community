@@ -71,8 +71,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Long collects = articleCollectService.getUserCollects(loginUserId);
         loginProfile.setCollects(collects);
         //获取登录用户关注的用户数
-        Integer followings = userFollowService.getUserFollowingCount(loginUserId);
-        Integer followers = userFollowService.getUserFollowerCount(loginUserId);
+        Integer followings = userInteractService.getUserFollowings(loginUserId);
+        Integer followers = userInteractService.getUserFollowers(loginUserId);
         loginProfile.setFollowers(followers);
         loginProfile.setFollowings(followings);
         return loginProfile;

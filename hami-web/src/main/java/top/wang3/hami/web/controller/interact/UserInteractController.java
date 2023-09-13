@@ -1,9 +1,13 @@
-package top.wang3.hami.web.controller.user;
+package top.wang3.hami.web.controller.interact;
 
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.LikeItemParam;
+import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.model.ReadingRecordDTO;
+import top.wang3.hami.core.service.article.ReadingRecordService;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.security.model.Result;
 
@@ -16,6 +20,7 @@ import top.wang3.hami.security.model.Result;
 public class UserInteractController {
 
     private final UserInteractService userInteractService;
+    private final ReadingRecordService readingRecordService;
 
     @PostMapping("/follow/do")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
@@ -56,5 +61,12 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
+    @GetMapping("/reading_record")
+    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestParam("pageNum") long pageNum,
+                                                               @RequestParam("pageSize") long pageSize) {
+        PageData<ReadingRecordDTO> pageData = readingRecordService.getReadingRecords(new PageParam(pageNum, pageSize));
+        return Result.ofNullable(pageData)
+                .orElse("还没有历史记录");
+    }
 
 }

@@ -21,7 +21,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
     @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'CATEGORY_LIST'", cacheManager = Constants.CaffeineCacheManager)
     @Override
     public List<Category> getAllCategories() {
-        log.debug("1111");
         return super.list();
     }
 

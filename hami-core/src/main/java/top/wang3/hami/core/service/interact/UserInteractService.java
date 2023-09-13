@@ -34,5 +34,5 @@ public interface UserInteractService {
 
     Integer getUserFollowings(Integer userId);
 
-    Integer getUserFollowers(Integer userId);
+    Integer getUserFollowers(Integer userId);;
 }

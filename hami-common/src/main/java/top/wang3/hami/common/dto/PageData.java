@@ -39,5 +39,9 @@ public class PageData<T> {
         return new PageData<>(page.getCurrent(), page.getSize(), page.getTotal(), page.getRecords());
     }
 
+//    public static <T> PageData<T> empty() {
+//
+//    }
+
 
 }

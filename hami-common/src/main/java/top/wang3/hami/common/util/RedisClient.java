@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings(value = {"unchecked", "rawtypes", "unused"})
 public class RedisClient {
 
-
     private static RedisTemplate redisTemplate;
 
     public static void register(RedisTemplate template) {
@@ -347,6 +346,11 @@ public class RedisClient {
                 .range(key, min, max);
         if (set == null) return Collections.emptyList();
         return new ArrayList<>(set);
+    }
+
+    public static <T> Long zAddAll(String key, Set<ZSetOperations.TypedTuple<T>> items) {
+        return redisTemplate.opsForZSet()
+                .add(key, items);
     }
 
     /**

@@ -48,7 +48,7 @@ public class CanalQueueListener {
                     if (handlers != null && !handlers.isEmpty()) {
                         //todo 批量消费
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
-                        log.debug(rowChange.getSql());
+                        log.debug("event type: {}", rowChange.getEventType());
                         List<CanalEntry.RowData> rowDataList = rowChange.getRowDatasList();
                         for (CanalEntry.RowData rowData : rowDataList) {
                             for (CanalEntryHandler<?> handler : handlers) {
@@ -57,8 +57,10 @@ public class CanalQueueListener {
                         }
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     //todo 处理失败重试
-                    log.debug("process CanalEntry failed: {}", e.getMessage());
+                    log.debug("process CanalEntry failed: error_class: {} error_msg: {}",
+                            e.getClass().getSimpleName(), e.getMessage());
                 }
             }
         }
@@ -71,10 +73,12 @@ public class CanalQueueListener {
             case INSERT: {
                 T t = CanalEntryMapper.mapToEntity(rowData.getAfterColumnsList(), handler);
                 handler.processInsert(t);
+                break;
             }
             case DELETE: {
                 T t = CanalEntryMapper.mapToEntity(rowData.getBeforeColumnsList(), handler);
                 handler.processDelete(t);
+                break;
             }
             case UPDATE: {
                 T before = CanalEntryMapper.mapToEntity(rowData.getBeforeColumnsList(), handler);
@@ -82,6 +86,7 @@ public class CanalQueueListener {
                 handler.processUpdate(before, after);
             }
             default:
+                break;
         }
     }
 
