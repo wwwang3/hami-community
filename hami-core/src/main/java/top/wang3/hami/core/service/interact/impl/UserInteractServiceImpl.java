@@ -1,22 +1,28 @@
 package top.wang3.hami.core.service.interact.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.notify.CollectMsg;
 import top.wang3.hami.common.dto.notify.FollowMsg;
 import top.wang3.hami.common.dto.notify.LikeMsg;
-import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.LikeItem;
+import top.wang3.hami.common.model.UserFollow;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.CommentMapper;
-import top.wang3.hami.core.mapper.UserMapper;
+import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.interact.UserInteractService;
@@ -26,6 +32,7 @@ import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 用户行为Service实现 todo 完善
@@ -40,15 +47,12 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final ArticleCollectService articleCollectService;
     private final NotifyMsgPublisher notifyMsgPublisher;
     private final ArticleStatService articleStatService;
-
+    private final UserRepository userRepository;
     @Resource
     ArticleMapper articleMapper;
 
     @Resource
     CommentMapper commentMapper;
-
-    @Resource
-    UserMapper userMapper;
 
     @Resource
     TransactionTemplate transactionTemplate;
@@ -112,6 +116,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean cancelLike(int itemId, byte type) {
         //用户取消
@@ -141,6 +146,7 @@ public class UserInteractServiceImpl implements UserInteractService {
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean cancelCollect(int articleId) {
         int loginUserId = LoginUserContext.getLoginUserId();
@@ -190,7 +196,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     @Override
-    public Integer getUserLikes(Integer userId) {
+    public Integer getUserLikeCount(Integer userId) {
         //获取用户点赞的文章数
         String redisKey = Constants.LIST_USER_LIKE + userId;
         Long count = RedisClient.zCard(redisKey);
@@ -198,7 +204,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     @Override
-    public Integer getUserCollects(Integer userId) {
+    public Integer getUserCollectCount(Integer userId) {
         //获取用户点赞的文章数
         String redisKey = Constants.LIST_USER_COLLECT + userId;
         Long count = RedisClient.zCard(redisKey);
@@ -206,7 +212,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     @Override
-    public Integer getUserFollowings(Integer userId) {
+    public Integer getUserFollowingCount(Integer userId) {
         //获取用户点赞的文章数
         String redisKey = Constants.LIST_USER_FOLLOWING + userId;
         Long count = RedisClient.zCard(redisKey);
@@ -214,11 +220,62 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     @Override
-    public Integer getUserFollowers(Integer userId) {
+    public Integer getUserFollowerCount(Integer userId) {
         //获取用户点赞的文章数
         String redisKey = Constants.LIST_USER_FOLLOWER + userId;
         Long count = RedisClient.zCard(redisKey);
         return count != null ? count.intValue() : 0;
+    }
+
+    @Override
+    public List<Integer> getUserCollectArticles(Page<ArticleCollect> page, Integer userId) {
+        String redisKey = Constants.LIST_USER_COLLECT + userId;
+        if (!RedisClient.exist(redisKey)) {
+            return loadUserCollectArticlesFromDB(page, redisKey, userId);
+        }
+        List<Integer> collects = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+        page.setTotal(RedisClient.zCard(redisKey));
+        return collects;
+    }
+
+    @Override
+    public List<Integer> getUserLikesArticles(Page<LikeItem> page, Integer userId) {
+        String redisKey = Constants.LIST_USER_LIKE + userId;
+        if (RedisClient.exist(redisKey)) {
+            List<Integer> likes = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+            page.setTotal(RedisClient.zCard(redisKey));
+            return likes;
+        }
+        return loadUserLikeArticlesFromDB(page, redisKey, userId);
+    }
+
+    @Override
+    public List<Integer> getUserFollowings(Page<UserFollow> page, Integer userId) {
+        String redisKey = Constants.LIST_USER_FOLLOWING + userId;
+        if (RedisClient.exist(redisKey)) {
+            List<Integer> followings = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+            page.setTotal(RedisClient.zCard(redisKey));
+            return followings;
+        }
+        return loadUserFollowingsFromDB(page, redisKey, userId);
+    }
+
+    @Override
+    public List<Integer> getUserFollowers(Page<UserFollow> page, Integer userId) {
+        String redisKey = Constants.LIST_USER_FOLLOWING + userId;
+        if (!RedisClient.exist(redisKey)) {
+            return loadUserFollowersFromDB(page, redisKey, userId);
+        } else {
+            long total = RedisClient.zCard(redisKey);
+            long index = page.getCurrent() * page.getSize();
+            if (total > 1000 && index > total) {
+                //回源DB
+                return userFollowService.getUserFollowers(page, userId);
+            }
+            List<Integer> followers = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+            page.setTotal(total);
+            return followers;
+        }
     }
 
     private void checkItemExist(int itemId, int itemType) {
@@ -234,9 +291,66 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     private void checkUserExist(int userId) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new ServiceException("参数错误");
+        if (!userRepository.checkUserExist(userId)) {
+            throw new IllegalArgumentException("用户不存在");
         }
+    }
+
+    private List<Integer> loadUserCollectArticlesFromDB(Page<ArticleCollect> page, String key, Integer userId) {
+        //to many duplicates code
+        List<ArticleCollect> collects = articleCollectService.getUserCollectArticles(userId);
+        int current = (int) page.getCurrent();
+        int size = (int) page.getSize();
+        var tuples = ListMapperHandler.listToZSet(collects, ArticleCollect::getArticleId, a -> {
+                return (double) a.getMtime().getTime();
+            }
+        );
+        setZsetCache(key, tuples);
+        page.setTotal(Math.min(1000, collects.size()));
+        return ListMapperHandler.subList(collects, ArticleCollect::getArticleId, current, size);
+    }
+
+    private List<Integer> loadUserLikeArticlesFromDB(Page<LikeItem> page, String key, Integer userId) {
+        List<LikeItem> likes = likeService.getUserLikeArticles(userId);
+        int current = (int) page.getCurrent();
+        int size = (int) page.getSize();
+        var tuples = ListMapperHandler.listToZSet(likes, LikeItem::getItemId, item -> {
+            return (double) item.getMtime().getTime();
+        });
+        setZsetCache(key, tuples);
+        page.setTotal(Math.min(1000, likes.size()));
+        return ListMapperHandler.subList(likes, LikeItem::getItemId, current, size);
+    }
+
+    private List<Integer> loadUserFollowingsFromDB(Page<UserFollow> page, String key, Integer userId) {
+        List<UserFollow> followings = userFollowService.getUserFollowings(userId);
+        int current = (int) page.getCurrent();
+        int size = (int) page.getSize();
+        var set = ListMapperHandler.listToZSet(followings, UserFollow::getFollowing, item -> {
+            return (double) item.getMtime().getTime();
+        });
+        setZsetCache(key, set);
+        page.setTotal(Math.min(1000, followings.size()));
+        return ListMapperHandler.subList(followings, UserFollow::getFollowing, current, size);
+    }
+
+    private List<Integer> loadUserFollowersFromDB(Page<UserFollow> page, String key, Integer userId) {
+        //一般用户点赞/关注收藏的文章不会太多
+        //用户的粉丝一般需要回源查询
+        int current = (int) page.getCurrent();
+        int size = (int) page.getSize();
+        //小于1000条全部读出来放Redis
+        List<UserFollow> followers = userFollowService.getUserFollowers(userId);
+        var tuples = ListMapperHandler.listToZSet(followers, UserFollow::getUserId, item -> {
+            return (double) item.getMtime().getTime();
+        });
+        setZsetCache(key, tuples);
+        page.setTotal(Math.min(1000, followers.size()));
+        return ListMapperHandler.subList(followers, UserFollow::getUserId, current, size);
+    }
+
+
+    private <T> void setZsetCache(String key, Set<ZSetOperations.TypedTuple<T>> pairs) {
+        RedisClient.zAddAll(key, pairs);
     }
 }

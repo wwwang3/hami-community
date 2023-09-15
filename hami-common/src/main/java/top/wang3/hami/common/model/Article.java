@@ -15,6 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName(value = "article")
 public class Article {
+
     /**
      * 文章id
      */

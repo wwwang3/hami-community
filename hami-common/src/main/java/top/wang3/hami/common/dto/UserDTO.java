@@ -62,5 +62,4 @@ public class UserDTO {
      */
     private  boolean followed;
 
-
 }

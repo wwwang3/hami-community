@@ -9,6 +9,7 @@ import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.model.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Mapper
@@ -40,35 +41,6 @@ public interface ArticleConverter {
 
     ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<Tag> tags);
 
-    default List<ArticleDTO> toArticleDTOList(List<Article> articles) {
-        if (articles == null) return null;
-        ArrayList<ArticleDTO> list = new ArrayList<>(articles.size());
-        for (Article article : articles) {
-            list.add(toArticleDTO(article));
-        }
-        return list;
-    }
-
-    @Mappings(value = {
-            @Mapping(target = "collected", ignore = true),
-            @Mapping(target = "liked", ignore = true),
-            @Mapping(target = "category", ignore = true),
-            @Mapping(target = "author", ignore = true),
-            @Mapping(target = "stat", ignore = true),
-            @Mapping(target = "tags", ignore = true)
-    })
-    ArticleDTO toArticleDTO(Article article);
-
-    @Mappings(value = {
-            @Mapping(target = "collected", ignore = true),
-            @Mapping(target = "liked", ignore = true),
-            @Mapping(target = "category", ignore = true),
-            @Mapping(target = "author", ignore = true),
-            @Mapping(target = "stat", ignore = true),
-            @Mapping(target = "tags", ignore = true)
-    })
-    ArticleContentDTO toArticleContentDTO(Article article);
-
     @Mapping(target = "categoryId", source = "id")
     @Mapping(target = "categoryName", source = "name")
     CategoryDTO toCategoryDTO(Category category);
@@ -77,4 +49,37 @@ public interface ArticleConverter {
     List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
 
     List<ReadingRecordDTO> toReadingRecordDTO(List<ReadingRecord> records);
+
+    ArticleInfo toArticleInfo(Article article, List<Integer> tagIds);
+
+    default ArticleDTO toArticleDTO(ArticleInfo articleInfo) {
+        if (articleInfo == null) return null;
+        ArticleDTO articleDTO = new ArticleDTO();
+        articleDTO.setId(articleInfo.getId());
+        articleDTO.setUserId(articleInfo.getUserId());
+        articleDTO.setArticleInfo(articleInfo);
+        return articleDTO;
+    }
+
+    default List<ArticleDTO> toArticleDTOS(List<ArticleInfo> articleInfos) {
+        if (articleInfos == null || articleInfos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        ArrayList<ArticleDTO> dtos = new ArrayList<>(articleInfos.size());
+        for (ArticleInfo articleInfo : articleInfos) {
+            ArticleDTO dto = toArticleDTO(articleInfo);
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    default ArticleContentDTO toArticleContentDTO(ArticleInfo articleInfo, String content) {
+        if (articleInfo == null) return null;
+        ArticleContentDTO articleDTO = new ArticleContentDTO();
+        articleDTO.setId(articleInfo.getId());
+        articleDTO.setUserId(articleInfo.getUserId());
+        articleDTO.setArticleInfo(articleInfo);
+        articleDTO.setContent(content);
+        return articleDTO;
+    }
 }

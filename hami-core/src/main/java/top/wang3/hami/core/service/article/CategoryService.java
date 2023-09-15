@@ -1,12 +1,11 @@
 package top.wang3.hami.core.service.article;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.CategoryDTO;
 import top.wang3.hami.common.model.Category;
 
 import java.util.List;
 
-public interface CategoryService extends IService<Category> {
+public interface CategoryService {
     List<Category> getAllCategories();
 
     CategoryDTO getCategoryDTOById(Integer id);

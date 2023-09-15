@@ -9,6 +9,7 @@ import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.HotArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.core.service.article.ArticleRankService;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.security.model.Result;
@@ -44,5 +45,11 @@ public class ArticleController {
                                                           Integer categoryId) {
         List<HotArticleDTO> articles = rankService.getHotArticles(categoryId);
         return Result.successData(articles);
+    }
+
+    @GetMapping("/query_list")
+    public Result<PageData<ArticleDTO>> getUserArticles(@Valid UserArticleParam param) {
+        PageData<ArticleDTO> data = articleService.getUserArticles(param);
+        return Result.successData(data);
     }
 }

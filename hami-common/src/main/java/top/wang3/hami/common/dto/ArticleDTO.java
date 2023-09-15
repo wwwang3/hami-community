@@ -3,44 +3,46 @@ package top.wang3.hami.common.dto;
 
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
 public class ArticleDTO {
 
-    private int id;
+    private Integer id;
 
-    private int userId;
+    private Integer userId;
 
-    private int categoryId;
+    /**
+     * 文章信息
+     */
+    private ArticleInfo articleInfo;
 
-    private String title;
-
-    private String summary;
-
-    private String picture;
-
-    private Date ctime;
-
-    private Date mtime;
-
-    private CategoryDTO category;
-
-    private List<TagDTO> tags;
-
+    /**
+     * 作者信息
+     */
     private UserDTO author;
 
+    /**
+     * 分类
+     */
+    private CategoryDTO category;
+
+    /**
+     * 文章标签
+     */
+    private List<TagDTO> tags;
+
+    /**
+     * 文章数据
+     */
     private ArticleStatDTO stat;
 
-    /**
-     * 是否点赞文章
-     */
-    private boolean liked;
+    private boolean liked = false;
+    private boolean collected = false;
 
-    /**
-     * 是否
-     */
-    private boolean collected;
+//    /**
+//     * 用户行为 (点赞/收藏/关注)
+//     */
+//    private UserInteract userInteract;
 
 }

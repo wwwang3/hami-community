@@ -57,6 +57,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @Override
     public List<Integer> getUserFollowings(Page<UserFollow> page, int userId) {
         List<UserFollow> followings = ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "followings", "ctime", "mtime")
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
                 .list(page);
@@ -66,8 +67,10 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
     @Override
     public List<Integer> getUserFollowers(Page<UserFollow> page,int userId) {
         List<UserFollow> followers = ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "followings", "ctime", "mtime")
                 .eq("following", userId)
                 .eq("`state`", Constants.ONE)
+                .orderByDesc("mtime")
                 .list(page);
         return ListMapperHandler.listTo(followers, UserFollow::getUserId);
     }
@@ -111,4 +114,25 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .update();
     }
 
+    @Override
+    public List<UserFollow> getUserFollowings(Integer userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "following", "mtime")
+                .eq("user_id", userId)
+                .eq("`state`", Constants.ZERO)
+                .orderByDesc("mtime")
+                .last("limit 1000")
+                .list();
+    }
+
+    @Override
+    public List<UserFollow> getUserFollowers(Integer userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "following", "mtime")
+                .eq("followings", userId)
+                .eq("`state`", Constants.ZERO)
+                .orderByDesc("mtime")
+                .last("limit 1000")
+                .list();
+    }
 }

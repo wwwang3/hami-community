@@ -9,6 +9,7 @@ import top.wang3.hami.common.HamiCommonConfig;
 
 @ComponentScan(basePackages = {
         "top.wang3.hami.core.config",
+        "top.wang3.hami.core.repository",
         "top.wang3.hami.core.service",
         "top.wang3.hami.core.handler",
         "top.wang3.hami.core.component",

@@ -1,7 +1,6 @@
 package top.wang3.hami.core.service.user;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.dto.LoginProfile;
 import top.wang3.hami.common.dto.UserDTO;
@@ -15,15 +14,30 @@ public interface UserService extends IService<User> {
 
     UserProfile getUserProfile();
 
-    String updateAvatar(MultipartFile avatar);
+    User getUserInfo(Integer userId);
 
-    @Transactional(rollbackFor = Exception.class)
-    boolean updateProfile(User user);
-
-    List<UserDTO> getAuthorInfoByIds(List<Integer> userIds);
+    List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, OptionsBuilder builder);
 
     UserDTO getAuthorInfoById(int userId);
 
-    List<Integer> scanUserIds(int lastUserId, int batchSize);
+    String updateAvatar(MultipartFile avatar);
+
+    boolean updateProfile(User user);
+
+
+    class OptionsBuilder {
+        public boolean stat = true;
+        public boolean follow = true;
+
+        public OptionsBuilder noStat() {
+            stat = false;
+            return this;
+        }
+        public OptionsBuilder noFollowState(){
+            follow = false;
+            return this;
+        }
+
+    }
 
 }

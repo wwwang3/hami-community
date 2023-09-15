@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.stat.handler;
 
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -21,12 +22,13 @@ import java.util.Map;
 
 
 @CanalListener("article_stat")
+@RequiredArgsConstructor
 @Slf4j
 public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
 
     private RedisScript<Long> redisScript;
 
-    private SimpleCountService simpleCountService;
+    private final SimpleCountService simpleCountService;
 
     @PostConstruct
     public void loadFollowScript() {

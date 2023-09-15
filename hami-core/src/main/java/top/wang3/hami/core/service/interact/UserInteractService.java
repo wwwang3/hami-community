@@ -1,5 +1,10 @@
 package top.wang3.hami.core.service.interact;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.LikeItem;
+import top.wang3.hami.common.model.UserFollow;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,11 +33,19 @@ public interface UserInteractService {
     boolean hasCollected(int userId, int itemId, byte itemType);
     Map<Integer, Boolean> hasCollected(int userId, List<Integer> itemId, byte itemType);
 
-    Integer getUserLikes(Integer userId);
+    Integer getUserLikeCount(Integer userId);
 
-    Integer getUserCollects(Integer userId);
+    Integer getUserCollectCount(Integer userId);
 
-    Integer getUserFollowings(Integer userId);
+    Integer getUserFollowingCount(Integer userId);
 
-    Integer getUserFollowers(Integer userId);;
+    Integer getUserFollowerCount(Integer userId);;
+
+    List<Integer> getUserCollectArticles(Page<ArticleCollect> page, Integer userId);
+
+    List<Integer> getUserLikesArticles(Page<LikeItem> page, Integer userId);
+
+    List<Integer> getUserFollowings(Page<UserFollow> page, Integer userId);
+
+    List<Integer> getUserFollowers(Page<UserFollow> page, Integer userId);
 }

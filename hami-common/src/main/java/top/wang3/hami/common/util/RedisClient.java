@@ -1,8 +1,12 @@
 package top.wang3.hami.common.util;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.scripting.support.ResourceScriptSource;
+import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.util.*;
@@ -91,6 +95,13 @@ public class RedisClient {
     public static <T> T getCacheObject(final String key) {
         ValueOperations<String, T> operation = redisTemplate.opsForValue();
         return operation.get(key);
+    }
+
+    public static <T> List<T> getMultiCacheObject(final List<String> keys) {
+        Assert.notNull(keys, "keys cannot be null");
+        Assert.isTrue(!keys.isEmpty() && keys.size() <= 20, "keys size must in [0, 20]");
+        return redisTemplate.opsForValue()
+                .multiGet(keys);
     }
 
     /**
@@ -341,9 +352,19 @@ public class RedisClient {
     public static <T> List<T> zPage(String key, long current, long pageSize) {
         long size = Math.min(20, pageSize);
         long min = (current - 1) * pageSize;
-        long max = min + pageSize - 1;
+        long max = current * pageSize - 1;
         Set set = redisTemplate.opsForZSet()
                 .range(key, min, max);
+        if (set == null) return Collections.emptyList();
+        return new ArrayList<>(set);
+    }
+
+    public static <T> List<T> zRevPage(String key, long current, long pageSize) {
+        long size = Math.min(20, pageSize);
+        long min = (current - 1) * pageSize;
+        long max = current * pageSize - 1;
+        Set set = redisTemplate.opsForZSet()
+                .reverseRange(key, min, max);
         if (set == null) return Collections.emptyList();
         return new ArrayList<>(set);
     }
@@ -445,5 +466,13 @@ public class RedisClient {
 
     public static <T> T excuteScript(RedisScript<T> script, List<String> keys, Object... args) {
         return (T) redisTemplate.execute(script, keys, args);
+    }
+
+    public static RedisScript<Long> loadScript(String path) {
+        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
+        script.setScriptSource(source);
+        script.setResultType(Long.class);
+        return script;
     }
 }

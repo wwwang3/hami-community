@@ -13,11 +13,12 @@ import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleStatService;
+import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.CategoryService;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -26,39 +27,42 @@ import java.util.Set;
 public class RefreshArticleRankTaskService {
 
     private final CategoryService categoryService;
-    private final ArticleStatService articleStatService;
+    private final ArticleStatRepository articleStatRepository;
 
-
-    @Scheduled(cron = "* */10 * * * *")
+    @Scheduled(fixedDelay = 600, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshHotArticles() {
         try {
+            long start = System.currentTimeMillis();
             log.info("start to refresh cate-article rank list");
             List<Category> categories =
                     categoryService.getAllCategories();
             categories.forEach(category -> {
                 String redisKey = Constants.HOT_ARTICLE + category.getId();
-                List<HotCounter> articles = articleStatService.getHotArticlesByCateId(category.getId());
+                List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId());
                 if (articles != null && !articles.isEmpty()){
                     RedisClient.zAddAll(redisKey, convertToTuple(articles));
                 }
             });
-            log.info("refresh cate-article rank list success");
+            long end = System.currentTimeMillis();
+            log.info("refresh cate-article rank list success, cost: {}ms", end -start);
         } catch (Exception e) {
             e.printStackTrace();
             log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
-    @Scheduled(cron = "* */15 * * * *")
+    @Scheduled(fixedDelay = 600, initialDelay = 20, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshOverallHotArticles() {
         try {
+            long start = System.currentTimeMillis();
             log.info("start to refresh overall-article rank list");
             String redisKey = Constants.OVERALL_HOT_ARTICLES;
-            List<HotCounter> articles = articleStatService.getOverallHotArticles();
+            List<HotCounter> articles = articleStatRepository.getOverallHotArticles();
             RedisClient.zAddAll(redisKey, convertToTuple(articles));
-            log.info("refresh overall-article list success");
+            long end = System.currentTimeMillis();
+            log.info("refresh overall-article list success, cost: {}ms", end - start);
         } catch (Exception e) {
             log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }

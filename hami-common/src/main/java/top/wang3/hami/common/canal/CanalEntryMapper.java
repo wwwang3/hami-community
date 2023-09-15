@@ -132,8 +132,10 @@ public class CanalEntryMapper {
         for (CanalEntry.Column column : columns) {
             String name = column.getName();
             Field field = fieldMap.get(name);
-            field.setAccessible(true);
-            field.set(t, CanalEntryMapper.convertType(field.getType(), column.getValue()));
+            if (field != null) {
+                field.setAccessible(true);
+                field.set(t, CanalEntryMapper.convertType(field.getType(), column.getValue()));
+            }
         }
         return t;
     }

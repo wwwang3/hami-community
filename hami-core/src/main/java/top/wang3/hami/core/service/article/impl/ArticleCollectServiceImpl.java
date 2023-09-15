@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.article.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,12 @@ import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleCollectMapper;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 
+import java.util.List;
+
 @Service
 public class ArticleCollectServiceImpl extends ServiceImpl<ArticleCollectMapper, ArticleCollect>
         implements ArticleCollectService {
+
     @Override
     public Long getUserCollects(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
@@ -52,5 +56,21 @@ public class ArticleCollectServiceImpl extends ServiceImpl<ArticleCollectMapper,
                 .eq("article_id", articleId)
                 .eq("`state`", Constants.ONE)
                 .update();
+    }
+
+    @Override
+    public List<ArticleCollect> getUserCollectArticles(Integer userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id", "article_id", "user_id", "ctime", "mtime")
+                .eq("user_id", userId)
+                .eq("`state`", Constants.ONE) //状态为1
+                .orderByDesc("mtime") //更新时间
+                .last("limit 10000")
+                .list();
+    }
+
+    @Override
+    public List<ArticleCollect> getUserCollectArticles(Page<ArticleCollect> page, Integer userId) {
+        throw new UnsupportedOperationException("暂不支持");
     }
 }

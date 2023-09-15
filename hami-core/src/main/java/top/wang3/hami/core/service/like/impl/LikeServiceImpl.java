@@ -39,6 +39,17 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, LikeItem>
     }
 
     @Override
+    public List<LikeItem> getUserLikeArticles(int userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id", "item_id", "ctime", "mtime")
+                .eq("liker_id", userId)
+                .eq("`state`", Constants.ONE)
+                .orderByDesc("mtime")
+                .last("limit 1000")
+                .list();
+    }
+
+    @Override
     public List<Integer> getUserLikeArticles(Page<LikeItem> page, int userId) {
         List<LikeItem> items = ChainWrappers.queryChain(getBaseMapper())
                 .select("item_id")

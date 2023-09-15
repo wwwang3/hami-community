@@ -1,7 +1,6 @@
 package top.wang3.hami.core.job;
 
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -13,11 +12,10 @@ import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleStatService;
+import top.wang3.hami.core.repository.ArticleStatRepository;
+import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.stat.impl.SimpleCountService;
-import top.wang3.hami.core.service.user.UserFollowService;
-import top.wang3.hami.core.service.user.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -27,16 +25,10 @@ import java.util.Map;
 @Slf4j
 public class RefreshStatTaskService {
 
-    private final ArticleStatService articleStatService;
-    private final UserService userService;
-    private final UserFollowService userFollowService;
+    private final ArticleStatRepository articleStatRepository;
+    private final UserRepository userRepository;
 
-    private SimpleCountService simpleCountService;
-
-    @PostConstruct
-    public void init() {
-        simpleCountService = new SimpleCountService(articleStatService, userFollowService);
-    }
+    private final SimpleCountService simpleCountService;
 
     /**
      * 全量刷新文章数据缓存
@@ -51,7 +43,7 @@ public class RefreshStatTaskService {
         int batchSize = 500;
         int lastArticleId = 0;
         while (true) {
-            List<ArticleStat> stats = articleStatService.scanArticleStats(lastArticleId, batchSize);
+            List<ArticleStat> stats = articleStatRepository.scanArticleStats(lastArticleId, batchSize);
             cacheStat(stats);
             if (stats == null || stats.size() < batchSize) {
                 break;
@@ -69,7 +61,7 @@ public class RefreshStatTaskService {
         int batchSize = 500;
         int lastUserId = 0;
         while (true) {
-            List<Integer> userIds = userService.scanUserIds(lastUserId, batchSize);
+            List<Integer> userIds = userRepository.scanUserIds(lastUserId, batchSize);
             if (userIds.size() < batchSize) {
                 break;
             }

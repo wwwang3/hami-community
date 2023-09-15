@@ -21,11 +21,6 @@ public class PageData<T> {
     private long pageNum;
 
     /**
-     * 每页元素个数
-     */
-    private long pageSize;
-
-    /**
      * 元素总数
      */
     private long total;
@@ -35,13 +30,11 @@ public class PageData<T> {
      */
     private List<T> data;
 
-    public static <T> PageData<T>  build(Page<T> page) {
-        return new PageData<>(page.getCurrent(), page.getSize(), page.getTotal(), page.getRecords());
+
+    public static <T> PageData<T> build(Page<T> page) {
+        return new PageData<>(page.getCurrent(), page.getTotal(), page.getRecords());
     }
 
-//    public static <T> PageData<T> empty() {
-//
-//    }
 
 
 }

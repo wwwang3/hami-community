@@ -1,78 +1,79 @@
 package top.wang3.hami.core.service.user.impl;
 
-import cn.xuyanwu.spring.file.storage.FileStorageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.LoginProfile;
 import top.wang3.hami.common.dto.UserDTO;
 import top.wang3.hami.common.dto.UserProfile;
 import top.wang3.hami.common.dto.UserStat;
-import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.mapper.AccountMapper;
+import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.mapper.UserMapper;
-import top.wang3.hami.core.service.article.ArticleCollectService;
+import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.core.service.interact.UserInteractService;
-import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.stat.CountService;
-import top.wang3.hami.core.service.user.UserFollowService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
 
-    private static final String[] LOGIN_PROFILE_FIELDS = {"user_id", "username", "avatar", "profile", "tag", "ctime"};
-    public static final String[] USER_PROFILE_FIELDS = {
-            "user_id", "username", "avatar", "profile",
-            "blog", "company", "position", "tag", "ctime"
-    };
     @Resource
     ImageService imageService;
-    @Resource
-    TransactionTemplate transactionTemplate;
 
-    private final LikeService likeService;
-    private final ArticleCollectService articleCollectService;
-    private final UserFollowService userFollowService;
-    private final FileStorageService fileStorageService;
-    private final AccountMapper accountMapper;
+    private UserService self;
+
+    private final ApplicationContext context;
+    private final UserRepository repository;
     private final UserInteractService userInteractService;
     private final CountService countService;
+
+    public UserServiceImpl(ApplicationContext context, UserRepository repository,
+                           UserInteractService userInteractService,
+                           CountService countService) {
+        this.context = context;
+        this.repository = repository;
+        this.userInteractService = userInteractService;
+        this.countService = countService;
+    }
+
+    @Autowired
+    @Lazy
+    public void setSelf(UserService self) {
+        this.self = self;
+    }
 
     @Override
     public LoginProfile getLoginProfile() {
         int loginUserId = LoginUserContext.getLoginUserId();
-        User user = ChainWrappers
-                .queryChain(getBaseMapper())
-                .select(LOGIN_PROFILE_FIELDS)
-                .eq("user_id", loginUserId)
-                .one();
-        final LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
+        User user = self.getUserInfo(loginUserId);
+        LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
         //获取登录用户点赞的文章数
-        Long likes = likeService.getUserLikeCount(loginUserId, Constants.LIKE_TYPE_ARTICLE);
+        Integer likes = userInteractService.getUserLikeCount(loginUserId);
         loginProfile.setLikes(likes);
         //获取登录用户收藏的文章数
-        Long collects = articleCollectService.getUserCollects(loginUserId);
+        Integer collects = userInteractService.getUserCollectCount(loginUserId);
         loginProfile.setCollects(collects);
         //获取登录用户关注的用户数
-        Integer followings = userInteractService.getUserFollowings(loginUserId);
-        Integer followers = userInteractService.getUserFollowers(loginUserId);
+        Integer followings = userInteractService.getUserFollowingCount(loginUserId);
+        Integer followers = userInteractService.getUserFollowerCount(loginUserId);
         loginProfile.setFollowers(followers);
         loginProfile.setFollowings(followings);
         return loginProfile;
@@ -81,64 +82,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public UserProfile getUserProfile() {
         int userId = LoginUserContext.getLoginUserId();
-        User user = ChainWrappers.queryChain(getBaseMapper())
-                .select(USER_PROFILE_FIELDS)
-                .eq("user_id", userId)
-                .one();
+        User user = self.getUserInfo(userId);
         return UserConverter.INSTANCE.toUserProfile(user);
     }
 
     @Override
-    public String updateAvatar(MultipartFile avatar) {
-        //更新头像, 登录后才能上传
-        int loginUserId = LoginUserContext.getLoginUserId();
-        String url = imageService.upload(avatar, "avatar", th -> th.size(120, 120));
-        //更新头像地址
-        transactionTemplate.execute(status ->
-                ChainWrappers.updateChain(getBaseMapper())
-                .set("avatar", url)
-                .eq("user_id", loginUserId)
-                .update());
-        return url;
-    }
-
-    @Override
-    public boolean updateProfile(User user) {
-        int loginUserId = LoginUserContext.getLoginUserId();
-        //更新用户信息
-        user.setUserId(loginUserId);
-        boolean saved = super.updateById(user);
-        String username = user.getUsername();
-        //更新账号信息
-        if (StringUtils.hasText(username)) {
-            Account account = new Account();
-            account.setId(loginUserId);
-            account.setUsername(username);
-            accountMapper.updateById(account);
+    public User getUserInfo(Integer userId) {
+        if (userId == null || userId < 0) {
+            throw new IllegalArgumentException("参数异常");
         }
-        return saved;
+        String redisKey = "#userinfo:" + userId;
+        User user;
+        if (!RedisClient.exist(redisKey)) {
+            user = repository.getUserById(userId);
+            if (user == null) {
+                RedisClient.setCacheObject(redisKey, "", 10, TimeUnit.SECONDS);
+            } else{
+                RedisClient.setCacheObject(redisKey, user, 1, TimeUnit.HOURS);
+            }
+        } else {
+            user = RedisClient.getCacheObject(redisKey);
+        }
+        return user;
     }
 
     @Override
-    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds) {
-        List<User> user = ChainWrappers.queryChain(getBaseMapper())
-                .select(USER_PROFILE_FIELDS)
-                .in("user_id", userIds)
-                .list();
-        List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(user);
-        //查询用户的粉丝数据
+    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, OptionsBuilder builder) {
+        if (CollectionUtils.isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
+        List<User> users = ListMapperHandler.listTo(userIds, id -> self.getUserInfo(id));
+        List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(users);
+        if (builder == null || builder.stat) {
+            //查询用户的粉丝数据
+            buildUserStat(dtos);
+        }
         //查询关注状态
-        buildUserStat(dtos);
-        buildFollowState(dtos);
+        if (builder == null || builder.follow) {
+            buildFollowState(dtos);
+        }
         return dtos;
     }
 
     @Override
     public UserDTO getAuthorInfoById(int userId) {
-        User user = ChainWrappers.queryChain(getBaseMapper())
-                .select(USER_PROFILE_FIELDS)
-                .eq("user_id", userId)
-                .one();
+        User user = self.getUserInfo(userId);
         UserDTO dto = UserConverter.INSTANCE.toUserDTO(user);
         UserStat stat = countService.getUserStatById(userId);
         dto.setStat(stat);
@@ -147,9 +135,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public List<Integer> scanUserIds(int lastUserId, int batchSize) {
-        return getBaseMapper().scanUserIds(lastUserId, batchSize);
+    public String updateAvatar(MultipartFile avatar) {
+        //更新头像, 登录后才能上传
+        int loginUserId = LoginUserContext.getLoginUserId();
+        String url = imageService.upload(avatar, "avatar", th -> th.size(120, 120));
+        boolean success = repository.updateAvatar(loginUserId, url);
+        if (success) {
+            deleteUserCache(loginUserId);
+        }
+        return url;
     }
+
+    @Override
+    public boolean updateProfile(User user) {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        boolean success = repository.updateUser(loginUserId, user);
+        if (success) {
+            deleteUserCache(loginUserId);
+        }
+        return success;
+    }
+
 
     private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
@@ -175,5 +181,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 .ifPresent((loginUserId) -> {
                     userDTO.setFollowed(userInteractService.hasFollowed(loginUserId, userDTO.getUserId()));
                 });
+    }
+
+    private void deleteUserCache(Integer userId) {
+        String redisKey = "#userinfo:" + userId;
+        RedisClient.deleteObject(redisKey);
     }
 }

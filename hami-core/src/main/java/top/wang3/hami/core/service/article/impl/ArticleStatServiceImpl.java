@@ -1,128 +1,68 @@
 package top.wang3.hami.core.service.article.impl;
 
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleStatDTO;
-import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.common.model.HotCounter;
-import top.wang3.hami.core.mapper.ArticleStatMapper;
+import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
-public class ArticleStatServiceImpl extends ServiceImpl<ArticleStatMapper, ArticleStat>
-        implements ArticleStatService {
+@Slf4j
+@RequiredArgsConstructor
+public class ArticleStatServiceImpl implements ArticleStatService {
+
+    private final ArticleStatRepository articleStatRepository;
 
     @Override
     public ArticleStatDTO getArticleStatByArticleId(int articleId) {
-        ArticleStat stat = ChainWrappers.queryChain(getBaseMapper())
-                .eq("article_id", articleId)
-                .one();
+        ArticleStat stat = articleStatRepository.getArticleStatById(articleId);
         return ArticleConverter.INSTANCE.toArticleStatDTO(stat);
     }
 
     @Override
     public List<ArticleStatDTO> getArticleStatByArticleIds(List<Integer> articleIds) {
-        List<ArticleStat> stats = ChainWrappers.queryChain(getBaseMapper())
-                .in("article_id", articleIds)
-                .list();
+        List<ArticleStat> stats = articleStatRepository.getArticleStatByIds(articleIds);
         return ArticleConverter.INSTANCE.toArticleStatDTOList(stats);
     }
 
     @Override
-    public UserStat getUserStatistics(int userId) {
-        UserStat stat = getBaseMapper().selectUserStat(userId);
-        return stat == null ? new UserStat() : stat;
-    }
-
-    @Override
-    public List<UserStat> getUserStatistics(List<Integer> userIds) {
-        if (userIds == null || userIds.isEmpty()) return Collections.emptyList();
-        return getBaseMapper().selectUserStatsByUserIds(userIds);
-    }
-
-    @Override
-    public List<HotCounter> getHotArticlesByCateId(Integer categoryId) {
-        return getBaseMapper().selectHotArticlesByCateId(categoryId);
-    }
-
-    @Override
-    public List<HotCounter> getOverallHotArticles() {
-        return getBaseMapper().selectHotArticles();
-    }
-
-    @Override
-    public List<ArticleStat> scanArticleStats(int lastArticle, int batchSize) {
-        return getBaseMapper().scanBatchStats(lastArticle, batchSize);
-    }
-
-    @Transactional
-    @Override
     public boolean increaseViews(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("views = views + {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.increaseViews(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean increaseCollects(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("collects = collects + {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.increaseCollects(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean increaseComments(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("comments = comment + {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.increaseComments(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean increaseLikes(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("likes = likes + {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.increaseLikes(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean decreaseCollects(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("collects = collect - {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.decreaseCollects(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean decreaseLikes(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("likes = likes - {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.decreaseLikes(articleId, count);
     }
 
-    @Transactional
     @Override
     public boolean decreaseComments(int articleId, int count) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("comments = comments + {0}", count)
-                .eq("article_id", articleId)
-                .update();
+        return articleStatRepository.decreaseComments(articleId, count);
     }
 }

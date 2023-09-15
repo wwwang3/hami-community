@@ -27,8 +27,8 @@ public class CachedCountServiceConfig {
 
     @Bean
     @Order(2)
-    public CanalEntryHandler<ArticleStat> userStatCanalEntryHandler() {
-        return new UserStatCanalHandler();
+    public CanalEntryHandler<ArticleStat> userStatCanalEntryHandler(SimpleCountService simpleCountService) {
+        return new UserStatCanalHandler(simpleCountService);
     }
 
     @Bean

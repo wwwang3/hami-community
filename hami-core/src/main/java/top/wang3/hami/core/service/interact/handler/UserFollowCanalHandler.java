@@ -2,10 +2,7 @@ package top.wang3.hami.core.service.interact.handler;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
@@ -28,24 +25,8 @@ public class UserFollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
     @PostConstruct
     public void loadFollowScript() {
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
-        String path = "/META-INF/scripts/follow.lua";
-        ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
-        script.setScriptSource(source);
-        script.setResultType(Long.class);
-        this.followRedisScript = script;
-        log.debug("success load lua script: {}", path);
-    }
-
-    @PostConstruct
-    public void loadUnFollowScript() {
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
-        String path = "/META-INF/scripts/unfollow.lua";
-        ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
-        script.setScriptSource(source);
-        script.setResultType(Long.class);
-        this.unFollowRedisScript = script;
-        log.debug("success load lua script: {}", path);
+        followRedisScript = RedisClient.loadScript("/META-INF/scripts/follow.lua");
+        unFollowRedisScript = RedisClient.loadScript("/META-INF/scripts/unfollow.lua");
     }
 
     @Override
@@ -58,7 +39,7 @@ public class UserFollowCanalHandler implements CanalEntryHandler<UserFollow> {
         Integer following_id = entity.getFollowing();
         Integer follower_id = entity.getUserId();
 
-        Long score1 = System.currentTimeMillis();
+        Long score1 = entity.getMtime().getTime();
         Long score2 = System.currentTimeMillis();
 
         RedisClient.excuteScript(followRedisScript, keys, following_id, follower_id, score1, score2);

@@ -7,6 +7,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class ArticleViewListener {
 
     private final ArticleStatService articleStatService;
+    private final ArticleStatRepository articleStatRepository;
 
     @RabbitHandler
     public void handleMessage(List<Integer> views) {
@@ -36,6 +38,6 @@ public class ArticleViewListener {
             stat.setViews(stat.getViews() + 1);
         }
         Collection<ArticleStat> stats = map.values();
-        articleStatService.updateBatchById(stats);
+        articleStatRepository.updateViews(stats);
     }
 }

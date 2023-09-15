@@ -71,7 +71,6 @@ public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, R
                 ArticleDTO::getId, ReadingRecordDTO::setContent);
         return PageData.<ReadingRecordDTO>builder()
                 .total(page.getTotal())
-                .pageSize(page.getPageSize())
                 .pageNum(page.getPageNum())
                 .data(data)
                 .build();

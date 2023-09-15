@@ -33,7 +33,7 @@
 
   <select id="selectUserStat" resultType="top.wang3.hami.common.dto.UserStat">
     select
-      user_id, count(article_id) as articles, sum(views) as total_views, sum(likes) as total_likes,
+      user_id, count(article_id) as total_articles, sum(views) as total_views, sum(likes) as total_likes,
       sum(comments) as total_comments, sum(collects) as total_collects
     from article_stat
     where user_id = #{userId};
@@ -43,7 +43,7 @@
     select t2.article_id as article_id, t2.hot_rank as hot_rank
     from article t1
     join article_stat t2 on t1.id = t2.article_id
-    where t1.category_id = #{categoryId} and t2.hot_rank > 0
+    where t1.category_id = #{categoryId}
     order by t2.hot_rank desc, t1.id desc
     limit 20;
   </select>

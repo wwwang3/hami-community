@@ -21,9 +21,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<ArticleDTO> selectArticlesByCategoryId(Page<Article> page, @Param("categoryId") Integer categoryId);
 
-    List<Article> selectArticlesByCateIdAndTag(Page<Article> page,
-                                               @Param("cateId") Integer cateId, @Param("tagId") Integer tagId);
-
     @Select("""
         select user_id from article where id = #{articleId};
     """

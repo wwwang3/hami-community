@@ -36,4 +36,7 @@ public interface UserFollowService extends IService<UserFollow> {
 
     boolean unFollow(int userId, int followingId);
 
+    List<UserFollow> getUserFollowings(Integer userId);
+
+    List<UserFollow> getUserFollowers(Integer userId);
 }

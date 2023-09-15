@@ -1,13 +1,12 @@
 package top.wang3.hami.core.service.article;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.ArticleDraftDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.ArticleDraft;
 
-public interface ArticleDraftService extends IService<ArticleDraft> {
+public interface ArticleDraftService {
 
     /**
      * 获取文章草稿

@@ -11,6 +11,8 @@ public interface LikeService extends IService<LikeItem> {
 
     Long getItemLikeCount(int itemId, byte itemType);
 
+    List<LikeItem> getUserLikeArticles(int userId);
+
     List<Integer> getUserLikeArticles(Page<LikeItem> page, int userId);
 
     boolean doLike(int likerId, int itemId, byte itemType);

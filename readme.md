@@ -20,8 +20,8 @@ front-end: 8305
 - [x] 信息修改
 - [x] 关注/取关
 - [x] 账户信息修改
-- [ ] 用户关注列表
-- [ ] 用户粉丝列表
+- [x] 用户关注列表
+- [x] 用户粉丝列表
 
 #### 文章
 
@@ -31,10 +31,10 @@ front-end: 8305
 - [x] 文章收藏/取消
 - [x] 文章阅读量统计
 - [x] 文章编写/发表/更新删除
-- [ ] 热门文章
+- [x] 热门文章
 - [x] 历史记录
-- [ ] 用户主页文章
-- [ ] 用户点赞/收藏文章列表
+- [x] 用户主页文章
+- [x] 用户点赞/收藏文章列表
 
 #### 标签
 
@@ -91,11 +91,51 @@ redis：
 {business_type}{use_id}:zset[{item_id}:{timestamp}]
 ```
 
-### 文章数据和用户数据
+### 文章数据和用户数据 
 
 文章：
 
 ```
 {article_stat}{article_id}:hash
+```
+
+### 首页文章
+
+使用Redis zset保存最新发布的文章ID，每个zset最多保存1000篇，超过的回源数据库查询,每次更新时，没有超过1000，直接放入，
+
+否则移除最晚发布的再放入
+
+更新文章时，从原来的zset删除，再放到新的zset
+
+删除时，从zset删除即可
+
+```
+{artile:list:total}:zset
+{article:list:}{cate_id}:zset
+{user:article:list}:zset
+```
+
+## BUG
+
+```
+com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id '1000' as a subtype of `java.lang.Object`: no such class found
+ at [Source: (byte[])"[1000,1001]"; line: 1, column: 7]
+
+```
+
+`Jackson反序列化集合失败`
+
+https://github.com/FasterXML/jackson-databind/issues/3892
+
+使用List.of(...)时，NO_FINAL，序列化时没有包含完整的通用类型信息，改为EVERYTHING，
+
+```java
+objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
+                                   ObjectMapper.DefaultTyping.NON_FINAL,
+                                   JsonTypeInfo.As.PROPERTY);
+====>
+objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
+                                   ObjectMapper.DefaultTyping.EVERYTHING,
+                                   JsonTypeInfo.As.PROPERTY);
 ```
 

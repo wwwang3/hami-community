@@ -1,5 +1,7 @@
 package top.wang3.hami.common.util;
 
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -11,6 +13,25 @@ import java.util.stream.Collectors;
  * 简单集合映射工具类
  */
 public class ListMapperHandler {
+
+    public static <T> List<T> subList(List<T> origin, int current, int size) {
+        return subList(origin, Function.identity(), current, size);
+    }
+
+    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
+        if (CollectionUtils.isEmpty(origin)) {
+            return Collections.emptyList();
+        }
+        if (current < 0) return Collections.emptyList();
+        int length = origin.size();
+        int from = (current - 1) * size;
+        int to = Math.min(current * size, length);
+        if (from >= length) {
+            return Collections.emptyList();
+        }
+        List<T> list = origin.subList(from, to);
+        return listTo(list, mapper);
+    }
 
     /**
      * 将List中的元素转换为另一种元素
@@ -31,6 +52,15 @@ public class ListMapperHandler {
                 .map(o -> o.stream().map(mapper)
                         .collect(Collectors.toSet()))
                 .orElse(Collections.emptySet());
+    }
+
+    public static <T, R> Set<ZSetOperations.TypedTuple<R>> listToZSet(List<T> data, Function<T, R> memberMapper,
+                                                                 Function<T, Double> scoreMapper) {
+        return listToSet(data, item -> {
+            R member = memberMapper.apply(item);
+            Double score = scoreMapper.apply(item);
+            return new DefaultTypedTuple<R>(member, score);
+        });
     }
 
     public static <T, K> Map<K, T> listToMap(List<T> origin, Function<? super T, K> keyMapper) {

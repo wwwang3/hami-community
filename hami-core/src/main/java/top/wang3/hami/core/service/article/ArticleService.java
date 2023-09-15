@@ -1,26 +1,31 @@
 package top.wang3.hami.core.service.article;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.ArticleContentDTO;
 import top.wang3.hami.common.dto.ArticleDTO;
+import top.wang3.hami.common.dto.ArticleInfo;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.core.service.article.impl.ArticleServiceImpl;
 
 import java.util.List;
 
-public interface ArticleService extends IService<Article> {
+public interface ArticleService {
+
+    ArticleInfo getArticleInfoById(Integer id);
 
     PageData<ArticleDTO> listNewestArticles(ArticlePageParam param);
 
     ArticleContentDTO getArticleContentById(int articleId);
 
+    List<ArticleDTO> getArticleByIds(List<Integer> ids, ArticleServiceImpl.OptionsBuilder builder);
+
+    PageData<ArticleDTO> getUserArticles(UserArticleParam param);
+
     boolean checkArticleViewLimit(int articleId, int authorId);
 
     boolean deleteByArticleId(Integer userId, Integer articleId);
-
-    List<ArticleDTO> getArticleByIds(List<Integer> ids, ArticleServiceImpl.OptionsBuilder builder);
 
     @FunctionalInterface
     interface Handle {
@@ -86,4 +91,8 @@ public interface ArticleService extends IService<Article> {
             }
         }
     }
+
+    boolean saveArticle(Article article);
+
+    boolean updateArticle(Article article);
 }

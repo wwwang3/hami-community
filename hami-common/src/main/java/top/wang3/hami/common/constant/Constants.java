@@ -60,8 +60,8 @@ public final class Constants {
 
     public static final String RedisCacheManager = "redisCacheManager";
 
-    public static final String REDIS_CACHE_NAME = "HAMI_CACHE_REDIS_";
-    public static final String CAFFEINE_CACHE_NAME = "HAMI_CACHE_LOCAL_";
+    public static final String REDIS_CACHE_NAME = "CACHE_REDIS";
+    public static final String CAFFEINE_CACHE_NAME = "CACHE_LOCAL";
 
     /**
      * 计数服务常量
@@ -91,6 +91,11 @@ public final class Constants {
 
     public static final String LIST_USER_LIKE = "user:like:list:";
 
+    public static final String LIST_USER_ARTICLE = "user:article:list:";
+
+    public static final String ARTICLE_LIST = "article:list:total";
+
+    public static final String CATE_ARTICLE_LIST = "cate:article:list:";
     public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
     public static final String HOT_ARTICLE = "rank:article:";
 }

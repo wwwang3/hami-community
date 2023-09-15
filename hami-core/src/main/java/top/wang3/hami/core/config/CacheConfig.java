@@ -1,5 +1,9 @@
 package top.wang3.hami.core.config;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
@@ -37,11 +41,16 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.EVERYTHING,
+                JsonTypeInfo.As.PROPERTY);
         return builder -> {
             RedisCacheConfiguration configuration = builder.cacheDefaults()
                     .serializeValuesWith(
                             RedisSerializationContext.SerializationPair
-                                    .fromSerializer(new GenericJackson2JsonRedisSerializer())
+                                    .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper))
                     );
             builder.cacheDefaults(configuration);
         };
@@ -61,7 +70,7 @@ public class CacheConfig {
     @Bean(Constants.CaffeineCacheManager)
     @Primary
     public CacheManager caffeineCacheManager(Caffeine<Object, Object> caffeine) {
-        CaffeineCacheManager manager = new CaffeineCacheManager("HAMI_CACHE_LOCAL_");
+        CaffeineCacheManager manager = new CaffeineCacheManager(Constants.CAFFEINE_CACHE_NAME);
         manager.setCaffeine(caffeine);
         manager.setAllowNullValues(false);
         return manager;

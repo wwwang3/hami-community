@@ -44,20 +44,20 @@ public class LoginProfile {
     /**
      * 我点赞的文章数
      */
-    private long likes;
+    private Integer likes = 0;
 
     /**
      * 我收藏的文章数
      */
-    private long collects;
+    private Integer collects = 0;
 
     /**
      * 我的粉丝数
      */
-    private long followers;
+    private Integer followers = 0;
 
     /**
      * 我的关注数
      */
-    private long followings;
+    private Integer followings = 0;
 }

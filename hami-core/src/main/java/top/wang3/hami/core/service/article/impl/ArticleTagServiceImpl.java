@@ -1,86 +1,61 @@
 package top.wang3.hami.core.service.article.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.CollectionUtils;
-import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.ArticleTagDTO;
-import top.wang3.hami.common.dto.TagDTO;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleTag;
-import top.wang3.hami.common.model.Tag;
-import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.mapper.ArticleTagMapper;
+import top.wang3.hami.core.repository.ArticleTagRepository;
 import top.wang3.hami.core.service.article.ArticleTagService;
-import top.wang3.hami.core.service.article.TagService;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, ArticleTag>
-        implements ArticleTagService {
+public class ArticleTagServiceImpl implements ArticleTagService {
 
     @Resource
     TransactionTemplate transactionTemplate;
 
-    private final TagService tagService;
+    private final ArticleTagRepository articleTagRepository;
 
+
+    @Cacheable(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:tag:'+#articleId",
+        cacheManager = Constants.RedisCacheManager)
     @Override
-    public List<ArticleTagDTO> listArticleTagByArticleIds(List<Integer> articleIds) {
-        if (CollectionUtils.isEmpty(articleIds)) {
-            return Collections.emptyList();
-        }
-        return getBaseMapper().getArticleTagByArticleIds(articleIds);
+    public List<Integer> getArticleTagIds(Integer articleId) {
+        return articleTagRepository.getArticleTagIdsById(articleId);
     }
 
-    @Override
-    public List<TagDTO> getArticleTagByArticleId(int articleId) {
-         List<ArticleTag> tags = ChainWrappers.queryChain(getBaseMapper())
-                 .select("tag_id") //todo 直接冗余tag_name 修改标签名直接新增一个标签即可
-                .eq("article_id", articleId)
-                .list();
-        return ListMapperHandler.listTo(tags, articleTag -> {
-            Tag tag = tagService.getTagById(articleTag.getTagId());
-            return ArticleConverter.INSTANCE.toTagDTO(tag);
-        });
-    }
-
-    public List<ArticleTag> listArticleTags(Integer articleId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .eq("article_id", articleId)
-                .list();
-    }
-
-    @Transactional
+    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:tag:'+#articleId",
+            cacheManager = Constants.RedisCacheManager)
     @Override
     public void updateTags(Integer articleId, List<Integer> newTags) {
-        List<ArticleTag> oldTags = listArticleTags(articleId);
+        List<ArticleTag> oldTags = articleTagRepository.getArticleTagsById(articleId);
         List<Integer> toDelete = new ArrayList<>();
+        // [1,2,3] [2,1,4]
         oldTags.forEach(tag -> {
             if (newTags.contains(tag.getTagId())) {
                 //存在了, 不需要再添加了
                 newTags.remove(tag.getTagId());
             } else {
-                //不存在
+                //在旧的里面, 不在新的里面
                 toDelete.add(tag.getId());
             }
         });
 
         transactionTemplate.execute(status -> {
             if (!toDelete.isEmpty()) {
-                super.getBaseMapper().deleteBatchIds(toDelete);
+                articleTagRepository.deleteArticleTags(toDelete);
             }
             if (!newTags.isEmpty()) {
-                batchSave(articleId, newTags);
+                articleTagRepository.saveArticleTags(articleId, newTags);
             }
             return null;
         });
@@ -88,18 +63,12 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     }
 
     @Override
-    @Transactional
     public void saveTags(Integer articleId, List<Integer> tagIds) {
-        batchSave(articleId, tagIds);
+        boolean success = articleTagRepository.saveArticleTags(articleId, tagIds);
     }
 
+//    private void deleteCache(String key) {
+//        RedisClient.deleteObject(key);
+//    }
 
-    @Transactional
-    public void batchSave(Integer articleId, List<Integer> tags) {
-        List<ArticleTag> tagList = tags
-                .stream()
-                .map(tagId -> new ArticleTag(articleId, tagId))
-                .toList();
-        saveBatch(tagList);
-    }
 }

@@ -1,15 +1,27 @@
 package top.wang3.hami.web.controller.interact;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.UserDTO;
 import top.wang3.hami.common.dto.request.LikeItemParam;
 import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.request.UserArticleParam;
+import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.ReadingRecordDTO;
+import top.wang3.hami.common.model.UserFollow;
+import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ReadingRecordService;
 import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
+
+import java.util.List;
 
 /**
  * 用户交互 关注 点赞 收藏 评论
@@ -20,7 +32,12 @@ import top.wang3.hami.security.model.Result;
 public class UserInteractController {
 
     private final UserInteractService userInteractService;
+
     private final ReadingRecordService readingRecordService;
+
+    private final ArticleService articleService;
+
+    private final UserService userService;
 
     @PostMapping("/follow/do")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
@@ -64,9 +81,72 @@ public class UserInteractController {
     @GetMapping("/reading_record")
     public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestParam("pageNum") long pageNum,
                                                                @RequestParam("pageSize") long pageSize) {
-        PageData<ReadingRecordDTO> pageData = readingRecordService.getReadingRecords(new PageParam(pageNum, pageSize));
+        PageData<ReadingRecordDTO> pageData = readingRecordService
+                .getReadingRecords(new PageParam(pageNum, pageSize));
         return Result.ofNullable(pageData)
                 .orElse("还没有历史记录");
+    }
+
+    @PostMapping("/collect/query_list")
+    public Result<PageData<ArticleDTO>> getUserCollectArticles(@RequestBody @Valid
+                                                               UserArticleParam param) {
+        Page<ArticleCollect> page = param.toPage();
+        List<Integer> articleIds = userInteractService.getUserCollectArticles(page, param.getUserId());
+        List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
+        PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
+                .pageNum(param.getPageNum())
+                .total(page.getTotal())
+                .data(data)
+                .build();
+        return Result.successData(pageData);
+    }
+
+    @PostMapping("/like/query_list")
+    public Result<PageData<ArticleDTO>> getUserLikeArticles(@RequestBody @Valid
+                                                               UserArticleParam param) {
+        Page<LikeItem> page = param.toPage();
+        List<Integer> articleIds = userInteractService.getUserLikesArticles(page, param.getUserId());
+        List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
+        PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
+                .pageNum(param.getPageNum())
+                .total(page.getTotal())
+                .data(data)
+                .build();
+        return Result.successData(pageData);
+    }
+
+    @PostMapping("/follow/following_list")
+    public Result<PageData<UserDTO>> getUserFollowings(@RequestBody @Valid
+                                                               UserArticleParam param) {
+        Page<UserFollow> page = param.toPage();
+        List<Integer> followings = userInteractService.getUserFollowings(page, param.getUserId());
+        UserService.OptionsBuilder builder = new UserService.OptionsBuilder()
+                .noFollowState()
+                .noStat();
+        List<UserDTO> data = userService.getAuthorInfoByIds(followings, builder);
+        data.forEach(d -> d.setFollowed(true));
+        PageData<UserDTO> pageData = PageData.<UserDTO>builder()
+                .pageNum(param.getPageNum())
+                .total(page.getTotal())
+                .data(data)
+                .build();
+        return Result.successData(pageData);
+    }
+
+    @PostMapping("/follow/follower_list")
+    public Result<PageData<UserDTO>> getUserFollowers(@RequestBody @Valid
+                                                               UserArticleParam param) {
+        Page<UserFollow> page = param.toPage();
+        List<Integer> followers = userInteractService.getUserFollowers(page, param.getUserId());
+        UserService.OptionsBuilder builder = new UserService.OptionsBuilder()
+                .noStat();
+        List<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
+        PageData<UserDTO> pageData = PageData.<UserDTO>builder()
+                .pageNum(param.getPageNum())
+                .total(page.getTotal())
+                .data(data)
+                .build();
+        return Result.successData(pageData);
     }
 
 }

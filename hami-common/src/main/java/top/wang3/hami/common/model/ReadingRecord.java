@@ -39,7 +39,7 @@ public class ReadingRecord {
     /**
      * 阅读时间
      */
-    @TableField(value = "reading_time", update = "now()")
+    @TableField(value = "reading_time", update = "now(3)")
     private Date readingTime;
 
 
