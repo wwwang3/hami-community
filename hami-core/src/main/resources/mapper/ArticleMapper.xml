@@ -20,7 +20,6 @@
     <id column="t1.id" property="id"/>
     <result column="t1.title" property="title" />
     <result column="t1.summary" property="summary" />
-    <result column="t1.content" property="content" />
     <result column="t1.picture" property="picture" />
     <result column="t1.ctime" property="ctime" />
     <result column="t1.mtime" property="mtime" />
@@ -72,5 +71,4 @@
     </where>
     order by t1.ctime desc
   </select>
-
 </mapper>

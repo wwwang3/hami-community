@@ -14,11 +14,12 @@ import top.wang3.hami.common.HamiCommonConfig;
         "top.wang3.hami.core.handler",
         "top.wang3.hami.core.component",
         "top.wang3.hami.core.job",
+        "top.wang3.hami.core.aspect",
 })
 @Import(value = {HamiCommonConfig.class})
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")
 @Configuration
-@EnableScheduling()
+@EnableScheduling
 public class HamiCoreConfig {
 
 }

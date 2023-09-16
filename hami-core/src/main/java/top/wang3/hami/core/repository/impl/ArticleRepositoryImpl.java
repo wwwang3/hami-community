@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -28,8 +27,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     private final String[] fields = {"id", "user_id", "title", "summary", "picture", "category_id", "ctime", "mtime"};
     private final String[] full_fields = {"id", "user_id", "title", "summary", "content", "picture", "category_id", "ctime", "mtime"};
 
-    @Cacheable(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:info:'+#articleId",
-            cacheManager = Constants.RedisCacheManager)
     @Override
     public Article getArticleById(Integer articleId) {
         //no content
@@ -89,14 +86,8 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return super.save(article);
     }
 
-    @Caching(
-        evict = {
-            @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:info:'+#article.id",
-                    cacheManager = Constants.RedisCacheManager),
-            @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#article.id",
-                    cacheManager = Constants.RedisCacheManager)
-        }
-    )
+    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#article.id",
+            cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
     public boolean updateArticle(Article article) {
@@ -105,14 +96,8 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
 
-    @Caching(
-        evict = {
-            @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:info:'+#articleId",
-                    cacheManager = Constants.RedisCacheManager),
-            @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#articleId",
-                    cacheManager = Constants.RedisCacheManager)
-        }
-    )
+    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#articleId",
+            cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
     public boolean deleteArticle(Integer articleId, Integer userId) {

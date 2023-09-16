@@ -54,7 +54,7 @@ public class TagServiceImpl implements TagService {
     public List<TagDTO> getTagDTOsByIds(List<Integer> tagIds) {
         if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
         return ListMapperHandler.listTo(tagIds, id -> {
-            log.debug("tag_id: {}", id);
+//            log.debug("tag_id: {}", id);
             Tag tag = self.getTagById(id);
             return new TagDTO(id, tag.getName());
         });

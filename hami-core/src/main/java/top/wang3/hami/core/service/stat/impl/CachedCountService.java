@@ -1,17 +1,20 @@
 package top.wang3.hami.core.service.stat.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.service.stat.CountService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CachedCountService implements CountService {
 
     private final CountService origin;
@@ -35,24 +38,31 @@ public class CachedCountService implements CountService {
         return loadUserStatCache(redisKey, userId);
     }
 
+    @CostLog
     @Override
     public List<ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
-        ArrayList<ArticleStatDTO> dtos = new ArrayList<>();
-        for (Integer articleId : articleIds) {
-            ArticleStatDTO stat = getArticleStatById(articleId);
-            dtos.add(stat);
-        }
-        return dtos;
+        List<String> keys = ListMapperHandler.listTo(articleIds, id -> {
+            return Constants.COUNT_TYPE_ARTICLE + id;
+        });
+        return RedisClient.getMultiCacheObject(keys, (stat, index) -> {
+            return this.getArticleStatById(articleIds.get(index));
+        });
     }
 
+    @CostLog
     @Override
     public List<UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        userIds = userIds.stream().distinct().toList();
-        ArrayList<UserStat> stats = new ArrayList<>(userIds.size());
-        for (Integer useId : userIds) {
-            stats.add(getUserStatById(useId));
-        }
-        return stats;
+        final List<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.COUNT_TYPE_USER + id);
+        final List<Map<String, Integer>> stats = RedisClient.hMGetAll(keys);
+        return ListMapperHandler.listTo(stats, (stat, index) -> {
+            UserStat data;
+            if (stat == null || stat.isEmpty()) {
+                data = loadUserStatCache(keys.get(index), userIds.get(index));
+            } else {
+                data = CountService.readUserStatFromMap(stat, userIds.get(index));
+            }
+            return data;
+        });
     }
 
     private ArticleStatDTO loadArticleStatCache(String redisKey, Integer articleId) {

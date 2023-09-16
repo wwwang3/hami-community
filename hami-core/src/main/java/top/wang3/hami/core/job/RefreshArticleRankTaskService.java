@@ -7,7 +7,6 @@ import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.HotCounter;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 @Slf4j
 @SuppressWarnings(value = {"unchecked"})
@@ -52,7 +51,7 @@ public class RefreshArticleRankTaskService {
         }
     }
 
-    @Scheduled(fixedDelay = 600, initialDelay = 20, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 600, initialDelay = 10, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshOverallHotArticles() {
         try {

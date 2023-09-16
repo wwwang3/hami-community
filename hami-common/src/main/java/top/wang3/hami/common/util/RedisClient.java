@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
 /**
  * Redis工具类
@@ -102,6 +103,18 @@ public class RedisClient {
         Assert.isTrue(!keys.isEmpty() && keys.size() <= 20, "keys size must in [0, 20]");
         return redisTemplate.opsForValue()
                 .multiGet(keys);
+    }
+
+    public static <T> List<T> getMultiCacheObject(final List<String> keys, BiFunction<String, Integer, T> func) {
+        List<T> data = redisTemplate.opsForValue()
+                .multiGet(keys);
+        if (data == null || data.isEmpty()) return Collections.emptyList();
+        for (int i = 0; i < keys.size(); i++) {
+            if (data.get(i) == null) {
+                data.set(i, func.apply(keys.get(i), i));
+            }
+        }
+        return data;
     }
 
     /**
@@ -410,6 +423,39 @@ public class RedisClient {
                     .hGetAll(redisKey);
             return deserializeMap(byteMap);
         });
+    }
+
+    public static <T> List<Map<String, T>> hMGetAll(List<String> keys) {
+        return (List<Map<String, T>>) redisTemplate
+                .executePipelined((RedisCallback<Map<String, T>>) connection -> {
+                    for (String key : keys) {
+                        connection.hashCommands()
+                                .hGetAll(hashKeyBytes(key));
+                    }
+                    return null;
+                }, redisTemplate.getHashValueSerializer());
+    }
+
+    public static <T> List<Map<String, T>> hMGetAll(List<String> keys, BiFunction<String, Integer, Map<String, T>> provider) {
+        List<Object> list = redisTemplate
+                .executePipelined((RedisCallback<Object>) connection -> {
+                    for (String key : keys) {
+                        connection.hashCommands()
+                                .hGetAll(hashKeyBytes(key));
+                    }
+                    return null;
+                }, redisTemplate.getHashValueSerializer());
+        ArrayList<Map<String, T>> result = new ArrayList<>(list.size());
+        for (int i = 0; i < list.size(); i++) {
+            Object o = list.get(i);
+            if (o instanceof Map<?, ?> map && !map.isEmpty()) {
+                result.add((Map<String, T>) o);
+            } else {
+                Map<String, T> data = provider.apply(keys.get(i), i);
+                result.add(data);
+            }
+        }
+        return result;
     }
 
     public static <T> void hIncr(String key, String field, Integer cnt) {

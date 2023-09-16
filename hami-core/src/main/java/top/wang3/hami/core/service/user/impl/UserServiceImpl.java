@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.LoginProfile;
 import top.wang3.hami.common.dto.UserDTO;
@@ -17,6 +18,7 @@ import top.wang3.hami.common.dto.UserStat;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.common.ImageService;
@@ -91,7 +93,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userId == null || userId < 0) {
             throw new IllegalArgumentException("参数异常");
         }
-        String redisKey = "#userinfo:" + userId;
+        String redisKey = Constants.USER_INFO + userId;
         User user;
         if (!RedisClient.exist(redisKey)) {
             user = repository.getUserById(userId);
@@ -106,12 +108,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user;
     }
 
+    @CostLog
     @Override
     public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, OptionsBuilder builder) {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        List<User> users = ListMapperHandler.listTo(userIds, id -> self.getUserInfo(id));
+        List<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_INFO + id);
+        List<User> users = RedisClient.getMultiCacheObject(keys, (key, index) -> {
+           return self.getUserInfo(userIds.get(index));
+        });
         List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(users);
         if (builder == null || builder.stat) {
             //查询用户的粉丝数据

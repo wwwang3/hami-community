@@ -6,6 +6,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,16 @@ public class ListMapperHandler {
         }
         List<T> list = origin.subList(from, to);
         return listTo(list, mapper);
+    }
+
+    public static <T, R> List<R> listTo(List<T> origin, BiFunction<T, Integer, R> mapper) {
+        if (origin == null || origin.isEmpty()) return Collections.emptyList();
+        ArrayList<R> rs = new ArrayList<>(origin.size());
+        for (int i = 0; i < origin.size(); i++) {
+            R r = mapper.apply(origin.get(i), i);
+            rs.add(r);
+        }
+        return rs;
     }
 
     /**
@@ -115,7 +126,7 @@ public class ListMapperHandler {
         data.forEach(d -> {
             //忽略null
             U value = assemble.get(getter.apply(d));
-            if (value != null) {
+            if (value != null && d != null) {
                 setter.accept(d, value);
             }
         });

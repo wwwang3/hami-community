@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import top.wang3.hami.common.constant.Constants;
@@ -25,10 +26,11 @@ import java.util.List;
 @EnableFileStorage
 @EnableMessage
 @EnableCaching
+@EnableAspectJAutoProxy
 @Slf4j
 public class HamiCommunityApplication {
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(HamiCommunityApplication.class, args);
 //        test2();
     }
@@ -57,5 +59,6 @@ public class HamiCommunityApplication {
         long end = System.currentTimeMillis();
         log.info("test multi get cost: {}", end - start);
     }
+
 
 }

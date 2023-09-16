@@ -18,6 +18,7 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.repository.ArticleTagRepository;
 import top.wang3.hami.core.service.article.*;
@@ -27,8 +28,10 @@ import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -49,27 +52,41 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleTagRepository articleTagRepository;
     private final TagService tagService;
 
-    private ArticleService self;
+    private ArticleServiceImpl self;
 
     @Autowired
     @Lazy
-    public void setSelf(ArticleService self) {
+    public void setSelf(ArticleServiceImpl self) {
         this.self = self;
     }
 
     @Override
     public ArticleInfo getArticleInfoById(Integer id) {
-        Article article = articleRepository.getArticleById(id);
-        List<Integer> tagIds = articleTagService.getArticleTagIds(id);
-        return ArticleConverter.INSTANCE.toArticleInfo(article, tagIds);
+        String key = Constants.ARTICLE_INFO + id;
+        ArticleInfo info;
+        if (!RedisClient.exist(key)) {
+            Article article = articleRepository.getArticleById(id);
+            List<Integer> tagIds = articleTagRepository.getArticleTagIdsById(id);
+            info = ArticleConverter.INSTANCE.toArticleInfo(article, tagIds);
+            if (article == null) {
+                RedisClient.setCacheObject(key, null, 10, TimeUnit.SECONDS);
+            } else {
+                RedisClient.setCacheObject(key, info, 1, TimeUnit.HOURS);
+            }
+        } else {
+            info = RedisClient.getCacheObject(key);
+        }
+        return info;
     }
 
+    @CostLog
     @Override
     public PageData<ArticleDTO> listNewestArticles(ArticlePageParam param) {
+        if (param.getPageNum() > 50) return new PageData<>();
         Integer cateId = param.getCateId();
         Page<Article> page = param.toPage();
         //查询文章列表
-        List<ArticleInfo> articleInfos = this.listArticleByCate(page, cateId);
+        List<ArticleInfo> articleInfos = listArticleByCate(page, cateId);
         List<ArticleDTO> articleDTOS = ArticleConverter.INSTANCE.toArticleDTOS(articleInfos);
         buildArticleDTOs(articleDTOS, new OptionsBuilder());
         return PageData.<ArticleDTO>builder()
@@ -183,13 +200,26 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public boolean updateArticle(Article article) {
-        return articleRepository.updateArticle(article);
+        boolean success = articleRepository.updateArticle(article);
+        if (success) {
+            clearCache(article.getId());
+        }
+        return success;
     }
 
     @Transactional
     @Override
     public boolean deleteByArticleId(Integer articleId, Integer userId) {
-        return articleRepository.deleteArticle(articleId, userId);
+        boolean success = articleRepository.deleteArticle(articleId, userId);
+        if (success) {
+            clearCache(articleId);
+        }
+        return success;
+    }
+
+    private void clearCache(Integer id) {
+        String key = Constants.ARTICLE_INFO + id;
+        RedisClient.deleteObject(key);
     }
 
     private void buildArticleDTOs(List<ArticleDTO> articleDTOS,
@@ -213,11 +243,11 @@ public class ArticleServiceImpl implements ArticleService {
         });
         //查询文章数据
         builder.ifStat(() -> {
-            buildArticleStat(articleDTOS, articleIds);
+            self.buildArticleStat(articleDTOS, articleIds);
         });
         //查询用户行为(点赞，收藏)
         builder.ifInteract(() -> {
-            buildInteract(articleDTOS, articleIds);
+            self.buildInteract(articleDTOS, articleIds);
         });
     }
 
@@ -286,6 +316,9 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleRepository.listArticlesByCateId(cateId);
         //不出现意外情况这个方法每个分类只会调用一次
         //redis没数据或者Redis g了
+        if (cateId < 0 || cateId > 10007) {
+            return Collections.emptyList();
+        }
         return cacheToRedis(page, key, articles);
     }
 
@@ -297,14 +330,20 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     private List<ArticleInfo> listArticleByIds(List<Integer> ids) {
-        return ListMapperHandler.listTo(ids, self::getArticleInfoById);
+//        return ListMapperHandler.listTo(ids, self::getArticleInfoById);
+        List<String> keys = ListMapperHandler.listTo(ids, id -> Constants.ARTICLE_INFO + id);
+        return RedisClient.getMultiCacheObject(keys, (key, index) -> {
+           return self.getArticleInfoById(ids.get(index));
+        });
     }
 
     private List<Integer> cacheToRedis(Page<Article> page, String key, List<Article> articles) {
         var set = ListMapperHandler.listToZSet(articles, Article::getId, article -> {
             return (double) article.getCtime().getTime();
         });
-        RedisClient.zAddAll(key, set); //no-expire
+        if (!set.isEmpty()) {
+            RedisClient.zAddAll(key, set); //no-expire
+        }
         int current = (int) page.getCurrent();
         int size = (int) page.getSize();
         page.setTotal(articles.size());  //应该没人会在首页翻50页吧^_^
