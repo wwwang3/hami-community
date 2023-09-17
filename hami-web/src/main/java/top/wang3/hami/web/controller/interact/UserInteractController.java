@@ -4,17 +4,16 @@ package top.wang3.hami.web.controller.interact;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.UserDTO;
+import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.dto.request.LikeItemParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
-import top.wang3.hami.common.model.ArticleCollect;
-import top.wang3.hami.common.model.LikeItem;
-import top.wang3.hami.common.model.ReadingRecordDTO;
-import top.wang3.hami.common.model.UserFollow;
+import top.wang3.hami.common.model.*;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ReadingRecordService;
 import top.wang3.hami.core.service.interact.UserInteractService;
@@ -147,6 +146,28 @@ public class UserInteractController {
                 .data(data)
                 .build();
         return Result.successData(pageData);
+    }
+
+    @PostMapping("/comment/submit")
+    public Result<Comment> publishComment(@RequestBody @Valid CommentParam param) {
+        Comment comment = userInteractService.publishComment(param);
+        return Result.ofNullable(comment)
+                .orElse("发表失败");
+    }
+
+    @PostMapping("/reply/submit")
+    public Result<Comment> publishReply(@RequestBody
+            @Validated(value = CommentParam.Reply.class) CommentParam param) {
+        Comment comment = userInteractService.publishReply(param);
+        return Result.ofNullable(comment)
+                .orElse("回复失败");
+    }
+
+    @PostMapping("/comment/delete")
+    public Result<Void> deleteComment(@RequestParam("id") Integer id) {
+        boolean success = userInteractService.deleteComment(id);
+        return Result.ofTrue(success)
+                .orElse("删除失败");
     }
 
 }

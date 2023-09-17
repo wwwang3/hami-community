@@ -9,11 +9,15 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.notify.CollectMsg;
 import top.wang3.hami.common.dto.notify.FollowMsg;
 import top.wang3.hami.common.dto.notify.LikeMsg;
+import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -22,12 +26,15 @@ import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.CommentMapper;
+import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 import top.wang3.hami.core.service.article.ArticleStatService;
+import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
@@ -48,6 +55,8 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final NotifyMsgPublisher notifyMsgPublisher;
     private final ArticleStatService articleStatService;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final CommentService commentService;
     @Resource
     ArticleMapper articleMapper;
 
@@ -104,7 +113,7 @@ public class UserInteractServiceImpl implements UserInteractService {
             if (Constants.LIKE_TYPE_ARTICLE == type) {
                 added = articleStatService.increaseLikes(itemId, 1);
             } else {
-                added = commentMapper.updateLikes(itemId) == 1;
+                added = commentRepository.increaseLikes(itemId);
             }
             return added;
         });
@@ -154,6 +163,93 @@ public class UserInteractServiceImpl implements UserInteractService {
         if (!success) return false;
         //decrease
         return articleStatService.decreaseCollects(articleId, 1);
+    }
+
+    @Override
+    public Comment publishComment(CommentParam param) {
+        //发表评论
+        //todo 敏感词过滤
+        return publishComment(param, false);
+    }
+
+    @Override
+    public Comment publishReply(CommentParam param) {
+        //回复
+        return publishComment(param, true);
+    }
+
+    @Override
+    public boolean deleteComment(Integer id) {
+        Comment comment = commentRepository.getById(id);
+        int userId = LoginUserContext.getLoginUserId();
+        int deleted = commentRepository.deleteComment(userId, id);
+        if (deleted > 0) {
+            return articleStatService.decreaseComments(comment.getArticleId(), deleted);
+        }
+        return false;
+    }
+
+    private Comment publishComment(CommentParam param, boolean reply) {
+        Comment comment = buildComment(param, reply);
+        //评论
+        Boolean success = transactionTemplate.execute(status -> {
+            boolean saved = commentRepository.save(comment);
+            if (saved) {
+                return articleStatService.increaseComments(param.getArticleId(), 1);
+            }
+            return false;
+        });
+        if (!Boolean.TRUE.equals(success)) {
+            return null;
+        }
+        Object o = reply ? CommentConverter.INSTANCE.toReplyMsg(comment) :
+                CommentConverter.INSTANCE.toCommentMsg(comment);
+        notifyMsgPublisher.publishNotify(o);
+        return comment;
+    }
+
+    private Comment buildComment(CommentParam param, boolean reply) {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        Integer author = articleMapper.getArticleAuthor(param.getArticleId());
+        if (author == null) {
+            throw new IllegalArgumentException("参数错误");
+        }
+        Comment comment = CommentConverter.INSTANCE.toComment(param);
+        comment.setIsAuthor(loginUserId == author);
+        comment.setUserId(loginUserId); //评论用户
+        comment.setIpInfo(IpContext.getIpInfo()); //IP信息
+        if (reply) {
+            return buildReply(comment, param);
+        }
+        return comment;
+    }
+
+    private Comment buildReply(Comment comment, CommentParam param) {
+        //回复, parentId和rootId必须都大于0
+        //check rootId;
+        //check parentId;
+        //一级评论 rootId和parentId都为0
+        //二级评论 rootId = parentId != 0
+        Integer rootId = param.getRootId();
+        Integer parentId = param.getParentId();
+        Assert.isTrue(rootId != 0, "rootId can not be 0");
+        Assert.isTrue(rootId != 0, "parentId can not be 0");
+        Comment parentComemnt = commentRepository.getById(parentId);
+        if (parentComemnt == null) {
+            throw new ServiceException("参数错误");
+        } else if (rootId == parentId && parentComemnt.getRootId() != 0) {
+            //二级评论 回复的是根评论
+            //根评论的rootId应该为0
+            throw new ServiceException("参数错误");
+        } else if (parentComemnt.getRootId() != rootId) {
+            //三级以上的评论, 必须在同一个根评论下
+            throw new ServiceException("参数错误");
+        }
+        comment.setRootId(rootId);
+        comment.setParentId(parentId);
+        //回复的是父评论的userId
+        comment.setReplyTo(parentComemnt.getUserId());
+        return comment;
     }
 
     @Override
@@ -302,8 +398,8 @@ public class UserInteractServiceImpl implements UserInteractService {
         int current = (int) page.getCurrent();
         int size = (int) page.getSize();
         var tuples = ListMapperHandler.listToZSet(collects, ArticleCollect::getArticleId, a -> {
-                return (double) a.getMtime().getTime();
-            }
+                    return (double) a.getMtime().getTime();
+                }
         );
         setZsetCache(key, tuples);
         page.setTotal(Math.min(1000, collects.size()));

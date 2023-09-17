@@ -35,6 +35,10 @@ public class PageData<T> {
         return new PageData<>(page.getCurrent(), page.getTotal(), page.getRecords());
     }
 
+    public static <T> PageData<T> empty() {
+        return new PageData<>();
+    }
+
 
 
 }

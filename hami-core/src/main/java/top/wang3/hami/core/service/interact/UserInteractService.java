@@ -1,7 +1,9 @@
 package top.wang3.hami.core.service.interact;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
 
@@ -22,6 +24,12 @@ public interface UserInteractService {
     boolean collect(int articleId);
     boolean cancelCollect(int articleId);
 
+    Comment publishComment(CommentParam param);
+
+    Comment publishReply(CommentParam param);
+
+    boolean deleteComment(Integer id);
+
     boolean hasFollowed(int userId, int followingId);
 
     Map<Integer, Boolean> hasFollowed(int userId, List<Integer> followings);
@@ -39,7 +47,7 @@ public interface UserInteractService {
 
     Integer getUserFollowingCount(Integer userId);
 
-    Integer getUserFollowerCount(Integer userId);;
+    Integer getUserFollowerCount(Integer userId);
 
     List<Integer> getUserCollectArticles(Page<ArticleCollect> page, Integer userId);
 

@@ -46,11 +46,12 @@ public class ListMapperHandler {
 
     /**
      * 将List中的元素转换为另一种元素
+     *
      * @param origin origin
      * @param mapper mapper
+     * @param <T>    list元素泛型
+     * @param <R>    返回列表元素泛型
      * @return List<R>
-     * @param <T> list元素泛型
-     * @param <R> 返回列表元素泛型
      */
     public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper) {
         return Optional.ofNullable(origin)
@@ -66,7 +67,7 @@ public class ListMapperHandler {
     }
 
     public static <T, R> Set<ZSetOperations.TypedTuple<R>> listToZSet(List<T> data, Function<T, R> memberMapper,
-                                                                 Function<T, Double> scoreMapper) {
+                                                                      Function<T, Double> scoreMapper) {
         return listToSet(data, item -> {
             R member = memberMapper.apply(item);
             Double score = scoreMapper.apply(item);
@@ -80,9 +81,8 @@ public class ListMapperHandler {
                 .orElse(Collections.emptyMap());
     }
 
-    public static <T, K, U> Map<K, U> listToMap(List<T> data,
-                                                                    Function<T, K> keyMapper,
-                                                                    Function<T, U> valueMapper) {
+    public static <T, K, U> Map<K, U> listToMap(List<T> data, Function<T, K> keyMapper,
+                                                Function<T, U> valueMapper) {
         return Optional.ofNullable(data)
                 .map(d -> d.stream().collect(Collectors.toMap(keyMapper, valueMapper)))
                 .orElse(Collections.emptyMap());
@@ -93,20 +93,21 @@ public class ListMapperHandler {
      * 装配 将List<U> assemble ----> Map<R, U> map
      * 确保R对应的值唯一
      * data: List<Article> assemble: List<User> ===>
-     *   doAssemble(data,
-     *      (article) -> article.getUserId, ===> userId
-     *      assemble,
-     *      (user) -> user.getUserId, ===> Map<userId, user>
-     *      (article, user) -> article.setUserInfo(user)
+     * doAssemble(data,
+     * (article) -> article.getUserId, ===> userId
+     * assemble,
+     * (user) -> user.getUserId, ===> Map<userId, user>
+     * (article, user) -> article.setUserInfo(user)
      * )
-     * @param data 即将装配的对象
-     * @param getter 从T中获取某个字段的值
+     *
+     * @param data     即将装配的对象
+     * @param getter   从T中获取某个字段的值
      * @param assemble 装配对象
-     * @param mapKey 装配对象某个字段的值
-     * @param setter 设置
-     * @param <T> 待装配对象泛型
-     * @param <R> 待装配对象的某个字段的泛型
-     * @param <U> 装配对象泛型
+     * @param mapKey   装配对象某个字段的值
+     * @param setter   设置
+     * @param <T>      待装配对象泛型
+     * @param <R>      待装配对象的某个字段的泛型
+     * @param <U>      装配对象泛型
      */
     public static <T, R, U> void doAssemble(List<T> data, Function<T, R> getter, List<U> assemble,
                                             Function<U, R> mapKey, BiConsumer<T, U> setter) {

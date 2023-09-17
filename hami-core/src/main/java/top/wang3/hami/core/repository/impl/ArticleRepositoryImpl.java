@@ -1,5 +1,6 @@
 package top.wang3.hami.core.repository.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.dto.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
@@ -105,6 +108,12 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .eq("user_id", userId)
                 .eq("id", articleId)
                 .remove();
+    }
+
+    @Override
+    public List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword) {
+        if (!StringUtils.hasText(keyword)) return Collections.emptyList();
+        return getBaseMapper().searchArticle(page, keyword);
     }
 
 }

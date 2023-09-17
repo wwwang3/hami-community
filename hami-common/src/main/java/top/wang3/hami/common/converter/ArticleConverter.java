@@ -46,6 +46,7 @@ public interface ArticleConverter {
     CategoryDTO toCategoryDTO(Category category);
 
     ArticleStatDTO toArticleStatDTO(ArticleStat stat);
+
     List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
 
     List<ReadingRecordDTO> toReadingRecordDTO(List<ReadingRecord> records);

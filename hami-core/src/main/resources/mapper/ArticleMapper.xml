@@ -71,4 +71,14 @@
     </where>
     order by t1.ctime desc
   </select>
+
+  <select id="searchArticle" resultType="top.wang3.hami.common.dto.ArticleSearchDTO">
+    select id, user_id, category_id, picture, title, summary, ctime
+    from article
+    where
+      deleted = 0
+        and
+      title like concat('%', #{keyword}, '%') or summary like concat('%', #{keyword}, '%')
+    order by ctime desc
+  </select>
 </mapper>

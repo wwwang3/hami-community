@@ -15,7 +15,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "`comment`")
+@TableName(value = "`comment`", autoResultMap = true)
 public class Comment {
     /**
      * 主键ID
@@ -76,6 +76,7 @@ public class Comment {
      */
     @TableField(value = "reply_to")
     private Integer replyTo;
+
 
     @TableField(value = "likes")
     private Integer likes = 0;
