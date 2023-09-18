@@ -34,4 +34,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
         select user_id from article where id = #{articleId} and deleted = 0;
     """)
     Integer getArticleAuthor(Integer articleId);
+
+    List<Integer> selectFollowUserArticles(Page<Article> page, @Param("user_id") int loginUserId);
 }

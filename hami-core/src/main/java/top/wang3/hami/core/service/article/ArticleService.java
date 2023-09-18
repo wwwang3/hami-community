@@ -6,6 +6,7 @@ import top.wang3.hami.common.dto.ArticleInfo;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.model.Article;
 
@@ -25,6 +26,9 @@ public interface ArticleService {
 
     PageData<ArticleDTO> getUserArticles(UserArticleParam param);
 
+    PageData<ArticleDTO> getFollowUserArticles(PageParam param);
+
+
     boolean checkArticleViewLimit(int articleId, int authorId);
 
     boolean deleteByArticleId(Integer userId, Integer articleId);
@@ -32,4 +36,5 @@ public interface ArticleService {
     boolean saveArticle(Article article);
 
     boolean updateArticle(Article article);
+
 }

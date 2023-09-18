@@ -26,4 +26,6 @@ public interface ArticleRepository extends IService<Article> {
     boolean deleteArticle(Integer articleId, Integer userId);
 
     List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword);
+
+    List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId);
 }

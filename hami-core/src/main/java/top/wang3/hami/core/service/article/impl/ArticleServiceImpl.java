@@ -14,6 +14,7 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ReadingRecord;
@@ -22,7 +23,9 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.repository.ArticleTagRepository;
-import top.wang3.hami.core.service.article.*;
+import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.service.article.CategoryService;
+import top.wang3.hami.core.service.article.TagService;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
@@ -43,12 +46,10 @@ public class ArticleServiceImpl implements ArticleService {
     @Resource
     RabbitTemplate rabbitTemplate;
 
-    private final ArticleTagService articleTagService;
     private final CategoryService categoryService;
     private final UserService userService;
     private final UserInteractService userInteractService;
     private final CountService countService;
-    private final ArticleStatService articleStatService;
     private final ArticleRepository articleRepository;
     private final ArticleTagRepository articleTagRepository;
     private final TagService tagService;
@@ -121,6 +122,8 @@ public class ArticleServiceImpl implements ArticleService {
         dto.setStat(stat);
         if (checkArticleViewLimit(articleId, article.getUserId())) {
             dto.getStat().setViews(stat.getViews() + 1);
+            Integer totalViews = dto.getAuthor().getStat().getTotalViews();
+            dto.getAuthor().getStat().setTotalViews(totalViews + 1);
         }
         //作者信息
         UserDTO author = userService.getAuthorInfoById(dto.getUserId());
@@ -184,6 +187,20 @@ public class ArticleServiceImpl implements ArticleService {
                 .total(total)
                 .data(dtos)
                 .pageNum(page.getCurrent())
+                .build();
+    }
+
+    @Override
+    public PageData<ArticleDTO> getFollowUserArticles(PageParam param) {
+        //获取关注用户的最新文章
+        int loginUserId = 2;
+        Page<Article> page = param.toPage();
+        List<Integer> articleIds = articleRepository.listFollowUserArticles(page, loginUserId);
+        List<ArticleDTO> dtos = this.getArticleByIds(articleIds, null);
+        return PageData.<ArticleDTO>builder()
+                .pageNum(page.getCurrent())
+                .data(dtos)
+                .total(page.getTotal())
                 .build();
     }
 

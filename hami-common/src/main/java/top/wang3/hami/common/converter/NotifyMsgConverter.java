@@ -28,8 +28,7 @@ public interface NotifyMsgConverter {
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "title", ignore = true)
     @Mapping(target = "content", ignore = true)
-    @Mapping(target = "commentId", ignore = true)
-    @Mapping(target = "articleId", source = "itemId")
+    @Mapping(target = "itemId", source = "itemId")
     DiggMsgDTO toDiggMsg(NotifyMsg notifyMsg);
 
     List<DiggMsgDTO> toDiggMsgs(List<NotifyMsg> msgs);

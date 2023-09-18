@@ -81,4 +81,12 @@
       title like concat('%', #{keyword}, '%') or summary like concat('%', #{keyword}, '%')
     order by ctime desc
   </select>
+
+  <select id="selectFollowUserArticles" resultType="java.lang.Integer">
+    select article.id
+    from article
+    join user_follow on article.user_id = user_follow.following
+    where user_follow.user_id = #{user_id} and user_follow.`state` = 1 and article.deleted = 0
+    order by article.id desc
+  </select>
 </mapper>

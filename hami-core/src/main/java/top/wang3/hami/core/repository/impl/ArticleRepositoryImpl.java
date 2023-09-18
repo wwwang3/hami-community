@@ -116,4 +116,10 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return getBaseMapper().searchArticle(page, keyword);
     }
 
+    @Override
+    public List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId) {
+        return getBaseMapper().selectFollowUserArticles(page, loginUserId);
+    }
+
+
 }

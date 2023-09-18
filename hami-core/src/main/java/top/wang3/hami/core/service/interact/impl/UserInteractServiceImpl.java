@@ -30,7 +30,6 @@ import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 import top.wang3.hami.core.service.article.ArticleStatService;
-import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
@@ -56,7 +55,6 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final ArticleStatService articleStatService;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final CommentService commentService;
     @Resource
     ArticleMapper articleMapper;
 

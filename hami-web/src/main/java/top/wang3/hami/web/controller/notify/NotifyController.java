@@ -34,7 +34,7 @@ public class NotifyController {
                 .successData(data);
     }
 
-    @GetMapping("/list/system")
+    @GetMapping("/list/comment")
     public Result<PageData<CommentMsgDTO>> listCommentMsg(@RequestParam("pageNum") long pageNum,
                                                           @RequestParam("pageSize") long pageSize) {
         PageData<CommentMsgDTO> data = notifyMsgService.listCommentMsg(new PageParam(pageNum, pageSize));
@@ -42,7 +42,7 @@ public class NotifyController {
                 .successData(data);
     }
 
-    @GetMapping("/list/system")
+    @GetMapping("/list/digg")
     public Result<PageData<DiggMsgDTO>> listLikeMsg(@RequestParam("pageNum") long pageNum,
                                                      @RequestParam("pageSize") long pageSize) {
         PageData<DiggMsgDTO> data = notifyMsgService.listLikeAndCollectMsg(new PageParam(pageNum, pageSize));
@@ -50,7 +50,7 @@ public class NotifyController {
                 .successData(data);
     }
 
-    @GetMapping("/list/system")
+    @GetMapping("/list/follow")
     public Result<PageData<FollowMsgDTO>> listFollowMsg(@RequestParam("pageNum") long pageNum,
                                                      @RequestParam("pageSize") long pageSize) {
         PageData<FollowMsgDTO> data = notifyMsgService.listFollowingMsg(new PageParam(pageNum, pageSize));
@@ -58,7 +58,7 @@ public class NotifyController {
                 .successData(data);
     }
 
-    @GetMapping("/list/system")
+    @GetMapping("/list/article")
     public Result<PageData<ArticleMsgDTO>> listArticleMsg(@RequestParam("pageNum") long pageNum,
                                                      @RequestParam("pageSize") long pageSize) {
         PageData<ArticleMsgDTO> data = notifyMsgService.listArticleMsg(new PageParam(pageNum, pageSize));

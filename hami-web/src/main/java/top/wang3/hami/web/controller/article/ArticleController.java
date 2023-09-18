@@ -9,6 +9,7 @@ import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.HotArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.core.service.article.ArticleRankService;
 import top.wang3.hami.core.service.article.ArticleService;
@@ -33,6 +34,12 @@ public class ArticleController {
                 .orElse("获取失败");
     }
 
+    @PostMapping("/list/recommend/follow")
+    public Result<PageData<ArticleDTO>> getFollowUserArticles(@RequestBody @Valid PageParam param) {
+        PageData<ArticleDTO> articles = articleService.getFollowUserArticles(param);
+        return Result.successData(articles);
+    }
+
     @GetMapping("/detail")
     public Result<ArticleContentDTO> getArticleContentById(@RequestParam("articleId") int articleId) {
         ArticleContentDTO articleContentDTO = articleService.getArticleContentById(articleId);
@@ -42,13 +49,13 @@ public class ArticleController {
 
     @GetMapping("/rank/hot")
     public Result<List<HotArticleDTO>> getHotArticles(@RequestParam(value = "category_id", required = false)
-                                                          Integer categoryId) {
+                                                      Integer categoryId) {
         List<HotArticleDTO> articles = rankService.getHotArticles(categoryId);
         return Result.successData(articles);
     }
 
-    @GetMapping("/query_list")
-    public Result<PageData<ArticleDTO>> getUserArticles(@Valid UserArticleParam param) {
+    @PostMapping("/query_list")
+    public Result<PageData<ArticleDTO>> getUserArticles(@RequestBody @Valid UserArticleParam param) {
         PageData<ArticleDTO> data = articleService.getUserArticles(param);
         return Result.successData(data);
     }
