@@ -23,7 +23,6 @@ public class ArticleDraftController {
 
     private final ArticleDraftService articleDraftService;
 
-
     @GetMapping("/drafts")
     public Result<PageData<ArticleDraftDTO>> getDrafts(@RequestParam("pageNum") long pageNum,
                                                        @RequestParam("pageSize") long pageSize) {

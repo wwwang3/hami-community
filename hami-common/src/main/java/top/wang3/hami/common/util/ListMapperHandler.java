@@ -55,7 +55,8 @@ public class ListMapperHandler {
      */
     public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper) {
         return Optional.ofNullable(origin)
-                .map(o -> o.stream().map(mapper).toList())
+                .map(o -> o.stream().map(mapper).distinct()
+                        .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 

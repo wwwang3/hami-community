@@ -55,7 +55,6 @@ public interface CommentConverter {
                   .content(comment.getContent())
                   .articleId(comment.getArticleId())
                   .replyId(comment.getId())
-                  .parent(comment.getParentId())
                   .build();
       }
 

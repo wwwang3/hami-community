@@ -13,13 +13,12 @@
     <result column="detail" property="detail" />
     <result column="type" property="type" />
     <result column="state" property="state" />
-    <result column="deleted" property="deleted" />
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, item_id, item_name, related_id, sender, receiver, detail, `type`, `state`, deleted, 
+    id, item_id, item_name, related_id, sender, receiver, detail, `type`, `state`,
     ctime, mtime
   </sql>
 </mapper>

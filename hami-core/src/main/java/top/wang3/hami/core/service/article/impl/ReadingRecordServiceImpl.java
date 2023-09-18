@@ -12,6 +12,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.model.ReadingRecordDTO;
@@ -62,7 +63,7 @@ public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, R
             return null;
         }
         List<Integer> articleIds = ListMapperHandler.listTo(records, ReadingRecord::getArticleId);
-        ArticleService.OptionsBuilder builder = new ArticleService.OptionsBuilder()
+        ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
                 .noTags()
                 .noInteract();
         List<ArticleDTO> articleDTOS = articleService.getArticleByIds(articleIds, builder);

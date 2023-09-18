@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.*;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.CommentPageParam;
-import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.annotation.CostLog;
@@ -68,7 +68,7 @@ public class CommentServiceImpl implements CommentService {
         page.setSearchCount(false);
         List<Comment> comments = commentRepository.listReply(page, articleId, rootId);
         List<CommentDTO> dtos = CommentConverter.INSTANCE.toCommentDTO(comments);
-        buildUserInfo(dtos, true);
+        buildUserInfo(dtos);
         buildHasLiked(dtos);
         return PageData.<CommentDTO>builder()
                 .pageNum(page.getCurrent())
@@ -86,24 +86,6 @@ public class CommentServiceImpl implements CommentService {
         return dto;
     }
 
-    @Override
-    public CommentDTO publishComment(CommentParam param) {
-        //发表评论
-        int userId = LoginUserContext.getLoginUserId();
-
-    }
-
-    @Override
-    public CommentDTO publishReply(CommentParam param) {
-        return null;
-    }
-
-    @Override
-    public int deleteComment(Integer id) {
-
-
-    }
-
     private void buildIndexReply(List<CommentDTO> dtos) {
         dtos.forEach(dto -> {
             ReplyDTO reply = this.listIndexReply(dto.getId());
@@ -114,7 +96,7 @@ public class CommentServiceImpl implements CommentService {
     private void buildUserInfo(List<CommentDTO> dtos) {
         Collection<Integer> set = getUserId(dtos);
         List<Integer> userIds = set.stream().toList();
-        var builder = new UserService.OptionsBuilder()
+        var builder = new UserOptionsBuilder()
                 .noStat()
                 .noFollowState();
         List<UserDTO> users = userService.getAuthorInfoByIds(userIds, builder);

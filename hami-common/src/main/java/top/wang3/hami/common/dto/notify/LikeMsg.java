@@ -4,6 +4,7 @@ package top.wang3.hami.common.dto.notify;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.constant.Constants;
 
 @Data
 @AllArgsConstructor
@@ -16,9 +17,9 @@ public class LikeMsg implements Notify {
     int likerId;
     int itemId;
     int itemType;
-
     @Override
     public int getNotifyType() {
-        return NotifyType.LIKE.type;
+        return itemType == Constants.LIKE_TYPE_ARTICLE ? NotifyType.ARTICLE_LIKE.getType() :
+                NotifyType.COMMENT_LIKE.getType();
     }
 }

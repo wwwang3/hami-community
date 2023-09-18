@@ -13,10 +13,12 @@ import top.wang3.hami.common.dto.notify.*;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.core.mapper.ArticleMapper;
+import top.wang3.hami.core.mapper.CommentMapper;
 import top.wang3.hami.core.service.common.NotifyMsgService;
 import top.wang3.hami.core.service.user.UserFollowService;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Component
@@ -34,6 +36,9 @@ public class NotifyMsgQueueListener {
 
     @Resource
     ArticleMapper articleMapper;
+
+    @Resource
+    CommentMapper commentMapper;
 
     @PostConstruct
     public void init() {
@@ -96,20 +101,16 @@ public class NotifyMsgQueueListener {
     public void handleLikeMsg(LikeMsg msg) {
         try {
             int notifyType = msg.getNotifyType();
-            int likerId = msg.getLikerId();
             int itemId = msg.getItemId();
-            Integer authorId = articleMapper.getArticleAuthorId(itemId);
-            //文章点赞/评论点赞
-            //要是评论ID和文章ID重复咋办
-            if (notifyMsgService.checkExist(likerId, itemId, notifyType)) {
-                //对该文章点过赞
-                //用户取消赞也不管了
-                return;
-            }
+            int sender = msg.getLikerId();
+            Integer receiver = commentMapper.getCommentUserById(itemId);
+            if (receiver == sender) return;
+            if (notifyMsgService.checkExist(sender, receiver, notifyType)) return;
             NotifyMsg notifyMsg = NotifyMsg.builder()
+                    .itemId(itemId)
                     .relatedId(itemId) //xx赞了你的文章
-                    .sender(likerId)
-                    .receiver(authorId)
+                    .sender(sender)
+                    .receiver(receiver)
                     .type(notifyType)
                     .build();
             notifyMsgService.saveMsg(notifyMsg);
@@ -121,13 +122,17 @@ public class NotifyMsgQueueListener {
     @RabbitHandler
     public void handleCommentMsg(CommentMsg commentMsg) {
         try {
+            //作者自己发的评论不要通知
+            int sender = commentMsg.getUserId();
+            int receiver = commentMsg.getCommentTo();
+            if (sender == receiver) return;
             NotifyMsg notifyMsg = NotifyMsg.builder()
                     .itemId(commentMsg.getArticleId())
                     .relatedId(commentMsg.getCommentId())
-                    .sender(commentMsg.getUserId()) //谁评论的
-                    .receiver(commentMsg.getCommentTo())
+                    .sender(sender) //谁评论的
+                    .receiver(receiver)
                     .type(commentMsg.getNotifyType())
-                    .detail(commentMsg.getContent()) //todo 感觉冗余用户信息等也可以，查询还得连表
+                    .detail(commentMsg.getContent())
                     .build();
             notifyMsgService.saveMsg(notifyMsg);
         } catch (Exception e) {
@@ -138,11 +143,14 @@ public class NotifyMsgQueueListener {
     @RabbitHandler
     public void handleReply(ReplyMsg msg) {
         try {
+            int receiver = msg.getReplyTo();
+            int sender = msg.getUserId();
+            if (receiver == sender) return; //自己回复自己
             NotifyMsg notifyMsg = NotifyMsg.builder()
                     .itemId(msg.getArticleId())
-                    .relatedId(msg.getArticleId())
+                    .relatedId(msg.getReplyId())
                     .sender(msg.getUserId())
-                    .receiver(msg.getReplyTo())
+                    .receiver(receiver)
                     .detail(msg.getContent())
                     .type(msg.getNotifyType())
                     .build();
@@ -159,14 +167,12 @@ public class NotifyMsgQueueListener {
             int userId = msg.getUserId();
             int articleId = msg.getArticleId();
             int type = msg.getNotifyType();
-            Integer authorId = articleMapper.getArticleAuthorId(articleId);
-            if (notifyMsgService.checkExist(userId, authorId, type)) {
-                return;
-            }
+            Integer receiver = getAuthorId(userId, articleId, type);
             NotifyMsg notifyMsg = NotifyMsg.builder()
+                    .itemId(articleId)
                     .relatedId(articleId) //x收藏了你的文章
                     .sender(userId)
-                    .receiver(authorId)
+                    .receiver(receiver)
                     .type(type)
                     .build();
             notifyMsgService.saveMsg(notifyMsg);
@@ -176,6 +182,14 @@ public class NotifyMsgQueueListener {
     }
 
     private void logError(Exception e) {
-        log.warn("failed to process message, error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+        log.error("failed to process message, error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+    }
+
+    private Integer getAuthorId(Integer sender, Integer articleId, Integer type) {
+        Integer authorId = articleMapper.getArticleAuthorId(articleId);
+        if (Objects.equals(sender, authorId)) return null;
+        boolean exist = notifyMsgService.checkExist(sender, authorId, type);
+        if (!exist) return authorId;
+        return null;
     }
 }

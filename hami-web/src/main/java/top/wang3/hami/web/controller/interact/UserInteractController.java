@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.UserDTO;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.dto.request.LikeItemParam;
 import top.wang3.hami.common.dto.request.PageParam;
@@ -119,10 +120,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
         List<Integer> followings = userInteractService.getUserFollowings(page, param.getUserId());
-        UserService.OptionsBuilder builder = new UserService.OptionsBuilder()
-                .noFollowState()
-                .noStat();
-        List<UserDTO> data = userService.getAuthorInfoByIds(followings, builder);
+        List<UserDTO> data = userService.getAuthorInfoByIds(followings, UserOptionsBuilder.justInfo());
         data.forEach(d -> d.setFollowed(true));
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
                 .pageNum(param.getPageNum())
@@ -137,7 +135,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
         List<Integer> followers = userInteractService.getUserFollowers(page, param.getUserId());
-        UserService.OptionsBuilder builder = new UserService.OptionsBuilder()
+        UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
         List<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()

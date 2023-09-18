@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.dto.LoginProfile;
 import top.wang3.hami.common.dto.UserDTO;
 import top.wang3.hami.common.dto.UserProfile;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.model.User;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface UserService extends IService<User> {
 
     User getUserInfo(Integer userId);
 
-    List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, OptionsBuilder builder);
+    List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, UserOptionsBuilder builder);
 
     UserDTO getAuthorInfoById(int userId);
 
@@ -25,19 +26,6 @@ public interface UserService extends IService<User> {
     boolean updateProfile(User user);
 
 
-    class OptionsBuilder {
-        public boolean stat = true;
-        public boolean follow = true;
 
-        public OptionsBuilder noStat() {
-            stat = false;
-            return this;
-        }
-        public OptionsBuilder noFollowState(){
-            follow = false;
-            return this;
-        }
-
-    }
 
 }

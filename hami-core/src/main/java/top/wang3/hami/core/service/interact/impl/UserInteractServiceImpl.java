@@ -117,8 +117,7 @@ public class UserInteractServiceImpl implements UserInteractService {
             }
             return added;
         });
-        if (Boolean.TRUE.equals(updated) && Constants.LIKE_TYPE_ARTICLE == type) {
-            //文章点赞 评论先不管
+        if (Boolean.TRUE.equals(updated)) {
             notifyMsgPublisher.publishNotify(new LikeMsg(loginUserId, itemId, type));
         }
         return true;

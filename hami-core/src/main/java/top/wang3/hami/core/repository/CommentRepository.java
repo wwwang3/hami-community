@@ -19,4 +19,6 @@ public interface CommentRepository extends IService<Comment> {
     boolean increaseLikes(Integer id);
 
     int deleteComment(Integer userId, Integer id);
+
+    List<Comment> listCommentById(List<Integer> commentIds);
 }

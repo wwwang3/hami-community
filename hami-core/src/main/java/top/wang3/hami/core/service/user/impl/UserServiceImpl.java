@@ -15,6 +15,7 @@ import top.wang3.hami.common.dto.LoginProfile;
 import top.wang3.hami.common.dto.UserDTO;
 import top.wang3.hami.common.dto.UserProfile;
 import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
@@ -110,7 +111,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @CostLog
     @Override
-    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, OptionsBuilder builder) {
+    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, UserOptionsBuilder builder) {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }

@@ -12,4 +12,9 @@ public interface CommentMapper extends BaseMapper<Comment> {
         select 1 from comment where id = #{commentId} and deleted = 0;
     """)
     boolean isCommentExist(Integer commentId);
+
+    @Select("""
+        select user_id from comment where id = #{id} and deleted = 0;
+    """)
+    Integer getCommentUserById(Integer id);
 }

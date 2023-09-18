@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.*;
+import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.model.Article;
@@ -79,6 +80,11 @@ public class ArticleServiceImpl implements ArticleService {
         return info;
     }
 
+    @Override
+    public List<ArticleInfo> getArticleInfoByIds(List<Integer> ids) {
+        return listArticleByIds(ids);
+    }
+
     @CostLog
     @Override
     public PageData<ArticleDTO> listNewestArticles(ArticlePageParam param) {
@@ -88,7 +94,7 @@ public class ArticleServiceImpl implements ArticleService {
         //查询文章列表
         List<ArticleInfo> articleInfos = listArticleByCate(page, cateId);
         List<ArticleDTO> articleDTOS = ArticleConverter.INSTANCE.toArticleDTOS(articleInfos);
-        buildArticleDTOs(articleDTOS, new OptionsBuilder());
+        buildArticleDTOs(articleDTOS, new ArticleOptionsBuilder());
         return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
@@ -149,7 +155,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleDTO> getArticleByIds(List<Integer> ids, OptionsBuilder builder) {
+    public List<ArticleDTO> getArticleByIds(List<Integer> ids, ArticleOptionsBuilder builder) {
         List<ArticleInfo> articles = listArticleByIds(ids);
         List<ArticleDTO> dtos = ArticleConverter.INSTANCE.toArticleDTOS(articles);
         buildArticleDTOs(dtos, builder);
@@ -223,11 +229,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private void buildArticleDTOs(List<ArticleDTO> articleDTOS,
-                                  OptionsBuilder builder) {
+                                  ArticleOptionsBuilder builder) {
         List<Integer> articleIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getId);
         List<Integer> userIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getUserId);
         if (builder == null) {
-            builder = new OptionsBuilder();
+            builder = new ArticleOptionsBuilder();
         }
         //查询文章分类
         builder.ifCate(() -> {

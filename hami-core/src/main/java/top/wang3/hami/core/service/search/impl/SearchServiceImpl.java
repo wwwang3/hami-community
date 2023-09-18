@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.ArticleSearchDTO;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.UserDTO;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -60,7 +61,7 @@ public class SearchServiceImpl implements SearchService {
 
     private void buildAuthor(List<ArticleSearchDTO> articles) {
         List<Integer> userIds = ListMapperHandler.listTo(articles, ArticleSearchDTO::getUserId);
-        List<UserDTO> users = userService.getAuthorInfoByIds(userIds, new UserService.OptionsBuilder().noStat().noFollowState());
+        List<UserDTO> users = userService.getAuthorInfoByIds(userIds, UserOptionsBuilder.justInfo());
         ListMapperHandler.doAssemble(articles, ArticleSearchDTO::getUserId, users,
                 UserDTO::getUserId, ArticleSearchDTO::setAuthor);
     }

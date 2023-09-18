@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.ArticleDTO;
 import top.wang3.hami.common.dto.HotArticleDTO;
+import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.exception.ServiceException;
@@ -41,7 +42,7 @@ public class ArticleRankServiceImpl implements ArticleRankService {
             return Collections.emptyList();
         }
         List<Integer> articleIds = ListMapperHandler.listTo(counters, HotArticleDTO::getArticleId);
-        ArticleService.OptionsBuilder builder = new ArticleService.OptionsBuilder()
+        ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
                 .noTags();
         List<ArticleDTO> articles = articleService.getArticleByIds(articleIds, builder);
         ListMapperHandler.doAssemble(counters, HotArticleDTO::getArticleId,
