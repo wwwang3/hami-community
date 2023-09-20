@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.*;
+import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.model.*;
 

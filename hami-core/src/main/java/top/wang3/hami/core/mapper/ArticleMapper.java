@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import top.wang3.hami.common.dto.ArticleDTO;
-import top.wang3.hami.common.dto.ArticleSearchDTO;
+import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 
 import java.util.List;

@@ -4,7 +4,7 @@ package top.wang3.hami.web.controller.user;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import top.wang3.hami.common.dto.LoginProfile;
+import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 

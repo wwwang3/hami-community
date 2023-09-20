@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.*;
+import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
+import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -68,8 +70,11 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleInfo info;
         if (!RedisClient.exist(key)) {
             Article article = articleRepository.getArticleById(id);
+            //todo ???
             if (article == null) {
                 info = null;
+                //防止获取单个文章时 文章不存在, 请求全部到数据库
+                //批量获取时, 一般文章不会不存在
                 RedisClient.setCacheObject(key, null, 10, TimeUnit.SECONDS);
             } else {
                 List<Integer> tagIds = articleTagRepository.getArticleTagIdsById(id);

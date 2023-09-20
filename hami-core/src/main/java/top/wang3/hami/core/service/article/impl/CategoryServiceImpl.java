@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.CategoryDTO;
+import top.wang3.hami.common.dto.article.CategoryDTO;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.core.repository.CategoryRepository;
 import top.wang3.hami.core.service.article.CategoryService;

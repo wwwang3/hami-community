@@ -3,9 +3,7 @@ package top.wang3.hami.common.converter;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.CommentDTO;
-import top.wang3.hami.common.dto.notify.CommentMsg;
-import top.wang3.hami.common.dto.notify.ReplyMsg;
+import top.wang3.hami.common.dto.comment.CommentDTO;
 import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.model.Comment;
 
@@ -48,23 +46,4 @@ public interface CommentConverter {
         return comment;
     }
 
-      default ReplyMsg toReplyMsg(Comment comment) {
-          return ReplyMsg.builder()
-                  .userId(comment.getUserId())
-                  .replyTo(comment.getReplyTo())
-                  .content(comment.getContent())
-                  .articleId(comment.getArticleId())
-                  .replyId(comment.getId())
-                  .build();
-      }
-
-    default CommentMsg toCommentMsg(Comment comment) {
-        return CommentMsg.builder()
-                .userId(comment.getUserId())
-                .commentId(comment.getId())
-                .articleId(comment.getArticleId())
-                .commentTo(comment.getReplyTo())
-                .content(comment.getContent())
-                .build();
-    }
 }

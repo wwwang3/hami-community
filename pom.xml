@@ -19,7 +19,6 @@
         <module>hami-core</module>
         <module>hami-security</module>
         <module>hami-mail</module>
-        <module>hami-message</module>
     </modules>
 	<properties>
 		<java.version>17</java.version>

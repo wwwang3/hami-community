@@ -7,7 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
-import top.wang3.hami.common.dto.Reply;
+import top.wang3.hami.common.dto.comment.CommentInfo;
+import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.core.mapper.CommentMapper;
 import top.wang3.hami.core.repository.CommentRepository;
@@ -66,6 +67,12 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
                 .select(fields)
                 .in("id", commentIds)
                 .list();
+    }
+
+    @Override
+    public CommentInfo getCommentWithParentById(Integer id) {
+        if (id == null) return null;
+        return getBaseMapper().selectCommentWithParentById(id);
     }
 
     @Override

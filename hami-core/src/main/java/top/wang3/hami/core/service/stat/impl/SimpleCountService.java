@@ -2,9 +2,9 @@ package top.wang3.hami.core.service.stat.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import top.wang3.hami.common.dto.ArticleStatDTO;
 import top.wang3.hami.common.dto.FollowCountItem;
-import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.article.ArticleStatDTO;
+import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.ArticleStatService;

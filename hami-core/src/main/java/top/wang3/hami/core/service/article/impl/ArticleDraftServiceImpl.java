@@ -9,20 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.ArticleDraftDTO;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.notify.ArticlePublishMsg;
+import top.wang3.hami.common.dto.article.ArticleDraftDTO;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.Tag;
-import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.repository.ArticleDraftRepository;
 import top.wang3.hami.core.service.article.*;
+import top.wang3.hami.core.service.common.RabbitMessagePublisher;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
     private final CategoryService categoryService;
     private final TagService tagService;
-    private final NotifyMsgPublisher notifyMsgPublisher;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     private final ArticleDraftRepository articleDraftRepository;
 
@@ -140,9 +140,8 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         });
         if (Boolean.TRUE.equals(success)) {
             //发布文章发表消息
-            ArticlePublishMsg articlePublishMsg = new ArticlePublishMsg(article.getId(), article.getUserId(),
-                    article.getTitle());
-            notifyMsgPublisher.publishNotify(articlePublishMsg);
+            ArticleRabbitMessage message = new ArticleRabbitMessage(1, article.getId());
+            rabbitMessagePublisher.publishMsg(message);
             return oldDraft;
         }
         return null;

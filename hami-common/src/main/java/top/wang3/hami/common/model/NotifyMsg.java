@@ -17,8 +17,8 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @TableName(value = "notify_msg")
+@Builder
 public class NotifyMsg {
     /**
      * 主键ID
@@ -31,13 +31,6 @@ public class NotifyMsg {
      */
     @TableField(value = "item_id")
     private Integer itemId;
-
-    /**
-     * 对应的实体名称
-     */
-    @TableField(value = "item_name")
-    private String itemName;
-
     /**
      * 关联的主键
      */

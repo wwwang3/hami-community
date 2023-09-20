@@ -1,7 +1,7 @@
 package top.wang3.hami.core.repository;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.core.mapper.ArticleStatMapper;

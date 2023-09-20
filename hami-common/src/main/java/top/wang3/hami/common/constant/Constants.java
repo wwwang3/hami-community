@@ -5,6 +5,8 @@ public final class Constants {
 
     public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
 
+    public static final String HAMI_TOPIC_EXCHANGE1 = "hami-topic-exchange-1";
+
     public static final String HAMI_DIRECT_EXCHANGE2 = "hami-direct-exchange-2";
     public static final String EMAIL_QUEUE = "hami-email-queue";
 

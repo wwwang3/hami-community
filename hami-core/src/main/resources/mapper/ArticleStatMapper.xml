@@ -19,7 +19,7 @@
   </sql>
 
 
-  <select id="selectUserStatsByUserIds" resultType="top.wang3.hami.common.dto.UserStat">
+  <select id="selectUserStatsByUserIds" resultType="top.wang3.hami.common.dto.user.UserStat">
     select
         user_id, count(article_id) as articles, sum(views) as total_views, sum(likes) as total_likes,
         sum(comments) as total_comments, sum(collects) as total_collects
@@ -31,7 +31,7 @@
     group by user_id;
   </select>
 
-  <select id="selectUserStat" resultType="top.wang3.hami.common.dto.UserStat">
+  <select id="selectUserStat" resultType="top.wang3.hami.common.dto.user.UserStat">
     select
       user_id, count(article_id) as total_articles, sum(views) as total_views, sum(likes) as total_likes,
       sum(comments) as total_comments, sum(collects) as total_collects

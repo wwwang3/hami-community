@@ -12,9 +12,9 @@
     <result column="mtime" property="mtime" />
   </resultMap>
 
-  <resultMap id="TagDTOMap" type="top.wang3.hami.common.dto.ArticleTagDTO">
+  <resultMap id="TagDTOMap" type="top.wang3.hami.common.dto.article.ArticleTagDTO">
     <result column="article_id" property="articleId" />
-    <collection property="tags" ofType="top.wang3.hami.common.dto.TagDTO">
+    <collection property="tags" ofType="top.wang3.hami.common.dto.article.TagDTO">
       <result column="tag_id" property="tagId" />
       <result column="tag_name" property="tagName" />
     </collection>

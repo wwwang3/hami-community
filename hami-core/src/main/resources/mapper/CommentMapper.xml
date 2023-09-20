@@ -23,4 +23,15 @@
     id, article_id, user_id, is_author, ip_info, content, content_img, root_id, parent_id, 
     reply_to, deleted, ctime, mtime
   </sql>
+
+  <select id="selectCommentWithParentById" resultType="top.wang3.hami.common.dto.comment.CommentInfo">
+    select
+        t1.id as id, t1.article_id as article_id, t1.user_id as user_id, t1.is_author as is_author,
+        t1.ip_info as ip_info, t1.content as content, t1.content_img as content_img, t1.root_id as root_id,
+        t1.parent_id as parent_id, t1.reply_to as reply_to, t1.deleted as deleted, t1.ctime as ctime, t1.mtime as mtime,
+        t2.content as parent_content
+    from comment t1
+    left join comment t2 on t1.parent_id = t2.id
+    where t1.id = #{id} and t1.deleted = 0;
+  </select>
 </mapper>

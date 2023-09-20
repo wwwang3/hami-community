@@ -11,7 +11,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.stat.CountService;

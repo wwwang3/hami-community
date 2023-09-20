@@ -16,18 +16,18 @@
     <result column="mtime" property="mtime" />
   </resultMap>
   
-  <resultMap id="ArticleDTOResultMap" type="top.wang3.hami.common.dto.ArticleDTO">
+  <resultMap id="ArticleDTOResultMap" type="top.wang3.hami.common.dto.article.ArticleDTO">
     <id column="t1.id" property="id"/>
     <result column="t1.title" property="title" />
     <result column="t1.summary" property="summary" />
     <result column="t1.picture" property="picture" />
     <result column="t1.ctime" property="ctime" />
     <result column="t1.mtime" property="mtime" />
-    <association property="category" javaType="top.wang3.hami.common.dto.CategoryDTO" columnPrefix="t2.">
+    <association property="category" javaType="top.wang3.hami.common.dto.article.CategoryDTO" columnPrefix="t2.">
       <id column="id" property="categoryId" />
       <result column="name" property="categoryName" />
     </association>
-    <association property="author" javaType="top.wang3.hami.common.dto.UserDTO" columnPrefix="t3.">
+    <association property="author" javaType="top.wang3.hami.common.dto.user.UserDTO" columnPrefix="t3.">
       <id column="user_id" property="userId" />
       <result column="username" property="username" />
       <result column="avatar" property="avatar" />
@@ -72,7 +72,7 @@
     order by t1.ctime desc
   </select>
 
-  <select id="searchArticle" resultType="top.wang3.hami.common.dto.ArticleSearchDTO">
+  <select id="searchArticle" resultType="top.wang3.hami.common.dto.article.ArticleSearchDTO">
     select id, user_id, category_id, picture, title, summary, ctime
     from article
     where

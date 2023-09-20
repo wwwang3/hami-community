@@ -12,10 +12,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.CommentConverter;
-import top.wang3.hami.common.dto.notify.CollectMsg;
-import top.wang3.hami.common.dto.notify.FollowMsg;
-import top.wang3.hami.common.dto.notify.LikeMsg;
 import top.wang3.hami.common.dto.request.CommentParam;
+import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.LikeItem;
@@ -31,6 +29,7 @@ import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.ArticleCollectService;
 import top.wang3.hami.core.service.article.ArticleStatService;
+import top.wang3.hami.core.service.common.RabbitMessagePublisher;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.like.LikeService;
 import top.wang3.hami.core.service.user.UserFollowService;
@@ -56,6 +55,8 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final ArticleStatService articleStatService;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+
+    private final RabbitMessagePublisher rabbitMessagePublisher;
     @Resource
     ArticleMapper articleMapper;
 
@@ -78,9 +79,8 @@ public class UserInteractServiceImpl implements UserInteractService {
         Boolean success = transactionTemplate.execute(status -> {
             return userFollowService.follow(loginUserId, followingId);
         });
-        //发布关注消息
         if (Boolean.TRUE.equals(success)) {
-            notifyMsgPublisher.publishNotify(new FollowMsg(loginUserId, followingId));
+            rabbitMessagePublisher.publishMsg(new FollowRabbitMessage(loginUserId, followingId, true));
             return true;
         }
         return false;
@@ -92,9 +92,15 @@ public class UserInteractServiceImpl implements UserInteractService {
         //被关注用户的粉丝数-1
         //用户的关注数-1 (有Canal发送MQ消费)
         int loginUserId = LoginUserContext.getLoginUserId();
-        return userFollowService.unFollow(loginUserId, followingId);
+        boolean success = userFollowService.unFollow(loginUserId, followingId);
+        if (!success) {
+            return false;
+        }
+        rabbitMessagePublisher.publishMsg(new FollowRabbitMessage(loginUserId, followingId, false));
+        return true;
     }
 
+    @Transactional
     @Override
     public boolean like(int itemId, byte type) {
         //用户点赞
@@ -103,25 +109,13 @@ public class UserInteractServiceImpl implements UserInteractService {
         //发送点赞消息
         int loginUserId = LoginUserContext.getLoginUserId();
         checkItemExist(itemId, type);
-        Boolean updated = transactionTemplate.execute(status -> {
-            boolean success = likeService.doLike(loginUserId, itemId, type);
-            if (!success) return false;
-            boolean added;
-            //感觉点赞单独起一个服务，有该服务维护点赞数和获取点赞列表，判断是否点赞等
-            //更新文章点赞数
-            if (Constants.LIKE_TYPE_ARTICLE == type) {
-                added = articleStatService.increaseLikes(itemId, 1);
-            } else {
-                added = commentRepository.increaseLikes(itemId);
-            }
-            return added;
-        });
-        if (Boolean.TRUE.equals(updated)) {
-            notifyMsgPublisher.publishNotify(new LikeMsg(loginUserId, itemId, type));
-        }
+        boolean success = likeService.doLike(loginUserId, itemId, type);
+        if (!success) return false;
+        //发布点赞消息
+        //存在更新失败(消费失败问题)
+        rabbitMessagePublisher.publishMsg(new LikeRabbitMessage(loginUserId, itemId, type, true));
         return true;
     }
-
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -132,7 +126,8 @@ public class UserInteractServiceImpl implements UserInteractService {
         int loginUserId = LoginUserContext.getLoginUserId();
         boolean cancelled = likeService.cancelLike(loginUserId, itemId, type);
         if (!cancelled) return false;
-        return articleStatService.decreaseLikes(itemId, 1);
+        rabbitMessagePublisher.publishMsg(new LikeRabbitMessage(loginUserId, itemId, type, false));
+        return true;
     }
 
     @Override
@@ -144,12 +139,10 @@ public class UserInteractServiceImpl implements UserInteractService {
         int loginUserId = LoginUserContext.getLoginUserId();
         checkItemExist(articleId, Constants.LIKE_TYPE_ARTICLE);
         Boolean success = transactionTemplate.execute(status -> {
-            boolean collected = articleCollectService.collectArticle(loginUserId, articleId);
-            if (!collected) return false;
-            return articleStatService.increaseCollects(articleId, 1);
+            return articleCollectService.collectArticle(loginUserId, articleId);
         });
         if (Boolean.FALSE.equals(success)) return false;
-        notifyMsgPublisher.publishNotify(new CollectMsg(loginUserId, articleId));
+        rabbitMessagePublisher.publishMsg(new CollectRabbitMessage(loginUserId, articleId, true));
         return true;
     }
 
@@ -160,7 +153,8 @@ public class UserInteractServiceImpl implements UserInteractService {
         boolean success = articleCollectService.cancelCollectArticle(loginUserId, articleId);
         if (!success) return false;
         //decrease
-        return articleStatService.decreaseCollects(articleId, 1);
+        rabbitMessagePublisher.publishMsg(new CollectRabbitMessage(loginUserId, articleId, false));
+        return true;
     }
 
     @Override
@@ -182,7 +176,11 @@ public class UserInteractServiceImpl implements UserInteractService {
         int userId = LoginUserContext.getLoginUserId();
         int deleted = commentRepository.deleteComment(userId, id);
         if (deleted > 0) {
-            return articleStatService.decreaseComments(comment.getArticleId(), deleted);
+            //评论删除消息
+            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleted);
+            rabbitMessagePublisher.publishMsg(message);
+            //管他投递成不成功
+            return true;
         }
         return false;
     }
@@ -191,18 +189,24 @@ public class UserInteractServiceImpl implements UserInteractService {
         Comment comment = buildComment(param, reply);
         //评论
         Boolean success = transactionTemplate.execute(status -> {
-            boolean saved = commentRepository.save(comment);
-            if (saved) {
-                return articleStatService.increaseComments(param.getArticleId(), 1);
-            }
-            return false;
+            return commentRepository.save(comment);
         });
         if (!Boolean.TRUE.equals(success)) {
             return null;
         }
-        Object o = reply ? CommentConverter.INSTANCE.toReplyMsg(comment) :
-                CommentConverter.INSTANCE.toCommentMsg(comment);
-        notifyMsgPublisher.publishNotify(o);
+        if (reply) {
+            RabbitMessage message = new ReplyRabbitMessage(comment.getUserId(), comment.getArticleId(),
+                    comment.getId(), comment.getParentId(), comment.getContent());
+            rabbitMessagePublisher.publishMsg(message);
+
+        } else {
+            if (!comment.getIsAuthor()) {
+                RabbitMessage message = new CommentRabbitMessage(comment.getUserId(), comment.getArticleId(),
+                        comment.getId(), comment.getContent());
+                rabbitMessagePublisher.publishMsg(message);
+
+            }
+        }
         return comment;
     }
 

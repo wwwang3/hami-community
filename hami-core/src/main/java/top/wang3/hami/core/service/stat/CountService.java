@@ -1,8 +1,8 @@
 package top.wang3.hami.core.service.stat;
 
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.ArticleStatDTO;
-import top.wang3.hami.common.dto.UserStat;
+import top.wang3.hami.common.dto.article.ArticleStatDTO;
+import top.wang3.hami.common.dto.user.UserStat;
 
 import java.util.HashMap;
 import java.util.List;

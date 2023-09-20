@@ -1,9 +1,9 @@
 package top.wang3.hami.core.service.article;
 
-import top.wang3.hami.common.dto.ArticleContentDTO;
-import top.wang3.hami.common.dto.ArticleDTO;
-import top.wang3.hami.common.dto.ArticleInfo;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.article.ArticleContentDTO;
+import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;

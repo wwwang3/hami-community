@@ -2,8 +2,8 @@ package top.wang3.hami.core.repository;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.LoginProfile;
-import top.wang3.hami.common.dto.UserProfile;
+import top.wang3.hami.common.dto.user.LoginProfile;
+import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.User;
 
 import java.util.List;

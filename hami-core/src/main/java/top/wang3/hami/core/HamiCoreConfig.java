@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import top.wang3.hami.common.HamiCommonConfig;
+import top.wang3.hami.mail.EnableMail;
 
 @ComponentScan(basePackages = {
         "top.wang3.hami.core.config",
@@ -15,11 +16,13 @@ import top.wang3.hami.common.HamiCommonConfig;
         "top.wang3.hami.core.component",
         "top.wang3.hami.core.job",
         "top.wang3.hami.core.aspect",
+        "top.wang3.hami.core.listener",
 })
 @Import(value = {HamiCommonConfig.class})
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")
 @Configuration
 @EnableScheduling
+@EnableMail
 public class HamiCoreConfig {
 
 }

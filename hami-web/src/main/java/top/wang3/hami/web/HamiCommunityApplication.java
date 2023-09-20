@@ -10,10 +10,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.ArticleStatDTO;
+import top.wang3.hami.common.dto.article.ArticleStatDTO;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.HamiCoreConfig;
-import top.wang3.hami.message.EnableMessage;
 import top.wang3.hami.security.EnableSecurity;
 
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import java.util.List;
 @EnableSecurity
 @EnableTransactionManagement
 @EnableFileStorage
-@EnableMessage
 @EnableCaching
 @EnableAspectJAutoProxy
 @Slf4j

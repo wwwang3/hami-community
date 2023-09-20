@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.ArticleStatDTO;
+import top.wang3.hami.common.dto.article.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.ArticleStatService;
