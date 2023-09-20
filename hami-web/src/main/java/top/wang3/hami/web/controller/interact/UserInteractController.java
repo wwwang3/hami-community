@@ -39,13 +39,13 @@ public class UserInteractController {
 
     private final UserService userService;
 
-    @PostMapping("/follow/do")
+    @PostMapping("/follow")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(() -> userInteractService.follow(followingId))
                 .orElse("操作失败");
     }
 
-    @PostMapping("/follow/undo")
+    @PostMapping("/follow/cancel")
     public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(userInteractService.unFollow(followingId))
                 .orElse("操作失败");
@@ -78,11 +78,10 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
-    @GetMapping("/reading_record")
-    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestParam("pageNum") long pageNum,
-                                                               @RequestParam("pageSize") long pageSize) {
+    @PostMapping("/reading_record/query_list")
+    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestBody @Valid PageParam param) {
         PageData<ReadingRecordDTO> pageData = readingRecordService
-                .getReadingRecords(new PageParam(pageNum, pageSize));
+                .getReadingRecords(param);
         return Result.ofNullable(pageData)
                 .orElse("还没有历史记录");
     }

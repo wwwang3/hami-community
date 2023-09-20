@@ -101,7 +101,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             if (user == null) {
                 RedisClient.setCacheObject(redisKey, "", 10, TimeUnit.SECONDS);
             } else{
-                RedisClient.setCacheObject(redisKey, user, 1, TimeUnit.HOURS);
+                RedisClient.setCacheObject(redisKey, user, 24, TimeUnit.HOURS);
             }
         } else {
             user = RedisClient.getCacheObject(redisKey);

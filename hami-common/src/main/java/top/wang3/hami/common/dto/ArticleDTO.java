@@ -40,9 +40,4 @@ public class ArticleDTO {
     private boolean liked = false;
     private boolean collected = false;
 
-//    /**
-//     * 用户行为 (点赞/收藏/关注)
-//     */
-//    private UserInteract userInteract;
-
 }

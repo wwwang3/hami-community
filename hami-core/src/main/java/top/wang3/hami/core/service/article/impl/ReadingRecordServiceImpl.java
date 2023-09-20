@@ -22,6 +22,7 @@ import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.ReadingRecordService;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -108,6 +109,7 @@ public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, R
         return ChainWrappers.updateChain(getBaseMapper())
                 .eq("user_id", record.getUserId())
                 .eq("article_id", record.getArticleId())
+                .set("reading_time", new Date())
                 .update();
     }
 

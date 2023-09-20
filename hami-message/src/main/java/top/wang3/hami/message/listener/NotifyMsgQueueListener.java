@@ -69,6 +69,7 @@ public class NotifyMsgQueueListener {
             notifyMsgService.saveBatch(msgs);
         } catch (Exception e) {
             //先忽略
+            e.printStackTrace();
             logError(e);
         }
     }
@@ -103,7 +104,7 @@ public class NotifyMsgQueueListener {
             int notifyType = msg.getNotifyType();
             int itemId = msg.getItemId();
             int sender = msg.getLikerId();
-            Integer receiver = commentMapper.getCommentUserById(itemId);
+            Integer receiver = getReceiver(msg);
             if (receiver == sender) return;
             if (notifyMsgService.checkExist(sender, receiver, notifyType)) return;
             NotifyMsg notifyMsg = NotifyMsg.builder()
@@ -115,6 +116,7 @@ public class NotifyMsgQueueListener {
                     .build();
             notifyMsgService.saveMsg(notifyMsg);
         } catch (Exception e) {
+            e.printStackTrace();
             logError(e);
         }
     }
@@ -191,5 +193,13 @@ public class NotifyMsgQueueListener {
         boolean exist = notifyMsgService.checkExist(sender, authorId, type);
         if (!exist) return authorId;
         return null;
+    }
+
+    private Integer getReceiver(LikeMsg msg) {
+        if (msg.getNotifyType() == NotifyType.ARTICLE_LIKE.getType()) {
+            return articleMapper.getArticleAuthor(msg.getItemId());
+        } else {
+            return commentMapper.getCommentUserById(msg.getItemId());
+        }
     }
 }

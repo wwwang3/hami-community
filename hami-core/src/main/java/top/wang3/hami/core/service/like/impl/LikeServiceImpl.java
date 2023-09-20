@@ -70,6 +70,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, LikeItem>
                 .one();
         if (likeItem == null) {
             LikeItem item = new LikeItem(itemId, itemType, likerId);
+            item.setState(Constants.ONE);
             return super.save(item);
         }  else if (Constants.ZERO.equals(likeItem.getState())) {
             //更新

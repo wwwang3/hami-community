@@ -55,14 +55,19 @@ public class ListMapperHandler {
      */
     public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper) {
         return Optional.ofNullable(origin)
-                .map(o -> o.stream().map(mapper).distinct()
+                .map(o -> o.stream()
+                        .distinct()
+                        .filter(Objects::nonNull)
+                        .map(mapper)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
     public static <T, R> Set<R> listToSet(List<T> origin, Function<T, R> mapper) {
         return Optional.ofNullable(origin)
-                .map(o -> o.stream().map(mapper)
+                .map(o -> o.stream()
+                        .filter(Objects::nonNull)
+                        .map(mapper)
                         .collect(Collectors.toSet()))
                 .orElse(Collections.emptySet());
     }

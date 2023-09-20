@@ -22,6 +22,7 @@ import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.NotifyMsgPublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
@@ -270,6 +271,7 @@ public class UserInteractServiceImpl implements UserInteractService {
         return RedisClient.zContains(redisKey, itemId);
     }
 
+    @CostLog
     @Override
     public Map<Integer, Boolean> hasLiked(int userId, List<Integer> items, byte itemType) {
         String redisKey = Constants.LIST_USER_LIKE + userId + ":" + itemType;

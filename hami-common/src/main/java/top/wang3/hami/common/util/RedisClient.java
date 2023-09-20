@@ -352,7 +352,7 @@ public class RedisClient {
         }
         HashMap<T, Boolean> map = new HashMap<>(members.size());
         for (int i = 0; i < members.size(); i++) {
-            map.put(members.get(i), scores.get(i) == null);
+            map.put(members.get(i), scores.get(i) != null);
         }
         return map;
     }
@@ -360,6 +360,11 @@ public class RedisClient {
     public static <T> Long zCard(String key) {
         return redisTemplate.opsForZSet()
                 .zCard(key);
+    }
+
+    public static <T> Set<ZSetOperations.TypedTuple<T>> zRevRangeWithScore(String key, long start, long end) {
+        return redisTemplate.opsForZSet()
+                .reverseRangeWithScores(key, start, end);
     }
 
     public static <T> List<T> zPage(String key, long current, long pageSize) {

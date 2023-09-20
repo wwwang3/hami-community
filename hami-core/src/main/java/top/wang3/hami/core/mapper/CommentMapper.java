@@ -9,7 +9,7 @@ import top.wang3.hami.common.model.Comment;
 public interface CommentMapper extends BaseMapper<Comment> {
 
     @Select("""
-        select 1 from comment where id = #{commentId} and deleted = 0;
+        select count(id) from comment where id = #{commentId} and deleted = 0;
     """)
     boolean isCommentExist(Integer commentId);
 

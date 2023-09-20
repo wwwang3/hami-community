@@ -69,6 +69,7 @@ public class CanalQueueListener {
     }
 
     private <T> void processRowData(CanalEntry.RowData rowData, CanalEntryHandler<T> handler, CanalEntry.EventType type) throws Exception {
+        log.info("row: {}", rowData.getAfterColumnsList());
         switch (type) {
             case INSERT: {
                 T t = CanalEntryMapper.mapToEntity(rowData.getAfterColumnsList(), handler);

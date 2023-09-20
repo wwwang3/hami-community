@@ -34,28 +34,28 @@ public class ArticleController {
                 .orElse("获取失败");
     }
 
-    @PostMapping("/list/recommend/follow")
-    public Result<PageData<ArticleDTO>> getFollowUserArticles(@RequestBody @Valid PageParam param) {
+    @PostMapping("/list/follow")
+    public Result<PageData<ArticleDTO>> listFollowUserArticles(@RequestBody @Valid PageParam param) {
         PageData<ArticleDTO> articles = articleService.getFollowUserArticles(param);
         return Result.successData(articles);
     }
 
     @GetMapping("/detail")
-    public Result<ArticleContentDTO> getArticleContentById(@RequestParam("articleId") int articleId) {
+    public Result<ArticleContentDTO> getArticleContentById(@RequestParam("article_id") int articleId) {
         ArticleContentDTO articleContentDTO = articleService.getArticleContentById(articleId);
         return Result.ofNullable(articleContentDTO)
                 .orElse("文章不存在");
     }
 
     @GetMapping("/rank/hot")
-    public Result<List<HotArticleDTO>> getHotArticles(@RequestParam(value = "category_id", required = false)
+    public Result<List<HotArticleDTO>> listHotArticles(@RequestParam(value = "category_id", required = false)
                                                       Integer categoryId) {
         List<HotArticleDTO> articles = rankService.getHotArticles(categoryId);
         return Result.successData(articles);
     }
 
     @PostMapping("/query_list")
-    public Result<PageData<ArticleDTO>> getUserArticles(@RequestBody @Valid UserArticleParam param) {
+    public Result<PageData<ArticleDTO>> listUserArticles(@RequestBody @Valid UserArticleParam param) {
         PageData<ArticleDTO> data = articleService.getUserArticles(param);
         return Result.successData(data);
     }

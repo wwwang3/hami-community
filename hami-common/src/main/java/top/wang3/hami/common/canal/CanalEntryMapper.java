@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
 import org.apache.commons.lang.time.DateUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -58,13 +59,13 @@ public class CanalEntryMapper {
     }
 
 
-    private static final String[] PARSE_PATTERNS = new String[]{"yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
+    private static final String[] PARSE_PATTERNS = new String[]{"yyyy-MM-dd HH:mm:ss.sss", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm", "yyyy-MM", "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss",
             "yyyy/MM/dd HH:mm", "yyyy/MM", "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss",
-            "yyyy.MM.dd HH:mm", "yyyy.MM"};
+            "yyyy.MM.dd HH:mm", "yyyy.MM", }; //fix: Date类型解析失败, 导致NPE
 
     public static Object convertType(Class<?> type, String columnValue) throws JsonProcessingException {
-        if (columnValue == null) {
+        if (!StringUtils.hasText(columnValue)) {
             return null;
         } else if (type.equals(String.class)){
             return columnValue;

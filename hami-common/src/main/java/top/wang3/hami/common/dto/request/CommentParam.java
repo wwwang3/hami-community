@@ -25,6 +25,7 @@ public class CommentParam {
 
     @NotNull
     private String content;
+
     private String contentImg;
 
     public interface Reply {}

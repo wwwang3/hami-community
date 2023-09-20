@@ -28,7 +28,6 @@ public interface ArticleService {
 
     PageData<ArticleDTO> getFollowUserArticles(PageParam param);
 
-
     boolean checkArticleViewLimit(int articleId, int authorId);
 
     boolean deleteByArticleId(Integer userId, Integer articleId);

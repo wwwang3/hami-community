@@ -16,10 +16,10 @@ public class LikeMsg implements Notify {
      */
     int likerId;
     int itemId;
-    int itemType;
+    byte itemType;
     @Override
     public int getNotifyType() {
-        return itemType == Constants.LIKE_TYPE_ARTICLE ? NotifyType.ARTICLE_LIKE.getType() :
+        return Constants.LIKE_TYPE_ARTICLE.equals(itemType) ? NotifyType.ARTICLE_LIKE.getType() :
                 NotifyType.COMMENT_LIKE.getType();
     }
 }

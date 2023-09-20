@@ -68,12 +68,13 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleInfo info;
         if (!RedisClient.exist(key)) {
             Article article = articleRepository.getArticleById(id);
-            List<Integer> tagIds = articleTagRepository.getArticleTagIdsById(id);
-            info = ArticleConverter.INSTANCE.toArticleInfo(article, tagIds);
             if (article == null) {
+                info = null;
                 RedisClient.setCacheObject(key, null, 10, TimeUnit.SECONDS);
             } else {
-                RedisClient.setCacheObject(key, info, 1, TimeUnit.HOURS);
+                List<Integer> tagIds = articleTagRepository.getArticleTagIdsById(id);
+                info = ArticleConverter.INSTANCE.toArticleInfo(article, tagIds);
+                RedisClient.setCacheObject(key, info, 24, TimeUnit.HOURS);
             }
         } else {
             info = RedisClient.getCacheObject(key);
@@ -106,6 +107,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleContentDTO getArticleContentById(int articleId) {
         ArticleInfo article = self.getArticleInfoById(articleId);
+        if (article == null || article.getId() == null) {
+            return null;
+        }
         String content = articleRepository.getArticleContentById(articleId);
         ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(article, content);
         //文章分类
@@ -117,6 +121,10 @@ public class ArticleServiceImpl implements ArticleService {
         List<TagDTO> tags = tagService.getTagDTOsByIds(info.getTagIds());
         dto.setTags(tags);
 
+        //作者信息
+        UserDTO author = userService.getAuthorInfoById(dto.getUserId());
+        dto.setAuthor(author);
+
         //文章数据
         ArticleStatDTO stat = countService.getArticleStatById(articleId);
         dto.setStat(stat);
@@ -125,10 +133,6 @@ public class ArticleServiceImpl implements ArticleService {
             Integer totalViews = dto.getAuthor().getStat().getTotalViews();
             dto.getAuthor().getStat().setTotalViews(totalViews + 1);
         }
-        //作者信息
-        UserDTO author = userService.getAuthorInfoById(dto.getUserId());
-        dto.setAuthor(author);
-
         //用户行为
         buildInteract(dto);
         return dto;
@@ -138,13 +142,13 @@ public class ArticleServiceImpl implements ArticleService {
     public boolean checkArticleViewLimit(int articleId, int authorId) {
         String ip = IpContext.getIp();
         if (ip == null) return false;
-        String redisKey = "view:limit:" + ip + articleId;
+        String redisKey = "view:limit:" + ip + ":" + articleId;
         //todo fix 还是有并发问题
         if (RedisClient.exist(redisKey)) {
             log.debug("ip: {} access repeat", ip);
             return false;
         } else {
-            RedisClient.setCacheObject(redisKey, 1, 10);
+            RedisClient.setCacheObject(redisKey, 1, 15);
             //发布消息
             String exchange = Constants.HAMI_DIRECT_EXCHANGE2;
             rabbitTemplate.convertAndSend(exchange, Constants.ADD_VIEWS_ROUTING, articleId);
@@ -205,6 +209,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private List<ArticleInfo> listArticleByCate(Page<Article> page, Integer cateId) {
+        if (cateId != null && (cateId < 0 || cateId > 10007)) {
+            return Collections.emptyList();
+        }
         String key = cateId == null ? Constants.ARTICLE_LIST : Constants.CATE_ARTICLE_LIST + cateId;
         List<Integer> ids;
         if (!RedisClient.exist(key)) {
@@ -339,9 +346,6 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleRepository.listArticlesByCateId(cateId);
         //不出现意外情况这个方法每个分类只会调用一次
         //redis没数据或者Redis g了
-        if (cateId < 0 || cateId > 10007) {
-            return Collections.emptyList();
-        }
         return cacheToRedis(page, key, articles);
     }
 

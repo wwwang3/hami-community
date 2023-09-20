@@ -99,7 +99,7 @@ public final class Constants {
     public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
     public static final String HOT_ARTICLE = "rank:article:";
 
-    public static final String ARTICLE_INFO = "#article:info";
+    public static final String ARTICLE_INFO = "#article:info:";
 
-    public static final String USER_INFO = "#user:info";
+    public static final String USER_INFO = "#user:info:";
 }

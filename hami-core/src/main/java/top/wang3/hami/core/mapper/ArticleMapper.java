@@ -16,7 +16,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
 
     @Select("""
-        select 1 from article where id = #{articleId} and deleted = 0;
+        select count(id) from article where id = #{articleId} and deleted = 0;
     """)
     boolean isArticleExist(Integer articleId);
 

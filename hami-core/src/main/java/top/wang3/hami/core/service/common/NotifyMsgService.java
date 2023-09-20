@@ -1,6 +1,8 @@
 package top.wang3.hami.core.service.common;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -51,7 +53,11 @@ public class NotifyMsgService extends ServiceImpl<NotifyMsgMapper, NotifyMsg> {
     }
 
     public boolean checkExist(Integer sender, Integer receiver, Integer type) {
-        return getBaseMapper().hasExist(sender, receiver, type);
+        QueryWrapper<NotifyMsg> wrapper = Wrappers.query(new NotifyMsg())
+                .eq("sender", sender)
+                .eq("receiver", receiver)
+                .eq("type", type);
+        return getBaseMapper().exists(wrapper);
     }
 
     public PageData<NotifyMsg> listSystemMsg(PageParam param) {

@@ -12,5 +12,5 @@ public class HotArticleDTO {
 
     private Integer articleId;
     private Long hotRank;
-    private ArticleDTO articleDTO;
+    private ArticleDTO article;
 }

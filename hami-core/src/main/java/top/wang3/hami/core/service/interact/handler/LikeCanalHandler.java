@@ -19,7 +19,8 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
         //点赞
         Integer likerId = entity.getLikerId();
         Byte itemType = entity.getItemType();
-        String redisKey = Constants.LIST_USER_LIKE + likerId + "-" + itemType;
+        String redisKey = Constants.LIST_USER_LIKE + likerId + ":" + itemType;
+        log.debug("entity: {}", entity);
         RedisClient.zAdd(redisKey, entity.getItemId(), entity.getMtime().getTime());
     }
 

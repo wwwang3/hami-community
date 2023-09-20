@@ -98,14 +98,13 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
             boolean saved = super.updateById(user);
             String username = user.getUsername();
             //更新账号信息
-            boolean success = false;
             if (saved && StringUtils.hasText(username)) {
                 Account account = new Account();
                 account.setId(loginUserId);
                 account.setUsername(username);
-                success = accountMapper.updateById(account) == 1;
+                return accountMapper.updateById(account) == 1;
             }
-            return saved && success;
+            return saved;
         });
         return Boolean.TRUE.equals(updated);
     }

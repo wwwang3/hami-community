@@ -35,7 +35,7 @@ front-end: 8305
 - [x] 历史记录
 - [x] 用户主页文章
 - [x] 用户点赞/收藏文章列表
-- [ ] 关注用户的文章列表
+- [x] 关注用户的文章列表
 
 #### 标签
 
@@ -61,7 +61,7 @@ front-end: 8305
 - [x] 评论通知
 - [x] 收藏通知
 - [x] 点赞文章通知
-- [ ] 通知查询
+- [x] 通知查询
 
 ### 后台管理
 
@@ -117,6 +117,14 @@ redis：
 {user:article:list}:zset
 ```
 
+
+
+
+
+
+
+
+
 ## BUG
 
 ```
@@ -141,3 +149,6 @@ objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
                                    JsonTypeInfo.As.PROPERTY);
 ```
 
+### Canal同步数据时获取的字段为空
+
+Date类型值转化失败，返回null导致NPE

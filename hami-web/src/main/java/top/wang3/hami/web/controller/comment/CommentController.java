@@ -19,13 +19,13 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/list")
+    @PostMapping("/query_list")
     public Result<PageData<CommentDTO>> listComment(@RequestBody CommentPageParam param) {
         PageData<CommentDTO> data = commentService.listComment(param);
         return Result.successData(data);
     }
 
-    @PostMapping("/list/reply")
+    @PostMapping("/reply/query_list")
     public Result<PageData<CommentDTO>> listReply(@RequestBody CommentPageParam param) {
         PageData<CommentDTO> data = commentService.listReply(param);
         return Result.successData(data);
