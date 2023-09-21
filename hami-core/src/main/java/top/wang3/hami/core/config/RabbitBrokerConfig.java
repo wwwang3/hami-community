@@ -63,14 +63,6 @@ public class RabbitBrokerConfig {
                 .with(Constants.CANAL_ROUTING);
     }
 
-    @Bean(Constants.READING_RECORD_QUEUE)
-    public Queue readingRecordQueue() {
-        return QueueBuilder
-                .durable(Constants.READING_RECORD_QUEUE)
-                .build();
-    }
-
-
     @Bean
     public SimpleRabbitListenerContainerFactory batchRabbitContainerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer,
                                                                             ConnectionFactory connectionFactory) {

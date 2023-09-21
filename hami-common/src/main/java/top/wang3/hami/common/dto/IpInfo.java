@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IpInfo {
 
+    public static final String UNKNOWN_IP = "unknown";
+
     /**
      * IPv4地址
      */

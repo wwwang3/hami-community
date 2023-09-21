@@ -3,11 +3,13 @@ package top.wang3.hami.common.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.message.RabbitMessage;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Captcha {
+public class Captcha implements RabbitMessage {
 
     /**
      * 类型 作为redis-key前缀
@@ -28,4 +30,14 @@ public class Captcha {
      * 有效期 单位s
      */
     private long expire;
+
+    @Override
+    public String getExchange() {
+        return Constants.HAMI_DIRECT_EXCHANGE1;
+    }
+
+    @Override
+    public String getRoute() {
+        return Constants.EMAIL_ROUTING;
+    }
 }

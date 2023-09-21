@@ -64,6 +64,12 @@ public class RedisClient {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
 
+    public static <T> boolean setNx(String key, final T value, final long timeout, TimeUnit timeUnit) {
+        Boolean success = redisTemplate.opsForValue()
+                .setIfAbsent(key, value, timeout, timeUnit);
+        return Boolean.TRUE.equals(success);
+    }
+
     /**
      * 设置有效时间
      *

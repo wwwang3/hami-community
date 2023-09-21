@@ -74,7 +74,7 @@ public class UserInteractServiceImpl implements UserInteractService {
         //发送关注消息
         int loginUserId = LoginUserContext.getLoginUserId();
         //check user
-        checkUserExist(followingId);
+        checkUser(loginUserId, followingId);
         //关注
         Boolean success = transactionTemplate.execute(status -> {
             return userFollowService.follow(loginUserId, followingId);
@@ -389,9 +389,12 @@ public class UserInteractServiceImpl implements UserInteractService {
         }
     }
 
-    private void checkUserExist(int userId) {
-        if (!userRepository.checkUserExist(userId)) {
-            throw new IllegalArgumentException("用户不存在");
+    private void checkUser(int userId, int following) {
+        if (userId == following) {
+            throw new ServiceException("自己不能关注自己");
+        }
+        if (!userRepository.checkUserExist(following)) {
+            throw new ServiceException("用户不存在");
         }
     }
 

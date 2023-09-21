@@ -16,9 +16,11 @@ import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.repository.NotifyMsgRepository;
 import top.wang3.hami.core.service.article.ArticleService;
 
+import java.util.Objects;
+
 @RabbitListener(bindings = {
         @QueueBinding(
-                value = @Queue("hami-user-interact-queue-2"),
+                value = @Queue("hami-notify-queue"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
                 key = {"*.follow", "do.like.*", "*.collect", "comment.comment", "comment.reply"}
         )
@@ -52,8 +54,12 @@ public class NotifyMsgConsumer {
     private void handleArticleLike(LikeRabbitMessage message) {
         //点赞通知 xx赞了你的文章
         ArticleInfo article = articleService.getArticleInfoById(message.getItemId());
+        Integer sender = message.getUserId();
+        if (article == null || isSelf(sender, article.getUserId())) {
+            return;
+        }
         NotifyMsg msg = NotifyMsgBuilder
-                .buildArticleLikeMsg(message.getUserId(), message.getItemId(), article.getUserId());
+                .buildArticleLikeMsg(message.getUserId(), article.getUserId(), message.getItemId());
         notifyMsgRepository.save(msg);
     }
 
@@ -61,7 +67,9 @@ public class NotifyMsgConsumer {
         //评论点赞 xx赞了你的评论
         Integer commentId = message.getItemId();
         Comment comment = commentRepository.getById(commentId);
-        if (comment == null) return;
+        if (comment == null || isSelf(comment.getUserId(), message.getUserId())) {
+            return;
+        }
         NotifyMsg msg = NotifyMsgBuilder.buildCommentLikerMsg(message.getUserId(),
                 comment.getUserId(), commentId, comment.getArticleId(), comment.getContent());
         notifyMsgRepository.save(msg);
@@ -73,6 +81,9 @@ public class NotifyMsgConsumer {
         Integer articleId = message.getArticleId();
         ArticleInfo article = articleService.getArticleInfoById(message.getArticleId());
         if (article == null) return;
+        if (isSelf(article.getUserId(), message.getUserId())) {
+            return;
+        }
         NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), article.getUserId(),
                 message.getCommentId(), articleId, message.getDetail());
         save(msg);
@@ -82,9 +93,14 @@ public class NotifyMsgConsumer {
     public void handleReplyMessage(ReplyRabbitMessage message) {
         Integer articleId = message.getArticleId();
         ArticleInfo article = articleService.getArticleInfoById(articleId);
+        if (article == null) return;
         Integer articleAuthor = article.getUserId();
         //把他爹也查出来 内容一起写入通知 xx回复了你的评论
+        //自己回复自己不需要通知
         Comment comment = commentRepository.getById(message.getParentId());
+        if (comment == null || isSelf(message.getUserId(), comment.getUserId())) {
+            return;
+        }
         String split = "##@xx-"; //todo 用户评论可能含有分隔符
         String detail = comment.getContent() + split + message.getDetail();
         NotifyMsg msg = NotifyMsgBuilder
@@ -104,6 +120,9 @@ public class NotifyMsgConsumer {
         //收藏消息 xx收藏了你的文章
         int articleId = message.getArticleId();
         ArticleInfo article = articleService.getArticleInfoById(articleId);
+        if (article == null || isSelf(message.getUserId(), article.getUserId())) {
+            return;
+        }
         NotifyMsg msg = NotifyMsgBuilder
                 .buildCollectMsg(
                         message.getUserId(), article.getUserId(),
@@ -128,5 +147,9 @@ public class NotifyMsgConsumer {
             notifyMsgRepository.save(msg);
             return null;
         });
+    }
+
+    private boolean isSelf(Integer sender, Integer receiver) {
+        return Objects.equals(sender, receiver);
     }
 }

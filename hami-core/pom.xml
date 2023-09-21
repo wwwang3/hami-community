@@ -72,12 +72,6 @@
             <version>0.0.1</version>
         </dependency>
         <dependency>
-            <groupId>top.wang3</groupId>
-            <artifactId>hami-core</artifactId>
-            <version>0.0.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.alibaba.otter</groupId>
             <artifactId>canal.client</artifactId>
         </dependency>

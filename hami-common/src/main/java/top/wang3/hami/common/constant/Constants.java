@@ -5,8 +5,6 @@ public final class Constants {
 
     public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
 
-    public static final String HAMI_DIRECT_EXCHANGE2 = "hami-direct-exchange-2";
-
     public static final String HAMI_TOPIC_EXCHANGE1 = "hami-topic-exchange-1";
 
     public static final String HAMI_TOPIC_EXCHANGE2 = "hami-topic-exchange-2";
@@ -15,8 +13,6 @@ public final class Constants {
 
     public static final String EMAIL_ROUTING = "email";
 
-    public static final String NOTIFY_QUEUE = "hami-notify-queue";
-
     public static final String NOTIFY_ROUTING = "/notify-msg";
 
     public static final String CANAL_EXCHANGE = "hami-canal";
@@ -24,29 +20,21 @@ public final class Constants {
     public static final String CANAL_QUEUE = "hami-canal-queue";
 
     public static final String CANAL_ROUTING = "/canal";
-    public static final String ADD_VIEWS_QUEUE = "hami-add-views-queue";
-    public static final String READING_RECORD_QUEUE = "hami-reading-record-queue";
-
-    public static final String ADD_VIEWS_ROUTING = "/views";
-
-    public static final String READING_RECORD_ROUTING = "/reading-record";
 
     /**
      * 注册邮箱验证码
      */
-    public static final String REGISTER_EMAIL_CAPTCHA = "email:register";
+    public static final String REGISTER_EMAIL_CAPTCHA = "email:register:";
 
     /**
      * 忘记密码邮箱验证码
      */
-    public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass";
+    public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass:";
 
     /**
      * 更新密码邮箱验证码
      */
-    public static final String UPDATE_EMAIL_CAPTCHA = "email:reset:pass";
-
-    public static final String CAPTCHA_RATE_LIMIT = "captcha:rate:limit";
+    public static final String UPDATE_EMAIL_CAPTCHA = "email:update:pass:";
 
     public static final Byte ONE = (byte) 1;
 

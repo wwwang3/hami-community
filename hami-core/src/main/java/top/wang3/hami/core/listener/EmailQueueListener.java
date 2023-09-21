@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RabbitListener(messageConverter = "#{rabbitMQJacksonConverter}",
-        queues = Constants.EMAIL_QUEUE, concurrency = "2")
+        queues = Constants.EMAIL_QUEUE, concurrency = "4")
 @Slf4j
 public class EmailQueueListener {
 
@@ -51,7 +51,7 @@ public class EmailQueueListener {
         } catch (Exception e) {
             //防止发送出现异常无限消费
             //发送失败要用户重试
-            log.warn("failed to send email, error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            log.error("failed to send email, error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
         }
     }
 

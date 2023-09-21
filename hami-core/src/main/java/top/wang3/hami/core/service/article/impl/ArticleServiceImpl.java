@@ -73,7 +73,7 @@ public class ArticleServiceImpl implements ArticleService {
                 info = null;
                 //防止获取单个文章时 文章不存在, 请求全部到数据库
                 //批量获取时, 一般文章不会不存在
-                RedisClient.setCacheObject(key, null, 10, TimeUnit.SECONDS);
+                RedisClient.setCacheObject(key, "", 10, TimeUnit.SECONDS);
             } else {
                 List<Integer> tagIds = articleTagRepository.getArticleTagIdsById(id);
                 info = ArticleConverter.INSTANCE.toArticleInfo(article, tagIds);
@@ -146,19 +146,17 @@ public class ArticleServiceImpl implements ArticleService {
         String ip = IpContext.getIp();
         if (ip == null) return false;
         String redisKey = "view:limit:" + ip + ":" + articleId;
-        //todo fix 还是有并发问题
-        if (RedisClient.exist(redisKey)) {
+        boolean success = RedisClient.setNx(redisKey, "view-lock", 15, TimeUnit.SECONDS);
+        if (!success) {
             log.debug("ip: {} access repeat", ip);
             return false;
-        } else {
-            RedisClient.setCacheObject(redisKey, 1, 15);
-            //发布消息
-            Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
-            ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
-                    articleId, authorId, loginUserId);
-            rabbitMessagePublisher.publishMsg(message);
-            return true;
         }
+        //发布消息
+        Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
+        ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
+                articleId, authorId, loginUserId);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
     @Override

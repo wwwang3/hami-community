@@ -49,8 +49,6 @@ public class RedisConfig {
         return template;
     }
 
-
-    //    @Bean
     public ObjectMapper redisObjectMapper() {
         ObjectMapper objectMapper = baseObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
