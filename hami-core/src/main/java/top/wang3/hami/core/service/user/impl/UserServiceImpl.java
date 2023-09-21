@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -42,16 +41,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     ImageService imageService;
 
     private UserService self;
-
-    private final ApplicationContext context;
     private final UserRepository repository;
     private final UserInteractService userInteractService;
     private final CountService countService;
 
-    public UserServiceImpl(ApplicationContext context, UserRepository repository,
+    public UserServiceImpl(UserRepository repository,
                            UserInteractService userInteractService,
                            CountService countService) {
-        this.context = context;
         this.repository = repository;
         this.userInteractService = userInteractService;
         this.countService = countService;

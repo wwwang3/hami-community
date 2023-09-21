@@ -30,10 +30,11 @@ public interface ArticleService {
 
     boolean checkArticleViewLimit(int articleId, int authorId);
 
-    boolean deleteByArticleId(Integer userId, Integer articleId);
-
     boolean saveArticle(Article article);
 
     boolean updateArticle(Article article);
+
+    boolean deleteByArticleId(Integer userId, Integer articleId);
+
 
 }

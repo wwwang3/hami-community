@@ -131,20 +131,25 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
             if (article.getId() == null) {
                 //插入
                 success1 = handleInsert(article, oldDraft, loginUserId);
+                if (success1) {
+                    ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
+                            article.getId(), article.getUserId());
+                    rabbitMessagePublisher.publishMsg(message);
+                    return true;
+                }
             } else {
                 //更新
-                success1 = articleService.updateArticle(article);
-                articleTagService.updateTags(article.getId(), oldDraft.getTagIds());
+                success1 = handleUpdate(article, oldDraft);
+                if (success1) {
+                    ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
+                            article.getId(), article.getUserId());
+                    rabbitMessagePublisher.publishMsg(message);
+                    return true;
+                }
             }
-            return success1;
+            return false;
         });
-        if (Boolean.TRUE.equals(success)) {
-            //发布文章发表消息
-            ArticleRabbitMessage message = new ArticleRabbitMessage(1, article.getId());
-            rabbitMessagePublisher.publishMsg(message);
-            return oldDraft;
-        }
-        return null;
+        return Boolean.TRUE.equals(success) ? oldDraft : null;
     }
 
     @Override
@@ -184,6 +189,15 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
             articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
             ArticleDraft draft = new ArticleDraft(oldDraft.getId(), article.getId(), Constants.ONE, oldDraft.getVersion());
             return articleDraftRepository.updateDraft(draft);
+        }
+        return false;
+    }
+
+    private boolean handleUpdate(Article article, ArticleDraft draft) {
+        boolean success;
+        success = articleService.updateArticle(article);
+        if (success) {
+            return articleTagService.updateTags(article.getId(), draft.getTagIds());
         }
         return false;
     }

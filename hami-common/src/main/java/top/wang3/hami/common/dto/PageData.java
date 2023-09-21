@@ -32,6 +32,7 @@ public class PageData<T> {
 
 
     public static <T> PageData<T> build(Page<T> page) {
+        if (page == null) return PageData.empty();
         return new PageData<>(page.getCurrent(), page.getTotal(), page.getRecords());
     }
 

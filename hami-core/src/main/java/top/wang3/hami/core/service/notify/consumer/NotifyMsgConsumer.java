@@ -18,7 +18,7 @@ import top.wang3.hami.core.service.article.ArticleService;
 
 @RabbitListener(bindings = {
         @QueueBinding(
-                value = @Queue("hami-user-interact-queue-3"),
+                value = @Queue("hami-user-interact-queue-2"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
                 key = {"*.follow", "do.like.*", "*.collect", "comment.comment", "comment.reply"}
         )

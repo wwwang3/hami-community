@@ -3,23 +3,44 @@ package top.wang3.hami.common.message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.constant.Constants;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticleRabbitMessage implements RabbitMessage {
 
-    private int type;
+    private Type type;
     private Integer articleId;
+    private Integer authorId;
+    private Integer loginUserId = null; //当type为view时, 为当前登录用户的ID
+
+    public ArticleRabbitMessage(Type type, Integer articleId, Integer authorId) {
+        this.type = type;
+        this.articleId = articleId;
+        this.authorId = authorId;
+    }
+
+    @Override
+    public String getExchange() {
+        return Constants.HAMI_TOPIC_EXCHANGE2;
+    }
 
     @Override
     public String getRoute() {
-        if (type == 1) {
-            return "article.publish";
-        } else if (type == 2) {
-            return "article.update";
-        } else {
-            return "article.delete";
+        return type.route;
+    }
+
+    public enum Type {
+        PUBLISH("article.publish"),
+        UPDATE("article.update"),
+        DELETE("article.delete"),
+        VIEW("article.view");
+
+        final String route;
+
+        Type(String route) {
+            this.route = route;
         }
     }
 }

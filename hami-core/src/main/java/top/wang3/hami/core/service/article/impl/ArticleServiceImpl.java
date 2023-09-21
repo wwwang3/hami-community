@@ -1,10 +1,8 @@
 package top.wang3.hami.core.service.article.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -18,8 +16,8 @@ import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
-import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
@@ -28,6 +26,7 @@ import top.wang3.hami.core.repository.ArticleTagRepository;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.TagService;
+import top.wang3.hami.core.service.common.RabbitMessagePublisher;
 import top.wang3.hami.core.service.interact.UserInteractService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
@@ -45,8 +44,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ArticleServiceImpl implements ArticleService {
 
-    @Resource
-    RabbitTemplate rabbitTemplate;
 
     private final CategoryService categoryService;
     private final UserService userService;
@@ -55,6 +52,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleTagRepository articleTagRepository;
     private final TagService tagService;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     private ArticleServiceImpl self;
 
@@ -155,13 +153,10 @@ public class ArticleServiceImpl implements ArticleService {
         } else {
             RedisClient.setCacheObject(redisKey, 1, 15);
             //发布消息
-            String exchange = Constants.HAMI_DIRECT_EXCHANGE2;
-            rabbitTemplate.convertAndSend(exchange, Constants.ADD_VIEWS_ROUTING, articleId);
-            LoginUserContext.getOptLoginUserId()
-                    .ifPresent(id -> {
-                        rabbitTemplate.convertAndSend(exchange, Constants.READING_RECORD_ROUTING,
-                                new ReadingRecord(id, articleId));
-                    });
+            Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
+            ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
+                    articleId, authorId, loginUserId);
+            rabbitMessagePublisher.publishMsg(message);
             return true;
         }
     }
@@ -235,27 +230,15 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public boolean updateArticle(Article article) {
-        boolean success = articleRepository.updateArticle(article);
-        if (success) {
-            clearCache(article.getId());
-        }
-        return success;
+        return articleRepository.updateArticle(article);
     }
 
     @Transactional
     @Override
     public boolean deleteByArticleId(Integer articleId, Integer userId) {
-        boolean success = articleRepository.deleteArticle(articleId, userId);
-        if (success) {
-            clearCache(articleId);
-        }
-        return success;
+        return articleRepository.deleteArticle(articleId, userId);
     }
 
-    private void clearCache(Integer id) {
-        String key = Constants.ARTICLE_INFO + id;
-        RedisClient.deleteObject(key);
-    }
 
     private void buildArticleDTOs(List<ArticleDTO> articleDTOS,
                                   ArticleOptionsBuilder builder) {

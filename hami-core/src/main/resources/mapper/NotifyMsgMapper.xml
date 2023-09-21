@@ -1,23 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="top.wang3.hami.core.mapper.NotifyMsgMapper">
-  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.NotifyMsg">
-    <!--@mbg.generated-->
-    <!--@Table notify_msg-->
-    <id column="id" property="id" />
-    <result column="item_id" property="itemId" />
-    <result column="related_id" property="relatedId" />
-    <result column="sender" property="sender" />
-    <result column="receiver" property="receiver" />
-    <result column="detail" property="detail" />
-    <result column="type" property="type" />
-    <result column="state" property="state" />
-    <result column="ctime" property="ctime" />
-    <result column="mtime" property="mtime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, item_id, related_id, sender, receiver, detail, `type`, `state`,
-    ctime, mtime
-  </sql>
+    <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.NotifyMsg">
+        <!--@mbg.generated-->
+        <!--@Table notify_msg-->
+        <id column="id" property="id"/>
+        <result column="item_id" property="itemId"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="sender" property="sender"/>
+        <result column="receiver" property="receiver"/>
+        <result column="detail" property="detail"/>
+        <result column="type" property="type"/>
+        <result column="state" property="state"/>
+        <result column="ctime" property="ctime"/>
+        <result column="mtime" property="mtime"/>
+    </resultMap>
+
+    <resultMap id="NotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+        <id column="id" property="id"/>
+        <result column="state" property="state"/>
+        <result column="ctime" property="ctime"/>
+        <result column="type" property="type"/>
+        <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
+            <result column="item_id" property="id"/>
+            <result column="detail" property="name" />
+        </association>
+        <association property="sender" javaType="top.wang3.hami.common.dto.notify.Info">
+            <result column="sender_id" property="id" />
+            <result column="sender_name" property="name" />
+            <result column="sender_avatar" property="image" />
+        </association>
+        <association property="relatedInfo" javaType="top.wang3.hami.common.dto.notify.Info">
+            <result column="article_id" property="id" />
+            <result column="article_title" property="name" />
+        </association>
+    </resultMap>
+
+    <resultMap id="SimpleNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+        <id column="id" property="id"/>
+        <result column="state" property="state"/>
+        <result column="ctime" property="ctime"/>
+        <result column="type" property="type"/>
+        <association property="sender" javaType="top.wang3.hami.common.dto.notify.Info">
+            <result column="sender_id" property="id" />
+            <result column="sender_name" property="name" />
+            <result column="sender_avatar" property="image" />
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        item_id,
+        related_id,
+        sender,
+        receiver,
+        detail,
+        `type`,
+        `state`,
+        ctime,
+        mtime
+    </sql>
+
+    <sql id="NotifyMsgDTO_Column_List" >
+        <!--@sql select -->
+        t1.id       as id,
+        t1.state    as state,
+        t1.ctime    as ctime,
+        t1.type     as type,
+        t1.detail   as detail,
+        t1.item_id  as item_id,
+        t2.user_id  as sender_id,
+        t2.username as sender_name,
+        t2.avatar   as sender_avatar,
+        t3.id       as article_id,
+        t3.title    as article_title
+        <!--@sql from notify_msg t1
+                 join user t2
+                 join article t3
+        -->
+    </sql>
+
+    <select id="listCommentNotify" resultMap="NotifyMsgDTOResultMap">
+        <!-- 评论通知-->
+        select
+        <include refid="NotifyMsgDTO_Column_List">
+        </include>
+        from notify_msg t1
+                 join user t2 on t1.sender = t2.user_id and t2.deleted = 0
+                 join article t3 on t1.related_id = t3.id and t3.deleted = 0
+        where t1.receiver = #{receiver}
+          and (
+                    type = '${@top.wang3.hami.common.dto.notify.NotifyType@COMMENT.getType()}'
+                or
+                    type = '${@top.wang3.hami.common.dto.notify.NotifyType@REPLY.getType()}'
+            )
+        order by t1.id DESC
+    </select>
+
+    <select id="listLikeCollectNotify" resultMap="NotifyMsgDTOResultMap">
+        select
+        <include refid="NotifyMsgDTO_Column_List">
+        </include>
+        from notify_msg t1
+                 left join user t2 on t1.sender = t2.user_id and t2.deleted = 0
+                 left join article t3 on t1.related_id = t3.id and t3.deleted = 0
+        where t1.receiver = #{receiver}
+          and (
+                    t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@ARTICLE_LIKE.getType()}'
+                or
+                    t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@COMMENT_LIKE.getType()}'
+                or
+                    t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@COLLECT.getType()}'
+            )
+        order by t1.id DESC
+    </select>
+
+    <select id="listFollowNotify" resultMap="SimpleNotifyMsgDTOResultMap">
+        select t1.id       as id,
+               t1.state    as state,
+               t1.ctime    as ctime,
+               t1.type     as type,
+               t2.user_id  as sender_id,
+               t2.username as sender_name,
+               t2.avatar   as sender_avatar
+        from notify_msg t1
+                 left join user t2 on t1.sender = t2.user_id and t2.deleted = 0
+        where t1.receiver = #{receiver}
+          and t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@FOLLOW.getType()}'
+        order by id DESC
+    </select>
+
+    <select id="selectNoReadNotify" resultType="java.lang.Integer">
+        select type, count(*)
+        from notify_msg
+        where receiver = 1 and state = 0
+        group by type
+    </select>
 </mapper>

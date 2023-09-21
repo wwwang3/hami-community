@@ -6,7 +6,7 @@ public interface ArticleTagService {
 
     List<Integer> getArticleTagIds(Integer articleId);
 
-    void updateTags(Integer articleId, List<Integer> newTags);
+    boolean updateTags(Integer articleId, List<Integer> newTags);
 
     void saveTags(Integer id, List<Integer> tagIds);
 }

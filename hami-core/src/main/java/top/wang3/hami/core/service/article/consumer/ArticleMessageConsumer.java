@@ -1,0 +1,37 @@
+package top.wang3.hami.core.service.article.consumer;
+
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.stereotype.Component;
+import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.message.ArticleRabbitMessage;
+import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.service.article.ArticleStatService;
+
+@RabbitListener(bindings = {
+        @QueueBinding(
+                value = @Queue("hami-article-queue-1"),
+                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                key = {"article.*"}
+        ),
+})
+@Component
+@RequiredArgsConstructor
+public class ArticleMessageConsumer {
+
+    private final ArticleStatService articleStatService;
+
+    @RabbitHandler
+    public void handleArticleMessage(ArticleRabbitMessage message) {
+        if (message.getType() == ArticleRabbitMessage.Type.UPDATE ||
+                message.getType() == ArticleRabbitMessage.Type.DELETE) {
+            //删除缓存
+            String key = Constants.ARTICLE_INFO + message.getArticleId();
+            RedisClient.deleteObject(key);
+        } else if (message.getType() == ArticleRabbitMessage.Type.VIEW) {
+            //文章阅读量增加
+            articleStatService.increaseViews(message.getArticleId(), 1);
+        }
+    }
+}

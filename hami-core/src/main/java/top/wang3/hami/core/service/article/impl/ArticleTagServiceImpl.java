@@ -36,7 +36,7 @@ public class ArticleTagServiceImpl implements ArticleTagService {
     @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'#article:tag:'+#articleId",
             cacheManager = Constants.RedisCacheManager)
     @Override
-    public void updateTags(Integer articleId, List<Integer> newTags) {
+    public boolean updateTags(Integer articleId, List<Integer> newTags) {
         List<ArticleTag> oldTags = articleTagRepository.getArticleTagsById(articleId);
         List<Integer> toDelete = new ArrayList<>();
         // [1,2,3] [2,1,4]
@@ -50,16 +50,16 @@ public class ArticleTagServiceImpl implements ArticleTagService {
             }
         });
 
-        transactionTemplate.execute(status -> {
+        Boolean success = transactionTemplate.execute(status -> {
             if (!toDelete.isEmpty()) {
-                articleTagRepository.deleteArticleTags(toDelete);
+                return articleTagRepository.deleteArticleTags(toDelete);
             }
             if (!newTags.isEmpty()) {
-                articleTagRepository.saveArticleTags(articleId, newTags);
+                return articleTagRepository.saveArticleTags(articleId, newTags);
             }
-            return null;
+            return true;
         });
-
+        return Boolean.TRUE.equals(success);
     }
 
     @Override
