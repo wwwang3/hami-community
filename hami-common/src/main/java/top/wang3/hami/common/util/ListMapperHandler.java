@@ -19,6 +19,18 @@ public class ListMapperHandler {
         return subList(origin, Function.identity(), current, size);
     }
 
+    public static <T> void forEach(Collection<T> origin, BiConsumer<T, Integer> consumer) {
+        if (CollectionUtils.isEmpty(origin)) {
+            return;
+        }
+        Iterator<T> iterator = origin.iterator();
+        int index = 0;
+        while (iterator.hasNext()) {
+            consumer.accept(iterator.next(), index);
+            ++index;
+        }
+    }
+
     public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyList();
@@ -81,17 +93,23 @@ public class ListMapperHandler {
         });
     }
 
-    public static <T, K> Map<K, T> listToMap(List<T> origin, Function<? super T, K> keyMapper) {
-        return Optional.ofNullable(origin)
-                .map(o -> o.stream().collect(Collectors.toMap(keyMapper, Function.identity())))
-                .orElse(Collections.emptyMap());
+    public static <T, K> Map<K, T> listToMap(List<T> origin, Function<T, K> keyMapper) {
+        if (CollectionUtils.isEmpty(origin)) {
+            return Collections.emptyMap();
+        }
+        return listToMap(origin, keyMapper, t -> t);
     }
 
     public static <T, K, U> Map<K, U> listToMap(List<T> data, Function<T, K> keyMapper,
                                                 Function<T, U> valueMapper) {
-        return Optional.ofNullable(data)
-                .map(d -> d.stream().collect(Collectors.toMap(keyMapper, valueMapper)))
-                .orElse(Collections.emptyMap());
+        if (CollectionUtils.isEmpty(data)) {
+            return Collections.emptyMap();
+        }
+        LinkedHashMap<K, U> map = new LinkedHashMap<>(data.size());
+        for (T item : data) {
+            map.put(keyMapper.apply(item), valueMapper.apply(item));
+        }
+        return map;
     }
 
     /**

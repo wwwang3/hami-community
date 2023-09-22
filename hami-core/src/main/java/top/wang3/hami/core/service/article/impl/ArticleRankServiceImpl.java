@@ -40,8 +40,7 @@ public class ArticleRankServiceImpl implements ArticleRankService {
         }
         List<Integer> articleIds = ListMapperHandler.listTo(counters, HotArticleDTO::getArticleId);
         ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
-                .noInteract()
-                .noTags();
+                .noInteract();
         List<ArticleDTO> articles = articleService.getArticleByIds(articleIds, builder);
         ListMapperHandler.doAssemble(counters, HotArticleDTO::getArticleId,
                 articles, ArticleDTO::getId, HotArticleDTO::setArticle);

@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.Category;
@@ -14,7 +15,7 @@ import top.wang3.hami.core.repository.CategoryRepository;
 
 import java.util.List;
 
-//@Component
+@Component
 @Slf4j
 public class ArticleListInitializer implements ApplicationRunner {
 
@@ -29,13 +30,13 @@ public class ArticleListInitializer implements ApplicationRunner {
         try {
             log.info("start to init cate-article-list");
             long start = System.currentTimeMillis();
-            List<Article> articles = articleRepository.listArticlesByCateId(null);
+            List<Article> articles = articleRepository.listArticleByCateId(null);
             String totalKey = Constants.ARTICLE_LIST;
             cacheToRedis(totalKey, articles);
             List<Category> categories = categoryRepository.getAllCategories();
             for (Category category : categories) {
                 String key = Constants.CATE_ARTICLE_LIST + category.getId();
-                List<Article> data = articleRepository.listArticlesByCateId(category.getId());
+                List<Article> data = articleRepository.listArticleByCateId(category.getId());
                 cacheToRedis(key, data);
             }
             long end = System.currentTimeMillis();

@@ -65,7 +65,6 @@ public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, R
         }
         List<Integer> articleIds = ListMapperHandler.listTo(records, ReadingRecord::getArticleId);
         ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
-                .noTags()
                 .noInteract();
         List<ArticleDTO> articleDTOS = articleService.getArticleByIds(articleIds, builder);
         List<ReadingRecordDTO> data = ArticleConverter.INSTANCE.toReadingRecordDTO(records);

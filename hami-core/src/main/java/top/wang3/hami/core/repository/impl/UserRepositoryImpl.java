@@ -10,13 +10,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserProfile;
-import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
-import top.wang3.hami.core.mapper.AccountMapper;
 import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.repository.UserRepository;
 
@@ -36,8 +33,6 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     TransactionTemplate transactionTemplate;
-
-    private final AccountMapper accountMapper;
 
     @Override
     public User getUserById(Integer userId) {
@@ -75,17 +70,14 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
         return getBaseMapper().scanUserIds(lastUserId, batchSize);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateAvatar(Integer loginUserId, String url) {
         //更新头像地址
-        Boolean updated = transactionTemplate.execute(status -> {
-                    return ChainWrappers.updateChain(getBaseMapper())
-                            .set("avatar", url)
-                            .eq("user_id", loginUserId)
-                            .update();
-                }
-        );
-        return Boolean.TRUE.equals(updated);
+        return ChainWrappers.updateChain(getBaseMapper())
+                .set("avatar", url)
+                .eq("user_id", loginUserId)
+                .update();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -94,19 +86,7 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
         //更新用户信息
         Assert.notNull(user, "user cannot be null");
         user.setUserId(loginUserId);
-        Boolean updated = transactionTemplate.execute(status -> {
-            boolean saved = super.updateById(user);
-            String username = user.getUsername();
-            //更新账号信息
-            if (saved && StringUtils.hasText(username)) {
-                Account account = new Account();
-                account.setId(loginUserId);
-                account.setUsername(username);
-                return accountMapper.updateById(account) == 1;
-            }
-            return saved;
-        });
-        return Boolean.TRUE.equals(updated);
+        return super.updateById(user);
     }
 
     @Override

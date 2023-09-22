@@ -42,20 +42,20 @@ public class AccountController {
     @PostMapping("/register")
     public Result<Void> register(@RequestBody @Valid
                                      RegisterParam param) {
-        accountService.register(param);
-        return Result.success("注册成功");
+        return Result.ofTrue(accountService.register(param))
+                .orElse("注册失败");
     }
 
     @PostMapping("/update-pass")
     public Result<Void> updatePassword(@RequestBody @Valid ResetPassParam param) {
-        accountService.updatePassword(param);
-        return Result.success("修改成功");
+        return Result.ofTrue(accountService.updatePassword(param))
+                .orElse("修改失败");
     }
 
     @PostMapping("/reset-pass")
     public Result<Void> resetPassword(@RequestBody @Valid ResetPassParam param) {
-        accountService.resetPassword(param);
-        return Result.success("重置密码成功");
+        return Result.ofTrue(accountService.resetPassword(param))
+                .orElse("重置失败");
     }
 
 

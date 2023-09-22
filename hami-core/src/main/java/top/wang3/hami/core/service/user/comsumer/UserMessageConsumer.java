@@ -16,7 +16,7 @@ import top.wang3.hami.core.service.article.ReadingRecordService;
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"user.*", "article.view"}
         ),
-})
+}, concurrency = "4")
 @Component
 @RequiredArgsConstructor
 public class UserMessageConsumer {

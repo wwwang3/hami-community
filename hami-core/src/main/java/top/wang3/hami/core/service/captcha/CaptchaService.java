@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 public interface CaptchaService {
 
     /**
-     * todo 完善限流
-     * 发送验证码, 会对IP进行限制, 默认60秒内只能调用一次
+     *
+     * 发送验证码
      * @param captcha Captcha
      */
     void sendCaptcha(Captcha captcha) throws CaptchaServiceException;

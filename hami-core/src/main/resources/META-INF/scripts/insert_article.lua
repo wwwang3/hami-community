@@ -3,7 +3,7 @@ local user_id = tonumber(ARGV[2]]
 local cate_id = tonumber(ARGV[3])
 
 local ctime = tonumber(ARGV[4]) -- 分数
-local max_count = 1000; -- 1000篇文章 20篇每页，50页基本满足需求了
+local max_count = 2000; -- 2000篇文章 20篇每页，50页基本满足需求了
 
 local list_key = "article:list:total"
 local cate_list_key = "cate:article:list:" + cate_id

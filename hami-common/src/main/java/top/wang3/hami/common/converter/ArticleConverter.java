@@ -4,9 +4,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.model.*;
+import top.wang3.hami.common.util.ListMapperHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,13 +76,21 @@ public interface ArticleConverter {
         return dtos;
     }
 
-    default ArticleContentDTO toArticleContentDTO(ArticleInfo articleInfo, String content) {
-        if (articleInfo == null) return null;
-        ArticleContentDTO articleDTO = new ArticleContentDTO();
-        articleDTO.setId(articleInfo.getId());
-        articleDTO.setUserId(articleInfo.getUserId());
-        articleDTO.setArticleInfo(articleInfo);
-        articleDTO.setContent(content);
-        return articleDTO;
+
+    ArticleContentDTO toArticleContentDTO(ArticleDTO dto, String content);
+
+
+    ArticleInfo toArticleInfo(ArticleDO articleDO, List<Integer> tagIds);
+
+    default List<ArticleInfo> toArticleInfos(List<ArticleDO> dos) {
+        if (CollectionUtils.isEmpty(dos)) {
+            return Collections.emptyList();
+        }
+        ArrayList<ArticleInfo> articleDTOS = new ArrayList<>(dos.size());
+        for (ArticleDO item : dos) {
+            List<Integer> tagIds = ListMapperHandler.listTo(item.getTags(), ArticleTag::getTagId);
+            articleDTOS.add(toArticleInfo(item, tagIds));
+        }
+        return articleDTOS;
     }
 }

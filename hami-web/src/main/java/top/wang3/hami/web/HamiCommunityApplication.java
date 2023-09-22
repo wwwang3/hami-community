@@ -31,6 +31,7 @@ public class HamiCommunityApplication {
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(HamiCommunityApplication.class, args);
 //        test2();
+        RedisClient.setCacheObject("test", "114514");
     }
 
     public static void test1() {

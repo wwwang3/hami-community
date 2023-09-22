@@ -7,7 +7,7 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.article.ArticleInfo;
+import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.model.Comment;
@@ -53,7 +53,7 @@ public class NotifyMsgConsumer {
 
     private void handleArticleLike(LikeRabbitMessage message) {
         //点赞通知 xx赞了你的文章
-        ArticleInfo article = articleService.getArticleInfoById(message.getItemId());
+        ArticleDTO article = articleService.getArticleDTOById(message.getItemId());
         Integer sender = message.getUserId();
         if (article == null || isSelf(sender, article.getUserId())) {
             return;
@@ -79,7 +79,7 @@ public class NotifyMsgConsumer {
     public void handleCommentMessage(CommentRabbitMessage message) {
         //评论文章通知 xx评论了你的文章
         Integer articleId = message.getArticleId();
-        ArticleInfo article = articleService.getArticleInfoById(message.getArticleId());
+        ArticleDTO article = articleService.getArticleDTOById(message.getArticleId());
         if (article == null) return;
         if (isSelf(article.getUserId(), message.getUserId())) {
             return;
@@ -92,7 +92,7 @@ public class NotifyMsgConsumer {
     @RabbitHandler
     public void handleReplyMessage(ReplyRabbitMessage message) {
         Integer articleId = message.getArticleId();
-        ArticleInfo article = articleService.getArticleInfoById(articleId);
+        ArticleDTO article = articleService.getArticleDTOById(articleId);
         if (article == null) return;
         Integer articleAuthor = article.getUserId();
         //把他爹也查出来 内容一起写入通知 xx回复了你的评论
@@ -119,7 +119,7 @@ public class NotifyMsgConsumer {
         }
         //收藏消息 xx收藏了你的文章
         int articleId = message.getArticleId();
-        ArticleInfo article = articleService.getArticleInfoById(articleId);
+        ArticleDTO article = articleService.getArticleDTOById(articleId);
         if (article == null || isSelf(message.getUserId(), article.getUserId())) {
             return;
         }

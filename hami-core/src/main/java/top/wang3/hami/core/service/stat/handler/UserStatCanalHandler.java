@@ -4,10 +4,7 @@ package top.wang3.hami.core.service.stat.handler;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scripting.support.ResourceScriptSource;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.constant.Constants;
@@ -32,13 +29,7 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
 
     @PostConstruct
     public void loadFollowScript() {
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
-        String path = "/META-INF/scripts/update_user_stat.lua";
-        ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
-        script.setScriptSource(source);
-        script.setResultType(Long.class);
-        redisScript = script;
-        log.debug("success load lua script: {}", path);
+        redisScript = RedisClient.loadScript("/META-INF/scripts/update_user_stat.lua");
     }
 
     @Override
@@ -59,8 +50,8 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     public void processUpdate(ArticleStat before, ArticleStat after) {
         UserStat stat = calculate(before, after);
         String key = getKey(after.getUserId());
-        RedisClient.excuteScript(redisScript, List.of(key), stat.getTotalViews(), stat.getTotalLikes(),
-                stat.getTotalComments(), stat.getTotalCollects());
+        RedisClient.executeScript(redisScript, List.of(key), List.of(stat.getTotalViews(), stat.getTotalLikes(),
+                stat.getTotalComments(), stat.getTotalCollects()));
         log.debug("user-stat-handler update to Redis success");
     }
 
@@ -68,8 +59,9 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     public void processDelete(ArticleStat deletedEntity) {
         String key = getKey(deletedEntity.getUserId());
         //删除
-        RedisClient.excuteScript(redisScript, List.of(key), -1 * deletedEntity.getViews(), -1 * deletedEntity.getLikes(),
+        List<?> args = List.of(-1 * deletedEntity.getViews(), -1 * deletedEntity.getLikes(),
                 -1 * deletedEntity.getComments(), -1 * deletedEntity.getCollects());
+        RedisClient.executeScript(redisScript, List.of(key), args);
     }
 
     private UserStat calculate(ArticleStat before, ArticleStat after) {

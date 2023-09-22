@@ -1,18 +1,18 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.model;
 
 
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class UserArticleParam extends PageParam {
+public class ArticleDO extends Article {
 
-    @Min(value = 1)
-    private int userId;
+    private List<ArticleTag> tags;
 }

@@ -65,7 +65,7 @@ public class ArticleCollectServiceImpl extends ServiceImpl<ArticleCollectMapper,
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE) //状态为1
                 .orderByDesc("mtime") //更新时间
-                .last("limit 10000")
+                .last("limit 2000")
                 .list();
     }
 

@@ -10,11 +10,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.converter.ArticleConverter;
+import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.common.model.ArticleDO;
+import top.wang3.hami.common.model.ArticleTag;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.repository.ArticleRepository;
 
@@ -30,25 +35,29 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     private final String[] fields = {"id", "user_id", "title", "summary", "picture", "category_id", "ctime", "mtime"};
     private final String[] full_fields = {"id", "user_id", "title", "summary", "content", "picture", "category_id", "ctime", "mtime"};
 
+
     @Override
-    public Article getArticleById(Integer articleId) {
-        //no content
-        if (articleId == null || articleId < 0) {
-            throw new ServiceException("参数错误");
-        }
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select(fields)
-                .eq("id", articleId)
-                .one();
+    public ArticleInfo getArticleInfoById(Integer articleId) {
+        ArticleDO articleDO = getBaseMapper().selectArticleById(articleId);
+        if (articleDO == null) return null;
+        List<Integer> tagIds = ListMapperHandler.listTo(articleDO.getTags(), ArticleTag::getTagId);
+        return ArticleConverter.INSTANCE.toArticleInfo(articleDO, tagIds);
     }
 
     @Override
-    public List<Article> listArticlesByCateId(Integer cateId) {
+    public List<ArticleInfo> listArticleById(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
+        List<ArticleDO> dos = getBaseMapper().listArticleById(ids);
+        return ArticleConverter.INSTANCE.toArticleInfos(dos);
+    }
+
+    @Override
+    public List<Article> listArticleByCateId(Integer cateId) {
         List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
                 .select("id", "user_id", "ctime")
                 .eq(cateId != null, "category_id", cateId)
                 .orderByDesc("ctime", "id") //根据ctime倒序
-                .last("limit 1000") //查询1000条
+                .last("limit 2000") //查询1000条
                 .list();
         if (articles == null || articles.isEmpty()) {
             return Collections.emptyList();
@@ -56,7 +65,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return articles;
     }
 
-    @Cacheable(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#articleId",
+    @Cacheable(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#articleId",
             cacheManager = Constants.RedisCacheManager)
     @Override
     public String getArticleContentById(Integer articleId) {
@@ -71,7 +80,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public List<Article> queryUserArticles(int userId) {
         return ChainWrappers.queryChain(getBaseMapper())
-                .select("article_id", "ctime")
+                .select("id", "ctime")
                 .eq("user_id", userId)
                 .orderByDesc("ctime")
                 .list();
@@ -89,7 +98,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return super.save(article);
     }
 
-    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#article.id",
+    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#article.id",
             cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
@@ -99,7 +108,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
 
-    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content'+#articleId",
+    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#articleId",
             cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
@@ -119,6 +128,16 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId) {
         return getBaseMapper().selectFollowUserArticles(page, loginUserId);
+    }
+
+    @Override
+    public List<Integer> listInitArticle() {
+        List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
+                .select("id")
+                .orderByDesc("id")
+                .last("limit 2000")
+                .list();
+        return ListMapperHandler.listTo(articles, Article::getId);
     }
 
 

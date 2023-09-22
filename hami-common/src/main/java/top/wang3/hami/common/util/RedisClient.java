@@ -1,5 +1,6 @@
 package top.wang3.hami.common.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -7,16 +8,19 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Redis工具类
  */
 @SuppressWarnings(value = {"unchecked", "rawtypes", "unused"})
+@Slf4j
 public class RedisClient {
 
     private static RedisTemplate redisTemplate;
@@ -64,6 +68,28 @@ public class RedisClient {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
 
+    public static <T> void cacheMultiObject(final Map<String, T> data) {
+        redisTemplate.opsForValue()
+                .multiSet(data); //no expire
+    }
+
+    public static <T> void cacheMultiObject(final Map<String, T> data, final long timeout, final TimeUnit timeUnit) {
+        Assert.notEmpty(data, "map can not be empty");
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            Map<byte[], byte[]> map = serializeMap(data);
+            connection
+                    .stringCommands()
+                    .mSet(map);
+            data.keySet().forEach(key -> {
+                byte[] rawKey = keyBytes(key);
+                connection.
+                        keyCommands()
+                        .pExpire(rawKey, timeUnit.toMillis(timeout));
+            });
+            return null;
+        });
+    }
+
     public static <T> boolean setNx(String key, final T value, final long timeout, TimeUnit timeUnit) {
         Boolean success = redisTemplate.opsForValue()
                 .setIfAbsent(key, value, timeout, timeUnit);
@@ -106,7 +132,6 @@ public class RedisClient {
 
     public static <T> List<T> getMultiCacheObject(final List<String> keys) {
         Assert.notNull(keys, "keys cannot be null");
-        Assert.isTrue(!keys.isEmpty() && keys.size() <= 20, "keys size must in [0, 20]");
         return redisTemplate.opsForValue()
                 .multiGet(keys);
     }
@@ -115,13 +140,40 @@ public class RedisClient {
         List<T> data = redisTemplate.opsForValue()
                 .multiGet(keys);
         if (data == null || data.isEmpty()) return Collections.emptyList();
-        for (int i = 0; i < keys.size(); i++) {
-            if (data.get(i) == null) {
-                data.set(i, func.apply(keys.get(i), i));
+        ListMapperHandler.forEach(data, (item, i) -> {
+            if (item == null) {
+                T applied = func.apply(keys.get(i), i);
+                data.set(i, applied);
             }
-        }
+        });
         return data;
     }
+
+    /**
+     * 获取多个缓存对象 collection建议传入ArrayList
+     * @param keys keys
+     * @param func 当获取到的缓存对象为null时. 调用的方法，其中List中为null元素的索引
+     * @return
+     * @param <T>
+     */
+    public static <T> List<T> getMultiCacheObject(final Collection<String> keys, Function<List<Integer>, List<T>> func) {
+        List<T> data = redisTemplate.opsForValue()
+                .multiGet(keys);
+        if (CollectionUtils.isEmpty(data)) return Collections.emptyList();
+        int size = data.size();
+        final ArrayList<T> result = new ArrayList<>(size);
+        final ArrayList<Integer> list = new ArrayList<>(size);
+        ListMapperHandler.forEach(data, (item, index) -> {
+            if (item == null) list.add(index);
+            else result.add(item);
+        });
+        if (!list.isEmpty()) {
+            List<T> applied = func.apply(list);
+            result.addAll(applied);
+        }
+        return result;
+    }
+
 
     /**
      * 删除单个对象
@@ -488,7 +540,7 @@ public class RedisClient {
     private static <K, V> Map<byte[], byte[]> serializeMap(Map<K, V> map) {
         RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
         RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
-        HashMap<byte[], byte[]> serializeredMap = new HashMap<>();
+        Map<byte[], byte[]> serializeredMap = new LinkedHashMap<>(map.size());
         map.forEach((k, v) -> serializeredMap.put(hashKeySerializer.serialize(k), hashValueSerializer.serialize(v)));
         return serializeredMap;
     }
@@ -521,15 +573,20 @@ public class RedisClient {
         return hashValueSerializer.serialize(value);
     }
 
-    public static <T> T excuteScript(RedisScript<T> script, List<String> keys, Object... args) {
-        return (T) redisTemplate.execute(script, keys, args);
-    }
-
     public static RedisScript<Long> loadScript(String path) {
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
         ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
         script.setScriptSource(source);
         script.setResultType(Long.class);
+        log.debug("load lua script: {} success", path);
         return script;
     }
+
+    public static <T> T executeScript(RedisScript<T> script, List<String> keys, List<?> args) {
+        List<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf);
+        Object[] argsArray = stringArgs.toArray(new String[0]);
+        return (T) redisTemplate.execute(script, redisTemplate.getKeySerializer(),
+                redisTemplate.getStringSerializer(), keys, argsArray);
+    }
+
 }

@@ -121,7 +121,7 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ZERO)
                 .orderByDesc("mtime")
-                .last("limit 1000")
+                .last("limit 2000")
                 .list();
     }
 

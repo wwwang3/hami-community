@@ -37,12 +37,6 @@ public class ArticleTag {
     private Integer tagId;
 
     /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Byte deleted; //no logic
-
-    /**
      * 更新时间
      */
     @TableField(value = "ctime")

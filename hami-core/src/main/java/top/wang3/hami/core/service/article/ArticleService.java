@@ -3,7 +3,6 @@ package top.wang3.hami.core.service.article;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleContentDTO;
 import top.wang3.hami.common.dto.article.ArticleDTO;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;
@@ -14,9 +13,9 @@ import java.util.List;
 
 public interface ArticleService {
 
-    ArticleInfo getArticleInfoById(Integer id);
+    ArticleDTO getArticleDTOById(Integer id);
 
-    List<ArticleInfo> getArticleInfoByIds(List<Integer> ids);
+    List<ArticleDTO> listArticleDTOById(List<Integer> ids);
 
     PageData<ArticleDTO> listNewestArticles(ArticlePageParam param);
 

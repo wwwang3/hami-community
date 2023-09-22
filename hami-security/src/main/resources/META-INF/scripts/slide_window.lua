@@ -12,7 +12,6 @@ local last_requests = 0
 local exists = redis.call("exists", key)
 
 if (exists == 1) then
-    redis.call('zremrangebyscore', key, 0, current - window_size)
     last_requests = redis.call("zcard", key)
 end
 
@@ -22,6 +21,8 @@ if (last_requests < capacity) then
     redis.call("zadd", key, current, m_key)
 end
 
+
+redis.call('zremrangebyscore', key, 0, current - window_size)
 redis.call("expire", key, window_size)
 
 return allowed

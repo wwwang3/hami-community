@@ -57,14 +57,17 @@ public class ServiceErrorControllerConfig {
         @ResponseBody
         public Result<Void> handleError(HttpServletRequest request, HttpServletResponse response) {
             Map<String, Object> attributes = getErrorAttributes(request, getErrorAttributeOptions(request));
-            Exception e = (Exception) attributes.get("exception");
-
-            logError(request, e);
-            String error = attributes.get("error").toString();
-            String msg = e != null ? e.getMessage(): error;
-            var status = getStatus(request);
-            response.setStatus(status.value());
-            return Result.error(status.value(), msg);
+            Object e = attributes.get("exception");
+            if (e instanceof Exception ex) {
+                logError(request, ex);
+                String msg = ex.getMessage();
+                var status = getStatus(request);
+                response.setStatus(status.value());
+                return Result.error(status.value(), msg);
+            } else {
+                String error = attributes.get("error").toString();
+                return Result.error(error);
+            }
         }
 
         protected Map<String, Object> getErrorAttributes(HttpServletRequest request, ErrorAttributeOptions options) {

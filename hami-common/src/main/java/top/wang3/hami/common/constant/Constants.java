@@ -2,6 +2,8 @@ package top.wang3.hami.common.constant;
 
 public final class Constants {
 
+    public static final String EMPTY_STRING = "";
+
 
     public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
 

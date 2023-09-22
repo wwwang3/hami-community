@@ -3,7 +3,7 @@ local old_cate_id = tonumber(ARGV[2])
 local new_cate_id = tonumber(ARGV[3])
 
 local ctime = tonumber(ARGV[4])
-local max_count = 1000
+local max_count = 2000
 
 if (old_cate_id == new_cate_id) then
     return 0

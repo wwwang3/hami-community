@@ -10,6 +10,7 @@ import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -35,7 +36,9 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
         Integer userId = entity.getUserId();
         Integer cateId = entity.getCategoryId();
         long time = entity.getCtime().getTime();
-        Long res = RedisClient.excuteScript(insert_article_script, null,  id, userId, cateId, time);
+
+        Long res = RedisClient.executeScript(insert_article_script, null,
+                List.of(id, userId, cateId, time));
         log.debug("process finish, res: {}", res);
     }
 
@@ -51,7 +54,8 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
         long time = after.getCtime().getTime();
         Long res = null;
         if (!Objects.equals(oldCate, newCate)) {
-            res = RedisClient.excuteScript(update_article_script, null, id, oldCate, newCate, time);
+            List<?> args = List.of(id, oldCate, newCate, time);
+            res = RedisClient.executeScript(update_article_script, null, args);
         }
         log.debug("process finish, res: {}", res);
     }
@@ -62,7 +66,7 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
         Integer id = deletedEntity.getId();
         Integer categoryId = deletedEntity.getCategoryId();
         Integer userId = deletedEntity.getUserId();
-        Long res = RedisClient.excuteScript(delete_article_script, null, id, userId, categoryId);
+        Long res = RedisClient.executeScript(delete_article_script, null, List.of(id, userId, categoryId));
         log.debug("process finish, res: {}", res);
     }
 

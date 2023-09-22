@@ -1,6 +1,5 @@
 package top.wang3.hami.core.service.user;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.user.LoginProfile;
@@ -10,7 +9,7 @@ import top.wang3.hami.common.model.User;
 
 import java.util.List;
 
-public interface UserService extends IService<User> {
+public interface UserService {
     LoginProfile getLoginProfile();
 
     UserProfile getUserProfile();

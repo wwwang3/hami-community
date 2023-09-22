@@ -1,12 +1,14 @@
 package top.wang3.hami.core.service.user.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.UserConverter;
@@ -15,11 +17,12 @@ import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
-import top.wang3.hami.core.mapper.UserMapper;
+import top.wang3.hami.core.repository.AccountRepository;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.core.service.interact.UserInteractService;
@@ -34,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-        implements UserService {
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
 
     @Resource
     ImageService imageService;
@@ -45,13 +48,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private final UserInteractService userInteractService;
     private final CountService countService;
 
-    public UserServiceImpl(UserRepository repository,
-                           UserInteractService userInteractService,
-                           CountService countService) {
-        this.repository = repository;
-        this.userInteractService = userInteractService;
-        this.countService = countService;
-    }
+    private final AccountRepository accountRepository;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
+
 
     @Autowired
     @Lazy
@@ -91,16 +92,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new IllegalArgumentException("参数异常");
         }
         String redisKey = Constants.USER_INFO + userId;
-        User user;
-        if (!RedisClient.exist(redisKey)) {
+        User user = RedisClient.getCacheObject(redisKey);
+        if (user == null) {
+            //todo 保证只有一个请求查询数据库写入Redis
             user = repository.getUserById(userId);
             if (user == null) {
-                RedisClient.setCacheObject(redisKey, "", 10, TimeUnit.SECONDS);
+                RedisClient.setCacheObject(redisKey,  new User(), 10, TimeUnit.SECONDS);
             } else{
                 RedisClient.setCacheObject(redisKey, user, 24, TimeUnit.HOURS);
             }
-        } else {
-            user = RedisClient.getCacheObject(redisKey);
+        } else if (user.getUserId() == null) {
+            return null;
         }
         return user;
     }
@@ -152,11 +154,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public boolean updateProfile(User user) {
         int loginUserId = LoginUserContext.getLoginUserId();
-        boolean success = repository.updateUser(loginUserId, user);
-        if (success) {
+
+        Boolean success = transactionTemplate.execute(status -> {
+            boolean saved = repository.updateUser(loginUserId, user);
+            String username = user.getUsername();
+            //更新账号信息
+            if (saved && StringUtils.hasText(username)) {
+                Account account = new Account();
+                account.setId(loginUserId);
+                account.setUsername(username);
+                return accountRepository.updateById(account);
+            }
+            return false;
+        });
+        if (Boolean.TRUE.equals(success)) {
             deleteUserCache(loginUserId);
         }
-        return success;
+        return false;
     }
 
 

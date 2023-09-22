@@ -41,8 +41,8 @@ public class UserFollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
         Long score1 = entity.getMtime().getTime();
         Long score2 = System.currentTimeMillis();
-
-        RedisClient.excuteScript(followRedisScript, keys, following_id, follower_id, score1, score2);
+        List<?> args = List.of(following_id, follower_id, score1, score2);
+        RedisClient.executeScript(followRedisScript, keys, args);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class UserFollowCanalHandler implements CanalEntryHandler<UserFollow> {
         Integer following_id = deletedEntity.getFollowing();
         Integer follower_id = deletedEntity.getUserId();
 
-        RedisClient.excuteScript(unFollowRedisScript, keys,
-                following_id, follower_id);
+        RedisClient.executeScript(unFollowRedisScript, keys,
+                List.of(following_id, follower_id));
     }
     
     private List<String> getKeys(UserFollow entity) {

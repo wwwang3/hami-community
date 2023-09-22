@@ -1,10 +1,7 @@
 package top.wang3.hami.core.service.account.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import jakarta.annotation.Resource;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,24 +15,23 @@ import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.ServiceException;
-import top.wang3.hami.core.mapper.AccountMapper;
-import top.wang3.hami.core.mapper.UserMapper;
+import top.wang3.hami.core.repository.AccountRepository;
+import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
 import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.service.TokenService;
 
-import java.util.function.Supplier;
-
 @Service
 @Slf4j
-@Setter
-public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
-        implements AccountService {
+@RequiredArgsConstructor
+public class AccountServiceImpl implements AccountService {
 
     private final EmailCaptchaService captchaService;
 
-    private final UserMapper userMapper;
+    private final UserRepository userRepository;
+
+    private final AccountRepository accountRepository;
 
     @Resource
     PasswordEncoder passwordEncoder;
@@ -46,22 +42,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
     @Resource
     TokenService tokenService;
 
-    public AccountServiceImpl(EmailCaptchaService captchaService, UserMapper userMapper) {
-        this.captchaService = captchaService;
-        this.userMapper = userMapper;
-    }
-
     @Override
     public Account getAccountByEmailOrUsername(String account) {
-        var wrapper = Wrappers.lambdaQuery(Account.class)
-                .eq(Account::getUsername, account)
-                .or()
-                .eq(Account::getEmail, account);
-        return super.getOne(wrapper);
+        return accountRepository.getAccountByEmailOrUsername(account);
     }
 
     @Override
-    public void register(RegisterParam param) throws SecurityException {
+    public boolean register(RegisterParam param) throws SecurityException {
         //校验验证码
         String email = param.getEmail();
         String username = param.getUsername();
@@ -87,67 +74,56 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
                 .state((byte) 1)
                 .password(encryptedPassword)
                 .build();
-        transactionTemplate.execute(status -> {
-            super.save(account);
-            return userMapper.insert(new User(account.getId(), username));
+        Boolean success = transactionTemplate.execute(status -> {
+            boolean saved = accountRepository.save(account);
+            if (saved) {
+                User user = new User(account.getId(), username);
+                return userRepository.save(user);
+            }
+            return false;
         });
+        return Boolean.TRUE.equals(success);
     }
 
     @Override
-    public void resetPassword(ResetPassParam param) {
+    public boolean resetPassword(ResetPassParam param) {
         //校验验证码
-        restPassword(param, "reset");
+        return restPassword(param, "reset");
     }
 
 
     @Override
-    public void updatePassword(ResetPassParam param) {
+    public boolean updatePassword(ResetPassParam param) {
         //修改密码
         //清除用户所有的登录态
         boolean success = restPassword(param, "update");
         if (success) {
             tokenService.kickout();
         }
+        return success;
     }
 
-
-    /**
-     * 检查用户名是否存在
-     * @param username 用户名
-     * @return true-存在 false-不存在
-     */
+    @Override
     public boolean checkUsername(String username) {
-        var wrapper = Wrappers.query(Account.class)
-                .eq("username", username);
-        return super.getBaseMapper().exists(wrapper);
+        return accountRepository.checkUsername(username);
     }
 
+    @Override
+    public boolean checkEmail(String email) {
+        return accountRepository.checkEmail(email);
+    }
 
     @Override
     public AccountInfo getAccountInfo() {
-        int loginUserId = LoginUserContext.getLoginUserId();
-        Account account = ChainWrappers.queryChain(getBaseMapper())
-                .select("id", "email")
-                .eq("id", loginUserId)
-                .one();
-        return AccountConverter.INSTANCE.toAccountInfo(account);
-    }
-
-    /**
-     * 检查邮箱是否存在
-     * @param email 邮箱
-     * @return true-存在 false-不存在
-     */
-    public boolean checkEmail(String email) {
-        var wrapper = Wrappers.query(Account.class)
-                .eq("email", email);
-        return super.getBaseMapper().exists(wrapper);
+        int userId = LoginUserContext.getLoginUserId();
+        Account info = accountRepository.getAccountInfo(userId);
+        return AccountConverter.INSTANCE.toAccountInfo(info);
     }
 
 
     private boolean restPassword(ResetPassParam param, String type) {
         String captchaType = EmailCaptchaService.resolveCaptchaType(type);
-        String email = param.getEmail();
+        final String email = param.getEmail();
         boolean verify = captchaService.verify(captchaType, email, param.getCaptcha());
         if (!verify) {
             throw new CaptchaServiceException("验证码无效或过期");
@@ -157,21 +133,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         if (!checkEmail(param.getEmail())) {
             throw new ServiceException("用户不存在");
         }
-        String encryptedPassword = passwordEncoder.encode(param.getPassword());
+        Account account = getAccountByEmailOrUsername(email);
+        final String old = account.getPassword();
+        final String encryptedPassword = passwordEncoder.encode(param.getPassword());
         Boolean updated = transactionTemplate.execute(status -> {
-            return ChainWrappers.updateChain(getBaseMapper())
-                    .set("`password`", encryptedPassword)
-                    .eq("email", email)
-                    .update();
+            return accountRepository.updatePassword(email, old, encryptedPassword);
         });
-        return updated != null && updated;
-    }
-
-    private void throwIfFalse(Supplier<Boolean> supplier, String error_msg) {
-        if (supplier != null && Boolean.TRUE.equals(supplier.get())) {
-            return;
-        }
-        throw new ServiceException(error_msg);
+        return Boolean.TRUE.equals(updated);
     }
 
 }

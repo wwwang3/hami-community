@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleDO;
 
 import java.util.List;
 
@@ -20,13 +20,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
     """)
     boolean isArticleExist(Integer articleId);
 
-    List<ArticleDTO> selectArticlesByCategoryId(Page<Article> page, @Param("categoryId") Integer categoryId);
-
-    @Select("""
-        select user_id from article where id = #{articleId};
-    """
-    )
-    Integer getArticleAuthorId(Integer articleId);
 
     List<ArticleSearchDTO> searchArticle(Page<Article> page, @Param("keyword") String keyword);
 
@@ -36,4 +29,9 @@ public interface ArticleMapper extends BaseMapper<Article> {
     Integer getArticleAuthor(Integer articleId);
 
     List<Integer> selectFollowUserArticles(Page<Article> page, @Param("user_id") int loginUserId);
+
+    ArticleDO selectArticleById(@Param("articleId") Integer articleId);
+
+    List<ArticleDO> listArticleById(@Param("ids") List<Integer> ids);
+
 }

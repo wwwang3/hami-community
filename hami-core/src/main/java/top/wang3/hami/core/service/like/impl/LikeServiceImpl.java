@@ -45,7 +45,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, LikeItem>
                 .eq("liker_id", userId)
                 .eq("`state`", Constants.ONE)
                 .orderByDesc("mtime")
-                .last("limit 1000")
+                .last("limit 2000")
                 .list();
     }
 

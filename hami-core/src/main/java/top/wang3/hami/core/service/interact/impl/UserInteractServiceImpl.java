@@ -399,7 +399,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     private List<Integer> loadUserCollectArticlesFromDB(Page<ArticleCollect> page, String key, Integer userId) {
-        //to many duplicates code
+        //用户收藏的文章 zset最多存了2000篇最新的
         List<ArticleCollect> collects = articleCollectService.getUserCollectArticles(userId);
         int current = (int) page.getCurrent();
         int size = (int) page.getSize();
@@ -413,6 +413,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     private List<Integer> loadUserLikeArticlesFromDB(Page<LikeItem> page, String key, Integer userId) {
+        //用户点赞的文章 zset最多存了2000篇最新的
         List<LikeItem> likes = likeService.getUserLikeArticles(userId);
         int current = (int) page.getCurrent();
         int size = (int) page.getSize();
@@ -425,6 +426,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     }
 
     private List<Integer> loadUserFollowingsFromDB(Page<UserFollow> page, String key, Integer userId) {
+        //用户关注
         List<UserFollow> followings = userFollowService.getUserFollowings(userId);
         int current = (int) page.getCurrent();
         int size = (int) page.getSize();
