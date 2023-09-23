@@ -32,8 +32,8 @@ public class SimpleCountService implements CountService {
         UserStat stat = articleStatRepository.getUserStatByUserId(userId);
         Integer followings = userFollowService.getUserFollowingCount(userId);
         Integer followers = userFollowService.getUserFollowerCount(userId);
-        stat.setFollowings(followings);
-        stat.setFollowers(followers);
+        stat.setTotalFollowings(followings);
+        stat.setTotalFollowers(followers);
         return stat;
     }
 
@@ -44,15 +44,14 @@ public class SimpleCountService implements CountService {
 
     @Override
     public List<UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        //只有文章数据，没有关注数据
         List<UserStat> stats = articleStatRepository.getUserStatByUserIds(userIds);
         List<FollowCountItem> followings = userFollowService.getUserFollowerCount(userIds);
         List<FollowCountItem> followers = userFollowService.getUserFollowerCount(userIds);
         ListMapperHandler.doAssemble(stats, UserStat::getUserId, followings, FollowCountItem::getUserId, (stat, item) -> {
-            stat.setFollowings(item.getCount());
+            stat.setTotalFollowings(item.getCount());
         });
         ListMapperHandler.doAssemble(stats, UserStat::getUserId, followers, FollowCountItem::getUserId, (stat, item) -> {
-            stat.setFollowers(item.getCount());
+            stat.setTotalFollowers(item.getCount());
         });
         return stats;
     }

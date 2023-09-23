@@ -65,6 +65,7 @@ public class UserStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     }
 
     private UserStat calculate(ArticleStat before, ArticleStat after) {
+        log.debug("before: {} after: {}", before, after);
         UserStat stat = new UserStat();
         stat.setTotalLikes(after.getLikes() - before.getLikes());
         stat.setTotalComments(after.getComments() - before.getComments());

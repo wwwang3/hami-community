@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.article.consumer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
@@ -16,6 +17,7 @@ import top.wang3.hami.core.service.article.ArticleStatService;
         ),
 })
 @RequiredArgsConstructor
+@Slf4j
 //todo 消费失败先不管 _(≧∇≦」∠)_
 public class UserInteractMessageConsumer {
 
@@ -25,16 +27,18 @@ public class UserInteractMessageConsumer {
     public void handleLikeMessage(LikeRabbitMessage message) {
         //点赞消息
         //state表示取消还是点赞 对应路由do.like1 cancel.like.1
+        log.debug("message: {}", message);
         if (message.isState()) {
             articleStatService.increaseLikes(message.getItemId(), 1);
         } else {
-            articleStatService.decreaseLikes(message.getUserId(), 1);
+            articleStatService.decreaseLikes(message.getItemId(), 1);
         }
     }
 
     @RabbitHandler
     public void handleCollectMessage(CollectRabbitMessage message) {
         //收藏消息
+        log.debug("message: {}", message);
         if (message.isState()) {
             articleStatService.increaseCollects(message.getArticleId(), 1);
         } else {
@@ -51,7 +55,7 @@ public class UserInteractMessageConsumer {
     @RabbitHandler
     public void handleReplyMessage(ReplyRabbitMessage message) {
         //回复
-        articleStatService.decreaseComments(message.getArticleId(), 1);
+        articleStatService.increaseComments(message.getArticleId(), 1);
     }
 
     @RabbitHandler

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleStatDTO;
@@ -44,17 +45,18 @@ public class RefreshStatTaskService {
         int lastArticleId = 0;
         while (true) {
             List<ArticleStat> stats = articleStatRepository.scanArticleStats(lastArticleId, batchSize);
-            cacheStat(stats);
-            if (stats == null || stats.size() < batchSize) {
+            if (!CollectionUtils.isEmpty(stats)) {
+                cacheStat(stats);
+                lastArticleId = stats.get(stats.size() - 1).getArticleId();
+            } else {
                 break;
             }
-            lastArticleId = stats.get(stats.size() - 1).getArticleId();
         }
         long end = System.currentTimeMillis();
         log.info("refresh article-stat success, cost: {}ms", end - start);
     }
 
-    @Scheduled(cron = "0 30 2 * * ?")
+    @Scheduled(cron = "0 43 2 * * ?")
     public void refreshUserStat() {
         log.info("start to refresh user-data");
         long start = System.currentTimeMillis();
@@ -62,12 +64,13 @@ public class RefreshStatTaskService {
         int lastUserId = 0;
         while (true) {
             List<Integer> userIds = userRepository.scanUserIds(lastUserId, batchSize);
-            if (userIds.size() < batchSize) {
+            if (!CollectionUtils.isEmpty(userIds)) {
+                List<UserStat> stats = simpleCountService.getUserStatByUserIds(userIds);
+                cacheUserStat(stats);
+                lastUserId = userIds.get(userIds.size() - 1);
+            } else {
                 break;
             }
-            List<UserStat> stats = simpleCountService.getUserStatByUserIds(userIds);
-            cacheUserStat(stats);
-            lastUserId = userIds.get(userIds.size() - 1);
         }
         long end = System.currentTimeMillis();
         log.info("refresh user-stat success, cost: {}ms", end - start);
@@ -87,7 +90,6 @@ public class RefreshStatTaskService {
         if (stats == null || stats.isEmpty()) {
             return;
         }
-
         stats.forEach(stat -> {
             Map<String, Integer> map = CountService.setUserStatToMap(stat);
             RedisClient.hMSet(Constants.COUNT_TYPE_USER + stat.getUserId(), map);

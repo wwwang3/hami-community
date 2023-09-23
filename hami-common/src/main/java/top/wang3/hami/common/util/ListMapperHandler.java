@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 简单集合映射工具类
@@ -66,13 +67,22 @@ public class ListMapperHandler {
      * @return List<R>
      */
     public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper) {
-        return Optional.ofNullable(origin)
-                .map(o -> o.stream()
-                        .distinct()
-                        .filter(Objects::nonNull)
-                        .map(mapper)
-                        .collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
+        //默认去重
+        return listTo(origin, mapper, true);
+    }
+
+    public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper, boolean distinct) {
+        if (CollectionUtils.isEmpty(origin)) {
+            return Collections.emptyList();
+        }
+        Stream<T> stream = origin.stream();
+        if (distinct) {
+            stream = stream.distinct();
+        }
+        return stream
+                .filter(Objects::nonNull)
+                .map(mapper)
+                .collect(Collectors.toList());
     }
 
     public static <T, R> Set<R> listToSet(List<T> origin, Function<T, R> mapper) {

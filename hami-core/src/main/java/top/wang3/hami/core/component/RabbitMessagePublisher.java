@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.common;
+package top.wang3.hami.core.component;
 
 
 import lombok.RequiredArgsConstructor;

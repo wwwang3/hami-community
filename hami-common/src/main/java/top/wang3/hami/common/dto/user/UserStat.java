@@ -39,10 +39,10 @@ public class UserStat {
     /**
      * 粉丝数
      */
-    private Integer followers = 0;
+    private Integer totalFollowers = 0;
 
     /**
      * 关注总数
      */
-    private Integer followings = 0;
+    private Integer totalFollowings = 0;
 }

@@ -48,14 +48,22 @@ public class CanalEntryMapper {
     private static String getColumnName(Field field) {
         TableId tableId = field.getAnnotation(TableId.class);
         if (tableId != null) {
-            return tableId.value();
+            return resolveName(tableId.value());
         }
         TableField tableField = field.getAnnotation(TableField.class);
         if (tableField != null) {
-            return tableField.value();
+            return resolveName(tableField.value());
         }
         //驼峰转下划线
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName());
+    }
+
+    private static String resolveName(String name) {
+        //兼容反引号
+        if (name.charAt(0) == '`' && name.charAt(name.length() -1) == '`') {
+            return name.substring(1, name.length() - 1);
+        }
+        return name;
     }
 
 

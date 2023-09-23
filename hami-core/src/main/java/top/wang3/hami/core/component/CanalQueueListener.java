@@ -1,4 +1,4 @@
-package top.wang3.hami.core.listener;
+package top.wang3.hami.core.component;
 
 
 import com.alibaba.otter.canal.client.CanalMessageDeserializer;
@@ -69,7 +69,6 @@ public class CanalQueueListener {
     }
 
     private <T> void processRowData(CanalEntry.RowData rowData, CanalEntryHandler<T> handler, CanalEntry.EventType type) throws Exception {
-        log.info("row: {}", rowData.getAfterColumnsList());
         switch (type) {
             case INSERT: {
                 T t = CanalEntryMapper.mapToEntity(rowData.getAfterColumnsList(), handler);

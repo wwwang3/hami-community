@@ -12,10 +12,10 @@ local res2 = redis.call("zrem", follower_list_key, follower_id)
 
 -- 用户的关注数减一
 if (res1 == 1) then
-    redis.call("hincrby", user_stat_key, "followings", -1)
+    redis.call("hincrby", user_stat_key, "total_followings", -1)
 end
 if (res2 == 1) then
     -- 被关注用户的粉丝数减一
-    redis.call"hincrby", following_stat_key, "followers", -1)
+    redis.call("hincrby", following_stat_key, "total_followers", -1)
 end
 return 1

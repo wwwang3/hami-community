@@ -21,7 +21,7 @@
 
   <select id="selectUserStatsByUserIds" resultType="top.wang3.hami.common.dto.user.UserStat">
     select
-        user_id, count(article_id) as articles, sum(views) as total_views, sum(likes) as total_likes,
+        user_id, count(article_id) as total_articles, sum(views) as total_views, sum(likes) as total_likes,
         sum(comments) as total_comments, sum(collects) as total_collects
     from article_stat
     where user_id in

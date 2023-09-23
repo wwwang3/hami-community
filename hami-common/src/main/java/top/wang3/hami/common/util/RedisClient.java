@@ -583,7 +583,7 @@ public class RedisClient {
     }
 
     public static <T> T executeScript(RedisScript<T> script, List<String> keys, List<?> args) {
-        List<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf);
+        List<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf, false);
         Object[] argsArray = stringArgs.toArray(new String[0]);
         return (T) redisTemplate.execute(script, redisTemplate.getKeySerializer(),
                 redisTemplate.getStringSerializer(), keys, argsArray);

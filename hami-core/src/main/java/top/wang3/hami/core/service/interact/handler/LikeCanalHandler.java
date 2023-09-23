@@ -28,6 +28,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
     public void processUpdate(LikeItem before, LikeItem after) {
         Byte oldState = before.getState();
         Byte state = after.getState();
+        log.debug("like: before: {}, after: {}", before, after);
         if (Constants.ZERO.equals(oldState) && Constants.ONE.equals(state)) {
             //点赞
             processInsert(after);
@@ -40,7 +41,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
     public void processDelete(LikeItem deletedEntity) {
         Integer likerId = deletedEntity.getLikerId();
         Byte itemType = deletedEntity.getItemType();
-        String redisKey = Constants.LIST_USER_LIKE + likerId + "-" + itemType;
+        String redisKey = Constants.LIST_USER_LIKE + likerId + ":" + itemType;
         RedisClient.zRem(redisKey, deletedEntity.getItemId());
     }
 }

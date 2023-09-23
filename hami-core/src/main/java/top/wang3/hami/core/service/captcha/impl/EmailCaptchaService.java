@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.captcha.CaptchaService;
-import top.wang3.hami.core.service.common.RabbitMessagePublisher;
 
 import java.util.concurrent.TimeUnit;
 

@@ -9,14 +9,13 @@ local follower_id = tonumber(ARGV[2]) -- 粉丝ID
 local score1 = tonumber(ARGV[3])
 local score2 = tonumber(ARGV[4])
 
-local res1 = redis.call("zadd", following_list_key, score1, following_id)
-local res2 = redis.call("zadd", follower_list_key, score2, follower_id)
-
+-- 被关注用户的粉丝数加1
+local res1 = redis.call("hincrby", following_stat_key, "total_followers", 1)
+local res2 = redis.call("hincrby", user_stat_key, "total_followings", 1)
 if (res1 == 1) then
-    redis.call("hincrby", user_stat_key, "followings", 1)
+    redis.call("zadd", following_list_key, score1, following_id)
 end
 if (res2 == 1) then
-    -- 被关注用户的粉丝数加1
-    redis.call"hincrby", following_stat_key, "followers", 1)
+    redis.call("zadd", follower_list_key, score2, follower_id)
 end
 return 1

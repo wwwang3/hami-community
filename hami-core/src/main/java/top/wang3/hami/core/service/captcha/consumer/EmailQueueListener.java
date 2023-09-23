@@ -1,4 +1,4 @@
-package top.wang3.hami.core.listener;
+package top.wang3.hami.core.service.captcha.consumer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

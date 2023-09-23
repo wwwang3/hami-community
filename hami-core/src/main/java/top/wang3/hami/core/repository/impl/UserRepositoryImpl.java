@@ -91,6 +91,9 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public boolean checkUserExist(Integer userId) {
-        return getBaseMapper().selectById(userId) == null;
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id")
+                .eq("user_id", userId)
+                .exists();
     }
 }

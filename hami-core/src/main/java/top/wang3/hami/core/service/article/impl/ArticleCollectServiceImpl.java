@@ -38,10 +38,12 @@ public class ArticleCollectServiceImpl extends ServiceImpl<ArticleCollectMapper,
             collect.setState(Constants.ONE);
             return super.save(collect);
         } else if (Constants.ZERO.equals(articleCollect.getState())) {
-            ChainWrappers.updateChain(getBaseMapper())
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("`state`", Constants.ONE)
                     .eq("user_id", userId)
                     .eq("article_id", articleId)
-                    .eq("`state`", Constants.ZERO);
+                    .eq("`state`", Constants.ZERO)
+                    .update();
         } else if (Constants.ONE.equals(articleCollect.getState())) {
             throw new ServiceException("重复收藏");
         }

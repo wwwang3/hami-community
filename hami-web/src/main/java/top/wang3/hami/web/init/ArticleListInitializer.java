@@ -4,7 +4,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.Category;
@@ -15,7 +14,7 @@ import top.wang3.hami.core.repository.CategoryRepository;
 
 import java.util.List;
 
-@Component
+//@Component
 @Slf4j
 public class ArticleListInitializer implements ApplicationRunner {
 

@@ -22,7 +22,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
         //采用先更新MySQL后更新Redis的策略 (shabi想法^_^)
         //读取不到缓存时认为数据库也没有数据
         //数据量小的时候随便怎么玩, 直接查询MySQL都行
-        //数据量较大的情况最好还是Cache-Aside模式, 预热数据到MySQL
+        //数据量较大的情况最好还是Cache-Aside模式, 预热数据到Redis
         String redisKey = Constants.COUNT_TYPE_ARTICLE + entity.getArticleId();
         RedisClient.setCacheObject(redisKey, ArticleConverter.INSTANCE.toArticleStatDTO(entity));
         log.debug("insert to Redis success: {}", entity);

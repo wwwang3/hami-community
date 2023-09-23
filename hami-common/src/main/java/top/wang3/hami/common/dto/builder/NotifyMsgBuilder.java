@@ -49,6 +49,7 @@ public class NotifyMsgBuilder {
         //新增粉丝
         return new NotifyMsgBuilder()
                 .sender(userId)
+                .itemId(userId)
                 .receiver(following)
                 .type(NotifyType.FOLLOW)
                 .build();
@@ -108,7 +109,7 @@ public class NotifyMsgBuilder {
         return new NotifyMsgBuilder()
                 .sender(userId)
                 .receiver(replyTo) //userId回复的谁
-                .itemId(replyId) //回复Id 根据itemId查询内容
+                .itemId(replyId) //回复Id
                 .relatedId(articleId)
                 .type(NotifyType.REPLY)
                 .detail(detail)

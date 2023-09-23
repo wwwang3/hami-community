@@ -49,6 +49,7 @@ public class UserFollowCanalHandler implements CanalEntryHandler<UserFollow> {
     public void processUpdate(UserFollow before, UserFollow after) {
         Byte oldState = before.getState();
         Byte state = after.getState();
+        log.debug("before: {}, after: {}", before, after);
         if (Constants.ZERO.equals(oldState) && Constants.ONE.equals(state)) {
             //关注
             processInsert(after);

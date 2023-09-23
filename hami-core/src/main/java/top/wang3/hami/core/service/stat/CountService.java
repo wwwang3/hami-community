@@ -29,8 +29,8 @@ public interface CountService {
         if (userStat == null)
             userStat = new UserStat();
         HashMap<String, Integer> data = new HashMap<>();
-        data.put(Constants.USER_TOTAL_FOLLOWINGS, userStat.getFollowings());
-        data.put(Constants.USER_TOTAL_FOLLOWERS, userStat.getFollowers());
+        data.put(Constants.USER_TOTAL_FOLLOWINGS, userStat.getTotalFollowings());
+        data.put(Constants.USER_TOTAL_FOLLOWERS, userStat.getTotalFollowers());
         data.put(Constants.USER_TOTAL_LIKES, userStat.getTotalLikes());
         data.put(Constants.USER_TOTAL_COMMENTS, userStat.getTotalComments());
         data.put(Constants.USER_TOTAL_COLLECTS, userStat.getTotalCollects());
@@ -43,8 +43,8 @@ public interface CountService {
         if (data == null || data.isEmpty()) return null;
         UserStat stat1 = new UserStat();
         stat1.setUserId(userId);
-        stat1.setFollowings(data.get(Constants.USER_TOTAL_FOLLOWINGS));
-        stat1.setFollowers(data.get(Constants.USER_TOTAL_FOLLOWERS));
+        stat1.setTotalFollowings(data.get(Constants.USER_TOTAL_FOLLOWINGS));
+        stat1.setTotalFollowers(data.get(Constants.USER_TOTAL_FOLLOWERS));
         stat1.setTotalLikes(data.get(Constants.USER_TOTAL_LIKES));
         stat1.setTotalComments(data.get(Constants.USER_TOTAL_COMMENTS));
         stat1.setTotalCollects(data.get(Constants.USER_TOTAL_COLLECTS));

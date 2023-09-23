@@ -3,10 +3,9 @@ package top.wang3.hami.web.init;
 import jakarta.annotation.Resource;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 import top.wang3.hami.core.job.RefreshArticleRankTaskService;
 
-@Component
+//@Component
 public class ArticleRankInitializer implements ApplicationRunner {
 
     @Resource
