@@ -24,4 +24,6 @@ public interface CommentRepository extends IService<Comment> {
     List<Comment> listCommentById(List<Integer> commentIds);
 
     CommentInfo getCommentWithParentById(Integer id);
+
+    boolean checkCommentExist(int itemId);
 }

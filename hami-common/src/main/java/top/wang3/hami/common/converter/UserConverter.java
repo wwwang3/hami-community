@@ -7,7 +7,6 @@ import top.wang3.hami.common.dto.request.UserProfileParam;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
-import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.User;
 
 import java.util.ArrayList;
@@ -18,10 +17,6 @@ import java.util.List;
 public interface UserConverter {
 
     UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
-
-    @Mapping(target = "followed", ignore = true)
-    @Mapping(source = "user.userId", target = "userId")
-    UserDTO convert(User user, UserStat stat);
 
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "followings", ignore = true)

@@ -120,17 +120,17 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         //检查参数, 文章ID, 其他都不能为空
         int loginUserId = LoginUserContext.getLoginUserId();
         //获取草稿
-        final ArticleDraft oldDraft = articleDraftRepository.getDraftById(draftId, loginUserId);
+        final ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
         //校验draft
-        checkDraft(oldDraft);
+        checkDraft(draft);
         //文章
-        Article article = ArticleConverter.INSTANCE.toArticle(oldDraft);
+        Article article = ArticleConverter.INSTANCE.toArticle(draft);
         Boolean success = transactionTemplate.execute(status -> {
             //发表文章
             boolean success1;
             if (article.getId() == null) {
                 //插入
-                success1 = handleInsert(article, oldDraft, loginUserId);
+                success1 = handleInsert(article, draft, loginUserId);
                 if (success1) {
                     ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
                             article.getId(), article.getUserId());
@@ -139,17 +139,11 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
                 }
             } else {
                 //更新
-                success1 = handleUpdate(article, oldDraft);
-                if (success1) {
-                    ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
-                            article.getId(), article.getUserId());
-                    rabbitMessagePublisher.publishMsg(message);
-                    return true;
-                }
+                return handleUpdate(article, draft);
             }
             return false;
         });
-        return Boolean.TRUE.equals(success) ? oldDraft : null;
+        return Boolean.TRUE.equals(success) ? draft : null;
     }
 
     @Override
@@ -166,10 +160,13 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         Boolean success = transactionTemplate.execute(status -> {
             //删除文章
             boolean deleted = articleService.deleteByArticleId(articleId, userId);
+            if (!deleted) {
+                return false;
+            }
             //删除数据
             boolean success2 = articleStatMapper.deleteById(articleId) == 1;
             //删除草稿
-            if (deleted && success2) {
+            if (success2) {
                 return articleDraftRepository.deleteDraftByArticleId(articleId, userId);
             }
             return false;
@@ -177,27 +174,29 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         return Boolean.TRUE.equals(success);
     }
 
-    private boolean handleInsert(Article article, ArticleDraft oldDraft, Integer loginUserId) {
+    private boolean handleInsert(Article article, ArticleDraft draft, Integer loginUserId) {
         //插入
         boolean success1 = articleService.saveArticle(article);
-        oldDraft.setArticleId(article.getId());
-        oldDraft.setState(Constants.ONE);
+        draft.setArticleId(article.getId());
+        draft.setState(Constants.ONE);
         if (success1) {
             //插入文章标签
-            articleTagService.saveTags(article.getId(), oldDraft.getTagIds());
+            articleTagService.saveTags(article.getId(), draft.getTagIds());
             //初始化文章数据
             articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
-            ArticleDraft draft = new ArticleDraft(oldDraft.getId(), article.getId(), Constants.ONE, oldDraft.getVersion());
-            return articleDraftRepository.updateDraft(draft);
+            ArticleDraft newDraft = new ArticleDraft(draft.getId(), article.getId(), Constants.ONE, draft.getVersion());
+            return articleDraftRepository.updateDraft(newDraft);
         }
         return false;
     }
 
     private boolean handleUpdate(Article article, ArticleDraft draft) {
-        boolean success;
-        success = articleService.updateArticle(article);
-        if (success) {
-            return articleTagService.updateTags(article.getId(), draft.getTagIds());
+        if (articleService.updateArticle(article) &&
+                articleTagService.updateTags(article.getId(), draft.getTagIds())) {
+            ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
+                    article.getId(), article.getUserId());
+            rabbitMessagePublisher.publishMsg(message);
+            return true;
         }
         return false;
     }

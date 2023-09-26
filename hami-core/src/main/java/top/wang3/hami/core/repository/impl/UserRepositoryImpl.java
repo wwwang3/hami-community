@@ -28,7 +28,7 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
     private static final String[] LOGIN_PROFILE_FIELDS = {"user_id", "username", "avatar", "profile", "tag", "ctime"};
     public static final String[] USER_PROFILE_FIELDS = {
             "user_id", "username", "avatar", "profile",
-            "blog", "company", "position", "tag", "ctime"
+            "blog", "company", "position", "tag", "ctime", "mtime"
     };
 
     @Resource

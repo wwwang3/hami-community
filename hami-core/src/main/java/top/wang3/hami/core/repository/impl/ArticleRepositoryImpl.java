@@ -5,14 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.ArticleSearchDTO;
@@ -57,7 +54,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .select("id", "user_id", "ctime")
                 .eq(cateId != null, "category_id", cateId)
                 .orderByDesc("ctime", "id") //根据ctime倒序
-                .last("limit 2000") //查询1000条
+                .last("limit 5000")
                 .list();
         if (articles == null || articles.isEmpty()) {
             return Collections.emptyList();
@@ -65,8 +62,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return articles;
     }
 
-    @Cacheable(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#articleId",
-            cacheManager = Constants.RedisCacheManager)
     @Override
     public String getArticleContentById(Integer articleId) {
         return ChainWrappers.queryChain(getBaseMapper())
@@ -75,6 +70,16 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .oneOpt()
                 .map(Article::getContent)
                 .orElse("");
+    }
+
+    @Override
+    public List<Integer> scanArticleIds(int lastId, int batchSize) {
+        return getBaseMapper().scanArticleIds(lastId, batchSize);
+    }
+
+    @Override
+    public List<ArticleDO> scanArticles(List<Integer> ids) {
+       return getBaseMapper().scanArticles(ids);
     }
 
     @Override
@@ -88,7 +93,10 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Override
     public boolean checkArticleExist(Integer articleId) {
-        return getBaseMapper().isArticleExist(articleId);
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id")
+                .eq("id", articleId)
+                .exists();
     }
 
     @Transactional
@@ -98,8 +106,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return super.save(article);
     }
 
-    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#article.id",
-            cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
     public boolean updateArticle(Article article) {
@@ -107,9 +113,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return super.updateById(article);
     }
 
-
-    @CacheEvict(cacheNames = Constants.REDIS_CACHE_NAME, key = "'article:content:'+#articleId",
-            cacheManager = Constants.RedisCacheManager)
     @Transactional
     @Override
     public boolean deleteArticle(Integer articleId, Integer userId) {
@@ -138,6 +141,11 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .last("limit 2000")
                 .list();
         return ListMapperHandler.listTo(articles, Article::getId);
+    }
+
+    @Override
+    public Integer getArticleAuthor(Integer articleId) {
+        return getBaseMapper().getArticleAuthor(articleId);
     }
 
 

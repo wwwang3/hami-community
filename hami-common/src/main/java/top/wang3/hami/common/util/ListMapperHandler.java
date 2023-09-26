@@ -20,6 +20,23 @@ public class ListMapperHandler {
         return subList(origin, Function.identity(), current, size);
     }
 
+    public static <T> List<List<T>> split(Collection<T> origin, int size) {
+        final List<List<T>> result = new ArrayList<>();
+        if (CollectionUtils.isEmpty(origin)) {
+            return result;
+        }
+        ArrayList<T> subList = new ArrayList<>(size);
+        for (T t : origin) {
+            if (subList.size() >= size) {
+                result.add(subList);
+                subList = new ArrayList<>(size);
+            }
+            subList.add(t);
+        }
+        result.add(subList);
+        return result;
+    }
+
     public static <T> void forEach(Collection<T> origin, BiConsumer<T, Integer> consumer) {
         if (CollectionUtils.isEmpty(origin)) {
             return;

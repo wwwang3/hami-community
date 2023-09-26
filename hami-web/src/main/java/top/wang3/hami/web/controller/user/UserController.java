@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserProfileParam;
 import top.wang3.hami.common.dto.user.AccountInfo;
+import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.LoginRecord;
 import top.wang3.hami.common.model.User;
@@ -19,6 +21,7 @@ import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.account.LoginRecordService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.Result;
 
 @RestController
@@ -44,6 +47,23 @@ public class UserController {
     public Result<AccountInfo> getAccountInfo() {
         AccountInfo accountInfo = accountService.getAccountInfo();
         return Result.successData(accountInfo);
+    }
+
+    @GetMapping("/author_info/get/{id}")
+    public Result<UserDTO> getUserInfo(@PathVariable(name = "id") Integer userId) {
+        UserDTO user = userService.getAuthorInfoById(userId);
+        return Result.ofNullable(user)
+                .orElse("用户不存在");
+    }
+
+    @GetMapping("/user_info")
+    public Result<UserDTO> getUserInfo() {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        UserOptionsBuilder builder = new UserOptionsBuilder()
+                .noFollowState();
+        UserDTO user = userService.getAuthorInfoById(loginUserId, builder);
+        return Result.ofNullable(user)
+                .orElse("error");
     }
 
     @GetMapping("/login/log")

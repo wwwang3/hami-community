@@ -20,6 +20,7 @@
     <id column="id" property="id" />
     <result column="user_id" property="userId" />
     <result column="category_id" property="categoryId" />
+    <result column="content" property="content" />
     <result column="title" property="title" />
     <result column="summary" property="summary" />
     <result column="picture" property="picture" />
@@ -50,6 +51,23 @@
         t1.user_id     as user_id,
         t1.summary     as summary,
         t1.title       as title,
+        t1.deleted     as deleted,
+        t1.ctime       as ctime,
+        t1.mtime       as mtime,
+        t1.picture     as picture,
+        t1.category_id as category_id,
+        t2.tag_id      as tag_id,
+        t2.article_id  as article_id
+        <!--@sql from article t1 left join article_tag t2 -->
+    </sql>
+
+    <sql id="ARTICLDO_FULL_COLUMN_LIST">
+        <!--@sql select -->
+        t1.id          as id,
+        t1.user_id     as user_id,
+        t1.summary     as summary,
+        t1.title       as title,
+        t1.content     as content,
         t1.deleted     as deleted,
         t1.ctime       as ctime,
         t1.mtime       as mtime,
@@ -100,4 +118,17 @@
       left join article_tag t2 on t1.id = t2.article_id
       where t1.id = #{articleId} and t1.deleted = 0;
  </select>
+
+  <select id="scanArticles" resultMap="ArticleDOMap">
+      select
+      <include refid="ARTICLDO_FULL_COLUMN_LIST">
+      </include>
+      from article t1
+               left join article_tag t2 on t1.id = t2.article_id
+      where t1.deleted = 0
+      and t1.id in
+      <foreach collection="ids" open="(" separator="," close=")" item="id">
+          #{id}
+      </foreach>
+  </select>
 </mapper>

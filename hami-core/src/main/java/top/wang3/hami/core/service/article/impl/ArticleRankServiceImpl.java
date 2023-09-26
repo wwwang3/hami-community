@@ -34,12 +34,14 @@ public class ArticleRankServiceImpl implements ArticleRankService {
     @CostLog
     @Override
     public List<HotArticleDTO> getHotArticles(Integer categoryId) {
-        List<HotArticleDTO> counters = (categoryId == null) ? getOverallHotArticles() : getHotArticlesByCate(categoryId);
+        List<HotArticleDTO> counters = (categoryId == null) ? getOverallHotArticles() :
+                getHotArticlesByCate(categoryId);
         if (counters.isEmpty()) {
             return Collections.emptyList();
         }
         List<Integer> articleIds = ListMapperHandler.listTo(counters, HotArticleDTO::getArticleId);
         ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
+                .noAuthor()
                 .noInteract();
         List<ArticleDTO> articles = articleService.getArticleByIds(articleIds, builder);
         ListMapperHandler.doAssemble(counters, HotArticleDTO::getArticleId,
@@ -78,15 +80,15 @@ public class ArticleRankServiceImpl implements ArticleRankService {
 //            return Collections.emptyList();
 //        }
         //比较少直接读了
-        Set<ZSetOperations.TypedTuple<Integer>> items = RedisClient.zRevRangeWithScore(redisKey, 0, 100);
+        Set<ZSetOperations.TypedTuple<Integer>> items =
+                RedisClient.zRevRangeWithScore(redisKey, 0, -1);
         return items.stream().map(this::convertToHotCounter).toList();
     }
 
     private HotArticleDTO convertToHotCounter(ZSetOperations.TypedTuple<Integer> item) {
         HotArticleDTO dto = new HotArticleDTO();
         dto.setArticleId(item.getValue());
-        Long score = item.getScore() == null ? 0L : item.getScore().longValue();
-        dto.setHotRank(score);
+        dto.setHotRank(item.getScore());
         return dto;
     }
 

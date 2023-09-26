@@ -108,7 +108,7 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     @Override
     public boolean decreaseCollects(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("collects = collect - {0}", count)
+                .setSql("collects = collects - {0}", count)
                 .eq("article_id", articleId)
                 .update();
     }

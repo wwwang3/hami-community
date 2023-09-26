@@ -12,7 +12,7 @@ public interface RabbitMessage {
     String getRoute();
 
     static String getPrefix(boolean state) {
-        return state ? "do." : "cancel";
+        return state ? "do." : "cancel.";
     }
 
 }

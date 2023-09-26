@@ -11,8 +11,7 @@ import top.wang3.hami.common.constant.Constants;
 @NoArgsConstructor
 public class UserRabbitMessage implements RabbitMessage {
 
-
-    private int type;
+    private Type type;
     private Integer userId;
 
     @Override
@@ -22,12 +21,19 @@ public class UserRabbitMessage implements RabbitMessage {
 
     @Override
     public String getRoute() {
-        if (type == 1) {
-            return "user.insert";
-        } else if (type == 2) {
-            return "user.update";
-        } else {
-            return "user.delete";
+        return type.route;
+    }
+
+    public enum Type {
+        USER_CREATE("user.create"),
+        USER_UPDATE("user.update"),
+        USER_DELETE("user.delete");
+
+        final String route;
+
+        Type(String route) {
+            this.route = route;
         }
     }
+
 }

@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 
@@ -31,48 +32,52 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
 
     @Override
     public void processInsert(Article entity) {
-        log.info("start to process insert article to redis");
+        log.info("entity: {} ctime: {}", entity, entity.getCtime().getTime());
         Integer id = entity.getId();
         Integer userId = entity.getUserId();
         Integer cateId = entity.getCategoryId();
         long time = entity.getCtime().getTime();
-
-        Long res = RedisClient.executeScript(insert_article_script, null,
-                List.of(id, userId, cateId, time));
-        log.debug("process finish, res: {}", res);
+        List<String> keys = buildKeys(userId, cateId);
+        Long res = RedisClient.executeScript(insert_article_script, keys, List.of(id, time));
     }
 
     @Override
     public void processUpdate(Article before, Article after) {
-        log.info("start to process update article to redis");
         if (isLogicDelete(before, after)) {
             processDelete(after);
+        } else {
+            Integer id = after.getId();
+            Integer oldCate = before.getCategoryId();
+            Integer newCate = after.getCategoryId();
+            long time = after.getCtime().getTime();
+            Long res = null;
+            if (!Objects.equals(oldCate, newCate)) {
+                String oldCateListKey = Constants.CATE_ARTICLE_LIST + oldCate;
+                String newOldCateListKey = Constants.CATE_ARTICLE_LIST + newCate;
+                List<String> keys = List.of(oldCateListKey, newOldCateListKey);
+                List<?> args = List.of(id, time);
+                res = RedisClient.executeScript(update_article_script, keys, args);
+            }
         }
-        Integer id = after.getId();
-        Integer oldCate = before.getCategoryId();
-        Integer newCate = after.getCategoryId();
-        long time = after.getCtime().getTime();
-        Long res = null;
-        if (!Objects.equals(oldCate, newCate)) {
-            List<?> args = List.of(id, oldCate, newCate, time);
-            res = RedisClient.executeScript(update_article_script, null, args);
-        }
-        log.debug("process finish, res: {}", res);
     }
 
     @Override
     public void processDelete(Article deletedEntity) {
-        log.info("start to process update article to redis");
         Integer id = deletedEntity.getId();
         Integer categoryId = deletedEntity.getCategoryId();
         Integer userId = deletedEntity.getUserId();
-        Long res = RedisClient.executeScript(delete_article_script, null, List.of(id, userId, categoryId));
-        log.debug("process finish, res: {}", res);
+        List<String> keys = buildKeys(categoryId, userId);
+        Long res = RedisClient.executeScript(delete_article_script, keys, List.of(id));
     }
-
-
 
     private boolean isLogicDelete(Article before, Article after) {
         return before.getDeleted() == 0 && after.getDeleted() == 1;
+    }
+
+    private List<String> buildKeys(Integer cateId, Integer userId) {
+        String articleListKey = Constants.ARTICLE_LIST;
+        String cateListKey = Constants.CATE_ARTICLE_LIST + cateId;
+        String userArticleListKey = Constants.LIST_USER_ARTICLE + userId;
+        return List.of(articleListKey, cateListKey, userArticleListKey);
     }
 }

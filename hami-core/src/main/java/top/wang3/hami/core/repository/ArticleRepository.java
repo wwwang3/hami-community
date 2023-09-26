@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleDO;
 
 import java.util.List;
 
@@ -17,8 +18,11 @@ public interface ArticleRepository extends IService<Article> {
 
     List<Article> listArticleByCateId(Integer cateId);
 
-
     String getArticleContentById(Integer articleId);
+
+    List<Integer> scanArticleIds(int lastId, int batchSize);
+
+    List<ArticleDO> scanArticles(List<Integer> ids);
 
     List<Article> queryUserArticles(int userId);
 
@@ -35,4 +39,6 @@ public interface ArticleRepository extends IService<Article> {
     List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId);
 
     List<Integer> listInitArticle();
+
+    Integer getArticleAuthor(Integer articleId);
 }

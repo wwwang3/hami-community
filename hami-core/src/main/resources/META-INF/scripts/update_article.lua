@@ -1,20 +1,19 @@
-local article_id = tonumber(ARGV[1])
-local old_cate_id = tonumber(ARGV[2])
-local new_cate_id = tonumber(ARGV[3])
+local old_cate_list_key = KEYS[1]
+local new_cate_list_key = KEYS[2]
 
-local ctime = tonumber(ARGV[4])
-local max_count = 2000
+local article_id = tonumber(ARGV[1])
+local ctime = tonumber(ARGV[2])
+local max_count = 5000
 
 if (old_cate_id == new_cate_id) then
     return 0
 end
 
-local old_cate_list_key = "cate:article:list:" + old_cate_id
-local new_cate_list_key = "cate:article:list:" + new_cate_id
+
 
 -- 加入新的列表
-redis.call("zadd", new_cate_list_key, ctime, new_cate_id)
-redis.call("zrem", old_cate_list_key, old_cate_id)
+redis.call("zadd", new_cate_list_key, ctime, article_id)
+redis.call("zrem", old_cate_list_key, article_id)
 
 
 local new_cate_count = redis.call("zcard", new_cate_list_key)

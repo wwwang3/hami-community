@@ -9,6 +9,8 @@ import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
+import java.util.List;
+
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue("hami-article-queue-1"),
@@ -28,7 +30,8 @@ public class ArticleMessageConsumer {
                 message.getType() == ArticleRabbitMessage.Type.DELETE) {
             //删除缓存
             String key = Constants.ARTICLE_INFO + message.getArticleId();
-            RedisClient.deleteObject(key);
+            String contentKey = Constants.ARTICLE_CONTENT + message.getArticleId();
+            RedisClient.deleteObject(List.of(key, contentKey));
         } else if (message.getType() == ArticleRabbitMessage.Type.VIEW) {
             //文章阅读量增加
             articleStatService.increaseViews(message.getArticleId(), 1);

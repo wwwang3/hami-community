@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.Tag;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Component
 @Slf4j
+@Order(1)
 public class LocalCacheInitializer implements ApplicationRunner {
 
     @Resource

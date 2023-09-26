@@ -1,13 +1,11 @@
+local list_key = KEYS[1]
+local cate_list_key = KEYS[2]
+local user_article_list_key = KEYS[3]
+
 local article_id = tonumber(ARGV[1])
-local user_id = tonumber(ARGV[2]]
-local cate_id = tonumber(ARGV[3])
+local ctime = tonumber(ARGV[2]) -- 分数
+local max_count = 5000; -- 2000篇文章 20篇每页，50页基本满足需求了
 
-local ctime = tonumber(ARGV[4]) -- 分数
-local max_count = 2000; -- 2000篇文章 20篇每页，50页基本满足需求了
-
-local list_key = "article:list:total"
-local cate_list_key = "cate:article:list:" + cate_id
-local user_article_list_key = "user:article:list:" + user_id
 
 redis.call("zadd", list_key, ctime, article_id) -- 总的文章列表
 redis.call("zadd", cate_list_key, ctime, article_id) -- 分类文章列表

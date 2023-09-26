@@ -15,17 +15,11 @@ import java.util.List;
 public interface ArticleMapper extends BaseMapper<Article> {
 
 
-    @Select("""
-        select count(id) from article where id = #{articleId} and deleted = 0;
-    """)
-    boolean isArticleExist(Integer articleId);
-
-
     List<ArticleSearchDTO> searchArticle(Page<Article> page, @Param("keyword") String keyword);
 
     @Select("""
-        select user_id from article where id = #{articleId} and deleted = 0;
-    """)
+                select user_id from article where id = #{articleId} and deleted = 0;
+            """)
     Integer getArticleAuthor(Integer articleId);
 
     List<Integer> selectFollowUserArticles(Page<Article> page, @Param("user_id") int loginUserId);
@@ -33,5 +27,15 @@ public interface ArticleMapper extends BaseMapper<Article> {
     ArticleDO selectArticleById(@Param("articleId") Integer articleId);
 
     List<ArticleDO> listArticleById(@Param("ids") List<Integer> ids);
+
+    @Select("""
+        select id from article
+        where id > #{lastId} and deleted = 0
+        order by id
+        limit #{batchSize};
+    """)
+    List<Integer> scanArticleIds(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
+
+    List<ArticleDO> scanArticles(@Param("ids") List<Integer> ids);
 
 }

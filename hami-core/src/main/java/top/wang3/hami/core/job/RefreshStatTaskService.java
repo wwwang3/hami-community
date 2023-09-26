@@ -3,7 +3,6 @@ package top.wang3.hami.core.job;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -12,6 +11,7 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleStatDTO;
 import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.repository.UserRepository;
@@ -27,6 +27,7 @@ import java.util.Map;
 public class RefreshStatTaskService {
 
     private final ArticleStatRepository articleStatRepository;
+
     private final UserRepository userRepository;
 
     private final SimpleCountService simpleCountService;
@@ -35,7 +36,7 @@ public class RefreshStatTaskService {
      * 全量刷新文章数据缓存
      */
     @Scheduled(cron = "0 0 2 * * ?")
-    @Async
+//    @Async
     public void refreshArticleStat() {
         log.info("start to refresh article-data");
         long start = System.currentTimeMillis();
@@ -79,21 +80,18 @@ public class RefreshStatTaskService {
 
     private void cacheStat(List<ArticleStat> stats) {
         if (stats == null || stats.isEmpty()) return;
-        stats.forEach(stat -> {
-            ArticleStatDTO dto = ArticleConverter.INSTANCE.toArticleStatDTO(stat);
-            String redisKey = Constants.COUNT_TYPE_ARTICLE + stat.getArticleId();
-            RedisClient.setCacheObject(redisKey, dto);
-        });
+        Map<String, ArticleStatDTO> map = ListMapperHandler.listToMap(stats,
+                stat -> Constants.COUNT_TYPE_ARTICLE + stat.getArticleId(), ArticleConverter.INSTANCE::toArticleStatDTO);
+        RedisClient.cacheMultiObject(map);
     }
 
     private void cacheUserStat(List<UserStat> stats) {
         if (stats == null || stats.isEmpty()) {
             return;
         }
-        stats.forEach(stat -> {
-            Map<String, Integer> map = CountService.setUserStatToMap(stat);
-            RedisClient.hMSet(Constants.COUNT_TYPE_USER + stat.getUserId(), map);
-        });
+        Map<String, Map<String, Integer>> map = ListMapperHandler.listToMap(stats, stat -> Constants.COUNT_TYPE_USER + stat.getUserId(),
+                CountService::setUserStatToMap);
+        RedisClient.hMSet(map);
     }
 
 

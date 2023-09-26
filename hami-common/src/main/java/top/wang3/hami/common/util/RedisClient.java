@@ -471,6 +471,37 @@ public class RedisClient {
     }
 
     /**
+     * 使用Pipeline 批量写入Map, 不建议元素太多，推荐500个
+     * @param data
+     * @param <T>
+     */
+    public static <T> void hMSet(Map<String, Map<String, T>> data) {
+        Objects.requireNonNull(data);
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            data.forEach((key, value) -> {
+                connection.hashCommands()
+                        .hMSet(keyBytes(key), serializeMap(value));
+            });
+            return null;
+        });
+    }
+
+    public static <T> void hMSet(Map<String, Map<String, T>> data, final long timeout, final TimeUnit unit) {
+        Objects.requireNonNull(data);
+        Objects.requireNonNull(unit);
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            data.forEach((key, value) -> {
+                byte[] rawKey = keyBytes(key);
+                connection.hashCommands()
+                        .hMSet(rawKey, serializeMap(value));
+                connection.keyCommands()
+                        .pExpire(rawKey, unit.toMillis(timeout));
+            });
+            return null;
+        });
+    }
+
+    /**
      * 获取Map
      *
      * @param key

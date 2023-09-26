@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class HotArticleDTO {
 
     private Integer articleId;
-    private Long hotRank;
+    private Double hotRank;
     private ArticleDTO article;
 }

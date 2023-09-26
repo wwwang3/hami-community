@@ -64,10 +64,10 @@ public class RedisConfig {
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
         objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dtf));
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dtf));
         objectMapper.registerModule(javaTimeModule);

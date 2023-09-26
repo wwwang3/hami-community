@@ -40,6 +40,7 @@ public class RefreshArticleRankTaskService {
             categories.forEach(category -> {
                 String redisKey = Constants.HOT_ARTICLE + category.getId();
                 List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId());
+                RedisClient.deleteObject(redisKey);
                 if (articles != null && !articles.isEmpty()){
                     RedisClient.zAddAll(redisKey, convertToTuple(articles));
                 }
@@ -59,6 +60,7 @@ public class RefreshArticleRankTaskService {
             long start = System.currentTimeMillis();
             log.info("start to refresh overall-article rank list");
             String redisKey = Constants.OVERALL_HOT_ARTICLES;
+            RedisClient.deleteObject(redisKey);
             List<HotCounter> articles = articleStatRepository.getOverallHotArticles();
             RedisClient.zAddAll(redisKey, convertToTuple(articles));
             long end = System.currentTimeMillis();

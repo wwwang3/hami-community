@@ -25,7 +25,8 @@ public class UserMessageConsumer {
 
     @RabbitHandler
     public void handleMessage(UserRabbitMessage message) {
-        if (message.getType() > 1) {
+        UserRabbitMessage.Type type = message.getType();
+        if (type == UserRabbitMessage.Type.USER_UPDATE || type == UserRabbitMessage.Type.USER_DELETE) {
             String key = Constants.USER_INFO + message.getUserId();
             RedisClient.deleteObject(key);
         }

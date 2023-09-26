@@ -76,6 +76,14 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
     }
 
     @Override
+    public boolean checkCommentExist(int itemId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id")
+                .exists("id", itemId)
+                .exists();
+    }
+
+    @Override
     public boolean increaseLikes(Integer id) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .setSql("likes = likes + 1")

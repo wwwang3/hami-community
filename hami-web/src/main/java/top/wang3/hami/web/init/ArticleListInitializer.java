@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.Category;
@@ -16,6 +17,7 @@ import java.util.List;
 
 //@Component
 @Slf4j
+@Order(3)
 public class ArticleListInitializer implements ApplicationRunner {
 
     @Resource
@@ -29,15 +31,8 @@ public class ArticleListInitializer implements ApplicationRunner {
         try {
             log.info("start to init cate-article-list");
             long start = System.currentTimeMillis();
-            List<Article> articles = articleRepository.listArticleByCateId(null);
-            String totalKey = Constants.ARTICLE_LIST;
-            cacheToRedis(totalKey, articles);
-            List<Category> categories = categoryRepository.getAllCategories();
-            for (Category category : categories) {
-                String key = Constants.CATE_ARTICLE_LIST + category.getId();
-                List<Article> data = articleRepository.listArticleByCateId(category.getId());
-                cacheToRedis(key, data);
-            }
+            cacheTotal();
+            cacheSub();
             long end = System.currentTimeMillis();
             log.info("finish init cate-article-list, cost: {}ms", end - start);
         } catch (Exception e) {
@@ -45,10 +40,28 @@ public class ArticleListInitializer implements ApplicationRunner {
         }
     }
 
-    private void cacheToRedis(String key, List<Article> articles) {
-        var set = ListMapperHandler.listToZSet(articles, Article::getId, article -> {
-            return (double) article.getCtime().getTime();
+    private void cacheTotal() {
+        List<Article> articles = articleRepository.listArticleByCateId(null);
+        String totalKey = Constants.ARTICLE_LIST;
+        cacheToRedis(totalKey, articles);
+    }
+
+    private void cacheSub() {
+        List<Category> categories = categoryRepository.getAllCategories();
+        for (Category category : categories) {
+            String key = Constants.CATE_ARTICLE_LIST + category.getId();
+            List<Article> data = articleRepository.listArticleByCateId(category.getId());
+            cacheToRedis(key, data);
+        }
+    }
+
+    private void cacheToRedis(final String key, List<Article> articles) {
+        RedisClient.deleteObject(key);
+        List<List<Article>> results = ListMapperHandler.split(articles, 2000);
+        results.forEach(members -> {
+            var set = ListMapperHandler.listToZSet(members, Article::getId,
+                    article -> (double) article.getCtime().getTime());
+            RedisClient.zAddAll(key, set);
         });
-        RedisClient.zAddAll(key, set); //no-expire
     }
 }

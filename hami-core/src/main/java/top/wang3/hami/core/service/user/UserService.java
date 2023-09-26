@@ -14,11 +14,13 @@ public interface UserService {
 
     UserProfile getUserProfile();
 
-    User getUserInfo(Integer userId);
+    User getUserById(Integer userId);
 
     List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, UserOptionsBuilder builder);
 
     UserDTO getAuthorInfoById(int userId);
+
+    UserDTO getAuthorInfoById(int userId, UserOptionsBuilder builder);
 
     String updateAvatar(MultipartFile avatar);
 

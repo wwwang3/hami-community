@@ -25,6 +25,7 @@ import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.CommentMapper;
+import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.ArticleCollectService;
@@ -53,6 +54,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     private final ArticleStatService articleStatService;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final ArticleRepository articleRepository;
 
     private final RabbitMessagePublisher rabbitMessagePublisher;
     @Resource
@@ -210,9 +212,9 @@ public class UserInteractServiceImpl implements UserInteractService {
 
     private Comment buildComment(CommentParam param, boolean reply) {
         int loginUserId = LoginUserContext.getLoginUserId();
-        Integer author = articleMapper.getArticleAuthor(param.getArticleId());
+        Integer author = articleRepository.getArticleAuthor(param.getArticleId());
         if (author == null) {
-            throw new IllegalArgumentException("参数错误");
+            throw new IllegalArgumentException("文章不存在");
         }
         Comment comment = CommentConverter.INSTANCE.toComment(param);
         comment.setIsAuthor(loginUserId == author);
@@ -295,7 +297,7 @@ public class UserInteractServiceImpl implements UserInteractService {
     @Override
     public Integer getUserLikeCount(Integer userId) {
         //获取用户点赞的文章数
-        String redisKey = Constants.LIST_USER_LIKE + userId;
+        String redisKey = Constants.LIST_USER_LIKE + userId + ":" + Constants.LIKE_TYPE_ARTICLE;
         Long count = RedisClient.zCard(redisKey);
         return count != null ? count.intValue() : 0;
     }
@@ -377,11 +379,11 @@ public class UserInteractServiceImpl implements UserInteractService {
 
     private void checkItemExist(int itemId, int itemType) {
         if (itemType == Constants.LIKE_TYPE_ARTICLE) {
-            if (!articleMapper.isArticleExist(itemId)) {
+            if (!articleRepository.checkArticleExist(itemId)) {
                 throw new ServiceException("参数错误");
             }
         } else if (itemType == Constants.LIKE_TYPE_COMMENT) {
-            if (!commentMapper.isCommentExist(itemId)) {
+            if (!commentRepository.checkCommentExist(itemId)) {
                 throw new ServiceException("参数错误");
             }
         }
