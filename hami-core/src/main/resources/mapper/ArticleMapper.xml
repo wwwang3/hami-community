@@ -90,11 +90,11 @@
   </select>
 
   <select id="selectFollowUserArticles" resultType="java.lang.Integer">
-    select article.id
-    from article
-    join user_follow on article.user_id = user_follow.following
-    where user_follow.user_id = #{user_id} and user_follow.`state` = 1 and article.deleted = 0
-    order by article.id desc
+    select t1.id
+    from article t1
+    join user_follow t2 on t1.user_id = t2.following
+    where t2.user_id = #{user_id} and t2.`state` = 1 and t1.deleted = 0
+    order by t1.id desc
   </select>
 
   <select id="listArticleById" resultMap="ArticleDOMap">

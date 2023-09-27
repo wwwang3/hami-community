@@ -55,17 +55,7 @@ public class UserServiceImpl implements UserService {
         int loginUserId = LoginUserContext.getLoginUserId();
         User user = this.getUserById(loginUserId);
         LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
-        //获取登录用户点赞的文章数
-        Integer likes = userInteractService.getUserLikeCount(loginUserId);
-        loginProfile.setLikes(likes);
-        //获取登录用户收藏的文章数
-        Integer collects = userInteractService.getUserCollectCount(loginUserId);
-        loginProfile.setCollects(collects);
-        //获取登录用户关注的用户数
-        Integer followings = userInteractService.getUserFollowingCount(loginUserId);
-        Integer followers = userInteractService.getUserFollowerCount(loginUserId);
-        loginProfile.setFollowers(followers);
-        loginProfile.setFollowings(followings);
+        buildLoginUserStat(loginProfile, loginUserId);
         return loginProfile;
     }
 
@@ -204,6 +194,23 @@ public class UserServiceImpl implements UserService {
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         if (loginUserId == null) return;
         userDTO.setFollowed(userInteractService.hasFollowed(loginUserId, userDTO.getUserId()));
+    }
+
+    private void buildLoginUserStat(LoginProfile loginProfile, int loginUserId) {
+        //用户数据
+        UserStat stat = countService.getUserStatById(loginUserId);
+        loginProfile.setStat(stat);
+        //获取登录用户点赞的文章数
+        Integer likes = userInteractService.getUserLikeCount(loginUserId);
+        loginProfile.setLikes(likes);
+        //获取登录用户收藏的文章数
+        Integer collects = userInteractService.getUserCollectCount(loginUserId);
+        loginProfile.setCollects(collects);
+        //获取登录用户关注的用户数
+        Integer followings = userInteractService.getUserFollowingCount(loginUserId);
+        Integer followers = userInteractService.getUserFollowerCount(loginUserId);
+        loginProfile.setFollowers(followers);
+        loginProfile.setFollowings(followings);
     }
 
 }

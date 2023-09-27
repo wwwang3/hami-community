@@ -86,7 +86,7 @@ public class ArticleServiceImpl implements ArticleService {
     @CostLog
     @Override
     public PageData<ArticleDTO> listNewestArticles(ArticlePageParam param) {
-        //todo 超过Redis Zset存的回源DB
+        //todo 超过RedisZset存的回源DB
         if (param.getPageNum() > MAX_PAGE) return PageData.empty();
         Integer cateId = param.getCateId();
         Page<Article> page = param.toPage();
@@ -150,7 +150,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageData<ArticleDTO> getUserArticles(UserArticleParam param) {
+    public PageData<ArticleDTO> listUserArticles(UserArticleParam param) {
         //获取用户文章
         int userId = param.getUserId();
         String redisKey = Constants.LIST_USER_ARTICLE + userId;
@@ -174,9 +174,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageData<ArticleDTO> getFollowUserArticles(PageParam param) {
-        //获取关注用户的最新文章 //todo
-        int loginUserId = 2;
+    public PageData<ArticleDTO> listFollowUserArticles(PageParam param) {
+        //获取关注用户的最新文章
+        int loginUserId = LoginUserContext.getLoginUserId();
         Page<Article> page = param.toPage();
         List<Integer> articleIds = articleRepository.listFollowUserArticles(page, loginUserId);
         List<ArticleDTO> dtos = this.getArticleByIds(articleIds, null);

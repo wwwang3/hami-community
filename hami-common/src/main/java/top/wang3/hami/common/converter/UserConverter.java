@@ -18,6 +18,7 @@ public interface UserConverter {
 
     UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
 
+    @Mapping(target = "stat", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "followings", ignore = true)
     @Mapping(target = "followers", ignore = true)

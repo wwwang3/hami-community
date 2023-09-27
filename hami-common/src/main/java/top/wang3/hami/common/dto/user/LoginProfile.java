@@ -60,4 +60,6 @@ public class LoginProfile {
      * 我的关注数
      */
     private Integer followings = 0;
+
+    private UserStat stat;
 }

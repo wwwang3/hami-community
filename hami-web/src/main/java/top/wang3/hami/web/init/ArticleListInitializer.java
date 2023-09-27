@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.Category;
@@ -56,6 +57,9 @@ public class ArticleListInitializer implements ApplicationRunner {
     }
 
     private void cacheToRedis(final String key, List<Article> articles) {
+        if (CollectionUtils.isEmpty(articles)) {
+            return;
+        }
         RedisClient.deleteObject(key);
         List<List<Article>> results = ListMapperHandler.split(articles, 2000);
         results.forEach(members -> {

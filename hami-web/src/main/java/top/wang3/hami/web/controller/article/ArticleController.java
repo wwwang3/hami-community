@@ -36,7 +36,7 @@ public class ArticleController {
 
     @PostMapping("/list/follow")
     public Result<PageData<ArticleDTO>> listFollowUserArticles(@RequestBody @Valid PageParam param) {
-        PageData<ArticleDTO> articles = articleService.getFollowUserArticles(param);
+        PageData<ArticleDTO> articles = articleService.listFollowUserArticles(param);
         return Result.successData(articles);
     }
 
@@ -56,7 +56,7 @@ public class ArticleController {
 
     @PostMapping("/query_list")
     public Result<PageData<ArticleDTO>> listUserArticles(@RequestBody @Valid UserArticleParam param) {
-        PageData<ArticleDTO> data = articleService.getUserArticles(param);
+        PageData<ArticleDTO> data = articleService.listUserArticles(param);
         return Result.successData(data);
     }
 }

@@ -403,6 +403,9 @@ public class RedisClient {
 
     //shit
     public static <T> Map<T, Boolean> zMContains(String key, List<T> members) {
+        if (CollectionUtils.isEmpty(members)) {
+            return Collections.emptyMap();
+        }
         List<Double> scores = redisTemplate.opsForZSet()
                 .score(key, members.toArray());
         if (scores == null || scores.isEmpty()) {
@@ -445,6 +448,13 @@ public class RedisClient {
         return new ArrayList<>(set);
     }
 
+    /**
+     * 不能缓存空列表
+     * @param key
+     * @param items
+     * @return
+     * @param <T>
+     */
     public static <T> Long zAddAll(String key, Set<ZSetOperations.TypedTuple<T>> items) {
         return redisTemplate.opsForZSet()
                 .add(key, items);

@@ -23,9 +23,9 @@ public interface ArticleService {
 
     List<ArticleDTO> getArticleByIds(List<Integer> ids, ArticleOptionsBuilder builder);
 
-    PageData<ArticleDTO> getUserArticles(UserArticleParam param);
+    PageData<ArticleDTO> listUserArticles(UserArticleParam param);
 
-    PageData<ArticleDTO> getFollowUserArticles(PageParam param);
+    PageData<ArticleDTO> listFollowUserArticles(PageParam param);
 
     boolean checkArticleViewLimit(int articleId, int authorId);
 

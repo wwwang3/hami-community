@@ -329,9 +329,6 @@ public class UserInteractServiceImpl implements UserInteractService {
     @Override
     public List<Integer> getUserCollectArticles(Page<ArticleCollect> page, Integer userId) {
         String redisKey = Constants.LIST_USER_COLLECT + userId;
-        if (!RedisClient.exist(redisKey)) {
-            return loadUserCollectArticlesFromDB(page, redisKey, userId);
-        }
         List<Integer> collects = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
         page.setTotal(RedisClient.zCard(redisKey));
         return collects;
@@ -340,41 +337,31 @@ public class UserInteractServiceImpl implements UserInteractService {
     @Override
     public List<Integer> getUserLikesArticles(Page<LikeItem> page, Integer userId) {
         String redisKey = Constants.LIST_USER_LIKE + userId;
-        if (RedisClient.exist(redisKey)) {
-            List<Integer> likes = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
-            page.setTotal(RedisClient.zCard(redisKey));
-            return likes;
-        }
-        return loadUserLikeArticlesFromDB(page, redisKey, userId);
+        List<Integer> likes = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+        page.setTotal(RedisClient.zCard(redisKey));
+        return likes;
     }
 
     @Override
     public List<Integer> getUserFollowings(Page<UserFollow> page, Integer userId) {
         String redisKey = Constants.LIST_USER_FOLLOWING + userId;
-        if (RedisClient.exist(redisKey)) {
-            List<Integer> followings = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
-            page.setTotal(RedisClient.zCard(redisKey));
-            return followings;
-        }
-        return loadUserFollowingsFromDB(page, redisKey, userId);
+        List<Integer> followings = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+        page.setTotal(RedisClient.zCard(redisKey));
+        return followings;
     }
 
     @Override
     public List<Integer> getUserFollowers(Page<UserFollow> page, Integer userId) {
-        String redisKey = Constants.LIST_USER_FOLLOWING + userId;
-        if (!RedisClient.exist(redisKey)) {
-            return loadUserFollowersFromDB(page, redisKey, userId);
-        } else {
-            long total = RedisClient.zCard(redisKey);
-            long index = page.getCurrent() * page.getSize();
-            if (total > 1000 && index > total) {
-                //回源DB
-                return userFollowService.getUserFollowers(page, userId);
-            }
-            List<Integer> followers = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
-            page.setTotal(total);
-            return followers;
+        String redisKey = Constants.LIST_USER_FOLLOWER + userId;
+        long total = RedisClient.zCard(redisKey);
+        long index = page.getCurrent() * page.getSize();
+        if (total > 1000 && index > total) {
+            //回源DB
+            return userFollowService.getUserFollowers(page, userId);
         }
+        List<Integer> followers = RedisClient.zRevPage(redisKey, page.getCurrent(), page.getSize());
+        page.setTotal(total);
+        return followers;
     }
 
     private void checkItemExist(int itemId, int itemType) {
@@ -407,6 +394,7 @@ public class UserInteractServiceImpl implements UserInteractService {
                     return (double) a.getMtime().getTime();
                 }
         );
+        log.info("collects: {}", collects);
         setZsetCache(key, tuples);
         page.setTotal(Math.min(1000, collects.size()));
         return ListMapperHandler.subList(collects, ArticleCollect::getArticleId, current, size);
@@ -455,6 +443,10 @@ public class UserInteractServiceImpl implements UserInteractService {
 
 
     private <T> void setZsetCache(String key, Set<ZSetOperations.TypedTuple<T>> pairs) {
-        RedisClient.zAddAll(key, pairs);
+        if (pairs == null || pairs.isEmpty()) {
+            RedisClient.zAdd(key, -1, -1);
+        } else {
+            RedisClient.zAddAll(key, pairs);
+        }
     }
 }

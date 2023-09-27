@@ -20,6 +20,7 @@ public class ListMapperHandler {
         return subList(origin, Function.identity(), current, size);
     }
 
+
     public static <T> List<List<T>> split(Collection<T> origin, int size) {
         final List<List<T>> result = new ArrayList<>();
         if (CollectionUtils.isEmpty(origin)) {
