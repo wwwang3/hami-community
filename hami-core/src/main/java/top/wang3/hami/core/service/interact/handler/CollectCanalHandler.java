@@ -1,21 +1,19 @@
 package top.wang3.hami.core.service.interact.handler;
 
 
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.like.LikeService;
 
 @Component
 @CanalListener("article_collect")
 public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
 
-    @Resource
-    LikeService likeService;
+
+    //用户收藏Canal消息处理器
 
     @Override
     public void processInsert(ArticleCollect entity) {

@@ -60,7 +60,7 @@ public class LikeItem {
     @TableField(value = "mtime")
     private Date mtime;
 
-    public LikeItem(Integer itemId, Byte itemType, Integer likerId) {
+    public LikeItem(Integer likerId, Integer itemId, Byte itemType) {
         this.itemId = itemId;
         this.itemType = itemType;
         this.likerId = likerId;

@@ -2,10 +2,11 @@ package top.wang3.hami.core.service.comment.impl;
 
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import top.wang3.hami.common.constant.Constants;
+import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
@@ -13,14 +14,24 @@ import top.wang3.hami.common.dto.comment.CommentDTO;
 import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.dto.comment.ReplyDTO;
 import top.wang3.hami.common.dto.request.CommentPageParam;
+import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.message.CommentDeletedRabbitMessage;
+import top.wang3.hami.common.message.CommentRabbitMessage;
+import top.wang3.hami.common.message.RabbitMessage;
+import top.wang3.hami.common.message.ReplyRabbitMessage;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.annotation.CostLog;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
+import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.repository.CommentRepository;
 import top.wang3.hami.core.service.comment.CommentService;
-import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.*;
@@ -34,7 +45,12 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final UserService userService;
-    private final UserInteractService userInteractService;
+    private final ArticleRepository articleRepository;
+    private final LikeService likeService;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
+
+    @Resource
+    TransactionTemplate transactionTemplate;
 
     @CostLog
     @Override
@@ -88,6 +104,99 @@ public class CommentServiceImpl implements CommentService {
         dto.setTotal(reply.getTotal());
         dto.setList(CommentConverter.INSTANCE.toCommentDTO(reply.getComments()));
         return dto;
+    }
+
+    @Override
+    public Comment publishComment(CommentParam param) {
+        //发表评论
+        //todo 敏感词过滤
+        return publishComment(param, false);
+    }
+
+    @Override
+    public Comment publishReply(CommentParam param) {
+        //回复
+        return publishComment(param, true);
+    }
+
+    @Override
+    public boolean deleteComment(Integer id) {
+        Comment comment = commentRepository.getById(id);
+        int userId = LoginUserContext.getLoginUserId();
+        int deleted = commentRepository.deleteComment(userId, id);
+        if (deleted > 0) {
+            //评论删除消息
+            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleted);
+            rabbitMessagePublisher.publishMsg(message);
+            //管他投递成不成功
+            return true;
+        }
+        return false;
+    }
+
+    private Comment publishComment(CommentParam param, boolean reply) {
+        Comment comment = buildComment(param, reply);
+        //评论
+        Boolean success = transactionTemplate.execute(status -> {
+            return commentRepository.save(comment);
+        });
+        if (Boolean.FALSE.equals(success)) {
+            return null;
+        }
+        RabbitMessage message;
+        if (reply) {
+            message = new ReplyRabbitMessage(comment.getUserId(), comment.getArticleId(),
+                    comment.getId(), comment.getParentId(), comment.getContent());
+        } else {
+            message = new CommentRabbitMessage(comment.getUserId(), comment.getArticleId(),
+                    comment.getId(), comment.getContent());
+        }
+        rabbitMessagePublisher.publishMsg(message);
+        return comment;
+    }
+
+    private Comment buildComment(CommentParam param, boolean reply) {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        Integer author = articleRepository.getArticleAuthor(param.getArticleId());
+        if (author == null) {
+            throw new IllegalArgumentException("文章不存在");
+        }
+        Comment comment = CommentConverter.INSTANCE.toComment(param);
+        comment.setIsAuthor(loginUserId == author);
+        comment.setUserId(loginUserId); //评论用户
+        comment.setIpInfo(IpContext.getIpInfo()); //IP信息
+        if (reply) {
+            return buildReply(comment, param);
+        }
+        return comment;
+    }
+
+    private Comment buildReply(Comment comment, CommentParam param) {
+        //回复, parentId和rootId必须都大于0
+        //check rootId;
+        //check parentId;
+        //一级评论 rootId和parentId都为0
+        //二级评论 rootId = parentId != 0
+        Integer rootId = param.getRootId();
+        Integer parentId = param.getParentId();
+        org.springframework.util.Assert.isTrue(rootId != 0, "rootId can not be 0");
+        org.springframework.util.Assert.isTrue(rootId != 0, "parentId can not be 0");
+        Comment parentComemnt = commentRepository.getById(parentId);
+        if (parentComemnt == null) {
+            throw new ServiceException("参数错误");
+        } else if (rootId == parentId && parentComemnt.getRootId() != 0) {
+            //二级评论 回复的是根评论
+            //根评论的rootId应该为0
+            throw new ServiceException("参数错误");
+        } else if (parentComemnt.getRootId() != rootId) {
+            //三级以上的评论, 必须在同一个根评论下
+            throw new ServiceException("参数错误");
+        }
+        comment.setRootId(rootId);
+        comment.setParentId(parentId);
+        //回复的是父评论的userId
+        comment.setReplyTo(parentComemnt.getUserId());
+        return comment;
     }
 
     private void buildIndexReply(List<CommentDTO> dtos) {
@@ -144,8 +253,7 @@ public class CommentServiceImpl implements CommentService {
                 }
             }
         }
-        Map<Integer, Boolean> liked = userInteractService.hasLiked(loginUserId, items,
-                Constants.LIKE_TYPE_COMMENT);
+        Map<Integer, Boolean> liked = likeService.hasLiked(loginUserId, items, LikeType.COMMENT);
         buildHasLiked(comments, liked);
     }
 

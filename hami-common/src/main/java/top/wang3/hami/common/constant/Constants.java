@@ -38,9 +38,11 @@ public final class Constants {
      */
     public static final String UPDATE_EMAIL_CAPTCHA = "email:update:pass:";
 
-    public static final Byte ONE = (byte) 1;
+    public static final Byte TWO =  2;
 
-    public static final Byte ZERO = (byte) 0;
+    public static final Byte ONE = 1;
+
+    public static final Byte ZERO = 0;
 
     public static final Byte DELETED = ONE;
     public static final Byte NOT_DELETED = ZERO;
@@ -50,6 +52,32 @@ public final class Constants {
      */
     public static final Byte LIKE_TYPE_ARTICLE = 1;
     public static final Byte LIKE_TYPE_COMMENT = 2;
+
+    /**
+     * 用户点赞数(我点赞的文章/评论数)
+     */
+    public static final String USER_LIKE_COUNT = "user:like:count:";
+
+    /**
+     * 用户关注数
+     */
+    public static final String USER_FOLLOWING_COUNT = "user:following:count:";
+
+    /**
+     * 用户粉丝数
+     */
+    public static final String USER_FOLLOWER_COUNT = "user:follower:count:";
+
+    /**
+     * 用户收藏数(我收藏的文章数量)
+     */
+    public static final String USER_COLLECT_COUNT = "user:collect:count:";
+
+    /**
+     * 用户文章数量
+     */
+    public static final String USER_ARTICLE_COUNT = "user:article:count:";
+
 
     public static final String CaffeineCacheManager = "caffeineCacheManager";
 
@@ -67,12 +95,39 @@ public final class Constants {
     public static final String ARTICLE_COMMENTS = "comments";
     public static final String ARTICLE_VIEWS = "views";
 
+    /**
+     * 用户文章收到的总点赞数
+     */
     public static final String USER_TOTAL_LIKES = "total_likes";
+
+    /**
+     * 用户文章收到的总评论数
+     */
     public static final String USER_TOTAL_COMMENTS = "total_comments";
+
+    /**
+     * 用户文章收到的总收藏数
+     */
     public static final String USER_TOTAL_COLLECTS = "total_collects";
+
+    /**
+     * 用户总关注数
+     */
     public static final String USER_TOTAL_FOLLOWINGS = "total_followings";
+
+    /**
+     * 用户总粉丝数
+     */
     public static final String USER_TOTAL_FOLLOWERS = "total_followers";
+
+    /**
+     * 用户总文章数
+     */
     public static final String USER_TOTAL_ARTICLES = "total_articles";
+
+    /**
+     * 用户文章的总阅读量
+     */
     public static final String USER_TOTAL_VIEWS = "total_views";
 
     public static final String COUNT_TYPE_ARTICLE = "#count:article:";
@@ -85,6 +140,8 @@ public final class Constants {
     public static final String LIST_USER_COLLECT = "user:collect:list:";
 
     public static final String LIST_USER_LIKE = "user:like:list:";
+
+    public static final String LIST_USER_LIKE_ARTICLES = "user:like:list:" + LIKE_TYPE_ARTICLE + ":";
 
     public static final String LIST_USER_ARTICLE = "user:article:list:";
 

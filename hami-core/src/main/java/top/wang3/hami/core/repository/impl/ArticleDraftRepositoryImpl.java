@@ -33,6 +33,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("user_id", userId)
                 .eq("`state`", state)
+                .orderByDesc("mtime")
                 .list(page);
     }
 

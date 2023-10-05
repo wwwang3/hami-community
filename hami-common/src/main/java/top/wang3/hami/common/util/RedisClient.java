@@ -2,6 +2,7 @@ package top.wang3.hami.common.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.connection.zset.DefaultTuple;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -31,6 +32,21 @@ public class RedisClient {
 
     public static RedisTemplate getTemplate() {
         return redisTemplate;
+    }
+
+    /**
+     * 垃圾分布式锁
+     * @param key
+     * @param timeout
+     * @param timeUnit
+     * @return
+     */
+    public static boolean simpleLock(String key, long timeout, TimeUnit timeUnit) {
+        return setNx(key, UUID.randomUUID().toString(), timeout, timeUnit);
+    }
+
+    public static boolean unLock(String key) {
+        return deleteObject(key);
     }
 
     /**
@@ -169,7 +185,9 @@ public class RedisClient {
         });
         if (!list.isEmpty()) {
             List<T> applied = func.apply(list);
-            result.addAll(applied);
+            if (applied != null) {
+                result.addAll(applied);
+            }
         }
         return result;
     }
@@ -354,11 +372,25 @@ public class RedisClient {
      * @return 剩余的过期时间 单位为秒
      * redisTemplate.getExpire
      * 返回-2 表示key不存在
-     * 返回-1 表示键没有设置过期时间 这两种情况都返回0
+     * 返回-1 表示key存在但是没有关联超时时间返回 -1
      */
     public static long getExpire(String key) {
         Long ttl = redisTemplate.getExpire(key);
-        return ttl == null || ttl < 0 ? 0 : ttl;
+        return ttl == null ? -2 : ttl;
+    }
+
+    /**
+     * 以毫秒为单位获取密钥的生存时间。
+     *
+     * @param key 缓存对象的key
+     * @return 剩余的过期时间 单位为秒
+     * redisTemplate.getExpire
+     * 返回-2 表示key不存在
+     * 返回-1 表示key存在但是没有关联超时时间返回 -1
+     */
+    public static long getPExpire(String key) {
+        Long expire = redisTemplate.getExpire(key, TimeUnit.MICROSECONDS);
+        return expire == null ? -2 : expire;
     }
 
     /**
@@ -418,9 +450,10 @@ public class RedisClient {
         return map;
     }
 
-    public static <T> Long zCard(String key) {
-        return redisTemplate.opsForZSet()
+    public static <T> long zCard(String key) {
+        Long count = redisTemplate.opsForZSet()
                 .zCard(key);
+        return count == null ? 0L : count;
     }
 
     public static <T> Set<ZSetOperations.TypedTuple<T>> zRevRangeWithScore(String key, long start, long end) {
@@ -458,6 +491,22 @@ public class RedisClient {
     public static <T> Long zAddAll(String key, Set<ZSetOperations.TypedTuple<T>> items) {
         return redisTemplate.opsForZSet()
                 .add(key, items);
+    }
+
+    public static <T> void zSetAll(String key, List<DefaultTuple> items, long timeout, TimeUnit timeUnit) {
+        final byte[] rawKey = keyBytes(key);
+        List<List<DefaultTuple>> lists = ListMapperHandler.split(items, 1000);
+
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            connection.keyCommands()
+                    .del(rawKey);
+            for (List<DefaultTuple> list : lists) {
+                connection.zAdd(rawKey, new LinkedHashSet<>(list));
+            }
+            connection.keyCommands()
+                    .pExpire(rawKey, timeUnit.toMillis(timeout));
+            return null;
+        });
     }
 
     /**
@@ -599,17 +648,21 @@ public class RedisClient {
         return map;
     }
 
-    private static <T> byte[] keyBytes(T k) {
+    public static <T> byte[] keyBytes(T k) {
         RedisSerializer keySerializer = redisTemplate.getKeySerializer();
         return Objects.requireNonNull(keySerializer.serialize(k));
     }
 
-    private static <T> byte[] hashKeyBytes(T hashKey) {
+    public static <T> byte[] valueBytes(T value) {
+        return redisTemplate.getValueSerializer().serialize(value);
+    }
+
+    public static <T> byte[] hashKeyBytes(T hashKey) {
         RedisSerializer hashKeySerializer = redisTemplate.getHashKeySerializer();
         return Objects.requireNonNull(hashKeySerializer.serialize(hashKey));
     }
 
-    private static <T> byte[] hashValueBytes(T value) {
+    public static <T> byte[] hashValueBytes(T value) {
         RedisSerializer hashValueSerializer = redisTemplate.getHashValueSerializer();
         return hashValueSerializer.serialize(value);
     }
