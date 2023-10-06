@@ -14,8 +14,8 @@ import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.repository.TagRepository;
 import top.wang3.hami.core.service.article.TagService;
+import top.wang3.hami.core.service.interact.repository.TagRepository;
 
 import java.util.Collections;
 import java.util.List;

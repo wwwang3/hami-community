@@ -16,9 +16,9 @@ import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.ServiceException;
-import top.wang3.hami.core.repository.ArticleRepository;
-import top.wang3.hami.core.repository.ArticleStatRepository;
-import top.wang3.hami.core.repository.CommentRepository;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
+import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.interact.repository.LikeRepository;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -43,8 +43,8 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public boolean doLike(Integer itemId, LikeType likeType) {
-        checkItem(itemId, likeType);
         int loginUserId = LoginUserContext.getLoginUserId();
+        int itemUser = getItemUser(itemId, likeType);
         //检查合法性后，可以直接发消息然后再写持久层, 然后消费binlog同步Redis
         Boolean success = transactionTemplate.execute(status -> {
             boolean success1 = likeRepository.doLike(loginUserId, itemId, likeType);
@@ -54,17 +54,16 @@ public class LikeServiceImpl implements LikeService {
             status.setRollbackOnly();
             return false;
         });
-        if (Boolean.TRUE.equals(success)) {
-            LikeRabbitMessage message = new LikeRabbitMessage(loginUserId, itemId, likeType.getType(), true);
-            rabbitMessagePublisher.publishMsg(message);
-            return true;
-        }
-        return false;
+        if (!Boolean.TRUE.equals(success)) return false;
+        LikeRabbitMessage message = new LikeRabbitMessage(loginUserId, itemUser, Constants.ONE, itemId, likeType);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
     @Override
     public boolean cancelLike(Integer itemId, LikeType likeType) {
         int loginUserId = LoginUserContext.getLoginUserId();
+        int itemUser = getItemUser(itemId, likeType);
         Boolean success = transactionTemplate.execute(status -> {
             boolean success1 = likeRepository.cancelLike(loginUserId, itemId, likeType);
             if (success1 && reduceLikeCount(loginUserId, likeType)) {
@@ -73,12 +72,10 @@ public class LikeServiceImpl implements LikeService {
             status.setRollbackOnly();
             return false;
         });
-        if (Boolean.TRUE.equals(success)) {
-            LikeRabbitMessage message = new LikeRabbitMessage(loginUserId, itemId, likeType.getType(), false);
-            rabbitMessagePublisher.publishMsg(message);
-            return true;
-        }
-        return false;
+        if (!Boolean.TRUE.equals(success)) return false;
+        LikeRabbitMessage message = new LikeRabbitMessage(loginUserId, itemUser, Constants.ZERO, itemId, likeType);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
     @CostLog
@@ -102,7 +99,7 @@ public class LikeServiceImpl implements LikeService {
 
     @CostLog
     @Override
-    public List<Integer> getUserLikeArticles(Page<LikeItem> page, Integer userId) {
+    public List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
         //最近点赞的文章
         String key = Constants.LIST_USER_LIKE_ARTICLES + userId;
         return ZPageHandler.<Integer>of(key, page, this) //不同业务不同的锁
@@ -145,16 +142,15 @@ public class LikeServiceImpl implements LikeService {
         return ListMapperHandler.subList(likeItems, LikeItem::getItemId, current, size);
     }
 
-    private void checkItem(Integer itemId, LikeType likeType) {
+    private int getItemUser(Integer itemId, LikeType likeType) {
+        Integer itemUser = null;
         if (LikeType.ARTICLE.equals(likeType)) {
-            if (!articleRepository.checkArticleExist(itemId)) {
-                throw new ServiceException("参数错误");
-            }
+            itemUser = articleRepository.getArticleAuthor(itemId);
         } else if (LikeType.COMMENT.equals(likeType)) {
-            if (!commentRepository.checkCommentExist(itemId)) {
-                throw new ServiceException("参数错误");
-            }
+            itemUser = commentRepository.getCommentUser(itemId);
         }
+        if (itemUser == null) throw new ServiceException("参数错误");
+        return itemUser;
     }
 
     private boolean addLikeCount(Integer itemId, LikeType likeType) {

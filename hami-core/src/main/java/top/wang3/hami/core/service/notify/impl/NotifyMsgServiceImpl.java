@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.request.PageParam;
-import top.wang3.hami.core.repository.NotifyMsgRepository;
 import top.wang3.hami.core.service.notify.NotifyMsgService;
+import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Map;

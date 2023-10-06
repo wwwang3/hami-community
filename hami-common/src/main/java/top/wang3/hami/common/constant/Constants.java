@@ -4,7 +4,6 @@ public final class Constants {
 
     public static final String EMPTY_STRING = "";
 
-
     public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
 
     public static final String HAMI_TOPIC_EXCHANGE1 = "hami-topic-exchange-1";
@@ -86,50 +85,6 @@ public final class Constants {
     public static final String REDIS_CACHE_NAME = "CACHE_REDIS";
     public static final String CAFFEINE_CACHE_NAME = "CACHE_LOCAL";
 
-    /**
-     * 计数服务常量
-     */
-    public static final String COUNT_ARTICLE_STAT = "article:stat:";
-    public static final String ARTICLE_LIKES = "likes";
-    public static final String ARTICLE_COLLECTS = "collects";
-    public static final String ARTICLE_COMMENTS = "comments";
-    public static final String ARTICLE_VIEWS = "views";
-
-    /**
-     * 用户文章收到的总点赞数
-     */
-    public static final String USER_TOTAL_LIKES = "total_likes";
-
-    /**
-     * 用户文章收到的总评论数
-     */
-    public static final String USER_TOTAL_COMMENTS = "total_comments";
-
-    /**
-     * 用户文章收到的总收藏数
-     */
-    public static final String USER_TOTAL_COLLECTS = "total_collects";
-
-    /**
-     * 用户总关注数
-     */
-    public static final String USER_TOTAL_FOLLOWINGS = "total_followings";
-
-    /**
-     * 用户总粉丝数
-     */
-    public static final String USER_TOTAL_FOLLOWERS = "total_followers";
-
-    /**
-     * 用户总文章数
-     */
-    public static final String USER_TOTAL_ARTICLES = "total_articles";
-
-    /**
-     * 用户文章的总阅读量
-     */
-    public static final String USER_TOTAL_VIEWS = "total_views";
-
     public static final String COUNT_TYPE_ARTICLE = "#count:article:";
     public static final String COUNT_TYPE_USER = "#count:user:";
 
@@ -155,4 +110,40 @@ public final class Constants {
     public static final String USER_INFO = "#user:info:";
 
     public static final String ARTICLE_CONTENT = "#article:content:";
+
+    /**
+     * 文章数增量
+     */
+    public static final String DATA_GROWING_ARTICLE = "article_incr";
+
+    /**
+     * 阅读数增量
+     */
+    public static final String DATA_GROWING_VIEW = "view_incr";
+
+    /**
+     * 文章点赞增量
+     */
+    public static final String DATA_GROWING_ARTICLE_LIKE = "article_like_incr";
+
+    /**
+     * 评论数增量
+     */
+    public static final String DATA_GROWING_COMMENT = "comment_incr";
+
+    /**
+     * 文章收藏数增量
+     */
+
+    public static final String DATA_GROWING_COLLECT = "collect_incr";
+
+    /**
+     * 粉丝增量
+     */
+    public static final String DATA_GROWING_FOLLOWER = "follower_incr";
+
+    /**
+     * 取消关注增量(掉粉量)
+     */
+    public static final String DATA_GROWING_CANCEL_FOLLOW = "cancel_follow_incr";
 }

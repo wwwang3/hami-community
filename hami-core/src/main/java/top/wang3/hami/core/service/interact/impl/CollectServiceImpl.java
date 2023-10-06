@@ -17,8 +17,8 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.ServiceException;
-import top.wang3.hami.core.repository.ArticleRepository;
-import top.wang3.hami.core.repository.ArticleStatRepository;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.repository.CollectRepository;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -42,12 +42,13 @@ public class CollectServiceImpl implements CollectService {
     TransactionTemplate transactionTemplate;
 
     @Override
-    public boolean doCollect(Integer userId, Integer itemId) {
+    public boolean doCollect(Integer itemId) {
         //用户收藏
         //文章收藏+1
         //发送收藏消息
         int loginUserId = LoginUserContext.getLoginUserId();
-        if (!articleRepository.checkArticleExist(itemId)) {
+        Integer author = articleRepository.getArticleAuthor(itemId);
+        if (author == null) {
             throw new ServiceException("参数错误");
         }
         Boolean success = transactionTemplate.execute(status -> {
@@ -58,16 +59,20 @@ public class CollectServiceImpl implements CollectService {
             status.setRollbackOnly();
             return false;
         });
-        if (Boolean.TRUE.equals(success)) {
-            rabbitMessagePublisher.publishMsg(new CollectRabbitMessage(loginUserId, itemId, true));
-            return true;
-        }
-        return false;
+        if (!Boolean.TRUE.equals(success)) return false;
+        CollectRabbitMessage message = new CollectRabbitMessage(loginUserId, author,
+                Constants.ONE, itemId);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
     @Override
-    public boolean cancelCollect(Integer userId, Integer itemId) {
+    public boolean cancelCollect(Integer itemId) {
         int loginUserId = LoginUserContext.getLoginUserId();
+        Integer author = articleRepository.getArticleAuthor(itemId);
+        if (author == null) {
+            throw new ServiceException("参数错误");
+        }
         Boolean canceled = transactionTemplate.execute(status -> {
             boolean success = collectRepository.cancelCollect(loginUserId, itemId);
             if (success && articleStatRepository.decreaseCollects(itemId, 1)) {
@@ -76,10 +81,10 @@ public class CollectServiceImpl implements CollectService {
             status.setRollbackOnly();
             return false;
         });
-        if (Boolean.TRUE.equals(canceled)) {
-            rabbitMessagePublisher.publishMsg(new CollectRabbitMessage(loginUserId, itemId, false));
-            return false;
-        }
+        if (!Boolean.TRUE.equals(canceled)) return false;
+        CollectRabbitMessage message = new CollectRabbitMessage(loginUserId, author,
+                Constants.ZERO, itemId);
+        rabbitMessagePublisher.publishMsg(message);
         return true;
     }
 
@@ -123,13 +128,14 @@ public class CollectServiceImpl implements CollectService {
                     return collectRepository.listUserCollects(page, userId);
                 })
                 .loader((c, s) -> {
-                    return loadUSerCollects(key, userId, c, s);
+                    return loadUserCollects(key, userId, c, s);
                 })
                 .query();
     }
 
 
-    public List<Integer> loadUSerCollects(String key, Integer userId, long current, long size) {
+    @Override
+    public List<Integer> loadUserCollects(String key, Integer userId, long current, long size) {
         List<ArticleCollect> collects = listUserCollects(userId, ZPageHandler.DEFAULT_MAX_SIZE);
         if (CollectionUtils.isEmpty(collects)) {
             return Collections.emptyList();

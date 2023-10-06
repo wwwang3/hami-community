@@ -5,6 +5,7 @@ import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.zset.DefaultTuple;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
@@ -17,9 +18,9 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.ServiceException;
-import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.repository.FollowRepository;
+import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Collections;
@@ -40,6 +41,7 @@ public class FollowServiceImpl implements FollowService {
     @Resource
     TransactionTemplate transactionTemplate;
 
+    @NonNull
     @Override
     public Long getUserFollowingCount(Integer userId) {
         String key = Constants.USER_FOLLOWING_COUNT + userId;
@@ -55,6 +57,7 @@ public class FollowServiceImpl implements FollowService {
         }
     }
 
+    @NonNull
     @Override
     public Long getUserFollowerCount(Integer userId) {
         String key = Constants.USER_FOLLOWER_COUNT + userId;
@@ -163,30 +166,27 @@ public class FollowServiceImpl implements FollowService {
         Boolean success = transactionTemplate.execute(status -> {
             return followRepository.follow(loginUserId, followingId);
         });
-        if (Boolean.TRUE.equals(success)) {
-            rabbitMessagePublisher.publishMsg(new FollowRabbitMessage(loginUserId, followingId, true));
-            return true;
-        }
-        return false;
+        if (!Boolean.TRUE.equals(success)) return false;
+        FollowRabbitMessage message = new FollowRabbitMessage(loginUserId, followingId, Constants.ONE, null);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
     @Override
     public boolean unFollow(int followingId) {
         //用户取消关注
-        //被关注用户的粉丝数-1
-        //用户的关注数-1 (有Canal发送MQ消费)
         int loginUserId = LoginUserContext.getLoginUserId();
         Boolean success = transactionTemplate.execute(status -> {
             return followRepository.unFollow(loginUserId, followingId);
         });
-        if (Boolean.TRUE.equals(success)) {
-            rabbitMessagePublisher.publishMsg(new FollowRabbitMessage(loginUserId, followingId, false));
-            return true;
-        }
-        return false;
+        if (!Boolean.TRUE.equals(success)) return false;
+        FollowRabbitMessage message = new FollowRabbitMessage(loginUserId, followingId, Constants.ZERO, null);
+        rabbitMessagePublisher.publishMsg(message);
+        return true;
     }
 
-    private List<Integer> loadUserFollowings(String key, Integer userId, long current, long size) {
+    @Override
+    public List<Integer> loadUserFollowings(String key, Integer userId, long current, long size) {
         List<UserFollow> follows = followRepository.listUserFollowings(userId);
         if (CollectionUtils.isEmpty(follows)) {
             return Collections.emptyList();
@@ -200,7 +200,8 @@ public class FollowServiceImpl implements FollowService {
         return ListMapperHandler.subList(follows, UserFollow::getFollowing, current, size);
     }
 
-    private List<Integer> loadUserFollowers(String key, Integer userId, long current, long size) {
+    @Override
+    public List<Integer> loadUserFollowers(String key, Integer userId, long current, long size) {
         List<UserFollow> followers = followRepository.listUserFollowers(userId);
         if (CollectionUtils.isEmpty(followers)) {
             return Collections.emptyList();

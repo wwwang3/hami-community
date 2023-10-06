@@ -14,17 +14,20 @@ import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.TagService;
-import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.interact.CollectService;
+import top.wang3.hami.core.service.interact.FollowService;
+import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.IpContext;
@@ -42,7 +45,10 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final CategoryService categoryService;
     private final UserService userService;
-    private final UserInteractService userInteractService;
+    private final LikeService likeService;
+    private final CollectService collectService;
+    private final FollowService followService;
+
     private final CountService countService;
     private final ArticleRepository articleRepository;
     private final TagService tagService;
@@ -283,8 +289,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     public void buildArticleStat(List<ArticleDTO> dtos, List<Integer> articleIds) {
-        List<ArticleStatDTO> stats = countService.getArticleStatByIds(articleIds);
-        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats, ArticleStatDTO::getArticleId, ArticleDTO::setStat);
+        Map<Integer, ArticleStatDTO> stats = countService.getArticleStatByIds(articleIds);
+        ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats, ArticleDTO::setStat);
     }
 
     public void buildArticleAuthor(List<ArticleDTO> dtos, List<Integer> userIds) {
@@ -299,10 +305,10 @@ public class ArticleServiceImpl implements ArticleService {
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         if (loginUserId == null) return;
         Map<Integer, Boolean> liked =
-                userInteractService.hasLiked(loginUserId, articleIds, Constants.LIKE_TYPE_ARTICLE);
+                likeService.hasLiked(loginUserId, articleIds, LikeType.ARTICLE);
         ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, liked, ArticleDTO::setLiked);
         Map<Integer, Boolean> collected =
-                userInteractService.hasCollected(loginUserId, articleIds, Constants.LIKE_TYPE_ARTICLE);
+                collectService.hasCollected(loginUserId, articleIds);
         ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, collected, ArticleDTO::setCollected);
     }
 
@@ -312,9 +318,9 @@ public class ArticleServiceImpl implements ArticleService {
             return;
         }
         boolean liked =
-                userInteractService.hasLiked(loginUserId, articleDTO.getId(), Constants.LIKE_TYPE_ARTICLE);
+                likeService.hasLiked(loginUserId, articleDTO.getId(), LikeType.ARTICLE);
         boolean collected =
-                userInteractService.hasCollected(loginUserId, articleDTO.getId(), Constants.LIKE_TYPE_ARTICLE);
+                collectService.hasCollected(loginUserId, articleDTO.getId());
         articleDTO.setLiked(liked);
         articleDTO.setCollected(collected);
     }

@@ -2,21 +2,22 @@ package top.wang3.hami.common.message;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectRabbitMessage implements RabbitMessage {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class CollectRabbitMessage extends InteractRabbitMessage {
 
-
-    private int userId;
-    private int articleId;
-    private boolean state;
+    public CollectRabbitMessage(int userId, int toUserId, byte state, Integer itemId) {
+        super(userId, toUserId, state, itemId);
+    }
 
     @Override
     public String getRoute() {
-       return RabbitMessage.getPrefix(state) + "collect";
+       return getPrefix() + "collect";
     }
 }

@@ -31,4 +31,8 @@ public class ArticleStatDTO {
     private Integer comments = 0;
 
     private Integer collects = 0;
+
+    public ArticleStatDTO(Integer articleId) {
+        this.articleId = articleId;
+    }
 }

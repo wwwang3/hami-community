@@ -49,6 +49,26 @@ public class RedisClient {
         return deleteObject(key);
     }
 
+    public static Long incrBy(String key, long delta) {
+        return redisTemplate.opsForValue()
+                .increment(key, delta);
+    }
+
+    public static Long incr(String key) {
+        return redisTemplate.opsForValue()
+                .increment(key);
+    }
+
+    public static Long decr(String key) {
+        return redisTemplate.opsForValue()
+                .decrement(key);
+    }
+
+    public static <T> void cacheEmptyObject(String key, Object o) {
+        RedisClient.setCacheObject(key, o, 1, TimeUnit.MINUTES);
+    }
+
+
     /**
      * 缓存基本的对象，Integer、String、实体类等
      *
@@ -101,6 +121,23 @@ public class RedisClient {
                 connection.
                         keyCommands()
                         .pExpire(rawKey, timeUnit.toMillis(timeout));
+            });
+            return null;
+        });
+    }
+
+    public static <T> void cacheMultiObject(final Map<String, T> data, final long min, long max, final TimeUnit timeUnit) {
+        Assert.notEmpty(data, "map can not be empty");
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            Map<byte[], byte[]> map = serializeMap(data);
+            connection
+                    .stringCommands()
+                    .mSet(map);
+            data.keySet().forEach(key -> {
+                byte[] rawKey = keyBytes(key);
+                connection.
+                        keyCommands()
+                        .pExpire(rawKey, timeUnit.toMillis(RandomUtils.randomLong(min, max)));
             });
             return null;
         });
@@ -163,6 +200,32 @@ public class RedisClient {
             }
         });
         return data;
+    }
+
+    public static <K, V> Map<K, V> getMultiCacheObject(final String keyPrefix,
+                                                       final List<K> keyItems,
+                                                       final Function<List<K>, Map<K, V>> func
+                                                       ) {
+        List<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+        List<V> data = redisTemplate.opsForValue()
+                .multiGet(keys);
+        if (data == null || data.isEmpty()) return Collections.emptyMap();
+        HashMap<K, V> map = new HashMap<>(keyItems.size());
+        ArrayList<K> nullKeys = new ArrayList<>();
+        ListMapperHandler.forEach(keyItems, (key, index) -> {
+            V value = data.get(index);
+            if (value != null) {
+                map.put(key, value);
+            } else {
+                nullKeys.add(key);
+            }
+        });
+        if (nullKeys.isEmpty() || func == null) {
+            return map;
+        }
+        Map<K, V> absentValues = func.apply(nullKeys);
+        map.putAll(absentValues);
+        return map;
     }
 
     /**

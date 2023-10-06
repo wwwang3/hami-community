@@ -46,7 +46,6 @@ public class CanalQueueListener {
                     String tableName = entry.getHeader().getTableName();
                     List<CanalEntryHandler<?>> handlers = factory.getHandler(tableName);
                     if (handlers != null && !handlers.isEmpty()) {
-                        //todo 批量消费
                         CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
                         log.debug("event type: {}", rowChange.getEventType());
                         List<CanalEntry.RowData> rowDataList = rowChange.getRowDatasList();

@@ -1,12 +1,16 @@
 package top.wang3.hami.common.dto.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**
  * 用户数据
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserStat {
 
     private int userId;
@@ -45,4 +49,8 @@ public class UserStat {
      * 关注总数
      */
     private Integer totalFollowings = 0;
+
+    public UserStat(int userId) {
+        this.userId = userId;
+    }
 }

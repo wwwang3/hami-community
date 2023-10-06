@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleTag;
-import top.wang3.hami.core.repository.ArticleTagRepository;
 import top.wang3.hami.core.service.article.ArticleTagService;
+import top.wang3.hami.core.service.article.repository.ArticleTagRepository;
 
 import java.util.ArrayList;
 import java.util.List;

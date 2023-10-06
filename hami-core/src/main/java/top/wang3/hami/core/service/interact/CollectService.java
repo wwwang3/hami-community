@@ -9,9 +9,9 @@ import java.util.Map;
 
 public interface CollectService {
 
-    boolean doCollect(Integer userId, Integer itemId);
+    boolean doCollect(Integer itemId);
 
-    boolean cancelCollect(Integer userId, Integer itemId);
+    boolean cancelCollect(Integer itemId);
 
     boolean hasCollected(Integer userId, Integer itemId);
 
@@ -23,4 +23,5 @@ public interface CollectService {
 
     List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 
+    List<Integer> loadUserCollects(String key, Integer userId, long current, long size);
 }

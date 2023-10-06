@@ -6,31 +6,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
-import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.repository.ArticleStatRepository;
-import top.wang3.hami.core.repository.UserRepository;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.stat.CountService;
-import top.wang3.hami.core.service.stat.impl.SimpleCountService;
+import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RefreshStatTaskService {
 
+    private final ArticleRepository articleRepository;
+
     private final ArticleStatRepository articleStatRepository;
 
     private final UserRepository userRepository;
 
-    private final SimpleCountService simpleCountService;
+    private final CountService countService;
 
     /**
      * 全量刷新文章数据缓存
@@ -45,10 +39,10 @@ public class RefreshStatTaskService {
         int batchSize = 500;
         int lastArticleId = 0;
         while (true) {
-            List<ArticleStat> stats = articleStatRepository.scanArticleStats(lastArticleId, batchSize);
-            if (!CollectionUtils.isEmpty(stats)) {
-                cacheStat(stats);
-                lastArticleId = stats.get(stats.size() - 1).getArticleId();
+            List<Integer> ids = articleRepository.scanArticleIds(lastArticleId, batchSize);
+            if (!CollectionUtils.isEmpty(ids)) {
+                countService.getArticleStatByIds(ids);
+                lastArticleId = ids.get(ids.size() - 1);
             } else {
                 break;
             }
@@ -57,7 +51,7 @@ public class RefreshStatTaskService {
         log.info("refresh article-stat success, cost: {}ms", end - start);
     }
 
-    @Scheduled(cron = "0 43 2 * * ?")
+    @Scheduled(cron = "0 40 2 * * ?")
     public void refreshUserStat() {
         log.info("start to refresh user-data");
         long start = System.currentTimeMillis();
@@ -66,8 +60,7 @@ public class RefreshStatTaskService {
         while (true) {
             List<Integer> userIds = userRepository.scanUserIds(lastUserId, batchSize);
             if (!CollectionUtils.isEmpty(userIds)) {
-                List<UserStat> stats = simpleCountService.getUserStatByUserIds(userIds);
-                cacheUserStat(stats);
+                countService.getUserStatByUserIds(userIds);
                 lastUserId = userIds.get(userIds.size() - 1);
             } else {
                 break;
@@ -76,23 +69,5 @@ public class RefreshStatTaskService {
         long end = System.currentTimeMillis();
         log.info("refresh user-stat success, cost: {}ms", end - start);
     }
-
-
-    private void cacheStat(List<ArticleStat> stats) {
-        if (stats == null || stats.isEmpty()) return;
-        Map<String, ArticleStatDTO> map = ListMapperHandler.listToMap(stats,
-                stat -> Constants.COUNT_TYPE_ARTICLE + stat.getArticleId(), ArticleConverter.INSTANCE::toArticleStatDTO);
-        RedisClient.cacheMultiObject(map);
-    }
-
-    private void cacheUserStat(List<UserStat> stats) {
-        if (stats == null || stats.isEmpty()) {
-            return;
-        }
-        Map<String, Map<String, Integer>> map = ListMapperHandler.listToMap(stats, stat -> Constants.COUNT_TYPE_USER + stat.getUserId(),
-                CountService::setUserStatToMap);
-        RedisClient.hMSet(map);
-    }
-
 
 }

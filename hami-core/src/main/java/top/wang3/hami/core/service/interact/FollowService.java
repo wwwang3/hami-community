@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.interact;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.UserFollow;
 
@@ -14,6 +15,7 @@ public interface FollowService {
      * @param userId 用户ID
      * @return 用户关注数
      */
+    @NonNull
     Long getUserFollowingCount(Integer userId);
 
     /**
@@ -21,6 +23,7 @@ public interface FollowService {
      * @param userId 用户ID
      * @return 用户粉丝数
      */
+    @NonNull
     Long getUserFollowerCount(Integer userId);
 
     boolean hasFollowed(Integer userId, Integer followingId);
@@ -45,4 +48,7 @@ public interface FollowService {
     @Transactional(rollbackFor = Exception.class)
     boolean unFollow(int followingId);
 
+    List<Integer> loadUserFollowings(String key, Integer userId, long current, long size);
+
+    List<Integer> loadUserFollowers(String key, Integer userId, long current, long size);
 }

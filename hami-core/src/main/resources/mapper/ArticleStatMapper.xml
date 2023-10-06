@@ -53,4 +53,13 @@
     order by hot_rank desc, article_id desc
     limit 54;
   </select>
+
+  <select id="selectArticleStatsByArticleIds" resultType="top.wang3.hami.common.dto.article.ArticleStatDTO">
+    select article_id, views, likes, comments, collects
+    from article_stat
+    where article_id in
+    <foreach collection="articleIds" item="id" open="(" separator="," close=")">
+        #{id}
+    </foreach>
+  </select>
 </mapper>

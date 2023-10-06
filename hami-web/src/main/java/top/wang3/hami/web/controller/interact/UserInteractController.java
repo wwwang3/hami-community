@@ -14,10 +14,15 @@ import top.wang3.hami.common.dto.request.LikeItemParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.model.*;
+import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.article.ArticleService;
-import top.wang3.hami.core.service.article.ReadingRecordService;
-import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.comment.CommentService;
+import top.wang3.hami.core.service.interact.CollectService;
+import top.wang3.hami.core.service.interact.FollowService;
+import top.wang3.hami.core.service.interact.LikeService;
+import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 
@@ -31,7 +36,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserInteractController {
 
-    private final UserInteractService userInteractService;
+    private final FollowService followService;
+    private final LikeService likeService;
+    private final CollectService collectService;
+    private final CommentService commentService;
 
     private final ReadingRecordService readingRecordService;
 
@@ -41,40 +49,41 @@ public class UserInteractController {
 
     @PostMapping("/follow")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
-        return Result.ofTrue(() -> userInteractService.follow(followingId))
+        return Result.ofTrue(followService.follow(followingId))
                 .orElse("操作失败");
     }
 
     @PostMapping("/follow/cancel")
     public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
-        return Result.ofTrue(userInteractService.unFollow(followingId))
+        return Result.ofTrue(followService.unFollow(followingId))
                 .orElse("操作失败");
     }
 
     @PostMapping("/like")
     public Result<Void> like(@RequestBody LikeItemParam param) {
-        return Result.ofTrue(userInteractService.like(param.getItemId(), param.getItemType()))
+        LikeType likeType = resolveLikerType(param.getItemType());
+        return Result.ofTrue(likeService.doLike(param.getItemId(), likeType))
                 .orElse("操作失败");
     }
 
     @PostMapping("/like/cancel")
     public Result<Void> cancelLike(@RequestBody LikeItemParam param) {
         return Result
-                .ofTrue(userInteractService.cancelLike(param.getItemId(), param.getItemType()))
+                .ofTrue(likeService.cancelLike(param.getItemId(), resolveLikerType(param.getItemType())))
                 .orElse("操作失败");
     }
 
     @PostMapping("/collect")
     public Result<Void> collect(@RequestParam("articleId") int articleId) {
         return Result
-                .ofTrue(userInteractService.collect(articleId))
+                .ofTrue(collectService.doCollect(articleId))
                 .orElse("操作失败");
     }
 
     @PostMapping("/collect/cancel")
     public Result<Void> cancelCollect(@RequestParam("articleId") int articleId) {
         return Result
-                .ofTrue(userInteractService.cancelCollect(articleId))
+                .ofTrue(collectService.cancelCollect(articleId))
                 .orElse("操作失败");
     }
 
@@ -90,7 +99,7 @@ public class UserInteractController {
     public Result<PageData<ArticleDTO>> getUserCollectArticles(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<ArticleCollect> page = param.toPage();
-        List<Integer> articleIds = userInteractService.getUserCollectArticles(page, param.getUserId());
+        List<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
         List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
@@ -104,7 +113,7 @@ public class UserInteractController {
     public Result<PageData<ArticleDTO>> getUserLikeArticles(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<LikeItem> page = param.toPage();
-        List<Integer> articleIds = userInteractService.getUserLikesArticles(page, param.getUserId());
+        List<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
         List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
@@ -118,7 +127,7 @@ public class UserInteractController {
     public Result<PageData<UserDTO>> getUserFollowings(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
-        List<Integer> followings = userInteractService.getUserFollowings(page, param.getUserId());
+        List<Integer> followings = followService.listUserFollowings(page, param.getUserId());
         List<UserDTO> data = userService.getAuthorInfoByIds(followings, UserOptionsBuilder.justInfo());
         data.forEach(d -> d.setFollowed(true));
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
@@ -133,7 +142,7 @@ public class UserInteractController {
     public Result<PageData<UserDTO>> getUserFollowers(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
-        List<Integer> followers = userInteractService.getUserFollowers(page, param.getUserId());
+        List<Integer> followers = followService.listUserFollowers(page, param.getUserId());
         UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
         List<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
@@ -147,7 +156,7 @@ public class UserInteractController {
 
     @PostMapping("/comment/submit")
     public Result<Comment> publishComment(@RequestBody @Valid CommentParam param) {
-        Comment comment = userInteractService.publishComment(param);
+        Comment comment = commentService.publishComment(param);
         return Result.ofNullable(comment)
                 .orElse("发表失败");
     }
@@ -155,16 +164,24 @@ public class UserInteractController {
     @PostMapping("/reply/submit")
     public Result<Comment> publishReply(@RequestBody
             @Validated(value = CommentParam.Reply.class) CommentParam param) {
-        Comment comment = userInteractService.publishReply(param);
+        Comment comment = commentService.publishReply(param);
         return Result.ofNullable(comment)
                 .orElse("回复失败");
     }
 
     @PostMapping("/comment/delete")
     public Result<Void> deleteComment(@RequestParam("id") Integer id) {
-        boolean success = userInteractService.deleteComment(id);
+        boolean success = commentService.deleteComment(id);
         return Result.ofTrue(success)
                 .orElse("删除失败");
+    }
+
+    private LikeType resolveLikerType(Byte type) {
+        LikeType likeType = LikeType.of(type);
+        if (likeType == null) {
+            throw new ServiceException("不支持的类型");
+        }
+        return likeType;
     }
 
 }

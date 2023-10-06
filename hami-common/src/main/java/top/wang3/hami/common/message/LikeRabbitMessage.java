@@ -1,26 +1,26 @@
 package top.wang3.hami.common.message;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import top.wang3.hami.common.enums.LikeType;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LikeRabbitMessage implements RabbitMessage {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class LikeRabbitMessage extends InteractRabbitMessage {
 
-    Integer userId;
-    Integer itemId;
-    byte type;
-    boolean state;
+    public LikeRabbitMessage(int userId, int toUserId, byte state, Integer itemId, LikeType likeType) {
+        super(userId, toUserId, state, itemId);
+        this.likeType = likeType;
+    }
+
+    LikeType likeType;
 
     @Override
     public String getRoute() {
-        return getPrefix() + "like." + type; //do.like.1 //do.like.2
+        return getPrefix() + "like." + likeType.getType(); //do.like.1 //do.like.2
     }
 
-    String getPrefix() {
-        return state ? "do." : "cancel.";
-    }
 
 }

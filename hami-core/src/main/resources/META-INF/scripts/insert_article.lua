@@ -4,7 +4,7 @@ local user_article_list_key = KEYS[3]
 
 local article_id = tonumber(ARGV[1])
 local ctime = tonumber(ARGV[2]) -- 分数
-local max_count = 5000; -- 2000篇文章 20篇每页，50页基本满足需求了
+local max_count = 5000; -- 5000篇文章 20篇每页，250页基本满足需求了
 
 
 redis.call("zadd", list_key, ctime, article_id) -- 总的文章列表

@@ -13,8 +13,8 @@ import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.article.CategoryService;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 
 import java.util.List;
 import java.util.Set;

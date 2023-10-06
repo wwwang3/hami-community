@@ -11,8 +11,8 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.repository.ArticleRepository;
-import top.wang3.hami.core.repository.CategoryRepository;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.CategoryRepository;
 
 import java.util.List;
 

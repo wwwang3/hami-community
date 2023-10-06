@@ -24,11 +24,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     @Override
     public void processInsert(LikeItem entity) {
-        if (Constants.LIKE_TYPE_COMMENT.equals(entity.getItemType())) {
-            //用户点赞的评论不存了
-            return;
-        }
-        String key = Constants.LIST_USER_LIKE_ARTICLES + entity.getLikerId();
+        String key = Constants.LIST_USER_LIKE + entity.getItemType() + ":" + entity.getLikerId();
         //点赞
         //key已经过期或者不存在返回false
         boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
@@ -44,6 +40,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
             //todo 消费失败先不管 _(≧∇≦」∠)_
             RedisClient.zAdd(key, entity.getItemId(), entity.getMtime().getTime());
         }
+        deleteCountCache(entity.getLikerId(), entity.getItemType());
     }
 
     @Override
@@ -61,12 +58,15 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     @Override
     public void processDelete(LikeItem deletedEntity) {
-        if (Constants.LIKE_TYPE_COMMENT.equals(deletedEntity.getItemType())) {
-            //用户点赞的评论不存了
-            return;
-        }
-        String key = Constants.LIST_USER_LIKE_ARTICLES + deletedEntity.getLikerId();
+        String key = Constants.LIST_USER_LIKE + deletedEntity.getItemType() + ":" + deletedEntity.getLikerId();
         //删除
         RedisClient.zRem(key, deletedEntity.getItemId());
+        deleteCountCache(deletedEntity.getLikerId(), deletedEntity.getItemType());
+    }
+
+    public void deleteCountCache(Integer likerId, Byte type) {
+        //删除用户点赞数缓存(文章被删除情况)
+        String userLikeCountKey = Constants.USER_LIKE_COUNT + type + ":" + likerId;
+        RedisClient.deleteObject(userLikeCountKey);
     }
 }

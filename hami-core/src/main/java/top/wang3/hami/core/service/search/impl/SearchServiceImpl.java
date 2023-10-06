@@ -11,8 +11,8 @@ import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.repository.ArticleRepository;
 import top.wang3.hami.core.service.article.CategoryService;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.search.SearchService;
 import top.wang3.hami.core.service.user.UserService;
 

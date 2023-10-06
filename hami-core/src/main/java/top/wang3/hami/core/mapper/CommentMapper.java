@@ -18,7 +18,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
     @Select("""
         select user_id from comment where id = #{id} and deleted = 0;
     """)
-    Integer getCommentUserById(Integer id);
+    Integer selectCommentUserById(Integer id);
 
     CommentInfo selectCommentWithParentById(@Param("id") int id);
 }

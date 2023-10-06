@@ -15,9 +15,9 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.job.RefreshStatTaskService;
-import top.wang3.hami.core.repository.ArticleRepository;
-import top.wang3.hami.core.repository.UserRepository;
 import top.wang3.hami.core.service.article.impl.ArticleServiceImpl;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;

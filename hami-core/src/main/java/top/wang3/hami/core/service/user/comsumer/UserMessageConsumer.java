@@ -8,7 +8,7 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ReadingRecordService;
+import top.wang3.hami.core.service.interact.ReadingRecordService;
 
 @RabbitListener(bindings = {
         @QueueBinding(

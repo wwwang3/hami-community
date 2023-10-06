@@ -14,18 +14,21 @@ import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.repository.AccountRepository;
-import top.wang3.hami.core.repository.UserRepository;
+import top.wang3.hami.core.service.account.repository.AccountRepository;
 import top.wang3.hami.core.service.common.ImageService;
-import top.wang3.hami.core.service.interact.UserInteractService;
+import top.wang3.hami.core.service.interact.CollectService;
+import top.wang3.hami.core.service.interact.FollowService;
+import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Collections;
@@ -40,10 +43,12 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     ImageService imageService;
+    private final FollowService followService;
+    private final CountService countService;
+    private final LikeService likeService;
+    private final CollectService collectService;
 
     private final UserRepository userRepository;
-    private final UserInteractService userInteractService;
-    private final CountService countService;
     private final AccountRepository accountRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
@@ -173,8 +178,8 @@ public class UserServiceImpl implements UserService {
     private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
         List<Integer> userIds = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
-        List<UserStat> stats = countService.getUserStatByUserIds(userIds);
-        ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, stats, UserStat::getUserId, UserDTO::setStat);
+        Map<Integer, UserStat> stats = countService.getUserStatByUserIds(userIds);
+        ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, stats, UserDTO::setStat);
     }
 
     private void buildFollowState(List<UserDTO> userDTOS) {
@@ -184,7 +189,7 @@ public class UserServiceImpl implements UserService {
         }
         //待判定的用户
         List<Integer> followings = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
-        Map<Integer, Boolean> followed = userInteractService.hasFollowed(loginUserId, followings);
+        Map<Integer, Boolean> followed = followService.hasFollowed(loginUserId, followings);
         if (followed.isEmpty()) return;
         ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, followed,
                 UserDTO::setFollowed);
@@ -193,7 +198,7 @@ public class UserServiceImpl implements UserService {
     private void buildFollowState(UserDTO userDTO) {
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         if (loginUserId == null) return;
-        userDTO.setFollowed(userInteractService.hasFollowed(loginUserId, userDTO.getUserId()));
+        userDTO.setFollowed(followService.hasFollowed(loginUserId, userDTO.getUserId()));
     }
 
     private void buildLoginUserStat(LoginProfile loginProfile, int loginUserId) {
@@ -201,14 +206,14 @@ public class UserServiceImpl implements UserService {
         UserStat stat = countService.getUserStatById(loginUserId);
         loginProfile.setStat(stat);
         //获取登录用户点赞的文章数
-        Integer likes = userInteractService.getUserLikeCount(loginUserId);
+        Integer likes = likeService.getUserLikeCount(loginUserId, LikeType.ARTICLE).intValue();
         loginProfile.setLikes(likes);
         //获取登录用户收藏的文章数
-        Integer collects = userInteractService.getUserCollectCount(loginUserId);
+        Integer collects = collectService.getUserCollectCount(loginUserId).intValue();
         loginProfile.setCollects(collects);
         //获取登录用户关注的用户数
-        Integer followings = userInteractService.getUserFollowingCount(loginUserId);
-        Integer followers = userInteractService.getUserFollowerCount(loginUserId);
+        Integer followings = followService.getUserFollowingCount(loginUserId).intValue();
+        Integer followers = followService.getUserFollowerCount(loginUserId).intValue();
         loginProfile.setFollowers(followers);
         loginProfile.setFollowings(followings);
     }
