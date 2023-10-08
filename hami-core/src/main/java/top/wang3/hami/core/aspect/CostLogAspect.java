@@ -27,7 +27,7 @@ public class CostLogAspect {
             return point.proceed();
         } finally {
             long end = System.currentTimeMillis();
-            log.info("{}#{} execute cost: {}ms", className, methodName, end - start);
+            log.info("[{}]#[{}] execute cost: {}ms", className, methodName, end - start);
         }
     }
 }

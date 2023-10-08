@@ -27,6 +27,10 @@ public class PageParam {
     private long pageSize;
 
     public <T> Page<T> toPage() {
-        return Page.of(pageNum, pageSize);
+        return toPage(true);
+    }
+
+    public <T> Page<T> toPage(boolean searchCount) {
+        return Page.of(pageNum, pageSize, searchCount);
     }
 }

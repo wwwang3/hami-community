@@ -85,8 +85,8 @@ public final class Constants {
     public static final String REDIS_CACHE_NAME = "CACHE_REDIS";
     public static final String CAFFEINE_CACHE_NAME = "CACHE_LOCAL";
 
-    public static final String COUNT_TYPE_ARTICLE = "#count:article:";
-    public static final String COUNT_TYPE_USER = "#count:user:";
+    public static final String STAT_TYPE_ARTICLE = "#stat:article:";
+    public static final String STAT_TYPE_USER = "#stat:user:";
 
     public static final String LIST_USER_FOLLOWING = "user:following:list:";
 
@@ -101,8 +101,12 @@ public final class Constants {
     public static final String LIST_USER_ARTICLE = "user:article:list:";
 
     public static final String ARTICLE_LIST = "article:list:total";
-
     public static final String CATE_ARTICLE_LIST = "cate:article:list:";
+
+    public static final String TOTAL_ARTICLE_COUNT = "article:count:total";
+
+    public static final String TOTAL_UER_ARTICLE_COUNT = "user:article:count:";
+    public static final String CATE_ARTICLE_COUNT = "article:count:";
     public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
     public static final String HOT_ARTICLE = "rank:article:";
 
@@ -146,4 +150,7 @@ public final class Constants {
      * 取消关注增量(掉粉量)
      */
     public static final String DATA_GROWING_CANCEL_FOLLOW = "cancel_follow_incr";
+    public static final String VIEW_LIMIT = "view:limit:";
+    public static final String READING_RECORD_COUNT = "count:reading:record:";
+    public static final String READING_RECORD_LIST = "reading:record:list:";
 }

@@ -25,7 +25,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
         if (entity == null) return;
         //在文章数据表插入了一条数据
         //写入Redis
-        String redisKey = Constants.COUNT_TYPE_ARTICLE + entity.getArticleId();
+        String redisKey = Constants.STAT_TYPE_ARTICLE + entity.getArticleId();
         ArticleStatDTO dto = ArticleConverter.INSTANCE.toArticleStatDTO(entity);
         RedisClient.setCacheObject(redisKey, dto, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
         log.debug("insert to Redis success: {}", entity);
@@ -34,7 +34,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     @Override
     public void processUpdate(ArticleStat before, ArticleStat after) {
         //更新
-        String redisKey = Constants.COUNT_TYPE_ARTICLE + after.getArticleId();
+        String redisKey = Constants.STAT_TYPE_ARTICLE + after.getArticleId();
         RedisClient.setCacheObject(redisKey, ArticleConverter.INSTANCE.toArticleStatDTO(after));
         log.debug("update to Redis success: before: {}, after: {}", before, after);
     }
@@ -42,7 +42,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     @Override
     public void processDelete(ArticleStat deletedEntity) {
         Integer articleId = deletedEntity.getArticleId();
-        RedisClient.deleteObject(Constants.COUNT_TYPE_ARTICLE + articleId);
+        RedisClient.deleteObject(Constants.STAT_TYPE_ARTICLE + articleId);
         log.debug("update to Redis success: deleted: {}", deletedEntity);
     }
 }

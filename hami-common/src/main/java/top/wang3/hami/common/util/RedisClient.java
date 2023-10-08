@@ -2,7 +2,7 @@ package top.wang3.hami.common.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.connection.zset.DefaultTuple;
+import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -36,6 +36,7 @@ public class RedisClient {
 
     /**
      * 垃圾分布式锁
+     *
      * @param key
      * @param timeout
      * @param timeUnit
@@ -109,21 +110,10 @@ public class RedisClient {
                 .multiSet(data); //no expire
     }
 
-    public static <T> void cacheMultiObject(final Map<String, T> data, final long timeout, final TimeUnit timeUnit) {
-        Assert.notEmpty(data, "map can not be empty");
-        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            Map<byte[], byte[]> map = serializeMap(data);
-            connection
-                    .stringCommands()
-                    .mSet(map);
-            data.keySet().forEach(key -> {
-                byte[] rawKey = keyBytes(key);
-                connection.
-                        keyCommands()
-                        .pExpire(rawKey, timeUnit.toMillis(timeout));
-            });
-            return null;
-        });
+    public static <T> void cacheMultiObject(List<T> items, Function<T, String> keyMapper, long min, long max, TimeUnit timeUnit) {
+        Objects.requireNonNull(keyMapper);
+        Map<String, T> map = ListMapperHandler.listToMap(items, keyMapper);
+        cacheMultiObject(map, min, max, timeUnit);
     }
 
     public static <T> void cacheMultiObject(final Map<String, T> data, final long min, long max, final TimeUnit timeUnit) {
@@ -202,10 +192,34 @@ public class RedisClient {
         return data;
     }
 
-    public static <K, V> Map<K, V> getMultiCacheObject(final String keyPrefix,
-                                                       final List<K> keyItems,
-                                                       final Function<List<K>, Map<K, V>> func
-                                                       ) {
+    public static <K, T> List<T> getMultiCacheObject(String keyPrefix,
+                                                     List<K> keyItems,
+                                                     Function<List<K>, List<T>> func) {
+        List<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+        List<T> data = redisTemplate.opsForValue()
+                .multiGet(keys);
+        if (data == null || data.isEmpty()) return Collections.emptyList();
+        ArrayList<T> results = new ArrayList<>(keyItems.size());
+        ArrayList<K> nullKeys = new ArrayList<>();
+        ListMapperHandler.forEach(keyItems, (key, index) -> {
+            T value = data.get(index);
+            if (value == null) {
+                nullKeys.add(key);
+            } else {
+                results.add(value);
+            }
+        });
+        if (nullKeys.isEmpty() || func == null) {
+            return results;
+        }
+        List<T> absentValues = func.apply(nullKeys);
+        results.addAll(absentValues);
+        return results;
+    }
+
+    public static <K, V> Map<K, V> getMultiCacheObjectToMap(String keyPrefix,
+                                                            List<K> keyItems,
+                                                            Function<List<K>, Map<K, V>> func) {
         List<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
         List<V> data = redisTemplate.opsForValue()
                 .multiGet(keys);
@@ -230,10 +244,11 @@ public class RedisClient {
 
     /**
      * 获取多个缓存对象 collection建议传入ArrayList
+     *
      * @param keys keys
      * @param func 当获取到的缓存对象为null时. 调用的方法，其中List中为null元素的索引
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> List<T> getMultiCacheObject(final Collection<String> keys, Function<List<Integer>, List<T>> func) {
         List<T> data = redisTemplate.opsForValue()
@@ -524,46 +539,55 @@ public class RedisClient {
                 .reverseRangeWithScores(key, start, end);
     }
 
-    public static <T> List<T> zPage(String key, long current, long pageSize) {
-        long size = Math.min(20, pageSize);
-        long min = (current - 1) * pageSize;
-        long max = current * pageSize - 1;
+    public static <T> List<T> zPage(String key, long current, long size) {
+        size = Math.min(20, size);
+        long min = (current - 1) * size;
+        long max = current * size - 1;
         Set set = redisTemplate.opsForZSet()
                 .range(key, min, max);
         if (set == null) return Collections.emptyList();
         return new ArrayList<>(set);
     }
 
-    public static <T> List<T> zRevPage(String key, long current, long pageSize) {
-        long size = Math.min(20, pageSize);
-        long min = (current - 1) * pageSize;
-        long max = current * pageSize - 1;
+    public static <T> List<T> zRevPage(String key, long current, long size) {
+        size = Math.min(20, size);
+        long min = (current - 1) * size;
+        long max = current * size - 1;
         Set set = redisTemplate.opsForZSet()
                 .reverseRange(key, min, max);
         if (set == null) return Collections.emptyList();
         return new ArrayList<>(set);
     }
 
+    public static Set<ZSetOperations.TypedTuple<Integer>> zRevPageWithScore(String key, long current, long size) {
+        size = Math.min(20, size);
+        long min = (current - 1) * size;
+        long max = current * size - 1;
+        return redisTemplate.opsForZSet()
+                .reverseRangeWithScores(key, min, max);
+    }
+
     /**
      * 不能缓存空列表
+     *
      * @param key
      * @param items
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> Long zAddAll(String key, Set<ZSetOperations.TypedTuple<T>> items) {
         return redisTemplate.opsForZSet()
                 .add(key, items);
     }
 
-    public static <T> void zSetAll(String key, List<DefaultTuple> items, long timeout, TimeUnit timeUnit) {
+    public static <T> void zSetAll(String key, List<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
         final byte[] rawKey = keyBytes(key);
-        List<List<DefaultTuple>> lists = ListMapperHandler.split(items, 1000);
+        List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
 
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             connection.keyCommands()
                     .del(rawKey);
-            for (List<DefaultTuple> list : lists) {
+            for (List<? extends Tuple> list : lists) {
                 connection.zAdd(rawKey, new LinkedHashSet<>(list));
             }
             connection.keyCommands()
@@ -594,6 +618,7 @@ public class RedisClient {
 
     /**
      * 使用Pipeline 批量写入Map, 不建议元素太多，推荐500个
+     *
      * @param data
      * @param <T>
      */
@@ -745,5 +770,4 @@ public class RedisClient {
         return (T) redisTemplate.execute(script, redisTemplate.getKeySerializer(),
                 redisTemplate.getStringSerializer(), keys, argsArray);
     }
-
 }

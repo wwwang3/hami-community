@@ -2,6 +2,7 @@ package top.wang3.hami.common.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import top.wang3.hami.common.constant.Constants;
 
@@ -31,6 +32,7 @@ public class ArticleRabbitMessage implements RabbitMessage {
         return type.route;
     }
 
+    @Getter
     public enum Type {
         PUBLISH("article.publish"),
         UPDATE("article.update"),

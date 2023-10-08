@@ -1,21 +1,20 @@
 package top.wang3.hami.core.service.interact;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.PageParam;
-import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.model.ReadingRecordDTO;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
-public interface ReadingRecordService extends IService<ReadingRecord> {
+public interface ReadingRecordService {
 
-    boolean record(int userId, int articleId);
+    int record(int userId, int articleId, int authorId);
 
-    boolean record(List<ReadingRecord> records);
+    PageData<ReadingRecordDTO> listReadingRecords(PageParam param);
 
-    PageData<ReadingRecord> getReadingRecordByPage(PageParam param, Integer userId);
+    Long getUserReadingRecordCount(Integer userId);
 
-    PageData<ReadingRecordDTO> getReadingRecords(PageParam param);
+    List<Integer> loadUserReadingRecordCache(String key, Integer userId, long current, long size);
+
 }

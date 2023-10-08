@@ -2,7 +2,10 @@ package top.wang3.hami.core.service.article.consumer;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
@@ -11,20 +14,20 @@ import top.wang3.hami.core.service.article.ArticleStatService;
 
 import java.util.List;
 
-@RabbitListener(bindings = {
-        @QueueBinding(
-                value = @Queue("hami-article-queue-1"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                key = {"article.*"}
-        ),
-})
+
 @Component
 @RequiredArgsConstructor
 public class ArticleMessageConsumer {
 
     private final ArticleStatService articleStatService;
 
-    @RabbitHandler
+    @RabbitListener(bindings = {
+            @QueueBinding(
+                    value = @Queue("hami-article-queue-1"),
+                    exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                    key = {"article.*"}
+            ),
+    })
     public void handleArticleMessage(ArticleRabbitMessage message) {
         if (message.getType() == ArticleRabbitMessage.Type.UPDATE ||
                 message.getType() == ArticleRabbitMessage.Type.DELETE) {

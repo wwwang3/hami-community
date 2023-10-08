@@ -90,7 +90,7 @@ public class UserInteractController {
     @PostMapping("/reading_record/query_list")
     public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestBody @Valid PageParam param) {
         PageData<ReadingRecordDTO> pageData = readingRecordService
-                .getReadingRecords(param);
+                .listReadingRecords(param);
         return Result.ofNullable(pageData)
                 .orElse("还没有历史记录");
     }
@@ -100,7 +100,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<ArticleCollect> page = param.toPage();
         List<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
-        List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
+        List<ArticleDTO> data = articleService.listArticleById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())
@@ -114,7 +114,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<LikeItem> page = param.toPage();
         List<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
-        List<ArticleDTO> data = articleService.getArticleByIds(articleIds, null);
+        List<ArticleDTO> data = articleService.listArticleById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())

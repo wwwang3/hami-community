@@ -9,6 +9,7 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.interact.FollowService;
 
 import java.util.concurrent.TimeUnit;
@@ -58,8 +59,8 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
     private void addFollowing(String followingListKey, Integer userId, Integer following, double score) {
         boolean success = RedisClient.expire(followingListKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-        if (success) {
-            //缓存没有过期
+        if (success && RedisClient.zCard(followingListKey) < ZPageHandler.DEFAULT_MAX_SIZE) {
+            //缓存没有过期 && 小于最大元素数量
             RedisClient.zAdd(followingListKey, following, score);
         } else {
             followService.loadUserFollowings(followingListKey, userId, -1, -1);
@@ -68,7 +69,7 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
     private void addFollower(String followerListKey, Integer userId, Integer follower, double score) {
         boolean success = RedisClient.expire(followerListKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-        if (success) {
+        if (success && RedisClient.zCard(followerListKey) < ZPageHandler.DEFAULT_MAX_SIZE) {
             RedisClient.zAdd(followerListKey, follower, score);
         } else {
             followService.loadUserFollowers(followerListKey, userId, -1, -1);

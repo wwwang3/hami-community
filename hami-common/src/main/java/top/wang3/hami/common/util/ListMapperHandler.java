@@ -1,5 +1,7 @@
 package top.wang3.hami.common.util;
 
+import org.springframework.data.redis.connection.zset.DefaultTuple;
+import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.util.CollectionUtils;
@@ -69,14 +71,27 @@ public class ListMapperHandler {
         return subList(origin, mapper, (int) current, (int) size);
     }
 
-    public static <T, R> List<R> listTo(List<T> origin, BiFunction<T, Integer, R> mapper) {
+    public static <T, R> List<R> listTo(Collection<T> origin, BiFunction<T, Integer, R> mapper) {
         if (origin == null || origin.isEmpty()) return Collections.emptyList();
         ArrayList<R> rs = new ArrayList<>(origin.size());
-        for (int i = 0; i < origin.size(); i++) {
-            R r = mapper.apply(origin.get(i), i);
-            rs.add(r);
+        Iterator<T> iterator = origin.iterator();
+        int index = 0;
+        while (iterator.hasNext()) {
+            T value = iterator.next();
+            R applied = mapper.apply(value, index);
+            rs.add(applied);
+            ++index;
         }
         return rs;
+    }
+
+    public static <T> List<Tuple> listToTuple(List<T> origin, Function<T, Object> memberMapper, Function<T, Number> scoreMapper) {
+        return listTo(origin, item -> {
+            Object member = memberMapper.apply(item);
+            byte[] value = RedisClient.valueBytes(member);
+            Double score = scoreMapper.apply(item).doubleValue();
+            return new DefaultTuple(value, score);
+        });
     }
 
     /**
@@ -88,12 +103,12 @@ public class ListMapperHandler {
      * @param <R>    返回列表元素泛型
      * @return List<R>
      */
-    public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper) {
+    public static <T, R> List<R> listTo(Collection<T> origin, Function<T, R> mapper) {
         //默认去重
         return listTo(origin, mapper, true);
     }
 
-    public static <T, R> List<R> listTo(List<T> origin, Function<T, R> mapper, boolean distinct) {
+    public static <T, R> List<R> listTo(Collection<T> origin, Function<T, R> mapper, boolean distinct) {
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyList();
         }

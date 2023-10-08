@@ -56,7 +56,7 @@ public class ArticleController {
 
     @PostMapping("/query_list")
     public Result<PageData<ArticleDTO>> listUserArticles(@RequestBody @Valid UserArticleParam param) {
-        PageData<ArticleDTO> data = articleService.listUserArticles(param);
+        PageData<ArticleDTO> data = articleService.listUserArticle(param);
         return Result.successData(data);
     }
 }

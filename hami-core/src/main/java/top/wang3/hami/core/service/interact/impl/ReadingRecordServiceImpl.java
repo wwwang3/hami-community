@@ -1,121 +1,116 @@
 package top.wang3.hami.core.service.interact.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import top.wang3.hami.common.converter.ArticleConverter;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.model.ReadingRecordDTO;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.mapper.ReadingRecordMapper;
+import top.wang3.hami.common.util.RandomUtils;
+import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
+import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
+import top.wang3.hami.core.service.interact.repository.ReadingRecordRepository;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
 @SuppressWarnings("unused")
 @Slf4j
 @RequiredArgsConstructor
-public class ReadingRecordServiceImpl extends ServiceImpl<ReadingRecordMapper, ReadingRecord>
-        implements ReadingRecordService {
-    @Resource
-    TransactionTemplate transactionTemplate;
+public class ReadingRecordServiceImpl implements ReadingRecordService {
 
+    private final ReadingRecordRepository readingRecordRepository;
     private final ArticleService articleService;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
-    @Transactional
-    public boolean record(List<ReadingRecord> records) {
-        //
-        throw new UnsupportedOperationException("暂不支持");
-//        return super.saveBatch(records);
+    @Override
+    public int record(int userId, int articleId, int authorId) {
+        //记录阅读数据
+        String ip = IpContext.getIp();
+        if (ip == null) return 0;
+        String redisKey = Constants.VIEW_LIMIT + ip + ":" + articleId;
+        boolean success = RedisClient.setNx(redisKey, "view-lock", 15, TimeUnit.SECONDS);
+        if (!success) {
+            log.debug("ip: {} access repeat", ip);
+            return 0;
+        }
+        //发布消息
+        Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
+        ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
+                articleId, authorId, loginUserId);
+        rabbitMessagePublisher.publishMsg(message);
+        return 1;
     }
 
     @Override
-    public PageData<ReadingRecord> getReadingRecordByPage(PageParam param, Integer userId) {
-        Page<ReadingRecord> page = param.toPage();
-        page = ChainWrappers.queryChain(getBaseMapper())
-                .select("user_id", "article_id", "reading_time")
-                .eq("user_id", userId)
-                .orderByDesc("reading_time")
-                .page(page);
-        return PageData.build(page);
-    }
-
-    @Override
-    public PageData<ReadingRecordDTO> getReadingRecords(PageParam param) {
+    public PageData<ReadingRecordDTO> listReadingRecords(PageParam param) {
         int loginUserId = LoginUserContext.getLoginUserId();
-        PageData<ReadingRecord> page = this.getReadingRecordByPage(param, loginUserId);
-        List<ReadingRecord> records = page.getData();
-        if (records == null || records.isEmpty()) {
-            return null;
-        }
-        List<Integer> articleIds = ListMapperHandler.listTo(records, ReadingRecord::getArticleId);
-        ArticleOptionsBuilder builder = new ArticleOptionsBuilder()
-                .noInteract();
-        List<ArticleDTO> articleDTOS = articleService.getArticleByIds(articleIds, builder);
-        List<ReadingRecordDTO> data = ArticleConverter.INSTANCE.toReadingRecordDTO(records);
-        ListMapperHandler.doAssemble(data, ReadingRecordDTO::getArticleId, articleDTOS,
-                ArticleDTO::getId, ReadingRecordDTO::setContent);
-        return PageData.<ReadingRecordDTO>builder()
-                .total(page.getTotal())
-                .pageNum(page.getPageNum())
-                .data(data)
-                .build();
+        String key = Constants.READING_RECORD_LIST + loginUserId;
+        Page<ReadingRecordDTO> page = param.toPage();
+
+
+        ZPageHandler.<>of(key, page, this)
+                .countSupplier(() -> this.getUserReadingRecordCount(loginUserId))
+                .source((current, size) -> {
+                    Page<ReadingRecord> itemPage = new Page<>(current, size, false);
+                    return readingRecordRepository.listReadingRecordByPage(itemPage, loginUserId);
+                })
+                .query()
+
+        List<ReadingRecordDTO> dtos = ListMapperHandler.listTo(tuples, item -> {
+            Integer articleId = item.getValue();
+            Date readingTime = new Date(Objects.requireNonNull(item.getScore()).longValue());
+            return new ReadingRecordDTO(loginUserId, articleId, readingTime, null);
+        }, false);
+        return PageData.build(page)
     }
 
     @Override
-    public boolean record(int userId, int articleId) {
-        ReadingRecord record = getReadingRecord(userId, articleId);
-        Boolean success = transactionTemplate.execute(status -> {
-            ReadingRecord readingRecord = new ReadingRecord(userId, articleId);
-            boolean saved = false;
-            if (record == null) {
-                //没有记录尝试新增
-                 saved = trySave(readingRecord);
+    public Long getUserReadingRecordCount(Integer userId) {
+        String redisKey = Constants.READING_RECORD_COUNT + userId;
+        Long count = RedisClient.getCacheObject(redisKey);
+        if (count == null) {
+            synchronized (this) {
+                count = RedisClient.getCacheObject(redisKey);
+                if (count == null) {
+                    count = readingRecordRepository.getUserReadingRecordCount(userId);
+                    RedisClient.setCacheObject(redisKey, count, RandomUtils.randomLong(20, 30), TimeUnit.DAYS);
+                }
             }
-            //新增成功
-            if (saved) return true;
-            //插入记录失败
-            return tryUpdate(readingRecord);
-        });
-        return Boolean.TRUE.equals(success);
-    }
-
-    private boolean trySave(ReadingRecord readingRecord) {
-        try {
-            return super.save(readingRecord);
-        } catch (Exception e) {
-            log.warn("save failed: error_class: {} error_msg: {}", e.getClass().getCanonicalName(), e.getMessage());
-            return false;
         }
+        return count;
     }
 
-    private boolean tryUpdate(ReadingRecord record) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .eq("user_id", record.getUserId())
-                .eq("article_id", record.getArticleId())
-                .set("reading_time", new Date())
-                .update();
+    @Override
+    public List<Integer> loadUserReadingRecordCache(String key, Integer userId, long current, long size) {
+        List<ReadingRecord> records = readingRecordRepository.listReadingRecordByUserId(userId);
+        List<Tuple> tuples = ListMapperHandler.listToTuple(records, ReadingRecord::getArticleId,
+                record -> record.getReadingTime().getTime());
+        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(20, 30), TimeUnit.DAYS);
+        return ListMapperHandler.subList(records, ReadingRecord::getArticleId, current, size);
     }
 
-    public ReadingRecord getReadingRecord(int userId, int articleId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .eq("user_id", userId)
-                .eq("article_id", articleId)
-                .one();
+    private void buildReadingRecord(List<ReadingRecordDTO> dtos) {
+        List<Integer> articleIds = ListMapperHandler.listTo(dtos, ReadingRecordDTO::getArticleId, false);
+        List<ArticleDTO> articleDTOS = articleService.listArticleById(articleIds, new ArticleOptionsBuilder());
+        ListMapperHandler.doAssemble(dtos, ReadingRecordDTO::getArticleId,
+                articleDTOS, ArticleDTO::getId, ReadingRecordDTO::setContent);
     }
 }

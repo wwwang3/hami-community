@@ -2,10 +2,12 @@ package top.wang3.hami.core.component;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.ZSetOperations;
 import top.wang3.hami.common.util.RedisClient;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -71,11 +73,16 @@ public class ZPageHandler {
             //zset没有, 可能缓存过期或者超过了最大zset存储的数量
             long max = RedisClient.zCard(key);
             if (current * size > max && max != 0) {
+                //超过最大元素数量
                 //回源DB
                 return source == null ? Collections.emptyList() : source.apply(count, size);
             }
             //缓存过期
             return load(current, size);
+        }
+
+
+        public Set<ZSetOperations.TypedTuple<T>> queryWithScore() {
         }
 
         private List<T> handleQuery(long current, long size) {
@@ -127,5 +134,9 @@ public class ZPageHandler {
             return this;
         }
 
+        public ZPageBuilder<T> loaderWithScore(BiFunction<Long, Long, Set<ZSetOperations.TypedTuple<T>>> func) {
+            this.loader = func;
+            return this;
+        }
     }
 }

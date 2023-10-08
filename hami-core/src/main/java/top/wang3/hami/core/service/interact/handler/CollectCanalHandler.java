@@ -9,6 +9,7 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.interact.CollectService;
 
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
     public void processInsert(ArticleCollect entity) {
         String redisKey = Constants.LIST_USER_COLLECT + entity.getUserId();
         boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-        if (success) {
+        if (success && RedisClient.zCard(redisKey) < ZPageHandler.DEFAULT_MAX_SIZE) {
             RedisClient.zAdd(redisKey, entity.getArticleId(), entity.getMtime().getTime());
         } else {
             collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);

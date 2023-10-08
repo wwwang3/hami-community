@@ -5,23 +5,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.interact.ReadingRecordService;
 
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue("hami-user-queue-1"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                key = {"user.*", "article.view"}
+                key = {"user.*"}
         ),
 }, concurrency = "4")
 @Component
 @RequiredArgsConstructor
 public class UserMessageConsumer {
-
-    private final ReadingRecordService readingRecordService;
 
     @RabbitHandler
     public void handleMessage(UserRabbitMessage message) {
@@ -32,10 +28,4 @@ public class UserMessageConsumer {
         }
     }
 
-    @RabbitHandler
-    public void handleArticleViewMessage(ArticleRabbitMessage message) {
-        Integer loginUserId = message.getLoginUserId();
-        if (loginUserId == null) return;
-        readingRecordService.record(loginUserId, message.getArticleId());
-    }
 }

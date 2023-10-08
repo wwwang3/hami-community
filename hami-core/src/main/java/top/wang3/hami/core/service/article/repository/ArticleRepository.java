@@ -14,9 +14,15 @@ public interface ArticleRepository extends IService<Article> {
 
     ArticleInfo getArticleInfoById(Integer articleId);
 
+    Long getArticleCount(Integer cateId, Integer userId);
+
     List<ArticleInfo> listArticleById(List<Integer> ids);
 
+    List<Article> listUserArticle(int userId);
+
     List<Article> listArticleByCateId(Integer cateId);
+
+    List<Integer> listArticleByPage(Page<Article> page, Integer cateId, Integer userId);
 
     String getArticleContentById(Integer articleId);
 
@@ -24,15 +30,7 @@ public interface ArticleRepository extends IService<Article> {
 
     List<ArticleDO> scanArticles(List<Integer> ids);
 
-    List<Article> queryUserArticles(int userId);
-
     boolean checkArticleExist(Integer articleId);
-
-    boolean saveArticle(Article article);
-
-    boolean updateArticle(Article article);
-
-    boolean deleteArticle(Integer articleId, Integer userId);
 
     List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword);
 
@@ -41,4 +39,11 @@ public interface ArticleRepository extends IService<Article> {
     List<Integer> listInitArticle();
 
     Integer getArticleAuthor(Integer articleId);
+
+    boolean saveArticle(Article article);
+
+    boolean updateArticle(Article article);
+
+    boolean deleteArticle(Integer articleId, Integer userId);
+
 }

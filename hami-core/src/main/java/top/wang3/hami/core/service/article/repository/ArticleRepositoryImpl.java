@@ -17,6 +17,7 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.model.ArticleTag;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.mapper.ArticleMapper;
 
 import java.util.Collections;
@@ -41,6 +42,15 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
+    public Long getArticleCount(Integer cateId, Integer userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id")
+                .eq(userId != null, "user_id", userId)
+                .eq(cateId != null, "category_id", cateId)
+                .count();
+    }
+
+    @Override
     public List<ArticleInfo> listArticleById(List<Integer> ids) {
         if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
         List<ArticleDO> dos = getBaseMapper().listArticleById(ids);
@@ -48,17 +58,34 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
+    public List<Article> listUserArticle(int userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("id", "ctime")
+                .eq("user_id", userId)
+                .orderByDesc("ctime")
+                .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
+                .list();
+    }
+
+    @Override
     public List<Article> listArticleByCateId(Integer cateId) {
-        List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
+        return ChainWrappers.queryChain(getBaseMapper())
                 .select("id", "user_id", "ctime")
                 .eq(cateId != null, "category_id", cateId)
-                .orderByDesc("ctime", "id") //根据ctime倒序
-                .last("limit 5000")
+                .orderByDesc("ctime") //根据ctime倒序
+                .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
                 .list();
-        if (articles == null || articles.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return articles;
+    }
+
+    @Override
+    public List<Integer> listArticleByPage(Page<Article> page, Integer cateId, Integer userId) {
+        List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
+                .select("id")
+                .eq(userId != null, "user_id", userId)
+                .eq("category_id", cateId)
+                .orderByDesc("ctime")
+                .list(page);
+        return ListMapperHandler.listTo(articles, Article::getId);
     }
 
     @Override
@@ -82,15 +109,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<Article> queryUserArticles(int userId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select("id", "ctime")
-                .eq("user_id", userId)
-                .orderByDesc("ctime")
-                .list();
-    }
-
-    @Override
     public boolean checkArticleExist(Integer articleId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("id")
@@ -98,28 +116,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .exists();
     }
 
-    @Transactional
-    @Override
-    public boolean saveArticle(Article article) {
-        Assert.notNull(article, "article can not be null");
-        return super.save(article);
-    }
-
-    @Transactional
-    @Override
-    public boolean updateArticle(Article article) {
-        Assert.notNull(article, "article can not be null");
-        return super.updateById(article);
-    }
-
-    @Transactional
-    @Override
-    public boolean deleteArticle(Integer articleId, Integer userId) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .eq("user_id", userId)
-                .eq("id", articleId)
-                .remove();
-    }
 
     @Override
     public List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword) {
@@ -147,5 +143,26 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return getBaseMapper().getArticleAuthor(articleId);
     }
 
+    @Transactional
+    @Override
+    public boolean saveArticle(Article article) {
+        Assert.notNull(article, "article can not be null");
+        return super.save(article);
+    }
 
+    @Transactional
+    @Override
+    public boolean updateArticle(Article article) {
+        Assert.notNull(article, "article can not be null");
+        return super.updateById(article);
+    }
+
+    @Transactional
+    @Override
+    public boolean deleteArticle(Integer articleId, Integer userId) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .eq("user_id", userId)
+                .eq("id", articleId)
+                .remove();
+    }
 }

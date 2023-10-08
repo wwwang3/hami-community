@@ -28,7 +28,7 @@ public class CachedCountService implements CountService {
 
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
-        String redisKey = Constants.COUNT_TYPE_ARTICLE + articleId;
+        String redisKey = Constants.STAT_TYPE_ARTICLE + articleId;
         ArticleStatDTO stat = RedisClient.getCacheObject(redisKey);
         if (stat != null) {
             return stat;
@@ -39,12 +39,12 @@ public class CachedCountService implements CountService {
     @CostLog
     @Override
     public Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
-        return RedisClient.getMultiCacheObject(Constants.COUNT_TYPE_ARTICLE, articleIds, this::loadArticleStateCaches);
+        return RedisClient.getMultiCacheObjectToMap(Constants.STAT_TYPE_ARTICLE, articleIds, this::loadArticleStateCaches);
     }
 
     @Override
     public UserStat getUserStatById(Integer userId) {
-        String redisKey = Constants.COUNT_TYPE_USER + userId;
+        String redisKey = Constants.STAT_TYPE_USER + userId;
         UserStat stat = RedisClient.getCacheObject(redisKey);
         if (stat == null) {
             stat = loadUserStatCache(redisKey, userId);
@@ -59,7 +59,7 @@ public class CachedCountService implements CountService {
     @CostLog
     @Override
     public Map<Integer, UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        Map<Integer, UserStat> statMap = RedisClient.getMultiCacheObject(Constants.COUNT_TYPE_USER, userIds, this::loadUserStatCaches);
+        Map<Integer, UserStat> statMap = RedisClient.getMultiCacheObjectToMap(Constants.STAT_TYPE_USER, userIds, this::loadUserStatCaches);
         Map<Integer, Long> followings = followService.listUserFollowingCount(userIds);
         Map<Integer, Long> followers = followService.listUserFollowerCount(userIds);
         statMap.forEach((userId, item) -> {
@@ -95,7 +95,7 @@ public class CachedCountService implements CountService {
 
     private Map<Integer, ArticleStatDTO> loadArticleStateCaches(List<Integer> ids) {
         Map<Integer, ArticleStatDTO> dtoMap = articleStatService.listArticleStat(ids);
-        Map<String, ArticleStatDTO> newMap = ListMapperHandler.listToMap(ids, id -> Constants.COUNT_TYPE_ARTICLE + id, (id) -> {
+        Map<String, ArticleStatDTO> newMap = ListMapperHandler.listToMap(ids, id -> Constants.STAT_TYPE_ARTICLE + id, (id) -> {
             return dtoMap.computeIfAbsent(id, ArticleStatDTO::new);
         });
         RedisClient.cacheMultiObject(newMap, 10, 20, TimeUnit.HOURS);
@@ -116,7 +116,7 @@ public class CachedCountService implements CountService {
 
     private Map<Integer, UserStat> loadUserStatCaches(List<Integer> ids) {
         Map<Integer, UserStat> statMap = articleStatService.listUserStat(ids);
-        Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> Constants.COUNT_TYPE_USER + id, id -> {
+        Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> Constants.STAT_TYPE_USER + id, id -> {
             return statMap.computeIfAbsent(id, UserStat::new);
         });
         RedisClient.cacheMultiObject(cache, 10, 20, TimeUnit.HOURS);

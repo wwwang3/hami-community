@@ -129,7 +129,6 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public List<Integer> loadUserLikeArticleCache(String key, Integer userId, long current, long size) {
-        //md 加锁 缓存刚好过期时, 有大量的请求过来, 性能应该会比较低
         List<LikeItem> likeItems = likeRepository.listUserLikeItem(userId, LikeType.ARTICLE);
         var tuples = ListMapperHandler.listToZSet(likeItems, LikeItem::getItemId, item -> {
             return (double) item.getMtime().getTime();
