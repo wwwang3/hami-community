@@ -23,6 +23,7 @@ import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.repository.CollectRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +120,7 @@ public class CollectServiceImpl implements CollectService {
     }
 
     @Override
-    public List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
+    public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
         String key = Constants.LIST_USER_COLLECT + userId;
         return ZPageHandler
                 .<Integer>of(key, page, this)
@@ -135,12 +136,12 @@ public class CollectServiceImpl implements CollectService {
 
 
     @Override
-    public List<Integer> loadUserCollects(String key, Integer userId, long current, long size) {
+    public Collection<Integer> loadUserCollects(String key, Integer userId, long current, long size) {
         List<ArticleCollect> collects = listUserCollects(userId, ZPageHandler.DEFAULT_MAX_SIZE);
         if (CollectionUtils.isEmpty(collects)) {
             return Collections.emptyList();
         }
-        List<DefaultTuple> tuples = ListMapperHandler.listTo(collects, item -> {
+        Collection<DefaultTuple> tuples = ListMapperHandler.listTo(collects, item -> {
             byte[] rawValue = RedisClient.valueBytes(item.getArticleId());
             Double score = (double) item.getMtime().getTime();
             return new DefaultTuple(rawValue, score);

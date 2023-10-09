@@ -23,6 +23,7 @@ import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.interact.repository.LikeRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -99,7 +100,7 @@ public class LikeServiceImpl implements LikeService {
 
     @CostLog
     @Override
-    public List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
+    public Collection<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
         //最近点赞的文章
         String key = Constants.LIST_USER_LIKE_ARTICLES + userId;
         return ZPageHandler.<Integer>of(key, page, this) //不同业务不同的锁

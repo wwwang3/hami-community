@@ -23,10 +23,7 @@ import top.wang3.hami.core.service.interact.repository.FollowRepository;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -85,7 +82,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Map<Integer, Long> listUserFollowingCount(List<Integer> userIds) {
-        List<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWING_COUNT + id);
+        Collection<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWING_COUNT + id);
         List<Long> counts = RedisClient.getMultiCacheObject(keys);
         HashMap<Integer, Long> result = new HashMap<>(userIds.size());
         ListMapperHandler.forEach(counts, (count, index) -> {
@@ -100,7 +97,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Map<Integer, Long> listUserFollowerCount(List<Integer> userIds) {
-        List<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWER_COUNT + id);
+        Collection<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWER_COUNT + id);
         List<Long> counts = RedisClient.getMultiCacheObject(keys);
         HashMap<Integer, Long> result = new HashMap<>(userIds.size());
         ListMapperHandler.forEach(counts, (count, index) -> {
@@ -124,7 +121,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public List<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
+    public Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
         String key = Constants.LIST_USER_FOLLOWING + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowingCount(userId))
@@ -139,7 +136,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public List<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
+    public Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
         String key = Constants.LIST_USER_FOLLOWER + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowerCount(userId))
@@ -191,7 +188,7 @@ public class FollowServiceImpl implements FollowService {
         if (CollectionUtils.isEmpty(follows)) {
             return Collections.emptyList();
         }
-        List<DefaultTuple> tuples = ListMapperHandler.listTo(follows, (item) -> {
+        Collection<DefaultTuple> tuples = ListMapperHandler.listTo(follows, (item) -> {
             Double score = (double) item.getMtime().getTime();
             byte[] rawValue = RedisClient.valueBytes(item.getFollowing());
             return new DefaultTuple(rawValue, score);
@@ -206,7 +203,7 @@ public class FollowServiceImpl implements FollowService {
         if (CollectionUtils.isEmpty(followers)) {
             return Collections.emptyList();
         }
-        List<DefaultTuple> tuples = ListMapperHandler.listTo(followers, (item) -> {
+        Collection<DefaultTuple> tuples = ListMapperHandler.listTo(followers, (item) -> {
             Double score = (double) item.getMtime().getTime();
             byte[] rawValue = RedisClient.valueBytes(item.getUserId());
             return new DefaultTuple(rawValue, score);

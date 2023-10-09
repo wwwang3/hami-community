@@ -18,6 +18,7 @@ import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
@@ -31,6 +32,7 @@ import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -79,35 +81,26 @@ public class UserServiceImpl implements UserService {
         String redisKey = Constants.USER_INFO + userId;
         User user = RedisClient.getCacheObject(redisKey);
         if (user == null) {
-            //todo 保证只有一个请求查询数据库写入Redis
-            user = userRepository.getUserById(userId);
-            if (user == null) {
-                RedisClient.setCacheObject(redisKey,  new User(), 10, TimeUnit.SECONDS);
-            } else{
-                RedisClient.setCacheObject(redisKey, user);
-            }
+            user = loadUserCache(redisKey, userId);
         } else if (user.getUserId() == null) {
             return null;
         }
         return user;
     }
 
-
     @CostLog
     @Override
-    public List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, UserOptionsBuilder builder) {
+    public Collection<UserDTO> getAuthorInfoByIds(Collection<Integer> userIds, UserOptionsBuilder builder) {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        List<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_INFO + id);
-        List<User> users = RedisClient.getMultiCacheObject(keys, (nullIndexes) -> {
-            List<Integer> nullIds = ListMapperHandler.listTo(nullIndexes, userIds::get, false);
-            List<User> nullUsers = userRepository.getUserByIds(nullIds);
-            Map<String, User> map = ListMapperHandler.listToMap(nullUsers,
-                    u -> Constants.USER_INFO + u.getUserId());
-            RedisClient.cacheMultiObject(map);
-            return nullUsers;
+        List<User> users = RedisClient.getMultiCacheObject(Constants.USER_INFO, userIds, nullIds -> {
+            List<User> absentUsers = userRepository.getUserByIds(nullIds);
+            Map<String, User> map = ListMapperHandler.listToMap(absentUsers, user -> Constants.USER_INFO + user.getUserId());
+            RedisClient.cacheMultiObject(map, 10, 20, TimeUnit.DAYS);
+            return absentUsers;
         });
+
         List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(users);
         if (builder == null || builder.stat) {
             //查询用户的粉丝数据
@@ -174,7 +167,6 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-
     private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
         List<Integer> userIds = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
@@ -216,6 +208,22 @@ public class UserServiceImpl implements UserService {
         Integer followers = followService.getUserFollowerCount(loginUserId).intValue();
         loginProfile.setFollowers(followers);
         loginProfile.setFollowings(followings);
+    }
+
+    private User loadUserCache(String redisKey, Integer userId) {
+        User user;
+        synchronized (this) {
+            user = RedisClient.getCacheObject(redisKey);
+            if (user == null) {
+                user = userRepository.getUserById(userId);
+                if (user == null) {
+                    RedisClient.cacheEmptyObject(redisKey, new User());
+                } else {
+                    RedisClient.setCacheObject(redisKey, user, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
+                }
+            }
+            return user;
+        }
     }
 
 }

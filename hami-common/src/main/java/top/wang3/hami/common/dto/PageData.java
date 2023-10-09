@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
@@ -28,7 +28,7 @@ public class PageData<T> {
     /**
      * 数据
      */
-    private List<T> data;
+    private Collection<T> data;
 
 
     public static <T> PageData<T> build(Page<T> page) {

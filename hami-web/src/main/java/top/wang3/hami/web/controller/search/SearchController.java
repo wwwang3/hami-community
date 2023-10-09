@@ -3,6 +3,7 @@ package top.wang3.hami.web.controller.search;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +23,10 @@ public class SearchController {
     private final SearchService searchService;
 
     @PostMapping("article")
-    public Result<PageData<ArticleSearchDTO>> searArticle(@RequestBody
-                                                          @Valid SearchParam param) {
+    public Result<PageData<ArticleSearchDTO>> searArticle(@RequestBody @Valid SearchParam param) {
+        if (!StringUtils.hasText(param.getKeyword())) {
+            return Result.of(PageData.empty());
+        }
         PageData<ArticleSearchDTO> data = searchService.searchArticle(param);
         return Result.successData(data);
     }

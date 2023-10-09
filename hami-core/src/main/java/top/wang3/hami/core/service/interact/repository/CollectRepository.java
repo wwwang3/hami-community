@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.model.ArticleCollect;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +23,5 @@ public interface CollectRepository extends IService<ArticleCollect> {
 
     List<ArticleCollect> listUserCollects(Integer userId, int max);
 
-    List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
+    Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 }

@@ -18,11 +18,6 @@ import java.util.stream.Stream;
  */
 public class ListMapperHandler {
 
-    public static <T> List<T> subList(List<T> origin, int current, int size) {
-        return subList(origin, Function.identity(), current, size);
-    }
-
-
     public static <T> List<List<T>> split(Collection<T> origin, int size) {
         final List<List<T>> result = new ArrayList<>();
         if (CollectionUtils.isEmpty(origin)) {
@@ -52,7 +47,16 @@ public class ListMapperHandler {
         }
     }
 
+    public static <T> List<T> subList(List<T> origin, int current, int size) {
+        return subList(origin, Function.identity(), current, size);
+    }
+
+    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, long current, long size) {
+        return subList(origin, mapper, (int) current, (int) size);
+    }
+
     public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
+
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyList();
         }
@@ -64,15 +68,11 @@ public class ListMapperHandler {
             return Collections.emptyList();
         }
         List<T> list = origin.subList(from, to);
-        return listTo(list, mapper);
+        return (ArrayList<R>) listTo(list, mapper);
     }
 
-    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, long current, long size) {
-        return subList(origin, mapper, (int) current, (int) size);
-    }
-
-    public static <T, R> List<R> listTo(Collection<T> origin, BiFunction<T, Integer, R> mapper) {
-        if (origin == null || origin.isEmpty()) return Collections.emptyList();
+    public static <T, R> ArrayList<R> listTo(Collection<T> origin, BiFunction<T, Integer, R> mapper) {
+        if (origin == null || origin.isEmpty()) return new ArrayList<>(0);
         ArrayList<R> rs = new ArrayList<>(origin.size());
         Iterator<T> iterator = origin.iterator();
         int index = 0;
@@ -85,7 +85,7 @@ public class ListMapperHandler {
         return rs;
     }
 
-    public static <T> List<Tuple> listToTuple(List<T> origin, Function<T, Object> memberMapper, Function<T, Number> scoreMapper) {
+    public static <T> Collection<Tuple> listToTuple(List<T> origin, Function<T, Object> memberMapper, Function<T, Number> scoreMapper) {
         return listTo(origin, item -> {
             Object member = memberMapper.apply(item);
             byte[] value = RedisClient.valueBytes(member);
@@ -119,7 +119,7 @@ public class ListMapperHandler {
         return stream
                 .filter(Objects::nonNull)
                 .map(mapper)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public static <T, R> Set<R> listToSet(List<T> origin, Function<T, R> mapper) {
@@ -140,14 +140,14 @@ public class ListMapperHandler {
         });
     }
 
-    public static <T, K> Map<K, T> listToMap(List<T> origin, Function<T, K> keyMapper) {
+    public static <T, K> Map<K, T> listToMap(Collection<T> origin, Function<T, K> keyMapper) {
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyMap();
         }
         return listToMap(origin, keyMapper, t -> t);
     }
 
-    public static <T, K, U> Map<K, U> listToMap(List<T> data, Function<T, K> keyMapper,
+    public static <T, K, U> Map<K, U> listToMap(Collection<T> data, Function<T, K> keyMapper,
                                                 Function<T, U> valueMapper) {
         if (CollectionUtils.isEmpty(data)) {
             return Collections.emptyMap();
@@ -180,7 +180,7 @@ public class ListMapperHandler {
      * @param <R>      待装配对象的某个字段的泛型
      * @param <U>      装配对象泛型
      */
-    public static <T, R, U> void doAssemble(List<T> data, Function<T, R> getter, List<U> assemble,
+    public static <T, R, U> void doAssemble(Collection<T> data, Function<T, R> getter, Collection<U> assemble,
                                             Function<U, R> mapKey, BiConsumer<T, U> setter) {
         if (CollectionUtils.isEmpty(data) || CollectionUtils.isEmpty(assemble)) {
             //有一个为空直接返回
@@ -190,7 +190,7 @@ public class ListMapperHandler {
         doAssemble(data, getter, map, setter);
     }
 
-    public static <T, R, U> void doAssemble(List<T> data, Function<T, R> getter, Map<R, U> assemble,
+    public static <T, R, U> void doAssemble(Collection<T> data, Function<T, R> getter, Map<R, U> assemble,
                                             BiConsumer<T, U> setter) {
         if (CollectionUtils.isEmpty(data) || CollectionUtils.isEmpty(assemble)) {
             return;

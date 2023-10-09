@@ -4,6 +4,7 @@ package top.wang3.hami.core.service.interact;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import top.wang3.hami.common.model.ArticleCollect;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public interface CollectService {
 
     List<ArticleCollect> listUserCollects(Integer userId, int max);
 
-    List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
+    Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 
-    List<Integer> loadUserCollects(String key, Integer userId, long current, long size);
+    Collection<Integer> loadUserCollects(String key, Integer userId, long current, long size);
 }

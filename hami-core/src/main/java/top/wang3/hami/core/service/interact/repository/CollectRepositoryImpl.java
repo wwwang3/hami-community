@@ -11,6 +11,7 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.mapper.ArticleCollectMapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +94,7 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
     }
 
     @Override
-    public List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
+    public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
         List<ArticleCollect> collects = ChainWrappers.queryChain(getBaseMapper())
                 .select("article_id")
                 .eq("user_id", userId)

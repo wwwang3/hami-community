@@ -1,10 +1,9 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.dto.article;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.wang3.hami.common.dto.article.ArticleDTO;
 
 import java.util.Date;
 

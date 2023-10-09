@@ -8,14 +8,18 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.ReadingRecordDTO;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.dto.request.LikeItemParam;
-import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.enums.LikeType;
-import top.wang3.hami.common.model.*;
+import top.wang3.hami.common.model.ArticleCollect;
+import top.wang3.hami.common.model.Comment;
+import top.wang3.hami.common.model.LikeItem;
+import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.comment.CommentService;
@@ -26,6 +30,7 @@ import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -88,7 +93,7 @@ public class UserInteractController {
     }
 
     @PostMapping("/reading_record/query_list")
-    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestBody @Valid PageParam param) {
+    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestBody @Valid SearchParam param) {
         PageData<ReadingRecordDTO> pageData = readingRecordService
                 .listReadingRecords(param);
         return Result.ofNullable(pageData)
@@ -99,7 +104,7 @@ public class UserInteractController {
     public Result<PageData<ArticleDTO>> getUserCollectArticles(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<ArticleCollect> page = param.toPage();
-        List<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
+        Collection<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
         List<ArticleDTO> data = articleService.listArticleById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
@@ -113,8 +118,8 @@ public class UserInteractController {
     public Result<PageData<ArticleDTO>> getUserLikeArticles(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<LikeItem> page = param.toPage();
-        List<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
-        List<ArticleDTO> data = articleService.listArticleById(articleIds, null);
+        Collection<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
+        Collection<ArticleDTO> data = articleService.listArticleById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())
@@ -127,8 +132,8 @@ public class UserInteractController {
     public Result<PageData<UserDTO>> getUserFollowings(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
-        List<Integer> followings = followService.listUserFollowings(page, param.getUserId());
-        List<UserDTO> data = userService.getAuthorInfoByIds(followings, UserOptionsBuilder.justInfo());
+        Collection<Integer> followings = followService.listUserFollowings(page, param.getUserId());
+        Collection<UserDTO> data = userService.getAuthorInfoByIds(followings, UserOptionsBuilder.justInfo());
         data.forEach(d -> d.setFollowed(true));
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
                 .pageNum(param.getPageNum())
@@ -142,10 +147,10 @@ public class UserInteractController {
     public Result<PageData<UserDTO>> getUserFollowers(@RequestBody @Valid
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
-        List<Integer> followers = followService.listUserFollowers(page, param.getUserId());
+        Collection<Integer> followers = followService.listUserFollowers(page, param.getUserId());
         UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
-        List<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
+        Collection<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())

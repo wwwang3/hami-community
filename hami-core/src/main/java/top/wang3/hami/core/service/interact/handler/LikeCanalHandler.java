@@ -1,7 +1,9 @@
 package top.wang3.hami.core.service.interact.handler;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
@@ -12,6 +14,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.interact.LikeService;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -23,6 +26,13 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     private final LikeService likeService;
 
+    private RedisScript<Long> likeScript;
+
+    @PostConstruct
+    public void init() {
+        likeScript = RedisClient.loadScript("/META-INF/scripts/like.lua");
+    }
+
     @Override
     public void processInsert(LikeItem entity) {
         String key = Constants.LIST_USER_LIKE + entity.getItemType() + ":" + entity.getLikerId();
@@ -32,7 +42,6 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
         if (!success && RedisClient.zCard(key) < ZPageHandler.DEFAULT_MAX_SIZE) {
             //缓存过期 && zset元素数量小于最大元素数量
             //单个消费者出现消息顺序问题的概率还是比较小而且我没有重试
-            //todo zcard和zadd的原子性保证
             //单个队列单个消费者 非极端情况下能保证消息的顺序性, 这里就不加锁了
             //极端情况下, 缓存刚好过期, 来了一个查询请求, 查询请求读时没有缓存, 去加载, 然后有个点赞请求点赞成功, 投递了消息
             //查询请求读的是[1, 2] 点赞成功后读的是[1, 2, 3] 然后这里先更新了, 读请求再更新, 导致存的是旧的
@@ -40,8 +49,11 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
             //写请求 ===> 写DB ===> 发消息 ===>写Redis
             likeService.loadUserLikeArticleCache(key, entity.getLikerId(), 0, 0);
         } else {
-            //todo 消费失败先不管 _(≧∇≦」∠)_
-            RedisClient.zAdd(key, entity.getItemId(), entity.getMtime().getTime());
+            Integer member = entity.getItemId();
+            Long score = entity.getMtime().getTime();
+            Long res = RedisClient.executeScript(likeScript, List.of(key),
+                    List.of(member, score, ZPageHandler.DEFAULT_MAX_SIZE));
+            log.info("like--userId: {}, itemId: {}, res: {}", entity.getLikerId(), score, res);
         }
         deleteCountCache(entity.getLikerId(), entity.getItemType());
     }

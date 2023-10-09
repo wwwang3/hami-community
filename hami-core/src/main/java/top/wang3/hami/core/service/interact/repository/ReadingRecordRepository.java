@@ -19,11 +19,8 @@ public interface ReadingRecordRepository extends IService<ReadingRecord> {
 
     boolean clearRecords(int userId);
 
-    Long getUserReadingRecordCount(Integer userId);
-
-    List<ReadingRecord> listReadingRecordByUserId(Integer userId);
-
     List<ReadingRecord> listReadingRecordByPage(Page<ReadingRecord> page, Integer userId);
 
+    List<ReadingRecord> listReadingRecordByKeyword(Page<ReadingRecord> page, Integer userId, String keyword);
 
 }

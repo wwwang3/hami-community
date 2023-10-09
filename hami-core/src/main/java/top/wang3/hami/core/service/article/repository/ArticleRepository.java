@@ -8,6 +8,7 @@ import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ArticleRepository extends IService<Article> {
@@ -16,9 +17,11 @@ public interface ArticleRepository extends IService<Article> {
 
     Long getArticleCount(Integer cateId, Integer userId);
 
-    List<ArticleInfo> listArticleById(List<Integer> ids);
+    List<ArticleInfo> listArticleById(Collection<Integer> ids);
 
     List<Article> listUserArticle(int userId);
+
+    List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId);
 
     List<Article> listArticleByCateId(Integer cateId);
 
@@ -30,13 +33,7 @@ public interface ArticleRepository extends IService<Article> {
 
     List<ArticleDO> scanArticles(List<Integer> ids);
 
-    boolean checkArticleExist(Integer articleId);
-
     List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword);
-
-    List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId);
-
-    List<Integer> listInitArticle();
 
     Integer getArticleAuthor(Integer articleId);
 

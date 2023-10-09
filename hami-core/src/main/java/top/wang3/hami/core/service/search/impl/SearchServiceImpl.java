@@ -16,6 +16,7 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.search.SearchService;
 import top.wang3.hami.core.service.user.UserService;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -61,7 +62,7 @@ public class SearchServiceImpl implements SearchService {
 
     private void buildAuthor(List<ArticleSearchDTO> articles) {
         List<Integer> userIds = ListMapperHandler.listTo(articles, ArticleSearchDTO::getUserId);
-        List<UserDTO> users = userService.getAuthorInfoByIds(userIds, UserOptionsBuilder.justInfo());
+        Collection<UserDTO> users = userService.getAuthorInfoByIds(userIds, UserOptionsBuilder.justInfo());
         ListMapperHandler.doAssemble(articles, ArticleSearchDTO::getUserId, users,
                 UserDTO::getUserId, ArticleSearchDTO::setAuthor);
     }

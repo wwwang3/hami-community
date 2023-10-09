@@ -9,6 +9,7 @@ import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mapper
@@ -26,7 +27,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     ArticleDO selectArticleById(@Param("articleId") Integer articleId);
 
-    List<ArticleDO> listArticleById(@Param("ids") List<Integer> ids);
+   List<ArticleDO> listArticleById(@Param("ids") Collection<Integer> ids);
 
     @Select("""
         select id from article

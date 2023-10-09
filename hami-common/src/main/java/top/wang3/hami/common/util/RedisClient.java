@@ -34,14 +34,6 @@ public class RedisClient {
         return redisTemplate;
     }
 
-    /**
-     * 垃圾分布式锁
-     *
-     * @param key
-     * @param timeout
-     * @param timeUnit
-     * @return
-     */
     public static boolean simpleLock(String key, long timeout, TimeUnit timeUnit) {
         return setNx(key, UUID.randomUUID().toString(), timeout, timeUnit);
     }
@@ -173,7 +165,7 @@ public class RedisClient {
         return operation.get(key);
     }
 
-    public static <T> List<T> getMultiCacheObject(final List<String> keys) {
+    public static <T> List<T> getMultiCacheObject(final Collection<String> keys) {
         Assert.notNull(keys, "keys cannot be null");
         return redisTemplate.opsForValue()
                 .multiGet(keys);
@@ -193,9 +185,9 @@ public class RedisClient {
     }
 
     public static <K, T> List<T> getMultiCacheObject(String keyPrefix,
-                                                     List<K> keyItems,
-                                                     Function<List<K>, List<T>> func) {
-        List<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+                                                     Collection<K> keyItems,
+                                                     Function<List<K>, Collection<T>> func) {
+        Collection<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
         List<T> data = redisTemplate.opsForValue()
                 .multiGet(keys);
         if (data == null || data.isEmpty()) return Collections.emptyList();
@@ -212,7 +204,7 @@ public class RedisClient {
         if (nullKeys.isEmpty() || func == null) {
             return results;
         }
-        List<T> absentValues = func.apply(nullKeys);
+        Collection<T> absentValues = func.apply(nullKeys);
         results.addAll(absentValues);
         return results;
     }
@@ -220,7 +212,7 @@ public class RedisClient {
     public static <K, V> Map<K, V> getMultiCacheObjectToMap(String keyPrefix,
                                                             List<K> keyItems,
                                                             Function<List<K>, Map<K, V>> func) {
-        List<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+        Collection<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
         List<V> data = redisTemplate.opsForValue()
                 .multiGet(keys);
         if (data == null || data.isEmpty()) return Collections.emptyMap();
@@ -549,22 +541,30 @@ public class RedisClient {
         return new ArrayList<>(set);
     }
 
-    public static <T> List<T> zRevPage(String key, long current, long size) {
+    public static <T> Collection<T> zRevPage(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
         long max = current * size - 1;
-        Set set = redisTemplate.opsForZSet()
+        Set<T> set = redisTemplate.opsForZSet()
                 .reverseRange(key, min, max);
         if (set == null) return Collections.emptyList();
-        return new ArrayList<>(set);
+        return set;
     }
 
-    public static Set<ZSetOperations.TypedTuple<Integer>> zRevPageWithScore(String key, long current, long size) {
+    public static <T> Collection<ZSetOperations.TypedTuple<T>> zRevPageWithScore(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
         long max = current * size - 1;
         return redisTemplate.opsForZSet()
                 .reverseRangeWithScores(key, min, max);
+    }
+
+    public static <T> Collection<ZSetOperations.TypedTuple<T>> zPageWithScore(String key, long current, long size) {
+        size = Math.min(20, size);
+        long min = (current - 1) * size;
+        long max = current * size - 1;
+        return redisTemplate.opsForZSet()
+                .rangeWithScores(key, min, max);
     }
 
     /**
@@ -580,7 +580,7 @@ public class RedisClient {
                 .add(key, items);
     }
 
-    public static <T> void zSetAll(String key, List<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
+    public static <T> void zSetAll(String key, Collection<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
         final byte[] rawKey = keyBytes(key);
         List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
 
@@ -764,8 +764,17 @@ public class RedisClient {
         return script;
     }
 
+    public static <T> RedisScript<T> loadScript(String path, Class<T> clazz) {
+        DefaultRedisScript<T> script = new DefaultRedisScript<>();
+        ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
+        script.setScriptSource(source);
+        script.setResultType(clazz);
+        log.debug("load lua script: {} success", path);
+        return script;
+    }
+
     public static <T> T executeScript(RedisScript<T> script, List<String> keys, List<?> args) {
-        List<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf, false);
+        Collection<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf, false);
         Object[] argsArray = stringArgs.toArray(new String[0]);
         return (T) redisTemplate.execute(script, redisTemplate.getKeySerializer(),
                 redisTemplate.getStringSerializer(), keys, argsArray);

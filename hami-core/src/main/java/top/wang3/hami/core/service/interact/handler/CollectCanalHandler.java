@@ -1,7 +1,10 @@
 package top.wang3.hami.core.service.interact.handler;
 
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
@@ -12,25 +15,38 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.interact.CollectService;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @CanalListener("article_collect")
 @RequiredArgsConstructor
+@Slf4j
 public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
 
 
     //用户收藏Canal消息处理器
     private final CollectService collectService;
 
+    private RedisScript<Long> collectScript;
+
+    @PostConstruct
+    public void init() {
+        collectScript = RedisClient.loadScript("/META-INF/scripts/collect.lua");
+    }
+
     @Override
     public void processInsert(ArticleCollect entity) {
         String redisKey = Constants.LIST_USER_COLLECT + entity.getUserId();
         boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-        if (success && RedisClient.zCard(redisKey) < ZPageHandler.DEFAULT_MAX_SIZE) {
-            RedisClient.zAdd(redisKey, entity.getArticleId(), entity.getMtime().getTime());
-        } else {
+        if (!success) {
             collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);
+        } else {
+            Integer member = entity.getArticleId();
+            Long score = entity.getMtime().getTime();
+            Long res = RedisClient.executeScript(collectScript, List.of(redisKey),
+                    List.of(member, score, ZPageHandler.DEFAULT_MAX_SIZE));
+            log.info("collect--userId: {}, articleId: {}, res: {}", entity.getUserId(), score, res);
         }
         deleteCountCache(entity.getUserId());
     }

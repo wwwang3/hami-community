@@ -7,7 +7,7 @@ import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.User;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface UserService {
     LoginProfile getLoginProfile();
@@ -16,7 +16,7 @@ public interface UserService {
 
     User getUserById(Integer userId);
 
-    List<UserDTO> getAuthorInfoByIds(List<Integer> userIds, UserOptionsBuilder builder);
+    Collection<UserDTO> getAuthorInfoByIds(Collection<Integer> userIds, UserOptionsBuilder builder);
 
     UserDTO getAuthorInfoById(int userId);
 

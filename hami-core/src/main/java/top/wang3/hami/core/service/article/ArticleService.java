@@ -10,6 +10,7 @@ import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.model.Article;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ArticleService {
@@ -34,7 +35,7 @@ public interface ArticleService {
 
     ArticleDTO getArticleDTOById(Integer id);
 
-    List<ArticleDTO> listArticleById(List<Integer> ids, ArticleOptionsBuilder builder);
+    List<ArticleDTO> listArticleById(Collection<Integer> ids, ArticleOptionsBuilder builder);
 
     boolean saveArticle(Article article);
 

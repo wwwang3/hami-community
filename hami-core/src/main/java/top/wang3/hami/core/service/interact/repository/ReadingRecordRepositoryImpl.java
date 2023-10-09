@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.model.ReadingRecord;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.mapper.ReadingRecordMapper;
 
 import java.util.List;
@@ -51,28 +50,16 @@ public class ReadingRecordRepositoryImpl extends ServiceImpl<ReadingRecordMapper
     }
 
     @Override
-    public Long getUserReadingRecordCount(Integer userId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .eq("user_id", userId)
-                .count();
-    }
-
-    @Override
-    public List<ReadingRecord> listReadingRecordByUserId(Integer userId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select( "user_id", "article_id", "reading_time")
-                .eq("user_id", userId)
-                .orderByDesc("reading_time")
-                .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
-                .list();
-    }
-
-    @Override
     public List<ReadingRecord> listReadingRecordByPage(Page<ReadingRecord> page, Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("user_id", "reading_time", "article_id")
                 .eq("user_id", userId)
                 .orderByDesc("reading_time")
                 .list(page);
+    }
+
+    @Override
+    public List<ReadingRecord> listReadingRecordByKeyword(Page<ReadingRecord> page, Integer userId, String keyword) {
+        return getBaseMapper().selectReadingRecordByKeyword(page, userId, keyword);
     }
 }

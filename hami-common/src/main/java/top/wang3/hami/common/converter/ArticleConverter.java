@@ -11,6 +11,7 @@ import top.wang3.hami.common.model.*;
 import top.wang3.hami.common.util.ListMapperHandler;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,9 +52,9 @@ public interface ArticleConverter {
 
     List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
 
-    List<ReadingRecordDTO> toReadingRecordDTO(List<ReadingRecord> records);
+    Collection<ReadingRecordDTO> toReadingRecordDTO(Collection<ReadingRecord> records);
 
-    ArticleInfo toArticleInfo(Article article, List<Integer> tagIds);
+    ArticleInfo toArticleInfo(Article article, Collection<Integer> tagIds);
 
     default ArticleDTO toArticleDTO(ArticleInfo articleInfo) {
         if (articleInfo == null) return null;
@@ -64,7 +65,7 @@ public interface ArticleConverter {
         return articleDTO;
     }
 
-    default List<ArticleDTO> toArticleDTOS(List<ArticleInfo> articleInfos) {
+    default List<ArticleDTO> toArticleDTOS(Collection<ArticleInfo> articleInfos) {
         if (articleInfos == null || articleInfos.isEmpty()) {
             return Collections.emptyList();
         }
@@ -80,7 +81,7 @@ public interface ArticleConverter {
     ArticleContentDTO toArticleContentDTO(ArticleDTO dto, String content);
 
 
-    ArticleInfo toArticleInfo(ArticleDO articleDO, List<Integer> tagIds);
+    ArticleInfo toArticleInfo(ArticleDO articleDO, Collection<Integer> tagIds);
 
     default List<ArticleInfo> toArticleInfos(List<ArticleDO> dos) {
         if (CollectionUtils.isEmpty(dos)) {
@@ -88,7 +89,7 @@ public interface ArticleConverter {
         }
         ArrayList<ArticleInfo> articleDTOS = new ArrayList<>(dos.size());
         for (ArticleDO item : dos) {
-            List<Integer> tagIds = ListMapperHandler.listTo(item.getTags(), ArticleTag::getTagId);
+            Collection<Integer> tagIds = ListMapperHandler.listTo(item.getTags(), ArticleTag::getTagId);
             articleDTOS.add(toArticleInfo(item, tagIds));
         }
         return articleDTOS;

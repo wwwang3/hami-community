@@ -32,10 +32,12 @@ import top.wang3.hami.core.service.article.TagService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.LikeService;
+import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserService userService;
     private final LikeService likeService;
     private final CollectService collectService;
+    private final ReadingRecordService readingRecordService;
 
     private final CountService countService;
     private final ArticleRepository articleRepository;
@@ -79,7 +82,7 @@ public class ArticleServiceImpl implements ArticleService {
         int userId = param.getUserId();
         String redisKey = Constants.LIST_USER_ARTICLE + userId;
         Page<Article> page = param.toPage(false);
-        List<Integer> ids = ZPageHandler.<Integer>of(redisKey, page, this)
+        Collection<Integer> ids = ZPageHandler.<Integer>of(redisKey, page, this)
                 .countSupplier(() -> this.getUserArticleCount(userId))
                 .source((c, s) -> {
                     Page<Article> articlePage = new Page<>(c, s, false);
@@ -88,7 +91,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .loader((c, s) -> {
                     return loadUserArticleListCache(redisKey, userId, c, s);
                 }).query();
-        List<ArticleDTO> dtos = listArticleById(ids, new ArticleOptionsBuilder());
+        List<ArticleDTO> dtos = this.listArticleById(ids, new ArticleOptionsBuilder());
         return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())
                 .data(dtos)
@@ -148,7 +151,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private List<ArticleDTO> listArticleByCate(Page<Article> page, Integer cateId) {
         String key = cateId == null ? Constants.ARTICLE_LIST : Constants.CATE_ARTICLE_LIST + cateId;
-        List<Integer> articleIds = ZPageHandler.<Integer>of(key, page, this)
+        Collection<Integer> articleIds = ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> this.getArticleCount(cateId))
                 .source((current, size) -> {
                     Page<Article> itemPage = new Page<>(current, size, false);
@@ -187,11 +190,13 @@ public class ArticleServiceImpl implements ArticleService {
         //文章数据
         ArticleStatDTO stat = countService.getArticleStatById(articleId);
         dto.setStat(stat);
-        if (checkArticleViewLimit(articleId, dto.getUserId())) {
-            dto.getStat().setViews(stat.getViews() + 1);
-            Integer totalViews = dto.getAuthor().getStat().getTotalViews();
-            dto.getAuthor().getStat().setTotalViews(totalViews + 1);
-        }
+
+        //增加views
+        int record = readingRecordService.record(LoginUserContext.getLoginUserIdDefaultNull(), articleId, dto.getUserId());
+        dto.getStat().setViews(stat.getViews() + record);
+        Integer totalViews = dto.getAuthor().getStat().getTotalViews();
+        dto.getAuthor().getStat().setTotalViews(totalViews + record);
+
         //用户行为
         buildInteract(dto);
         return dto;
@@ -217,17 +222,17 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleDTO> listArticleById(List<Integer> ids, ArticleOptionsBuilder builder) {
+    public List<ArticleDTO> listArticleById(Collection<Integer> ids, ArticleOptionsBuilder builder) {
         if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
         List<ArticleDTO> dtos = this.listArticleDTOById(ids);
         this.buildArticleDTOs(dtos, builder);
         return dtos;
     }
 
-    private List<ArticleDTO> listArticleDTOById(List<Integer> ids) {
+    private List<ArticleDTO> listArticleDTOById(Collection<Integer> ids) {
         return RedisClient.getMultiCacheObject(Constants.ARTICLE_INFO, ids, nullIds -> {
             //fix? 感觉还是单个单个获取比较好
-            List<ArticleInfo> articles = articleRepository.listArticleById(nullIds);
+            Collection<ArticleInfo> articles = articleRepository.listArticleById(nullIds);
             List<ArticleDTO> results = ArticleConverter.INSTANCE.toArticleDTOS(articles);
             this.buildCategory(results);
             this.buildArticleTags(results);
@@ -324,8 +329,8 @@ public class ArticleServiceImpl implements ArticleService {
         ListMapperHandler.doAssemble(dtos, ArticleDTO::getId, stats, ArticleDTO::setStat);
     }
 
-    public void buildArticleAuthor(List<ArticleDTO> dtos, List<Integer> userIds) {
-        List<UserDTO> authors = userService.getAuthorInfoByIds(userIds, null);
+    public void buildArticleAuthor(List<ArticleDTO> dtos, Collection<Integer> userIds) {
+        Collection<UserDTO> authors = userService.getAuthorInfoByIds(userIds, null);
         ListMapperHandler
                 .doAssemble(dtos, ArticleDTO::getUserId, authors, UserDTO::getUserId, ArticleDTO::setAuthor);
     }
@@ -376,7 +381,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private static List<Integer> cacheArticleListToRedis(String key, long current, long size, List<Article> articles) {
-        List<Tuple> tuples = ListMapperHandler.listToTuple(articles, Article::getId, article -> article.getCtime().getTime());
+        Collection<Tuple> tuples = ListMapperHandler.listToTuple(articles, Article::getId, article -> article.getCtime().getTime());
         RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(20, 30), TimeUnit.DAYS);
         return ListMapperHandler.subList(articles, Article::getId, current, size);
     }

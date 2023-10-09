@@ -20,6 +20,7 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.mapper.ArticleMapper;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     public ArticleInfo getArticleInfoById(Integer articleId) {
         ArticleDO articleDO = getBaseMapper().selectArticleById(articleId);
         if (articleDO == null) return null;
-        List<Integer> tagIds = ListMapperHandler.listTo(articleDO.getTags(), ArticleTag::getTagId);
+        Collection<Integer> tagIds = ListMapperHandler.listTo(articleDO.getTags(), ArticleTag::getTagId);
         return ArticleConverter.INSTANCE.toArticleInfo(articleDO, tagIds);
     }
 
@@ -51,7 +52,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<ArticleInfo> listArticleById(List<Integer> ids) {
+    public List<ArticleInfo> listArticleById(Collection<Integer> ids) {
         if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
         List<ArticleDO> dos = getBaseMapper().listArticleById(ids);
         return ArticleConverter.INSTANCE.toArticleInfos(dos);
@@ -108,7 +109,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
        return getBaseMapper().scanArticles(ids);
     }
 
-    @Override
+
     public boolean checkArticleExist(Integer articleId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("id")
@@ -126,16 +127,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId) {
         return getBaseMapper().selectFollowUserArticles(page, loginUserId);
-    }
-
-    @Override
-    public List<Integer> listInitArticle() {
-        List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
-                .select("id")
-                .orderByDesc("id")
-                .last("limit 2000")
-                .list();
-        return ListMapperHandler.listTo(articles, Article::getId);
     }
 
     @Override
