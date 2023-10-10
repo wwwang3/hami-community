@@ -15,7 +15,6 @@ import java.util.Map;
 public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, NotifyMsg>
         implements NotifyMsgRepository {
 
-
     @Override
     public Page<NotifyMsgDTO> listCommentNotify(Page<NotifyMsgDTO> page, Integer receiver) {
         if (page == null || receiver == null) return null;

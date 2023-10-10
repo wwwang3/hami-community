@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.stat.impl;
 
+import cn.hutool.core.date.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.stat.CountService;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -73,8 +75,9 @@ public class CachedCountService implements CountService {
 
     @Override
     public Map<String, Integer> getUserDailyDataGrowing(Integer userId) {
-        //todo
-        return null;
+        String date = DateUtil.formatDate(new Date());
+        String key = Constants.DATA_GROWING + date + ":" + userId;
+        return RedisClient.hMGetAll(key);
     }
 
     private ArticleStatDTO loadArticleStatCache(String redisKey, Integer articleId) {

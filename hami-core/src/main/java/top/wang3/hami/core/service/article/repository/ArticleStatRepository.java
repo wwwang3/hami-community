@@ -15,7 +15,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<ArticleStat> scanArticleStats(int lastArticle, int batchSize);
 
-    List<HotCounter> getHotArticlesByCateId(Integer categoryId);
+    List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date);
 
     List<HotCounter> getOverallHotArticles();
 

@@ -1,14 +1,18 @@
 package top.wang3.hami.common.message;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import top.wang3.hami.common.enums.LikeType;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class LikeRabbitMessage extends InteractRabbitMessage {
+
+    public LikeRabbitMessage(LikeType likeType) {
+        this.likeType = likeType;
+    }
 
     public LikeRabbitMessage(int userId, int toUserId, byte state, Integer itemId, LikeType likeType) {
         super(userId, toUserId, state, itemId);

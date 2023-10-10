@@ -14,11 +14,13 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
@@ -32,9 +34,9 @@ import top.wang3.hami.core.service.article.TagService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.LikeService;
-import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Collection;
@@ -53,7 +55,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserService userService;
     private final LikeService likeService;
     private final CollectService collectService;
-    private final ReadingRecordService readingRecordService;
 
     private final CountService countService;
     private final ArticleRepository articleRepository;
@@ -184,7 +185,7 @@ public class ArticleServiceImpl implements ArticleService {
         String content = loadArticleContent(articleId);
         ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(article, content);
 
-        //作者信息
+        //作者信息, 包含用户数据
         UserDTO author = userService.getAuthorInfoById(dto.getUserId());
         dto.setAuthor(author);
         //文章数据
@@ -192,7 +193,7 @@ public class ArticleServiceImpl implements ArticleService {
         dto.setStat(stat);
 
         //增加views
-        int record = readingRecordService.record(LoginUserContext.getLoginUserIdDefaultNull(), articleId, dto.getUserId());
+        int record = this.record(LoginUserContext.getLoginUserIdDefaultNull(), articleId, dto.getUserId());
         dto.getStat().setViews(stat.getViews() + record);
         Integer totalViews = dto.getAuthor().getStat().getTotalViews();
         dto.getAuthor().getStat().setTotalViews(totalViews + record);
@@ -200,6 +201,23 @@ public class ArticleServiceImpl implements ArticleService {
         //用户行为
         buildInteract(dto);
         return dto;
+    }
+
+    private int record(Integer loginUserId, int articleId, int authorId) {
+        //记录阅读数据
+        String ip = IpContext.getIp();
+        if (ip == null) return 0;
+        String redisKey = Constants.VIEW_LIMIT + ip + ":" + articleId;
+        boolean success = RedisClient.setNx(redisKey, "view-lock", 15, TimeUnit.SECONDS);
+        if (!success) {
+            log.debug("ip: {} access repeat", ip);
+            return 0;
+        }
+        //发布消息
+        ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
+                articleId, authorId, loginUserId);
+        rabbitMessagePublisher.publishMsg(message);
+        return 1;
     }
 
     @Override
@@ -232,10 +250,7 @@ public class ArticleServiceImpl implements ArticleService {
     private List<ArticleDTO> listArticleDTOById(Collection<Integer> ids) {
         return RedisClient.getMultiCacheObject(Constants.ARTICLE_INFO, ids, nullIds -> {
             //fix? 感觉还是单个单个获取比较好
-            Collection<ArticleInfo> articles = articleRepository.listArticleById(nullIds);
-            List<ArticleDTO> results = ArticleConverter.INSTANCE.toArticleDTOS(articles);
-            this.buildCategory(results);
-            this.buildArticleTags(results);
+            List<ArticleDTO> results = loadArticleDTOFromDB(nullIds);
             RedisClient.cacheMultiObject(results, a -> Constants.ARTICLE_INFO + a.getId(), 20L, 30L, TimeUnit.DAYS);
             return results;
         });
@@ -330,7 +345,10 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     public void buildArticleAuthor(List<ArticleDTO> dtos, Collection<Integer> userIds) {
-        Collection<UserDTO> authors = userService.getAuthorInfoByIds(userIds, null);
+        //文章列表不查询用户数据
+        UserOptionsBuilder builder = new UserOptionsBuilder()
+                .noStat();
+        Collection<UserDTO> authors = userService.getAuthorInfoByIds(userIds, builder);
         ListMapperHandler
                 .doAssemble(dtos, ArticleDTO::getUserId, authors, UserDTO::getUserId, ArticleDTO::setAuthor);
     }

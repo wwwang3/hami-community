@@ -8,14 +8,12 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
-import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.NotifyMsg;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
 
@@ -24,17 +22,16 @@ import java.util.Objects;
 
 @RabbitListener(bindings = {
         @QueueBinding(
-                value = @Queue("hami-notify-queue"),
+                value = @Queue("hami-notify-queue-1"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"*.follow", "do.like.*", "*.collect", "comment.comment", "comment.reply"}
+                key = {"do.follow", "do.like.*", "do.collect", "comment.comment", "comment.reply"}
         )
 })
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotifyMsgConsumer {
+public class NotifyMsgConsumer implements InteractConsumer {
 
-    private final ArticleService articleService;
     private final CommentRepository commentRepository;
     private final NotifyMsgRepository notifyMsgRepository;
 
@@ -42,6 +39,7 @@ public class NotifyMsgConsumer {
     TransactionTemplate transactionTemplate;
 
     //点赞 评论 收藏 关注等通知消息
+    @Override
     @RabbitHandler
     public void handleLikeMessage(LikeRabbitMessage message) {
         //点赞消息
@@ -81,31 +79,26 @@ public class NotifyMsgConsumer {
         notifyMsgRepository.save(msg);
     }
 
+    @Override
     @RabbitHandler
     public void handleCommentMessage(CommentRabbitMessage message) {
         try {
             //评论文章通知 xx评论了你的文章
-            Integer articleId = message.getArticleId();
-            ArticleDTO article = articleService.getArticleDTOById(message.getArticleId());
-            if (article == null) return;
-            if (isSelf(article.getUserId(), message.getUserId())) {
+            if (isSelf(message.getAuthorId(), message.getUserId())) {
                 return;
             }
-            NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), article.getUserId(),
-                    message.getCommentId(), articleId, message.getDetail());
+            NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), message.getAuthorId(),
+                    message.getCommentId(), message.getArticleId(), message.getDetail());
             save(msg);
         } catch (Exception e) {
             logError(e);
         }
     }
 
+    @Override
     @RabbitHandler
     public void handleReplyMessage(ReplyRabbitMessage message) {
         try {
-            Integer articleId = message.getArticleId();
-            ArticleDTO article = articleService.getArticleDTOById(articleId);
-            if (article == null) return;
-            Integer articleAuthor = article.getUserId();
             //把他爹也查出来 内容一起写入通知 xx回复了你的评论
             //自己回复自己不需要通知
             Comment comment = commentRepository.getById(message.getParentId());
@@ -115,8 +108,8 @@ public class NotifyMsgConsumer {
             String detail = Arrays.toString(new String[]{comment.getContent(), message.getDetail()});
             NotifyMsg msg = NotifyMsgBuilder
                     .buildReplyMsg(
-                            message.getUserId(), articleAuthor,
-                            message.getReplyId(), message.getArticleId(),
+                            message.getUserId(), message.getReplyTo(),
+                            message.getCommentId(), message.getArticleId(),
                             detail
                     );
             save(msg);
@@ -171,9 +164,6 @@ public class NotifyMsgConsumer {
         return Objects.equals(sender, receiver);
     }
 
-    private boolean checkExist(Integer itemId, Integer sender, Integer receiver, NotifyType type) {
-        return notifyMsgRepository.checkExist(itemId, sender, receiver, type);
-    }
 
     private void logError(Exception e) {
         log.debug("error_class: {} error_msg: {}", e.getClass().getName(), e.getMessage());

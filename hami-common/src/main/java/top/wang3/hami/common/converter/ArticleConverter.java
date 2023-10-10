@@ -52,6 +52,7 @@ public interface ArticleConverter {
 
     List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
 
+    @Mapping(target = "content", ignore = true)
     Collection<ReadingRecordDTO> toReadingRecordDTO(Collection<ReadingRecord> records);
 
     ArticleInfo toArticleInfo(Article article, Collection<Integer> tagIds);

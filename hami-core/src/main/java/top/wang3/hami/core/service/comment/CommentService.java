@@ -15,7 +15,6 @@ public interface CommentService {
 
     ReplyDTO listIndexReply(Integer rootId);
 
-
     Comment publishComment(CommentParam param);
 
     Comment publishReply(CommentParam param);

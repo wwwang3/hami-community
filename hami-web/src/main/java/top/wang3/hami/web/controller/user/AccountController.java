@@ -4,13 +4,16 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.request.RegisterParam;
 import top.wang3.hami.common.dto.request.ResetPassParam;
+import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
 import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
+import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 
 import java.util.concurrent.TimeUnit;
@@ -18,15 +21,17 @@ import java.util.concurrent.TimeUnit;
 @Validated
 @RestController
 @RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
-
+    private final UserService userService;
     private final CaptchaService captchaService;
 
-    public AccountController(AccountService accountService, CaptchaService captchaService) {
-        this.accountService = accountService;
-        this.captchaService = captchaService;
+    @GetMapping("/me")
+    public Result<LoginProfile> me() {
+        LoginProfile loginProfile = userService.getLoginProfile();
+        return Result.of(loginProfile);
     }
 
     @GetMapping("/captcha")

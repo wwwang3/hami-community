@@ -27,6 +27,7 @@ import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.interact.LikeService;
@@ -46,6 +47,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ArticleRepository articleRepository;
+    private final ArticleStatRepository articleStatRepository;
     private final LikeService likeService;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
@@ -123,12 +125,20 @@ public class CommentServiceImpl implements CommentService {
     public boolean deleteComment(Integer id) {
         Comment comment = commentRepository.getById(id);
         int userId = LoginUserContext.getLoginUserId();
-        int deleted = commentRepository.deleteComment(userId, id);
-        if (deleted > 0) {
+        Integer deleteCount = transactionTemplate.execute(status -> {
+            int deleted = commentRepository.deleteComment(userId, id);
+            if (deleted == 0) return 0;
+            boolean success = articleStatRepository.decreaseComments(comment.getArticleId(), deleted);
+            if (!success) {
+                status.setRollbackOnly();
+                return 0;
+            }
+            return deleted;
+        });
+        if (deleteCount != null && deleteCount > 0) {
             //评论删除消息
-            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleted);
+            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleteCount);
             rabbitMessagePublisher.publishMsg(message);
-            //管他投递成不成功
             return true;
         }
         return false;
@@ -138,18 +148,18 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = buildComment(param, reply);
         //评论
         Boolean success = transactionTemplate.execute(status -> {
-            return commentRepository.save(comment);
+            boolean success1 =  commentRepository.save(comment);
+            return success1 && articleStatRepository.increaseComments(param.getArticleId(), 1);
         });
         if (Boolean.FALSE.equals(success)) {
             return null;
         }
         RabbitMessage message;
+        Integer author = articleRepository.getArticleAuthor(param.getArticleId());
         if (reply) {
-            message = new ReplyRabbitMessage(comment.getUserId(), comment.getArticleId(),
-                    comment.getId(), comment.getParentId(), comment.getContent());
+            message = new ReplyRabbitMessage(comment, author);
         } else {
-            message = new CommentRabbitMessage(comment.getUserId(), comment.getArticleId(),
-                    comment.getId(), comment.getContent());
+            message = new CommentRabbitMessage(comment, author);
         }
         rabbitMessagePublisher.publishMsg(message);
         return comment;
@@ -162,7 +172,6 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalArgumentException("文章不存在");
         }
         Comment comment = CommentConverter.INSTANCE.toComment(param);
-        comment.setIsAuthor(loginUserId == author);
         comment.setUserId(loginUserId); //评论用户
         comment.setIpInfo(IpContext.getIpInfo()); //IP信息
         if (reply) {
@@ -179,23 +188,23 @@ public class CommentServiceImpl implements CommentService {
         //二级评论 rootId = parentId != 0
         Integer rootId = param.getRootId();
         Integer parentId = param.getParentId();
-        org.springframework.util.Assert.isTrue(rootId != 0, "rootId can not be 0");
-        org.springframework.util.Assert.isTrue(rootId != 0, "parentId can not be 0");
-        Comment parentComemnt = commentRepository.getById(parentId);
-        if (parentComemnt == null) {
+        Assert.isTrue(rootId != null && rootId != 0, "rootId can not be null or zero");
+        Assert.isTrue(parentId != null && parentId != 0, "parentId can not be null or zero");
+        Comment parentComment = commentRepository.getById(parentId);
+        if (parentComment == null) {
             throw new ServiceException("参数错误");
-        } else if (rootId == parentId && parentComemnt.getRootId() != 0) {
+        } else if (rootId == parentId && parentComment.getRootId() != 0) {
             //二级评论 回复的是根评论
             //根评论的rootId应该为0
             throw new ServiceException("参数错误");
-        } else if (parentComemnt.getRootId() != rootId) {
+        } else if (!Objects.equals(parentComment.getRootId(), rootId)) {
             //三级以上的评论, 必须在同一个根评论下
             throw new ServiceException("参数错误");
         }
         comment.setRootId(rootId);
         comment.setParentId(parentId);
         //回复的是父评论的userId
-        comment.setReplyTo(parentComemnt.getUserId());
+        comment.setReplyTo(parentComment.getUserId());
         return comment;
     }
 

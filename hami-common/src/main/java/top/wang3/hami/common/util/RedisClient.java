@@ -699,7 +699,7 @@ public class RedisClient {
         return result;
     }
 
-    public static <T> void hIncr(String key, String field, Integer cnt) {
+    public static <T> void hIncr(String key, String field, long cnt) {
         redisTemplate.execute((RedisCallback) connection -> {
             connection.hashCommands()
                     .hIncrBy(keyBytes(key), hashKeyBytes(field), cnt);

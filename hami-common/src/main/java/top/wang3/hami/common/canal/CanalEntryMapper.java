@@ -89,10 +89,10 @@ public class CanalEntryMapper {
             return Double.parseDouble(columnValue);
         } else if (type.equals(Float.class)) {
             return Float.parseFloat(columnValue);
-        } else if (type.equals(Date.class)) {
-            return parseDate(columnValue);
         } else if (type.equals(Byte.class)) {
             return Byte.parseByte(columnValue);
+        } else if (type.equals(Date.class)) {
+            return parseDate(columnValue);
         } else {
             return mapper.readValue(columnValue, type);
         }

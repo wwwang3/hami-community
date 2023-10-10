@@ -26,8 +26,8 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
-    public List<HotCounter> getHotArticlesByCateId(Integer categoryId) {
-        return getBaseMapper().selectHotArticlesByCateId(categoryId);
+    public List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date) {
+        return getBaseMapper().selectHotArticlesByCateId(categoryId, date);
     }
 
     @Override

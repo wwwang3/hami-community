@@ -3,6 +3,7 @@ package top.wang3.hami.common.message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.model.Comment;
 
 @Data
 @AllArgsConstructor
@@ -11,8 +12,17 @@ public class CommentRabbitMessage implements RabbitMessage {
 
     private Integer userId; //用户ID
     private Integer articleId; //文章ID
+    private Integer authorId; //文章作者ID
     private Integer commentId; //评论Id
     private String detail;
+
+    public CommentRabbitMessage(Comment comment, Integer authorId) {
+        this.userId = comment.getUserId();
+        this.articleId = comment.getArticleId();
+        this.authorId = authorId;
+        this.commentId = comment.getId();
+        this.detail = comment.getContent();
+    }
 
 
     @Override

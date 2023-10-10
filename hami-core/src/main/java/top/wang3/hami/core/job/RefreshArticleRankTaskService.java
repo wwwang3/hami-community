@@ -1,6 +1,7 @@
 package top.wang3.hami.core.job;
 
 
+import cn.hutool.core.date.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.DefaultTypedTuple;
@@ -16,6 +17,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +41,8 @@ public class RefreshArticleRankTaskService {
                     categoryService.getAllCategories();
             categories.forEach(category -> {
                 String redisKey = Constants.HOT_ARTICLE + category.getId();
-                List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId());
+                long time = DateUtil.offsetDay(new Date(), 30).getTime();
+                List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId(), time);
                 RedisClient.deleteObject(redisKey);
                 if (articles != null && !articles.isEmpty()){
                     RedisClient.zAddAll(redisKey, convertToTuple(articles));

@@ -65,20 +65,6 @@ public class ArticleRankServiceImpl implements ArticleRankService {
     }
 
     private List<HotArticleDTO> scanHotArticles(String redisKey) {
-//        try (Cursor<ZSetOperations.TypedTuple<Integer>> cursor = RedisClient.getTemplate()
-//                .opsForZSet()
-//                .scan(redisKey, ScanOptions.NONE)) {
-//            ArrayList<HotArticleDTO> items = new ArrayList<>();
-//            while (cursor.hasNext()) {
-//                ZSetOperations.TypedTuple<Integer> item = cursor.next();
-//                items.add(convertToHotCounter(item));
-//            }
-//            return items;
-//        } catch (Exception e) {
-//            log.error("error to scan items: error_class: {}, error_msg: {}",
-//                    e.getClass().getSimpleName(), e.getMessage());
-//            return Collections.emptyList();
-//        }
         //比较少直接读了
         Set<ZSetOperations.TypedTuple<Integer>> items =
                 RedisClient.zRevRangeWithScore(redisKey, 0, -1);

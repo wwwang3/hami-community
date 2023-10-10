@@ -27,11 +27,14 @@ import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
+import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.Result;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户交互 关注 点赞 收藏 评论
@@ -45,12 +48,17 @@ public class UserInteractController {
     private final LikeService likeService;
     private final CollectService collectService;
     private final CommentService commentService;
-
     private final ReadingRecordService readingRecordService;
-
     private final ArticleService articleService;
-
     private final UserService userService;
+    private final CountService countService;
+
+    @GetMapping("/data_growing")
+    public Result<Map<String, Integer>> dataGrowing() {
+        int loginUserId = LoginUserContext.getLoginUserId();
+        Map<String, Integer> result = countService.getUserDailyDataGrowing(loginUserId);
+        return Result.of(result);
+    }
 
     @PostMapping("/follow")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {

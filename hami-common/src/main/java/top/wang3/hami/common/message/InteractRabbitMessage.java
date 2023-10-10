@@ -1,14 +1,20 @@
 package top.wang3.hami.common.message;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import top.wang3.hami.common.constant.Constants;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public abstract class InteractRabbitMessage implements RabbitMessage {
+    public InteractRabbitMessage() {
+
+    }
+
+    public InteractRabbitMessage(int userId, int toUserId, byte state, Integer itemId) {
+        this.userId = userId;
+        this.toUserId = toUserId;
+        this.state = state;
+        this.itemId = itemId;
+    }
 
     /**
      * 行为: 点赞, 收藏, 关注

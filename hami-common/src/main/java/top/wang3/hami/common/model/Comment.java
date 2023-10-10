@@ -36,12 +36,6 @@ public class Comment {
     private Integer userId;
 
     /**
-     * 是否是作者评论
-     */
-    @TableField(value = "is_author")
-    private Boolean isAuthor;
-
-    /**
      * 评论时的IP信息
      */
     @TableField(value = "ip_info", typeHandler = JacksonTypeHandler.class)

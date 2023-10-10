@@ -1,15 +1,14 @@
 package top.wang3.hami.common.message;
 
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
+@Data
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString(callSuper = true)
 public class FollowRabbitMessage extends InteractRabbitMessage {
+
+    public FollowRabbitMessage() {
+    }
 
     public FollowRabbitMessage(int userId, int toUserId, byte state, Integer itemId) {
         super(userId, toUserId, state, itemId);

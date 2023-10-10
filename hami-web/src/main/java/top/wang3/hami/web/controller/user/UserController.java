@@ -12,7 +12,6 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.dto.request.UserProfileParam;
 import top.wang3.hami.common.dto.user.AccountInfo;
-import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.LoginRecord;
@@ -48,11 +47,6 @@ public class UserController {
         return Result.successData(accountInfo);
     }
 
-    @GetMapping("/me")
-    public Result<LoginProfile> getLoginProfile() {
-        LoginProfile profile  = userService.getLoginProfile();
-        return Result.successData(profile);
-    }
 
     @GetMapping("/author_info/{id}")
     public Result<UserDTO> getAuthorInfo(@PathVariable(name = "id") Integer userId) {
