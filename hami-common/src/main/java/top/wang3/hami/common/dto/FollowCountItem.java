@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class FollowCountItem {
 
     private Integer userId;
-    private Integer count;
+    private Long count;
 }

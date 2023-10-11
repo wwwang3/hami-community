@@ -82,7 +82,7 @@ public class DataGrowingConsumer implements InteractConsumer {
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
         Integer author = articleRepository.getArticleAuthor(message.getArticleId());
         String key = buildKey(author);
-        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, -1);
+        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, message.getDeletedCount());
         ensureExpireTime(key);
     }
 

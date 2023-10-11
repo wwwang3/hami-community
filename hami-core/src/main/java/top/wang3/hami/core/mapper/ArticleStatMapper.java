@@ -25,7 +25,7 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
     """)
     List<ArticleStat> scanBatchStats(@Param("lastArticleId") int lastArticle, @Param("batchSize") int batchSize);
 
-    @MapKey(value = "user_id")
+    @MapKey(value = "userId")
     Map<Integer, UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
 
     UserStat selectUserStat(@Param("userId") int userId);
@@ -34,6 +34,6 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
 
     List<HotCounter> selectHotArticles();
 
-    @MapKey("article_id")
+    @MapKey("articleId")
     Map<Integer, ArticleStatDTO> selectArticleStatsByArticleIds(@Param("articleIds") List<Integer> articleIds);
 }

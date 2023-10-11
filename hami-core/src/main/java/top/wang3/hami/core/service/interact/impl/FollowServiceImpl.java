@@ -15,6 +15,7 @@ import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.ServiceException;
@@ -23,7 +24,10 @@ import top.wang3.hami.core.service.interact.repository.FollowRepository;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -75,6 +79,7 @@ public class FollowServiceImpl implements FollowService {
         return followRepository.hasFollowed(userId, followingId);
     }
 
+    @CostLog
     @Override
     public Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds) {
         return followRepository.hasFollowed(userId, followingIds);
@@ -82,32 +87,14 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Map<Integer, Long> listUserFollowingCount(List<Integer> userIds) {
-        Collection<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWING_COUNT + id);
-        List<Long> counts = RedisClient.getMultiCacheObject(keys);
-        HashMap<Integer, Long> result = new HashMap<>(userIds.size());
-        ListMapperHandler.forEach(counts, (count, index) -> {
-            Integer id = userIds.get(index);
-            if (count == null) {
-                count = getUserFollowingCount(id);
-            }
-            result.put(id, count);
-        });
-        return result;
+        return RedisClient.getMultiCacheObjectToMap(Constants.USER_FOLLOWING_COUNT, userIds,
+                followRepository::listUserFollowingCount);
     }
 
     @Override
     public Map<Integer, Long> listUserFollowerCount(List<Integer> userIds) {
-        Collection<String> keys = ListMapperHandler.listTo(userIds, id -> Constants.USER_FOLLOWER_COUNT + id);
-        List<Long> counts = RedisClient.getMultiCacheObject(keys);
-        HashMap<Integer, Long> result = new HashMap<>(userIds.size());
-        ListMapperHandler.forEach(counts, (count, index) -> {
-            Integer id = userIds.get(index);
-            if (count == null) {
-                count = getUserFollowerCount(id);
-            }
-            result.put(id, count);
-        });
-        return result;
+        return RedisClient.getMultiCacheObjectToMap(Constants.USER_FOLLOWER_COUNT, userIds,
+                followRepository::listUserFollowerCount);
     }
 
     @Override

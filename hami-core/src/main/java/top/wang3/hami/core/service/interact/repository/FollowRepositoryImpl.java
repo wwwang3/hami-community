@@ -57,13 +57,15 @@ public class FollowRepositoryImpl extends ServiceImpl<UserFollowMapper, UserFoll
     }
 
     @Override
-    public List<FollowCountItem> listUserFollowingCount(List<Integer> userIds) {
-       return getBaseMapper().selectUserFollowingCount(userIds);
+    public Map<Integer, Long> listUserFollowingCount(List<Integer> userIds) {
+        List<FollowCountItem> countItems = getBaseMapper().selectUserFollowingCount(userIds);
+        return ListMapperHandler.listToMap(countItems, FollowCountItem::getUserId, FollowCountItem::getCount);
     }
 
     @Override
-    public List<FollowCountItem> listUserFollowerCount(List<Integer> userIds) {
-        return getBaseMapper().selectUserFollowerCount(userIds);
+    public Map<Integer, Long> listUserFollowerCount(List<Integer> userIds) {
+        List<FollowCountItem> countItems = getBaseMapper().selectUserFollowerCount(userIds);
+        return ListMapperHandler.listToMap(countItems, FollowCountItem::getUserId, FollowCountItem::getCount);
     }
 
     @Override

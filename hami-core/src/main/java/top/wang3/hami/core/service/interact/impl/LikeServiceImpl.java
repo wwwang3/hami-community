@@ -67,7 +67,7 @@ public class LikeServiceImpl implements LikeService {
         int itemUser = getItemUser(itemId, likeType);
         Boolean success = transactionTemplate.execute(status -> {
             boolean success1 = likeRepository.cancelLike(loginUserId, itemId, likeType);
-            if (success1 && reduceLikeCount(loginUserId, likeType)) {
+            if (success1 && reduceLikeCount(itemId, likeType)) {
                 return true;
             }
             status.setRollbackOnly();
@@ -123,6 +123,7 @@ public class LikeServiceImpl implements LikeService {
         return likeRepository.hasLiked(userId, itemId, likeType);
     }
 
+    @CostLog
     @Override
     public Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemId, LikeType likeType) {
         return likeRepository.hasLiked(userId, itemId, likeType);

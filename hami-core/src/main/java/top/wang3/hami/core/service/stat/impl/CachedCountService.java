@@ -41,7 +41,8 @@ public class CachedCountService implements CountService {
     @CostLog
     @Override
     public Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
-        return RedisClient.getMultiCacheObjectToMap(Constants.STAT_TYPE_ARTICLE, articleIds, this::loadArticleStateCaches);
+        return RedisClient.getMultiCacheObjectToMap(Constants.STAT_TYPE_ARTICLE, articleIds,
+                this::loadArticleStateCaches);
     }
 
     @Override

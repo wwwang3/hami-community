@@ -221,7 +221,7 @@ public class CommentServiceImpl implements CommentService {
         var builder = new UserOptionsBuilder()
                 .noStat()
                 .noFollowState();
-        Collection<UserDTO> users = userService.getAuthorInfoByIds(userIds, builder);
+        Collection<UserDTO> users = userService.listAuthorInfoById(userIds, builder);
         Map<Integer, UserDTO> map =
                 ListMapperHandler.listToMap(users, UserDTO::getUserId, Function.identity());
         buildUserInfo(dtos, map);

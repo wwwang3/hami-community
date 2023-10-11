@@ -32,6 +32,7 @@ public class UserStatHandler implements CanalEntryHandler<ArticleStat> {
     }
 
     private void deleteUserStatCache(Integer userId) {
+        log.debug("delete user-stat cache: {}", userId);
         RedisClient.deleteObject(Constants.STAT_TYPE_USER + userId);
     }
 }

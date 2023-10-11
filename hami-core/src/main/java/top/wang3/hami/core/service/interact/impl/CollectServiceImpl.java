@@ -14,6 +14,7 @@ import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.ServiceException;
@@ -94,6 +95,7 @@ public class CollectServiceImpl implements CollectService {
         return collectRepository.hasCollected(userId, itemId);
     }
 
+    @CostLog
     @Override
     public Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds) {
         return collectRepository.hasCollected(userId, itemIds);

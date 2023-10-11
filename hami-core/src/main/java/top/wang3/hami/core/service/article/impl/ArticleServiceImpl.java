@@ -348,7 +348,7 @@ public class ArticleServiceImpl implements ArticleService {
         //文章列表不查询用户数据
         UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
-        Collection<UserDTO> authors = userService.getAuthorInfoByIds(userIds, builder);
+        Collection<UserDTO> authors = userService.listAuthorInfoById(userIds, builder);
         ListMapperHandler
                 .doAssemble(dtos, ArticleDTO::getUserId, authors, UserDTO::getUserId, ArticleDTO::setAuthor);
     }

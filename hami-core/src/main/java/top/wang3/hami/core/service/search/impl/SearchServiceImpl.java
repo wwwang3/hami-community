@@ -62,7 +62,7 @@ public class SearchServiceImpl implements SearchService {
 
     private void buildAuthor(List<ArticleSearchDTO> articles) {
         List<Integer> userIds = ListMapperHandler.listTo(articles, ArticleSearchDTO::getUserId);
-        Collection<UserDTO> users = userService.getAuthorInfoByIds(userIds, UserOptionsBuilder.justInfo());
+        Collection<UserDTO> users = userService.listAuthorInfoById(userIds, UserOptionsBuilder.justInfo());
         ListMapperHandler.doAssemble(articles, ArticleSearchDTO::getUserId, users,
                 UserDTO::getUserId, ArticleSearchDTO::setAuthor);
     }

@@ -40,7 +40,7 @@ public class UserInteractMessageConsumer {
     @RabbitListener(bindings = {
             @QueueBinding(
                     value = @Queue("hami-user-interact-queue-2"),
-                    exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                    exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                     key = {"article.view"}
             )
     })

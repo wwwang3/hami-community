@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
     @CostLog
     @Override
-    public Collection<UserDTO> getAuthorInfoByIds(Collection<Integer> userIds, UserOptionsBuilder builder) {
+    public Collection<UserDTO> listAuthorInfoById(Collection<Integer> userIds, UserOptionsBuilder builder) {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }

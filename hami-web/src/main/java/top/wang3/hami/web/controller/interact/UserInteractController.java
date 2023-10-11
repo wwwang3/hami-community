@@ -4,20 +4,17 @@ package top.wang3.hami.web.controller.interact;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.article.ReadingRecordDTO;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
-import top.wang3.hami.common.dto.request.CommentParam;
 import top.wang3.hami.common.dto.request.LikeItemParam;
 import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.model.ArticleCollect;
-import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.core.exception.ServiceException;
@@ -141,7 +138,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<UserFollow> page = param.toPage();
         Collection<Integer> followings = followService.listUserFollowings(page, param.getUserId());
-        Collection<UserDTO> data = userService.getAuthorInfoByIds(followings, UserOptionsBuilder.justInfo());
+        Collection<UserDTO> data = userService.listAuthorInfoById(followings, UserOptionsBuilder.justInfo());
         data.forEach(d -> d.setFollowed(true));
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
                 .pageNum(param.getPageNum())
@@ -158,35 +155,13 @@ public class UserInteractController {
         Collection<Integer> followers = followService.listUserFollowers(page, param.getUserId());
         UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
-        Collection<UserDTO> data = userService.getAuthorInfoByIds(followers, builder);
+        Collection<UserDTO> data = userService.listAuthorInfoById(followers, builder);
         PageData<UserDTO> pageData = PageData.<UserDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())
                 .data(data)
                 .build();
         return Result.successData(pageData);
-    }
-
-    @PostMapping("/comment/submit")
-    public Result<Comment> publishComment(@RequestBody @Valid CommentParam param) {
-        Comment comment = commentService.publishComment(param);
-        return Result.ofNullable(comment)
-                .orElse("发表失败");
-    }
-
-    @PostMapping("/reply/submit")
-    public Result<Comment> publishReply(@RequestBody
-            @Validated(value = CommentParam.Reply.class) CommentParam param) {
-        Comment comment = commentService.publishReply(param);
-        return Result.ofNullable(comment)
-                .orElse("回复失败");
-    }
-
-    @PostMapping("/comment/delete")
-    public Result<Void> deleteComment(@RequestParam("id") Integer id) {
-        boolean success = commentService.deleteComment(id);
-        return Result.ofTrue(success)
-                .orElse("删除失败");
     }
 
     private LikeType resolveLikerType(Byte type) {

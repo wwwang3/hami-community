@@ -5,22 +5,21 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.article.ArticleDTO;
-import top.wang3.hami.common.dto.article.ArticleInfo;
+import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
+import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
-import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
-import top.wang3.hami.core.job.RefreshStatTaskService;
-import top.wang3.hami.core.service.article.impl.ArticleServiceImpl;
+import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 //@Component
 @RequiredArgsConstructor
@@ -31,19 +30,17 @@ public class RedisCacheInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;
 
-    private final RefreshStatTaskService refreshStatTaskService;
+    private final ArticleService articleService;
 
-    private final ArticleServiceImpl articleService;
+    private final UserService userService;
 
     @CostLog
     @Override
     public void run(ApplicationArguments args) {
-        cacheArticle();
-        cacheUser();
-        refreshStatTaskService.refreshArticleStat();
-        refreshStatTaskService.refreshUserStat();
+//        cacheArticle();
+//        cacheUser();
+        cacheArticleContent();
     }
-
 
     private void cacheArticle() {
         int lastId = 0;
@@ -52,9 +49,7 @@ public class RedisCacheInitializer implements ApplicationRunner {
             if (ids == null || ids.isEmpty()) {
                 break;
             }
-            List<ArticleDO> articles = articleRepository.scanArticles(ids);
-            cacheArticleInfo(articles);
-            cacheArticleContent(articles);
+            articleService.listArticleById(ids, new ArticleOptionsBuilder());
             lastId = ids.get(ids.size() - 1);
         }
     }
@@ -66,27 +61,28 @@ public class RedisCacheInitializer implements ApplicationRunner {
             if (userIds == null || userIds.isEmpty()) {
                 break;
             }
-            List<User> users = userRepository.getUserByIds(userIds);
-            Map<String, User> map = ListMapperHandler.listToMap(users,
-                    user -> Constants.USER_INFO + user.getUserId());
-            RedisClient.cacheMultiObject(map);
-            lastId = userIds.get(users.size() - 1);
+            userService.listAuthorInfoById(userIds, new UserOptionsBuilder());
+            lastId = userIds.get(userIds.size() - 1);
         }
     }
 
-    private void cacheArticleInfo(List<ArticleDO> articles) {
-        List<ArticleInfo> articleInfos = ArticleConverter.INSTANCE.toArticleInfos(articles);
-        List<ArticleDTO> dtos = ArticleConverter.INSTANCE.toArticleDTOS(articleInfos);
-        articleService.buildCategory(dtos);
-        articleService.buildArticleTags(dtos);
-        Map<String, ArticleDTO> map = ListMapperHandler.listToMap(dtos,
-                item -> Constants.ARTICLE_INFO + item.getId());
-        RedisClient.cacheMultiObject(map);
+    private void cacheArticleContent() {
+        int lastId = 0;
+        while (true) {
+            List<Integer> ids = articleRepository.scanArticleIds(lastId, 1000);
+            if (ids == null || ids.isEmpty()) {
+                break;
+            }
+            List<ArticleDO> dos = articleRepository.scanArticles(ids);
+            cacheArticleContent(dos);
+            lastId = ids.get(ids.size() - 1);
+        }
     }
+
 
     private void cacheArticleContent(List<ArticleDO> articleDOS) {
         Map<String, String> map = ListMapperHandler.listToMap(articleDOS,
                 item -> Constants.ARTICLE_CONTENT + item.getId(), Article::getContent);
-        RedisClient.cacheMultiObject(map);
+        RedisClient.cacheMultiObject(map, 10, 30, TimeUnit.DAYS);
     }
 }

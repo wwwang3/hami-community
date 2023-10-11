@@ -3,7 +3,6 @@ package top.wang3.hami.core.service.interact.repository;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 
 import java.util.List;
@@ -29,9 +28,9 @@ public interface FollowRepository extends IService<UserFollow> {
 
     Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds);
 
-    List<FollowCountItem> listUserFollowingCount(List<Integer> userIds);
+    Map<Integer, Long> listUserFollowingCount(List<Integer> userIds);
 
-    List<FollowCountItem> listUserFollowerCount(List<Integer> userIds);
+    Map<Integer, Long> listUserFollowerCount(List<Integer> userIds);
 
     List<UserFollow> listUserFollowings(Integer userId);
 

@@ -16,7 +16,7 @@ public interface UserService {
 
     User getUserById(Integer userId);
 
-    Collection<UserDTO> getAuthorInfoByIds(Collection<Integer> userIds, UserOptionsBuilder builder);
+    Collection<UserDTO> listAuthorInfoById(Collection<Integer> userIds, UserOptionsBuilder builder);
 
     UserDTO getAuthorInfoById(int userId);
 

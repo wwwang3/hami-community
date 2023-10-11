@@ -66,15 +66,14 @@ public class ZPageHandler {
                 return Collections.emptyList();
             }
             page.setTotal(count);
-            if (!page.hasNext()) {
+            long current = page.getCurrent();
+            long size = page.getSize();
+            if (current > page.getPages() ) {
                 //超过最大页数
                 return Collections.emptyList();
             }
-            //到这里说明current * size <= total, 这一页一定有数据
-            long current = page.getCurrent();
-            long size = page.getSize();
             Collection<T> items = query(key, current, size);
-            if (items.isEmpty()) {
+            if (!items.isEmpty()) {
                 return items;
             }
             //zset没有, 可能缓存过期或者超过了最大zset存储的数量

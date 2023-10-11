@@ -187,16 +187,17 @@ public class RedisClient {
     public static <K, T> List<T> getMultiCacheObject(String keyPrefix,
                                                      Collection<K> keyItems,
                                                      Function<List<K>, Collection<T>> func) {
-        Collection<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+        List<K> items = keyItems.stream().distinct().toList();
+        //already distinct
+        Collection<String> keys = ListMapperHandler.listTo(items, item -> keyPrefix + item, false);
         List<T> data = redisTemplate.opsForValue()
                 .multiGet(keys);
         if (data == null || data.isEmpty()) return Collections.emptyList();
         ArrayList<T> results = new ArrayList<>(keyItems.size());
         ArrayList<K> nullKeys = new ArrayList<>();
-        ListMapperHandler.forEach(keyItems, (key, index) -> {
-            T value = data.get(index);
+        ListMapperHandler.forEach(data, (value, index) -> {
             if (value == null) {
-                nullKeys.add(key);
+                nullKeys.add(items.get(index));
             } else {
                 results.add(value);
             }
@@ -210,16 +211,18 @@ public class RedisClient {
     }
 
     public static <K, V> Map<K, V> getMultiCacheObjectToMap(String keyPrefix,
-                                                            List<K> keyItems,
+                                                            Collection<K> keyItems,
                                                             Function<List<K>, Map<K, V>> func) {
-        Collection<String> keys = ListMapperHandler.listTo(keyItems, item -> keyPrefix + item);
+        List<K> items = keyItems.stream().distinct().toList();
+        //already distinct
+        Collection<String> keys = ListMapperHandler.listTo(items, item -> keyPrefix + item);
         List<V> data = redisTemplate.opsForValue()
                 .multiGet(keys);
         if (data == null || data.isEmpty()) return Collections.emptyMap();
         HashMap<K, V> map = new HashMap<>(keyItems.size());
         ArrayList<K> nullKeys = new ArrayList<>();
-        ListMapperHandler.forEach(keyItems, (key, index) -> {
-            V value = data.get(index);
+        ListMapperHandler.forEach(data, (value, index) -> {
+            K key = items.get(index);
             if (value != null) {
                 map.put(key, value);
             } else {
