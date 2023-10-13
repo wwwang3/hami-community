@@ -180,7 +180,10 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleContentDTO getArticleContentById(int articleId) {
         ArticleDTO article = this.getArticleDTOById(articleId);
-        if (article == null || article.getId() == null) return null;
+        if (article == null || article.getId() == null
+                || article.getArticleInfo().getDeleted() == Constants.DELETED) {
+            return null;
+        }
 
         String content = loadArticleContent(articleId);
         ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(article, content);
@@ -230,7 +233,7 @@ public class ArticleServiceImpl implements ArticleService {
             synchronized (this) {
                 dto = this.loadArticleDTOFromDB(id);
                 if (dto == null) {
-                    RedisClient.setCacheObject(key, new ArticleDTO(), 10, TimeUnit.SECONDS);
+                    RedisClient.cacheEmptyObject(key, new ArticleDTO());
                 } else {
                     RedisClient.setCacheObject(key, dto);
                 }

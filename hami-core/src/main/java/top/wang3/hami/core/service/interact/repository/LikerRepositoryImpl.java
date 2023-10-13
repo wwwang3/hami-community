@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.interact.repository;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -61,6 +62,14 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
     }
 
     @Override
+    public int deleteLikeItem(Integer itemId, LikeType likeType) {
+        var wrapper = Wrappers.update(new LikeItem())
+                .eq("item_id", itemId)
+                .eq("item_type", likeType.getType());
+        return getBaseMapper().delete(wrapper);
+    }
+
+    @Override
     public List<LikeItem> listUserLikeItem(Integer likerId, LikeType likeType) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(FULL_FIELDS)
@@ -68,7 +77,6 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
                 .eq("liker_id", likerId)
                 .eq("`state`", Constants.ONE)
                 .orderByDesc("mtime") //最近点赞的文章
-                .last("limit 8192")
                 .list();
     }
 

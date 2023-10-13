@@ -14,7 +14,7 @@ import top.wang3.hami.common.util.RedisClient;
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"user.*"}
         ),
-}, concurrency = "4")
+}, concurrency = "2")
 @Component
 @RequiredArgsConstructor
 public class UserMessageConsumer {

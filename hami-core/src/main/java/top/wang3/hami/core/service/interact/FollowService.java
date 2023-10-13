@@ -35,10 +35,6 @@ public interface FollowService {
 
     Map<Integer, Long> listUserFollowerCount(List<Integer> userIds);
 
-    List<UserFollow> listUserFollowings(Integer userId);
-
-    List<UserFollow> listUserFollowers(Integer userId);
-
     Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId);
 
     Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId);

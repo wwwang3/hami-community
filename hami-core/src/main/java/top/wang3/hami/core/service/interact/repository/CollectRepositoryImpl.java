@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.interact.repository;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
@@ -65,6 +66,13 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
     }
 
     @Override
+    public int deleteCollectItem(Integer articleId) {
+        var wrapper = Wrappers.update(new ArticleCollect())
+                .eq("article_id", articleId);
+        return getBaseMapper().delete(wrapper);
+    }
+
+    @Override
     public Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds) {
         List<ArticleCollect> collects = ChainWrappers.queryChain(getBaseMapper())
                 .eq("user_id", userId)
@@ -80,6 +88,16 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
                 .count();
+    }
+
+    @Override
+    public List<ArticleCollect> listUserCollects(Integer userId) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select("article_id", "user_id", "mtime")
+                .eq("user_id", userId)
+                .eq("`state`", Constants.ONE) //状态为1
+                .orderByDesc("mtime") //更新时间
+                .list();
     }
 
     @Override

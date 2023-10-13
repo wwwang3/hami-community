@@ -102,45 +102,56 @@ public class LikeServiceImpl implements LikeService {
     @Override
     public Collection<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
         //最近点赞的文章
-        String key = Constants.LIST_USER_LIKE_ARTICLES + userId;
+        String key = buildKey(userId, LikeType.ARTICLE);
         return ZPageHandler.<Integer>of(key, page, this) //不同业务不同的锁
                 .countSupplier(() -> {
                     return getUserLikeCount(userId, LikeType.ARTICLE);
                 })
-                .source((current, size) -> {
-                    //回源查询
-                    Page<LikeItem> itemPage = new Page<>(current, size, false);
-                    return likeRepository.listUserLikeItem(itemPage, userId, LikeType.ARTICLE);
-                })
                 .loader((c, s) -> {
-                    return loadUserLikeArticleCache(key, userId, c, s);
+                    return loadUserLikeItem(key, userId, LikeType.ARTICLE, c, s);
                 })
                 .query();
     }
 
     @Override
     public boolean hasLiked(Integer userId, Integer itemId, LikeType likeType) {
-        return likeRepository.hasLiked(userId, itemId, likeType);
+        //两次redis操作
+        //感觉可以用hash结构存储ttl和点赞的item
+        //判断ttl过期则重新加载 减少一次io
+        String key = buildKey(userId, likeType);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserLikeItem(key, userId, likeType, -1, -1);
+        }
+        return RedisClient.zContains(key, itemId);
     }
+
 
     @CostLog
     @Override
-    public Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemId, LikeType likeType) {
-        return likeRepository.hasLiked(userId, itemId, likeType);
+    public Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemIds, LikeType likeType) {
+        String key = buildKey(userId, likeType);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserLikeItem(key, userId, likeType, -1, -1);
+        }
+        return RedisClient.zMContains(key, itemIds);
     }
 
     @Override
-    public List<Integer> loadUserLikeArticleCache(String key, Integer userId, long current, long size) {
-        List<LikeItem> likeItems = likeRepository.listUserLikeItem(userId, LikeType.ARTICLE);
-        var tuples = ListMapperHandler.listToZSet(likeItems, LikeItem::getItemId, item -> {
-            return (double) item.getMtime().getTime();
-        });
-        if (!tuples.isEmpty()) {
-            RedisClient.deleteObject(key);
-            RedisClient.zAddAll(key, tuples);
-            RedisClient.expire(key, RandomUtils.randomLong(10L, 15L), TimeUnit.DAYS);
+    public List<Integer> loadUserLikeItem(String key, Integer userId, LikeType likeType, long current, long size) {
+        synchronized (this) {
+            List<LikeItem> likeItems = likeRepository.listUserLikeItem(userId, likeType);
+            var tuples = ListMapperHandler.listToZSet(likeItems, LikeItem::getItemId, item -> {
+                return (double) item.getMtime().getTime();
+            });
+            if (!tuples.isEmpty()) {
+                RedisClient.deleteObject(key);
+                RedisClient.zAddAll(key, tuples);
+                RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+            }
+            return ListMapperHandler.subList(likeItems, LikeItem::getItemId, current, size);
         }
-        return ListMapperHandler.subList(likeItems, LikeItem::getItemId, current, size);
     }
 
     private int getItemUser(Integer itemId, LikeType likeType) {
@@ -170,5 +181,9 @@ public class LikeServiceImpl implements LikeService {
             return commentRepository.decreaseLikes(itemId);
         }
         return false;
+    }
+
+    private String buildKey(Integer userId, LikeType likeType) {
+        return Constants.LIST_USER_LIKE + likeType.getType() + ":" + userId;
     }
 }

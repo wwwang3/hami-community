@@ -92,13 +92,23 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public boolean hasCollected(Integer userId, Integer itemId) {
-        return collectRepository.hasCollected(userId, itemId);
+        String key = buildKey(userId);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserCollects(key, userId, -1, -1);
+        }
+        return RedisClient.zContains(key, itemId);
     }
 
     @CostLog
     @Override
     public Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds) {
-        return collectRepository.hasCollected(userId, itemIds);
+        String key = buildKey(userId);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserCollects(key, userId, -1, -1);
+        }
+        return RedisClient.zMContains(key, itemIds);
     }
 
     @Override
@@ -116,10 +126,6 @@ public class CollectServiceImpl implements CollectService {
         }
     }
 
-    @Override
-    public List<ArticleCollect> listUserCollects(Integer userId, int max) {
-        return collectRepository.listUserCollects(userId, max);
-    }
 
     @Override
     public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
@@ -127,9 +133,6 @@ public class CollectServiceImpl implements CollectService {
         return ZPageHandler
                 .<Integer>of(key, page, this)
                 .countSupplier(() -> getUserCollectCount(userId))
-                .source((current, size) -> {
-                    return collectRepository.listUserCollects(page, userId);
-                })
                 .loader((c, s) -> {
                     return loadUserCollects(key, userId, c, s);
                 })
@@ -139,16 +142,25 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Collection<Integer> loadUserCollects(String key, Integer userId, long current, long size) {
-        List<ArticleCollect> collects = listUserCollects(userId, ZPageHandler.DEFAULT_MAX_SIZE);
-        if (CollectionUtils.isEmpty(collects)) {
-            return Collections.emptyList();
+        synchronized (this) {
+            //todo 应该用分布式锁, 对userId进行加锁，避免锁粒度过大
+            //全部查出来
+            //用户收藏的文章一般不会太多
+            List<ArticleCollect> collects = collectRepository.listUserCollects(userId);
+            if (CollectionUtils.isEmpty(collects)) {
+                return Collections.emptyList();
+            }
+            Collection<DefaultTuple> tuples = ListMapperHandler.listTo(collects, item -> {
+                byte[] rawValue = RedisClient.valueBytes(item.getArticleId());
+                Double score = (double) item.getMtime().getTime();
+                return new DefaultTuple(rawValue, score);
+            });
+            RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
+            return ListMapperHandler.subList(collects, ArticleCollect::getArticleId, current, size);
         }
-        Collection<DefaultTuple> tuples = ListMapperHandler.listTo(collects, item -> {
-            byte[] rawValue = RedisClient.valueBytes(item.getArticleId());
-            Double score = (double) item.getMtime().getTime();
-            return new DefaultTuple(rawValue, score);
-        });
-        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
-        return ListMapperHandler.subList(collects, ArticleCollect::getArticleId, current, size);
+    }
+
+    private String buildKey(Integer userId) {
+        return Constants.LIST_USER_COLLECT + userId;
     }
 }

@@ -76,13 +76,23 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public boolean hasFollowed(Integer userId, Integer followingId) {
-        return followRepository.hasFollowed(userId, followingId);
+        String key = buildKey(userId);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserFollowings(key, userId, -1, -1);
+        }
+        return RedisClient.zContains(key, followingId);
     }
 
     @CostLog
     @Override
     public Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds) {
-        return followRepository.hasFollowed(userId, followingIds);
+        String key = buildKey(userId);
+        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+        if (!success) {
+            loadUserFollowings(key, userId, -1, -1);
+        }
+        return RedisClient.zMContains(key, followingIds);
     }
 
     @Override
@@ -98,24 +108,10 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public List<UserFollow> listUserFollowings(Integer userId) {
-        return followRepository.listUserFollowings(userId);
-    }
-
-    @Override
-    public List<UserFollow> listUserFollowers(Integer userId) {
-        return followRepository.listUserFollowers(userId);
-    }
-
-    @Override
     public Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
         String key = Constants.LIST_USER_FOLLOWING + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowingCount(userId))
-                .source((current, size) -> {
-                    page.setSearchCount(false);
-                    return followRepository.listUserFollowings(page, userId);
-                })
                 .loader((current, size) -> {
                     return loadUserFollowings(key, userId, current, size);
                 })
@@ -171,17 +167,19 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public List<Integer> loadUserFollowings(String key, Integer userId, long current, long size) {
-        List<UserFollow> follows = followRepository.listUserFollowings(userId);
-        if (CollectionUtils.isEmpty(follows)) {
-            return Collections.emptyList();
+        synchronized (this) {
+            List<UserFollow> follows = followRepository.listUserFollowings(userId);
+            if (CollectionUtils.isEmpty(follows)) {
+                return Collections.emptyList();
+            }
+            Collection<DefaultTuple> tuples = ListMapperHandler.listTo(follows, (item) -> {
+                Double score = (double) item.getMtime().getTime();
+                byte[] rawValue = RedisClient.valueBytes(item.getFollowing());
+                return new DefaultTuple(rawValue, score);
+            });
+            RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
+            return ListMapperHandler.subList(follows, UserFollow::getFollowing, current, size);
         }
-        Collection<DefaultTuple> tuples = ListMapperHandler.listTo(follows, (item) -> {
-            Double score = (double) item.getMtime().getTime();
-            byte[] rawValue = RedisClient.valueBytes(item.getFollowing());
-            return new DefaultTuple(rawValue, score);
-        });
-        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
-        return ListMapperHandler.subList(follows, UserFollow::getFollowing, current, size);
     }
 
     @Override
@@ -206,5 +204,9 @@ public class FollowServiceImpl implements FollowService {
         if (!userRepository.checkUserExist(following)) {
             throw new ServiceException("用户不存在");
         }
+    }
+
+    private String buildKey(Integer userId) {
+        return Constants.LIST_USER_FOLLOWING + userId;
     }
 }

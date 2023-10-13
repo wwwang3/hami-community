@@ -20,7 +20,7 @@ public interface LikeService {
 
     boolean hasLiked(Integer userId, Integer itemId, LikeType likeType);
 
-    Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemId, LikeType likeType);
+    Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemIds, LikeType likeType);
 
-    Collection<Integer> loadUserLikeArticleCache(String key, Integer userId, long current, long size);
+    Collection<Integer> loadUserLikeItem(String key, Integer userId, LikeType likeType, long current, long size);
 }

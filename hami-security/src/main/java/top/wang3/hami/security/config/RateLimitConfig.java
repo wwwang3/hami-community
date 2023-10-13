@@ -27,7 +27,7 @@ public class RateLimitConfig {
     @Bean
     public FilterRegistrationBean<RateLimitFilter> rateLimiterFilter(RateLimiter rateLimiter,
                                                                      RequestMappingHandlerMapping requestMappingHandlerMapping) {
-        WebSecurityProperties.RateLimitConfig config = properties.getRateLimit();
+        WebSecurityProperties.RateLimitFilterConfig config = properties.getRateLimit();
         RateLimitFilter filter = new RateLimitFilter();
         filter.setRateLimiter(rateLimiter);
         filter.setScope(config.getScope());

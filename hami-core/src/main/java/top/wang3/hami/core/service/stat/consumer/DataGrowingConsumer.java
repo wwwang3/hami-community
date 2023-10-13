@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
         @QueueBinding(
                 value = @Queue(value = "hami-data-growing-queue-1"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"*.follow", "*.like.*", "*.collect", "comment.comment", "comment.reply", "comment.delete"}
+                key = {"*.follow", "*.like.*", "*.collect", "comment.*"}
         ),
         @QueueBinding(
                 value = @Queue(value = "hami-data-growing-queue-2"),

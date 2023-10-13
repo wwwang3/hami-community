@@ -126,14 +126,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.getById(id);
         int userId = LoginUserContext.getLoginUserId();
         Integer deleteCount = transactionTemplate.execute(status -> {
-            int deleted = commentRepository.deleteComment(userId, id);
-            if (deleted == 0) return 0;
-            boolean success = articleStatRepository.decreaseComments(comment.getArticleId(), deleted);
-            if (!success) {
-                status.setRollbackOnly();
-                return 0;
-            }
-            return deleted;
+            return commentRepository.deleteComment(userId, id);
         });
         if (deleteCount != null && deleteCount > 0) {
             //评论删除消息
@@ -148,8 +141,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = buildComment(param, reply);
         //评论
         Boolean success = transactionTemplate.execute(status -> {
-            boolean success1 =  commentRepository.save(comment);
-            return success1 && articleStatRepository.increaseComments(param.getArticleId(), 1);
+            return commentRepository.save(comment);
         });
         if (Boolean.FALSE.equals(success)) {
             return null;

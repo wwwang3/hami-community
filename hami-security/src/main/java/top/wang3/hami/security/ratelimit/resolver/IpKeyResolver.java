@@ -1,15 +1,16 @@
-package top.wang3.hami.security.ratelimit;
+package top.wang3.hami.security.ratelimit.resolver;
 
 import org.springframework.stereotype.Component;
 import top.wang3.hami.security.model.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 @Component
 public class IpKeyResolver implements RateLimitKeyResolver {
 
 
     @Override
-    public String getScope() {
-        return "ip";
+    public RateLimit.Scope getScope() {
+        return RateLimit.Scope.IP;
     }
 
     @Override

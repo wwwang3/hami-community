@@ -18,6 +18,7 @@ import java.util.Date;
 @NoArgsConstructor
 @TableName(value = "article_collect")
 public class ArticleCollect {
+
     /**
      * 主键ID
      */

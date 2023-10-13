@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class ZPageHandler {
 
-    public static final int DEFAULT_MAX_SIZE = 8192;
+    public static final int DEFAULT_MAX_SIZE = 8000;
 
     public static <T> ZPage<T> of(String key, Object lock) {
         return new ZPageBuilder<T>(lock)

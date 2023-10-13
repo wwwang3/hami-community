@@ -17,6 +17,7 @@ import top.wang3.hami.common.util.IpUtils;
 import top.wang3.hami.security.model.RateLimiterModel;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.RateLimiter;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 import java.io.IOException;
 
@@ -27,8 +28,8 @@ import java.io.IOException;
 @Setter
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private String scope;
-    private String algorithm;
+    private RateLimit.Scope scope;
+    private RateLimit.Algorithm algorithm;
     private int rate;
     private int capacity;
 

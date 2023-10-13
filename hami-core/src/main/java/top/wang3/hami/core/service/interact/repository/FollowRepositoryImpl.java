@@ -75,7 +75,6 @@ public class FollowRepositoryImpl extends ServiceImpl<UserFollowMapper, UserFoll
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
                 .orderByDesc("mtime")
-                .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
                 .list();
     }
 

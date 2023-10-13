@@ -19,6 +19,9 @@ public interface LikeRepository extends IService<LikeItem> {
     @Transactional(rollbackFor = Exception.class)
     boolean cancelLike(Integer likerId, Integer itemId, LikeType likeType);
 
+    @Transactional(rollbackFor = Exception.class)
+    int deleteLikeItem(Integer itemId, LikeType likeType);
+
     List<LikeItem> listUserLikeItem(Integer likerId, LikeType likeType);
 
     List<Integer> listUserLikeItem(Page<LikeItem> page, Integer userId, LikeType likeType);

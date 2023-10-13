@@ -1,4 +1,4 @@
-package top.wang3.hami.security.ratelimit;
+package top.wang3.hami.security.ratelimit.handler;
 
 
 import jakarta.annotation.PostConstruct;
@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.security.annotation.RateLimit;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -29,12 +29,12 @@ public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
     }
 
     @Override
-    public String getSupportedAlgorithm() {
-        return RateLimit.Algorithm.SLIDE_WINDOW.getName();
+    public RateLimit.Algorithm getSupportedAlgorithm() {
+        return RateLimit.Algorithm.SLIDE_WINDOW;
     }
 
     @Override
-    public boolean isAllowed(String key, int rate, int capacity) {
+    public boolean isAllowed(String key, double rate, double capacity) {
         long current = Instant.now().getEpochSecond();
         List<String> keys = Arrays.asList(key, String.valueOf(System.currentTimeMillis()));
         //fix 传入的参数不应为List
@@ -42,5 +42,4 @@ public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
         Long allowed = RedisClient.executeScript(redisScript, keys, List.of(rate, capacity, current));
         return allowed != null && allowed ==  1L;
     }
-
 }

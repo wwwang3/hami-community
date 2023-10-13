@@ -48,7 +48,6 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
                     List.of(member, score, ZPageHandler.DEFAULT_MAX_SIZE));
             log.info("collect--userId: {}, articleId: {}, res: {}", entity.getUserId(), score, res);
         }
-        deleteCountCache(entity.getUserId());
     }
 
     @Override
@@ -59,15 +58,19 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
             //点赞
             processInsert(after);
         } else {
-            processDelete(after);
+            handleDelete(after);
         }
     }
 
     @Override
     public void processDelete(ArticleCollect deletedEntity) {
-        String redisKey = Constants.LIST_USER_COLLECT + deletedEntity.getUserId();
-        RedisClient.zRem(redisKey, deletedEntity.getArticleId());
+        handleDelete(deletedEntity);
         deleteCountCache(deletedEntity.getUserId());
+    }
+
+    private void handleDelete(ArticleCollect entity) {
+        String redisKey = Constants.LIST_USER_COLLECT + entity.getUserId();
+        RedisClient.zRem(redisKey, entity.getArticleId());
     }
 
     private void deleteCountCache(Integer userId) {

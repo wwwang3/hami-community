@@ -163,15 +163,21 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
             if (!deleted) {
                 return false;
             }
-            //删除数据
-            boolean success2 = articleStatMapper.deleteById(articleId) == 1;
             //删除草稿
-            if (success2) {
-                return articleDraftRepository.deleteDraftByArticleId(articleId, userId);
+            boolean removed = articleDraftRepository.deleteDraftByArticleId(articleId, userId);
+            if (!removed) {
+                status.setRollbackOnly();
+                return false;
             }
-            return false;
+            return true;
         });
-        return Boolean.TRUE.equals(success);
+        if (Boolean.TRUE.equals(success)) {
+            var message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.DELETE,
+                    articleId, userId, userId);
+            rabbitMessagePublisher.publishMsg(message);
+            return true;
+        }
+        return false;
     }
 
     private boolean handleInsert(Article article, ArticleDraft draft, Integer loginUserId) {

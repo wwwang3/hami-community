@@ -52,6 +52,9 @@ public class ArticleInfo {
      */
     private Date mtime;
 
+    //todo
+    private byte deleted;
+
     /**
      * 文章标签
      */

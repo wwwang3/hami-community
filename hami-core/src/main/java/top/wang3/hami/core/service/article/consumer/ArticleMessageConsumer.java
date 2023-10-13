@@ -27,7 +27,7 @@ public class ArticleMessageConsumer {
                     exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                     key = {"article.*"}
             ),
-    })
+    }, concurrency = "2")
     public void handleArticleMessage(ArticleRabbitMessage message) {
         if (message.getType() == ArticleRabbitMessage.Type.UPDATE ||
                 message.getType() == ArticleRabbitMessage.Type.DELETE) {

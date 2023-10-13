@@ -56,11 +56,10 @@ public class ListMapperHandler {
     }
 
     public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
-
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyList();
         }
-        if (current < 0) return Collections.emptyList();
+        if (current <= 0 || size <= 0) return Collections.emptyList();
         int length = origin.size();
         int from = (current - 1) * size;
         int to = Math.min(current * size, length);
@@ -154,6 +153,9 @@ public class ListMapperHandler {
         }
         LinkedHashMap<K, U> map = new LinkedHashMap<>(data.size());
         for (T item : data) {
+            if (item == null) {
+                continue;
+            }
             map.put(keyMapper.apply(item), valueMapper.apply(item));
         }
         return map;
