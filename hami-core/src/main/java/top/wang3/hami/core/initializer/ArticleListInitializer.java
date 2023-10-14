@@ -1,10 +1,9 @@
-package top.wang3.hami.web.init;
+package top.wang3.hami.core.initializer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import top.wang3.hami.common.dto.request.ArticlePageParam;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.core.service.article.ArticleService;
@@ -12,27 +11,24 @@ import top.wang3.hami.core.service.article.repository.CategoryRepository;
 
 import java.util.List;
 
-//@Component
-@Slf4j
-@Order(3)
+@Component
+@Order(2)
 @RequiredArgsConstructor
-public class ArticleListInitializer implements ApplicationRunner {
+@Slf4j
+public class ArticleListInitializer implements HamiInitializer {
 
-    private final ArticleService articleService;
     private final CategoryRepository categoryRepository;
+    private final ArticleService articleService;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        try {
-            log.info("start to init cate-article-list");
-            long start = System.currentTimeMillis();
-            cacheTotal();
-//            cacheSub();
-            long end = System.currentTimeMillis();
-            log.info("finish init cate-article-list, cost: {}ms", end - start);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public String getName() {
+        return ARTICLE_LIST_CACHE;
+    }
+
+    @Override
+    public void run() {
+        cacheTotal();
+        cacheSub();
     }
 
     private void cacheTotal() {

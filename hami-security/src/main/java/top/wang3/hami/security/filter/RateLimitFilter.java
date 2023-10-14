@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import top.wang3.hami.common.util.IpUtils;
 import top.wang3.hami.security.model.RateLimiterModel;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.security.ratelimit.RateLimitException;
 import top.wang3.hami.security.ratelimit.RateLimiter;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
@@ -53,9 +54,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             model.setMethodName(handlerMethod.getMethod().getName());
             model.setClassName(handlerMethod.getBeanType().getName());
         }
-        if (rateLimiter.limited(model)) {
-            //被限制
-            log.debug("{}: 操作频繁", request.getRequestURI());
+        try {
+            rateLimiter.checkLimit(model);
+        } catch (RateLimitException e) {
             writeBlockedMessage(response);
             return;
         }
@@ -82,7 +83,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        log.debug("11");
         requestMappingHandlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
     }
 

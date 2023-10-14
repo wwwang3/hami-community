@@ -31,40 +31,51 @@ public class RateLimiter implements ApplicationContextAware {
             log.info("load {} rate-limiter-handlers", handlers.size());
             log.info("load {} key-resolvers", resolvers.size());
         } catch (BeansException e) {
-            log.error("no handler or resolver found: {}", e);
+            log.error("no handler or resolver found: {}", e.getMessage());
         }
     }
 
-    /**
-     * 是否被限制
-     * @param model model
-     * @return true-被限制访问
-     */
-    public boolean limited(RateLimiterModel model) {
-        RateLimit.Algorithm algorithm = model.getAlgorithm();
-        RateLimit.Scope scope = model.getScope();
-        RateLimiterHandler handler = getHandler(algorithm);
-        RateLimitKeyResolver resolver = getResolver(scope);
-        String key = RATE_LIMIT_PREFIX + algorithm +  ":" + resolver.resolve(model);
-        return !handler.isAllowed(key, model.getRate(), model.getCapacity());
+
+    public void checkLimit(RateLimiterModel model) throws RateLimitException {
+        try {
+            RateLimit.Algorithm algorithm = model.getAlgorithm();
+            RateLimit.Scope scope = model.getScope();
+            RateLimiterHandler handler = getHandler(algorithm);
+            RateLimitKeyResolver resolver = getResolver(scope);
+            String key = RATE_LIMIT_PREFIX + algorithm + ":" + resolver.resolve(model);
+
+            List<Long> results = handler.execute(key, model.getRate(), model.getCapacity());
+            boolean allowed = results.get(0) == 1L;
+            Long remain = results.get(1);
+            if (!allowed) {
+                String msg = "[%s] is limited rate: %s, capacity: %s".formatted(key, model.getRate(), model.getScope());
+                throw new RateLimitException(msg);
+            }
+            log.info("[{}] remain_requests: {}", key, remain);
+        } catch (RateLimitException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RateLimitException(e.getMessage(), e.getCause());
+        }
     }
 
-    private RateLimiterHandler getHandler(RateLimit.Algorithm algorithm) {
+
+    private RateLimiterHandler getHandler(RateLimit.Algorithm algorithm) throws RateLimitException {
         for (RateLimiterHandler handler : handlers) {
             if (handler.getSupportedAlgorithm().equals(algorithm)) {
                 return handler;
             }
         }
-        throw new IllegalArgumentException("No handler found for this algorithm");
+        throw new RateLimitException("No handler found for this algorithm");
     }
 
-    private RateLimitKeyResolver getResolver(RateLimit.Scope scope) {
-        for (RateLimitKeyResolver resolver: resolvers) {
+    private RateLimitKeyResolver getResolver(RateLimit.Scope scope) throws RateLimitException {
+        for (RateLimitKeyResolver resolver : resolvers) {
             if (resolver.getScope().equals(scope)) {
                 return resolver;
             }
         }
-        throw new IllegalArgumentException("No resolver found for this scope");
+        throw new RateLimitException("No resolver found for this scope");
     }
 
 

@@ -1,6 +1,7 @@
 package top.wang3.hami.core;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -10,7 +11,6 @@ import top.wang3.hami.mail.EnableMail;
 
 @ComponentScan(basePackages = {
         "top.wang3.hami.core.config",
-        "top.wang3.hami.core.repository",
         "top.wang3.hami.core.service",
         "top.wang3.hami.core.component",
         "top.wang3.hami.core.job",
@@ -21,6 +21,7 @@ import top.wang3.hami.mail.EnableMail;
 @Configuration
 @EnableScheduling
 @EnableMail
+@EnableConfigurationProperties(HamiProperties.class)
 public class HamiCoreConfig {
 
 }

@@ -1,17 +1,14 @@
-package top.wang3.hami.web.init;
+package top.wang3.hami.core.initializer;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
-import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.user.UserService;
@@ -21,24 +18,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-//@Component
+@Component
+@Order(3)
 @RequiredArgsConstructor
-@Order(4)
-public class RedisCacheInitializer implements ApplicationRunner {
+public class ArticleCacheInitializer implements HamiInitializer {
+
 
     private final ArticleRepository articleRepository;
-
     private final UserRepository userRepository;
-
     private final ArticleService articleService;
-
     private final UserService userService;
 
-    @CostLog
     @Override
-    public void run(ApplicationArguments args) {
-//        cacheArticle();
-//        cacheUser();
+    public String getName() {
+        return ARTICLE_CACHE;
+    }
+
+    @Override
+    public void run() {
+        cacheArticle();
         cacheArticleContent();
     }
 
@@ -49,27 +47,17 @@ public class RedisCacheInitializer implements ApplicationRunner {
             if (ids == null || ids.isEmpty()) {
                 break;
             }
-            articleService.listArticleById(ids, new ArticleOptionsBuilder());
+            articleService.listArticleById(ids, new ArticleOptionsBuilder()
+                    .noAuthor()
+                    .noInteract());
             lastId = ids.get(ids.size() - 1);
-        }
-    }
-
-    private void cacheUser() {
-        int lastId = 0;
-        while (true) {
-            List<Integer> userIds = userRepository.scanUserIds(lastId, 2000);
-            if (userIds == null || userIds.isEmpty()) {
-                break;
-            }
-            userService.listAuthorInfoById(userIds, new UserOptionsBuilder());
-            lastId = userIds.get(userIds.size() - 1);
         }
     }
 
     private void cacheArticleContent() {
         int lastId = 0;
         while (true) {
-            List<Integer> ids = articleRepository.scanArticleIds(lastId, 1000);
+            List<Integer> ids = articleRepository.scanArticleIds(lastId, 500);
             if (ids == null || ids.isEmpty()) {
                 break;
             }

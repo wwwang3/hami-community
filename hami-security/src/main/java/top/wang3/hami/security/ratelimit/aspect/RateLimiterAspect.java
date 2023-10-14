@@ -37,11 +37,7 @@ public class RateLimiterAspect {
         Method method = signature.getMethod();
         String className = signature.getDeclaringType().getSimpleName();
         RateLimiterModel model = buildModel(method, className);
-
-        if (rateLimiter.limited(model)) {
-            throw new RateLimitException("[%s#%s] is limited rate: %s capacity: %s".formatted(className, method.getName(), model.getRate(), model
-                    .getCapacity()));
-        }
+        rateLimiter.checkLimit(model);
     }
 
     private RateLimiterModel buildModel(Method method, String className)  {

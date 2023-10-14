@@ -14,11 +14,11 @@ import java.util.List;
 @Slf4j
 public class FixedWindowRateLimiterHandler implements RateLimiterHandler {
 
-    private RedisScript<Long> fixedWindowScript;
+    private RedisScript<List<Long>> fixedWindowScript;
 
     @PostConstruct
     public void init() {
-        fixedWindowScript = RedisClient.loadScript("/META-INF/scripts/fixed_window.lua");
+        fixedWindowScript = RedisClient.loadScript("/META-INF/scripts/fixed_window.lua", Long.class);
     }
 
     @Override
@@ -27,14 +27,8 @@ public class FixedWindowRateLimiterHandler implements RateLimiterHandler {
     }
 
     @Override
-    public boolean isAllowed(String key, double rate, double capacity) {
+    public List<Long> execute(String key, double rate, double capacity) {
         double interval = capacity / rate;
-        Long current_requests = RedisClient.executeScript(fixedWindowScript, List.of(key), List.of(interval, capacity));
-        if (current_requests == -1) {
-            log.warn("[{}] limited: rate: {}: capacity: {}", key, rate, capacity);
-            return false;
-        }
-        log.info("[{}] current_requests: {}", key, current_requests);
-        return true;
+        return RedisClient.executeScript(fixedWindowScript, List.of(key), List.of(interval, capacity));
     }
 }

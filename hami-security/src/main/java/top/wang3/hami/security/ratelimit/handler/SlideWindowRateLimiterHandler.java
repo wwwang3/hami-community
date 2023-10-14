@@ -20,12 +20,12 @@ import java.util.List;
 @SuppressWarnings(value = {"rawtypes", "unchecked"})
 public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
 
-    private RedisScript<Long> redisScript;
+    private RedisScript<List<Long>> redisScript;
 
 
     @PostConstruct
     private void loadScript() {
-        redisScript = RedisClient.loadScript("/META-INF/scripts/slide_window.lua");
+        redisScript = RedisClient.loadScript("/META-INF/scripts/slide_window.lua", Long.class);
     }
 
     @Override
@@ -34,12 +34,11 @@ public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
     }
 
     @Override
-    public boolean isAllowed(String key, double rate, double capacity) {
+    public List<Long> execute(String key, double rate, double capacity) {
         long current = Instant.now().getEpochSecond();
         List<String> keys = Arrays.asList(key, String.valueOf(System.currentTimeMillis()));
         //fix 传入的参数不应为List
         //fix objectMapper 配置ObjectMapper.DefaultTyping.EVERYTHING导致long类型序列化错误
-        Long allowed = RedisClient.executeScript(redisScript, keys, List.of(rate, capacity, current));
-        return allowed != null && allowed ==  1L;
+        return RedisClient.executeScript(redisScript, keys, List.of(rate, capacity, current));
     }
 }

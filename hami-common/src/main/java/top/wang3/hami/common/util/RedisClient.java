@@ -767,13 +767,14 @@ public class RedisClient {
         return script;
     }
 
-    public static <T> RedisScript<T> loadScript(String path, Class<T> clazz) {
-        DefaultRedisScript<T> script = new DefaultRedisScript<>();
+
+    public static <T> RedisScript<List<T>> loadScript(String path, Class<T> clazz) {
+        DefaultRedisScript script = new DefaultRedisScript<>();
         ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
         script.setScriptSource(source);
-        script.setResultType(clazz);
+        script.setResultType(List.class);
         log.debug("load lua script: {} success", path);
-        return script;
+        return (DefaultRedisScript<List<T>>) script;
     }
 
     public static <T> T executeScript(RedisScript<T> script, List<String> keys, List<?> args) {

@@ -62,8 +62,11 @@ public class WebSecurityProperties {
      */
     private List<String> allowedOrigins;
 
+    /**
+     * 全局限流过滤器配置
+     */
     @NestedConfigurationProperty
-    private RateLimitFilterConfig rateLimit;
+    private RateLimitFilterProperties rateLimit;
 
     @Data
     public static class CookieConfig {
@@ -95,7 +98,7 @@ public class WebSecurityProperties {
      *
      */
     @Data
-    public static class RateLimitFilterConfig {
+    public static class RateLimitFilterProperties {
 
         boolean enable;
 
@@ -103,11 +106,6 @@ public class WebSecurityProperties {
          * 限流算法
          */
         RateLimit.Algorithm algorithm = RateLimit.Algorithm.SLIDE_WINDOW;
-
-        /**
-         * 应用范围, GLOBAL, IP, URI
-         */
-        RateLimit.Scope scope = RateLimit.Scope.IP;
 
         /**
          * 请求速率
