@@ -1,4 +1,4 @@
-package top.wang3.hami.core.initializer;
+package top.wang3.hami.core.init;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
@@ -11,8 +11,6 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
-import top.wang3.hami.core.service.user.UserService;
-import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +23,7 @@ public class ArticleCacheInitializer implements HamiInitializer {
 
 
     private final ArticleRepository articleRepository;
-    private final UserRepository userRepository;
     private final ArticleService articleService;
-    private final UserService userService;
 
     @Override
     public String getName() {

@@ -1,4 +1,4 @@
-package top.wang3.hami.core.initializer;
+package top.wang3.hami.core.init;
 
 public interface HamiInitializer extends Runnable {
 

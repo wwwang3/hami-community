@@ -17,12 +17,12 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 @Component
 @RabbitListener(bindings = {
         @QueueBinding(
-                value = @Queue(value = "hami-data-growing-queue-1"),
+                value = @Queue(value = "hami-stat-queue-1"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
                 key = {"comment.*"}
         ),
         @QueueBinding(
-                value = @Queue(value = "hami-data-growing-queue-2"),
+                value = @Queue(value = "hami-stat-queue-2"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"article.delete"}
         )

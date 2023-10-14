@@ -10,10 +10,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.enums.LikeType;
-import top.wang3.hami.common.message.*;
+import top.wang3.hami.common.message.CollectRabbitMessage;
+import top.wang3.hami.common.message.CommentDeletedRabbitMessage;
+import top.wang3.hami.common.message.FollowRabbitMessage;
+import top.wang3.hami.common.message.LikeRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
-import top.wang3.hami.core.service.interact.repository.CollectRepository;
 import top.wang3.hami.core.service.interact.repository.LikeRepository;
 
 import java.util.List;
@@ -32,8 +34,6 @@ import java.util.List;
 //todo 消费失败先不管 _(≧∇≦」∠)_
 public class UserInteractMessageConsumer implements InteractConsumer {
 
-
-    private final CollectRepository collectRepository;
     private final LikeRepository likeRepository;
 
     @Override
@@ -59,32 +59,6 @@ public class UserInteractMessageConsumer implements InteractConsumer {
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
         int deleted = likeRepository.deleteLikeItem(message.getArticleId(), LikeType.COMMENT);
         log.info("article deleted, async to delete like-item, deleted-count: {}", deleted);
-    }
-
-    @RabbitListener(
-            bindings = @QueueBinding(
-                    value = @Queue(value = "hami-user-interact-queue-2"),
-                    exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                    key = {"article.delete"}
-            )
-    )
-    public void handleArticleMessageForLike(ArticleRabbitMessage message) {
-        //文章删除消息
-        int deleted = likeRepository.deleteLikeItem(message.getArticleId(), LikeType.ARTICLE);
-        log.info("article deleted, async to delete like-item, deleted-count: {}", deleted);
-    }
-
-    @RabbitListener(
-            bindings = @QueueBinding(
-                    value = @Queue(value = "hami-user-interact-queue-3"),
-                    exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                    key = {"article.delete"}
-            )
-    )
-    public  void handleArticleMessageForCollect(ArticleRabbitMessage message) {
-        //文章删除消息
-        int deleted = collectRepository.deleteCollectItem(message.getArticleId());
-        log.info("article deleted, async to delete collect-item, deleted-count: {}", deleted);
     }
 
 }

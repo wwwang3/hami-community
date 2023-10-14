@@ -28,6 +28,7 @@ import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,6 +58,8 @@ public class UserInteractController {
         return Result.of(result);
     }
 
+    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/follow")
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(followService.follow(followingId))
@@ -69,6 +72,8 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
+    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/like")
     public Result<Void> like(@RequestBody LikeItemParam param) {
         LikeType likeType = resolveLikerType(param.getItemType());
@@ -83,6 +88,8 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
+    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/collect")
     public Result<Void> collect(@RequestParam("articleId") int articleId) {
         return Result

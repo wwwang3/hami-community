@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"article.publish", "article.delete"}
         )
-})
+}, concurrency = "2")
 @RequiredArgsConstructor
 public class DataGrowingConsumer implements InteractConsumer {
 

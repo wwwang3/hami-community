@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.security.context.LoginUserContext;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 import java.io.InputStream;
 import java.util.function.Consumer;
@@ -19,22 +20,18 @@ public class ImageService {
     @Resource
     FileStorageService fileStorageService;
 
-    /**
-     * 对用户每日的上传图片量进行限制
-     */
-    private void preCheck() {
-
-    }
 
     public String upload(MultipartFile file, String type) {
         return upload(file, type, null);
     }
+
+    @RateLimit(capacity = 216, rate = 0.0025, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public String upload(MultipartFile file, String type, Consumer<Thumbnails.Builder<? extends InputStream>> consumer) {
         if (file == null) {
             throw new ServiceException("参数错误");
         }
         int id = LoginUserContext.getLoginUserId();
-        preCheck();
         FileInfo info = fileStorageService.of(file)
                 .setObjectId(id)
                 .setObjectType(type)

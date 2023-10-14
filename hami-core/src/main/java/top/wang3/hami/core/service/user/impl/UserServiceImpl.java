@@ -43,8 +43,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Resource
-    ImageService imageService;
+    private final ImageService imageService;
     private final FollowService followService;
     private final CountService countService;
     private final LikeService likeService;

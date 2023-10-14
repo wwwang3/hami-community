@@ -15,6 +15,7 @@ import top.wang3.hami.mail.EnableMail;
         "top.wang3.hami.core.component",
         "top.wang3.hami.core.job",
         "top.wang3.hami.core.aspect",
+        "top.wang3.hami.core.init",
 })
 @Import(value = {HamiCommonConfig.class})
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")

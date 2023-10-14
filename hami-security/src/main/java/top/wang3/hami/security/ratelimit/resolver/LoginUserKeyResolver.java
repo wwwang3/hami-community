@@ -16,6 +16,6 @@ public class LoginUserKeyResolver implements RateLimitKeyResolver {
     @Override
     public String resolve(RateLimiterModel model) {
         //没有报错
-        return String.valueOf(LoginUserContext.getLoginUserId());
+        return model.getMethodName() + ":" + LoginUserContext.getLoginUserId();
     }
 }

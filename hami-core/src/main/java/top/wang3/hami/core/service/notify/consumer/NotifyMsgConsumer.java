@@ -24,9 +24,9 @@ import java.util.Objects;
         @QueueBinding(
                 value = @Queue("hami-notify-queue-1"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"do.follow", "do.like.*", "do.collect", "comment.comment", "comment.reply"}
+                key = {"do.follow", "do.like.*", "do.collect", "comment.*"}
         )
-})
+}, concurrency = "2")
 @Component
 @RequiredArgsConstructor
 @Slf4j

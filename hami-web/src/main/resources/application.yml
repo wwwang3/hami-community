@@ -3,7 +3,5 @@ spring:
     active:
       - mail
       - @environment@
-hami:
-  version: 0.0.1
 
 

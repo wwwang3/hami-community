@@ -1,4 +1,4 @@
-package top.wang3.hami.core.initializer;
+package top.wang3.hami.core.init;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

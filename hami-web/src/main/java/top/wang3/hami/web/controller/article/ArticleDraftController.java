@@ -13,6 +13,7 @@ import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.core.service.article.ArticleDraftService;
 import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 @RestController
 @RequestMapping("/api/v1/article_draft")
@@ -51,6 +52,8 @@ public class ArticleDraftController {
         return Result.successData(url);
     }
 
+    @RateLimit(capacity = 216, rate = 0.0025, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/create")
     public Result<ArticleDraft> createDraft(@RequestBody ArticleDraftParam param) {
         ArticleDraft draft = articleDraftService.createDraft(param);

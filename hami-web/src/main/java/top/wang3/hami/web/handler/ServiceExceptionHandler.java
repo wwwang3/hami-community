@@ -11,6 +11,7 @@ import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.security.ratelimit.RateLimitException;
 
 
 @RestControllerAdvice
@@ -22,6 +23,13 @@ public class ServiceExceptionHandler {
     public Result<Void> handleCaptchaException(Exception e) {
         logError(e);
         return Result.error(e.getMessage());
+    }
+
+    @ExceptionHandler(value = {RateLimitException.class})
+    public Result<Void> handleRateLimitException(RateLimitException e) {
+        logError(e);
+        return Result
+                .error("大哥别刷了( ´･･)ﾉ(._.`)");
     }
 
     @ExceptionHandler(value = {ValidationException.class, BindException.class})

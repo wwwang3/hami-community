@@ -57,13 +57,6 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void insertArticleStat(Integer articleId, Integer userId) {
-        ArticleStat stat = new ArticleStat(articleId, userId);
-        super.save(stat);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
     public boolean increaseViews(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .setSql("views = views + {0}", count)
