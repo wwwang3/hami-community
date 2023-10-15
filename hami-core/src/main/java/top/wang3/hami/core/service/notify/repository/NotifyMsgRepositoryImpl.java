@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.model.NotifyMsg;
@@ -49,5 +50,23 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
                 .eq("type", type.getType())
                 .count();
         return count != null && count > 0;
+    }
+
+    @Override
+    public boolean updateNotifyState(Integer msgId, int loginUserId) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .set("state", Constants.ONE)
+                .eq("id", msgId)
+                .eq("user_id", loginUserId)
+                .eq("state", Constants.ZERO)
+                .update();
+    }
+
+    @Override
+    public boolean deleteNotifyMsg(Integer msgId, int loginUserId) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .eq("id", msgId)
+                .eq("user_id", loginUserId)
+                .remove();
     }
 }

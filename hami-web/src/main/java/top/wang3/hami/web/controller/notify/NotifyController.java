@@ -43,4 +43,17 @@ public class NotifyController {
         return Result.successData(unRead);
     }
 
+    @PostMapping("/read")
+    public Result<Void> doRead(@RequestParam("msg_id") Integer msgId) {
+        boolean read = notifyMsgService.doRead(msgId);
+        return Result.ofTrue(read)
+                .orElse("操作失败");
+    }
+
+    @PostMapping("/delete")
+    public Result<Void> deleteNotify(@RequestParam("msg_id") Integer msgId) {
+        boolean deleted = notifyMsgService.deleteNotify(msgId);
+        return Result.ofTrue(deleted)
+                .orElse("删除失败");
+    }
 }

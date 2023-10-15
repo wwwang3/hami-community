@@ -76,21 +76,25 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public boolean hasFollowed(Integer userId, Integer followingId) {
-        String key = buildKey(userId);
-        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
-        if (!success) {
-            loadUserFollowings(key, userId, -1, -1);
-        }
-        return RedisClient.zContains(key, followingId);
+        Map<Integer, Boolean> followed = hasFollowed(userId, List.of(followingId));
+        return followed.getOrDefault(followingId, false);
     }
 
     @CostLog
     @Override
     public Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds) {
         String key = buildKey(userId);
+        if (getUserFollowingCount(userId) == 0) {
+            return Collections.emptyMap();
+        }
         boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
         if (!success) {
-            loadUserFollowings(key, userId, -1, -1);
+            synchronized (this) {
+                success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+                if (!success) {
+                    loadUserFollowings(key, userId, -1, -1);
+                }
+            }
         }
         return RedisClient.zMContains(key, followingIds);
     }

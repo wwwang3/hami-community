@@ -10,10 +10,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.enums.LikeType;
-import top.wang3.hami.common.message.CollectRabbitMessage;
-import top.wang3.hami.common.message.CommentDeletedRabbitMessage;
-import top.wang3.hami.common.message.FollowRabbitMessage;
-import top.wang3.hami.common.message.LikeRabbitMessage;
+import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.interact.repository.LikeRepository;
@@ -53,6 +50,16 @@ public class UserInteractMessageConsumer implements InteractConsumer {
         String followingCountKey = Constants.USER_FOLLOWING_COUNT + message.getUserId();
         String followerCountKey = Constants.USER_FOLLOWER_COUNT + message.getToUserId();
         RedisClient.deleteObject(List.of(followingCountKey, followerCountKey));
+    }
+
+    @Override
+    public void handleCommentMessage(CommentRabbitMessage message) {
+
+    }
+
+    @Override
+    public void handleReplyMessage(ReplyRabbitMessage message) {
+
     }
 
     @Override

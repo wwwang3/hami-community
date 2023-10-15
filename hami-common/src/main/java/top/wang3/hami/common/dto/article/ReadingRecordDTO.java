@@ -12,6 +12,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class ReadingRecordDTO {
 
+    private Integer id;
+
     /**
      * 用户ID
      */

@@ -26,19 +26,19 @@ public class ReadingRecordRepositoryImpl extends ServiceImpl<ReadingRecordMapper
     }
 
     @Override
-    public boolean deleteRecord(int userId, Integer articleId) {
+    public boolean deleteRecord(int userId, Integer id) {
         //刪除阅读记录
         return ChainWrappers.updateChain(getEntityClass())
+                .eq("id", id)
                 .eq("user_id", userId)
-                .eq("article_id", articleId)
                 .remove();
     }
 
     @Override
-    public boolean deleteRecords(int userId, List<Integer> articleIds) {
+    public boolean deleteRecords(int userId, List<Integer> ids) {
         return ChainWrappers.updateChain(getEntityClass())
                 .eq("user_id", userId)
-                .in("article_id", articleIds)
+                .in("id", ids)
                 .remove();
     }
 
@@ -52,7 +52,7 @@ public class ReadingRecordRepositoryImpl extends ServiceImpl<ReadingRecordMapper
     @Override
     public List<ReadingRecord> listReadingRecordByPage(Page<ReadingRecord> page, Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
-                .select("user_id", "reading_time", "article_id")
+                .select("user_id", "reading_time", "article_id", "id")
                 .eq("user_id", userId)
                 .orderByDesc("reading_time")
                 .list(page);

@@ -3,7 +3,7 @@ local key = KEYS[1]
 local time_window = tonumber(ARGV[1]) -- 单位s
 local capacity = tonumber(ARGV[2])
 
-local last_requests = tonumber(redis.call("'get", key) or "0")
+local last_requests = tonumber(redis.call("get", key) or "0")
 local remain_requests = capacity - last_requests;
 if (last_requests == 0) then
     redis.call("expire", key, time_window)

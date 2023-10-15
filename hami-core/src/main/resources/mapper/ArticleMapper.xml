@@ -82,10 +82,11 @@
       select id, user_id, category_id, picture, title, summary, ctime
       from article
       where deleted = 0
-          and
-            title like concat('%', #{keyword}, '%')
-          or
-            summary like concat('%', #{keyword}, '%')
+        and (
+                  title like concat('%', #{keyword}, '%')
+              or
+                  summary like concat('%', #{keyword}, '%')
+          )
       order by ctime desc
   </select>
 

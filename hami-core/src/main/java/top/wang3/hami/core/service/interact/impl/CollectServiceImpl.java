@@ -92,21 +92,25 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public boolean hasCollected(Integer userId, Integer itemId) {
-        String key = buildKey(userId);
-        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
-        if (!success) {
-            loadUserCollects(key, userId, -1, -1);
-        }
-        return RedisClient.zContains(key, itemId);
+        Map<Integer, Boolean> map = hasCollected(userId, List.of(itemId));
+        return map.getOrDefault(itemId, false);
     }
 
     @CostLog
     @Override
     public Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds) {
         String key = buildKey(userId);
+        if (getUserCollectCount(userId) == 0) {
+            return Collections.emptyMap();
+        }
         boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
         if (!success) {
-            loadUserCollects(key, userId, -1, -1);
+            synchronized (this) {
+                success = RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+                if (!success) {
+                    loadUserCollects(key, userId, -1, -1);
+                }
+            }
         }
         return RedisClient.zMContains(key, itemIds);
     }

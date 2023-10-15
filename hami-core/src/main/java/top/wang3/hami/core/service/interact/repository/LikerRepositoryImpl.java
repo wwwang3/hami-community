@@ -38,12 +38,12 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
             LikeItem item = new LikeItem(likerId, itemId, itemType);
             item.setState(Constants.ONE);
             return super.save(item);
-        } else if (Constants.ZERO.equals(likeItem.getItemType())){
+        } else if (Constants.ZERO.equals(likeItem.getState())){
             //修改
             return ChainWrappers.updateChain(getBaseMapper())
                     .set("`state`", Constants.ONE)
                     .eq("id", likeItem.getId())
-                    .eq("`state`", Constants.ONE)
+                    .eq("`state`", Constants.ZERO)
                     .update();
         } else {
             throw new ServiceException("重复点赞");

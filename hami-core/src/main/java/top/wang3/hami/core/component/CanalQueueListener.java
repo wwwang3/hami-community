@@ -21,7 +21,8 @@ import java.util.List;
  * todo FlatMessage支持
  */
 @Component
-@RabbitListener(queues = {Constants.CANAL_QUEUE}, messageConverter = "simpleMessageConverter")
+@RabbitListener(queues = {Constants.CANAL_QUEUE}, messageConverter = "simpleMessageConverter",
+        concurrency = "16")
 @Slf4j
 public class CanalQueueListener {
 

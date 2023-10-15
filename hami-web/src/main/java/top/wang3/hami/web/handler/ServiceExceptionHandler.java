@@ -28,6 +28,7 @@ public class ServiceExceptionHandler {
     @ExceptionHandler(value = {RateLimitException.class})
     public Result<Void> handleRateLimitException(RateLimitException e) {
         logError(e);
+        e.printStackTrace();
         return Result
                 .error("大哥别刷了( ´･･)ﾉ(._.`)");
     }

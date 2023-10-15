@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
-import top.wang3.hami.common.dto.article.ReadingRecordDTO;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.request.LikeItemParam;
-import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.common.dto.request.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.enums.LikeType;
@@ -19,11 +17,9 @@ import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.article.ArticleService;
-import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.LikeService;
-import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -45,8 +41,6 @@ public class UserInteractController {
     private final FollowService followService;
     private final LikeService likeService;
     private final CollectService collectService;
-    private final CommentService commentService;
-    private final ReadingRecordService readingRecordService;
     private final ArticleService articleService;
     private final UserService userService;
     private final CountService countService;
@@ -104,13 +98,6 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
-    @PostMapping("/reading_record/query_list")
-    public Result<PageData<ReadingRecordDTO>> getReadingRecord(@RequestBody @Valid SearchParam param) {
-        PageData<ReadingRecordDTO> pageData = readingRecordService
-                .listReadingRecords(param);
-        return Result.ofNullable(pageData)
-                .orElse("还没有历史记录");
-    }
 
     @PostMapping("/collect/query_list")
     public Result<PageData<ArticleDTO>> getUserCollectArticles(@RequestBody @Valid

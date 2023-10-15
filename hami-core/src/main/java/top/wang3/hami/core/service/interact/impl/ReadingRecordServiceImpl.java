@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
@@ -51,6 +52,24 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
                 .pageNum(page.getCurrent())
                 .data(dtos)
                 .build();
+    }
+
+    @Override
+    public boolean clearReadingRecords() {
+        return readingRecordRepository.clearRecords(LoginUserContext.getLoginUserId());
+    }
+
+    @Override
+    public boolean deleteRecord(Integer id) {
+        return readingRecordRepository.deleteRecord(LoginUserContext.getLoginUserId(), id);
+    }
+
+    @Override
+    public boolean deleteRecords(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return false;
+        }
+        return readingRecordRepository.deleteRecords(LoginUserContext.getLoginUserId(), ids);
     }
 
     private void buildReadingRecord(Collection<ReadingRecordDTO> dtos) {

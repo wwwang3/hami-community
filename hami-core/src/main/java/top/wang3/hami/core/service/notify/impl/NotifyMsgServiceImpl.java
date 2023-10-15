@@ -48,4 +48,14 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         int loginUserId = LoginUserContext.getLoginUserId();
         return notifyMsgRepository.selectNoReadNotify(loginUserId);
     }
+
+    @Override
+    public boolean doRead(Integer msgId) {
+        return notifyMsgRepository.updateNotifyState(msgId, LoginUserContext.getLoginUserId());
+    }
+
+    @Override
+    public boolean deleteNotify(Integer msgId) {
+        return notifyMsgRepository.deleteNotifyMsg(msgId, LoginUserContext.getLoginUserId());
+    }
 }

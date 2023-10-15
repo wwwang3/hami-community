@@ -28,7 +28,7 @@ public class FixedWindowRateLimiterHandler implements RateLimiterHandler {
 
     @Override
     public List<Long> execute(String key, double rate, double capacity) {
-        double interval = capacity / rate;
+        long interval =  (long) (capacity / rate);
         return RedisClient.executeScript(fixedWindowScript, List.of(key), List.of(interval, capacity));
     }
 }

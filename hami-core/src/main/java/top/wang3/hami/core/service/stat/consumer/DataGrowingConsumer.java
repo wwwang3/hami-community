@@ -34,7 +34,6 @@ public class DataGrowingConsumer implements InteractConsumer {
     private final ArticleRepository articleRepository;
 
     @Override
-    @RabbitHandler
     public void handleFollowMessage(FollowRabbitMessage message) {
         //关注消息
         String key = buildKey(message.getToUserId());
@@ -49,7 +48,6 @@ public class DataGrowingConsumer implements InteractConsumer {
     }
 
     @Override
-    @RabbitHandler
     public void handleCollectMessage(CollectRabbitMessage message) {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
@@ -60,7 +58,6 @@ public class DataGrowingConsumer implements InteractConsumer {
         ensureExpireTime(key);
     }
 
-    @RabbitHandler
     public void handleLikeMessage(LikeRabbitMessage message) {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
@@ -71,11 +68,15 @@ public class DataGrowingConsumer implements InteractConsumer {
         ensureExpireTime(key);
     }
 
-    @RabbitHandler
     public void handleCommentMessage(CommentRabbitMessage message) {
         String key = buildKey(message.getAuthorId());
         RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, 1);
         ensureExpireTime(key);
+    }
+
+    @Override
+    public void handleReplyMessage(ReplyRabbitMessage message) {
+
     }
 
     @Override
@@ -85,6 +86,7 @@ public class DataGrowingConsumer implements InteractConsumer {
         RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, message.getDeletedCount());
         ensureExpireTime(key);
     }
+
 
     @RabbitHandler
     public void handleArticleMessage(ArticleRabbitMessage message) {

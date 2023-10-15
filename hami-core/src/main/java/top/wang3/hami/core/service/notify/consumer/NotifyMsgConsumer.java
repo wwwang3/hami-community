@@ -4,7 +4,10 @@ package top.wang3.hami.core.service.notify.consumer;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
@@ -40,7 +43,6 @@ public class NotifyMsgConsumer implements InteractConsumer {
 
     //点赞 评论 收藏 关注等通知消息
     @Override
-    @RabbitHandler
     public void handleLikeMessage(LikeRabbitMessage message) {
         //点赞消息
         try {
@@ -80,7 +82,6 @@ public class NotifyMsgConsumer implements InteractConsumer {
     }
 
     @Override
-    @RabbitHandler
     public void handleCommentMessage(CommentRabbitMessage message) {
         try {
             //评论文章通知 xx评论了你的文章
@@ -96,7 +97,6 @@ public class NotifyMsgConsumer implements InteractConsumer {
     }
 
     @Override
-    @RabbitHandler
     public void handleReplyMessage(ReplyRabbitMessage message) {
         try {
             //把他爹也查出来 内容一起写入通知 xx回复了你的评论
@@ -118,7 +118,11 @@ public class NotifyMsgConsumer implements InteractConsumer {
         }
     }
 
-    @RabbitHandler
+    @Override
+    public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
+
+    }
+
     public void handleCollectMessage(CollectRabbitMessage message) {
         try {
             if (Constants.ZERO.equals(message.getState())) {
@@ -138,15 +142,15 @@ public class NotifyMsgConsumer implements InteractConsumer {
         }
     }
 
-    @RabbitHandler
-    public void handleFollowMsg(FollowRabbitMessage rabbitMessage) {
+    @Override
+    public void handleFollowMessage(FollowRabbitMessage message) {
         try {
-            if (Constants.ZERO.equals(rabbitMessage.getState())) {
+            if (Constants.ZERO.equals(message.getState())) {
                 return;
             }
             //xx 关注了你
             NotifyMsg msg = NotifyMsgBuilder
-                    .buildFollowMsg(rabbitMessage.getUserId(), rabbitMessage.getToUserId());
+                    .buildFollowMsg(message.getUserId(), message.getToUserId());
             save(msg);
         } catch (Exception e) {
             logError(e);

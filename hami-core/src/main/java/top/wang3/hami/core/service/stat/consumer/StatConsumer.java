@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.message.CommentDeletedRabbitMessage;
-import top.wang3.hami.common.message.CommentRabbitMessage;
-import top.wang3.hami.common.message.ReplyRabbitMessage;
+import top.wang3.hami.common.message.*;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
@@ -37,6 +34,21 @@ public class StatConsumer implements InteractConsumer {
     @RabbitHandler
     public void handleArticleMessage(ArticleRabbitMessage message) {
         articleRepository.deleteArticle(message.getArticleId(), message.getAuthorId());
+    }
+
+    @Override
+    public void handleLikeMessage(LikeRabbitMessage message) {
+
+    }
+
+    @Override
+    public void handleCollectMessage(CollectRabbitMessage message) {
+
+    }
+
+    @Override
+    public void handleFollowMessage(FollowRabbitMessage message) {
+
     }
 
     @Override
