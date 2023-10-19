@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class SearchParam extends PageParam {
 
     private String keyword;

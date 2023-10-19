@@ -18,7 +18,8 @@ public class ReadingRecordController {
     private final ReadingRecordService readingRecordService;
 
     @PostMapping("/reading_record/query_list")
-    public Result<PageData<ReadingRecordDTO>> listReadingRecord(@RequestBody @Valid SearchParam param) {
+    public Result<PageData<ReadingRecordDTO>> listReadingRecord(@RequestBody
+                                                                @Valid SearchParam param) {
         PageData<ReadingRecordDTO> pageData = readingRecordService
                 .listReadingRecords(param);
         return Result.ofNullable(pageData)
@@ -29,13 +30,13 @@ public class ReadingRecordController {
     public Result<Void> deleteReadingRecord(@RequestParam("record_id") Integer id) {
         boolean deleted = readingRecordService.deleteRecord(id);
         return Result.ofTrue(deleted)
-                .orElse("删除失败");
+                .orElse("操作失败");
     }
 
     @PostMapping("/reading_record/clear")
     public Result<Void> clearReadingRecords() {
         boolean deleted = readingRecordService.clearReadingRecords();
         return Result.ofTrue(deleted)
-                .orElse("删除失败");
+                .orElse("操作失败");
     }
 }

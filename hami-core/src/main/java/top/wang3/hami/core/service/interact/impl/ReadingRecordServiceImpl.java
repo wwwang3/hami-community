@@ -6,9 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import top.wang3.hami.common.converter.ArticleConverter;
+import top.wang3.hami.common.converter.ReadingRecordConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.ReadingRecordDTO;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.SearchParam;
@@ -22,6 +23,10 @@ import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import static top.wang3.hami.common.constant.Constants.Hi_POST_TAG;
+import static top.wang3.hami.common.constant.Constants.Hi_PRE_TAG;
 
 
 @Service
@@ -45,8 +50,8 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
         } else {
             records = readingRecordRepository.listReadingRecordByPage(page, loginUserId);
         }
-        Collection<ReadingRecordDTO> dtos = ArticleConverter.INSTANCE.toReadingRecordDTO(records);
-        buildReadingRecord(dtos);
+        Collection<ReadingRecordDTO> dtos = ReadingRecordConverter.INSTANCE.toReadingRecordDTOList(records);
+        buildReadingRecord(dtos, keyword);
         return PageData.<ReadingRecordDTO>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
@@ -72,10 +77,26 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
         return readingRecordRepository.deleteRecords(LoginUserContext.getLoginUserId(), ids);
     }
 
-    private void buildReadingRecord(Collection<ReadingRecordDTO> dtos) {
+    private void buildReadingRecord(Collection<ReadingRecordDTO> dtos, String keyword) {
         List<Integer> articleIds = ListMapperHandler.listTo(dtos, ReadingRecordDTO::getArticleId, false);
         List<ArticleDTO> articleDTOS = articleService.listArticleById(articleIds, new ArticleOptionsBuilder());
         ListMapperHandler.doAssemble(dtos, ReadingRecordDTO::getArticleId,
                 articleDTOS, ArticleDTO::getId, ReadingRecordDTO::setContent);
+        if (StringUtils.hasText(keyword)) {
+            highlightTitle(dtos, keyword);
+        }
+    }
+
+    private void highlightTitle(Collection<ReadingRecordDTO> dtos, String keyword) {
+        for (ReadingRecordDTO dto : dtos) {
+            ArticleDTO content = dto.getContent();
+            if (content == null) continue;
+            ArticleInfo info = content.getArticleInfo();
+            if (info == null) continue;
+            String title = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE)
+                    .matcher(info.getTitle())
+                    .replaceAll(Hi_PRE_TAG + keyword + Hi_POST_TAG);
+            info.setTitle(title);
+        }
     }
 }

@@ -18,6 +18,10 @@ import top.wang3.hami.core.service.user.UserService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import static top.wang3.hami.common.constant.Constants.Hi_POST_TAG;
+import static top.wang3.hami.common.constant.Constants.Hi_PRE_TAG;
 
 @Service
 @Slf4j
@@ -27,9 +31,6 @@ public class SearchServiceImpl implements SearchService {
     private final ArticleRepository articleRepository;
     private final UserService userService;
     private final CategoryService categoryService;
-
-    public static final String PRE_TAG = "<em>";
-    public static final String POST_TAG = "</em>";
 
     @Override
     public PageData<ArticleSearchDTO> searchArticle(SearchParam param) {
@@ -46,9 +47,11 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private void highlightKeyword(List<ArticleSearchDTO> articles, String keyword) {
+        Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
+        String replaced = Hi_PRE_TAG + keyword + Hi_POST_TAG;
         for (ArticleSearchDTO article : articles) {
-            String title = article.getTitle().replaceAll(keyword, PRE_TAG + keyword + POST_TAG);
-            String summary = article.getSummary().replaceAll(keyword, PRE_TAG + keyword + POST_TAG);
+            String title = pattern.matcher(article.getTitle()).replaceAll(replaced);
+            String summary = pattern.matcher(article.getSummary()).replaceAll(replaced);
             article.setTitle(title);
             article.setSummary(summary);
         }
