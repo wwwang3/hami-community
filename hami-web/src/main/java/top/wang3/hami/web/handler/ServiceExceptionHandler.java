@@ -27,8 +27,7 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {RateLimitException.class})
     public Result<Void> handleRateLimitException(RateLimitException e) {
-        logError(e);
-        e.printStackTrace();
+        logError(e, true);
         return Result
                 .error("大哥别刷了( ´･･)ﾉ(._.`)");
     }
@@ -47,13 +46,22 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {Exception.class})
     public Result<Void> resolveException(Exception e) {
-        logError(e);
-        e.printStackTrace();
+        logError(e, true);
         return Result.error(e.getMessage());
     }
 
 
     private void logError(Exception e) {
-        log.warn("resolved exception: [{}: {}]", e.getClass(), e.getMessage());
+        logError(e, false);
     }
+
+
+    @SuppressWarnings(value = "all")
+    private void logError(Exception e, boolean printTrace) {
+        log.error("resolved exception: [{}: {}]", e.getClass(), e.getMessage());
+        if (printTrace) {
+            e.printStackTrace();
+        }
+    }
+
 }

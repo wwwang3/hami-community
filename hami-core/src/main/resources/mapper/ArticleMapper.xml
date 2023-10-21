@@ -78,8 +78,8 @@
         <!--@sql from article t1 left join article_tag t2 -->
     </sql>
 
-  <select id="searchArticle" resultType="top.wang3.hami.common.dto.article.ArticleSearchDTO">
-      select id, user_id, category_id, picture, title, summary, ctime
+  <select id="searchArticle" resultType="java.lang.Integer">
+      select id
       from article
       where deleted = 0
         and (

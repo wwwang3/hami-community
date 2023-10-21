@@ -4,7 +4,6 @@ package top.wang3.hami.core.service.article.repository;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.dto.article.ArticleInfo;
-import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 
@@ -33,7 +32,7 @@ public interface ArticleRepository extends IService<Article> {
 
     List<ArticleDO> scanArticles(List<Integer> ids);
 
-    List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword);
+    List<Integer> searchArticle(Page<Article> page, String keyword);
 
     Integer getArticleAuthor(Integer articleId);
 

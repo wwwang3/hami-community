@@ -12,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleInfo;
-import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.model.ArticleTag;
@@ -119,7 +118,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
 
 
     @Override
-    public List<ArticleSearchDTO> searchArticle(Page<Article> page, String keyword) {
+    public List<Integer> searchArticle(Page<Article> page, String keyword) {
         if (!StringUtils.hasText(keyword)) return Collections.emptyList();
         return getBaseMapper().searchArticle(page, keyword);
     }

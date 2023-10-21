@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import top.wang3.hami.common.dto.article.ArticleSearchDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 
@@ -16,7 +15,7 @@ import java.util.List;
 public interface ArticleMapper extends BaseMapper<Article> {
 
 
-    List<ArticleSearchDTO> searchArticle(Page<Article> page, @Param("keyword") String keyword);
+    List<Integer> searchArticle(Page<Article> page, @Param("keyword") String keyword);
 
     @Select("""
                 select user_id from article where id = #{articleId} and deleted = 0;

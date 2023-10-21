@@ -7,11 +7,11 @@ local max_size = tonumber(ARGV[3])
 
 local res1 = redis.call("zadd", following_list_key, score1, following_id)
 
-local following_size = redis.call("zcard", following_list_key)
-
-
-if (following_size > max_size) then
-    return redis.call("zpopmin", following_list_key)
-end
+--local following_size = redis.call("zcard", following_list_key)
+--
+--
+--if (following_size > max_size) then
+--    return redis.call("zpopmin", following_list_key)
+--end
 
 return res1;

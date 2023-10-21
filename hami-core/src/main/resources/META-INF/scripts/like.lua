@@ -5,9 +5,9 @@ local score = tonumber(ARGV[2])
 local max_size = tonumber(ARGV[3])
 
 local res = redis.call("zadd", key, score, member)
-local size = redis.call("zcard", key)
+--local size = redis.call("zcard", key)
 
-if size > max_size then
-    return redis.call("zpopmin")
-end
+--if size > max_size then
+--    return redis.call("zpopmin", key)
+--end
 return res

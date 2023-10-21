@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
         @QueueBinding(
                 value = @Queue(value = "hami-data-growing-queue-2"),
                 exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                key = {"article.publish", "article.delete"}
+                key = {"article.publish", "article.delete", "article.view"}
         )
 }, concurrency = "2")
 @RequiredArgsConstructor
@@ -58,6 +58,7 @@ public class DataGrowingConsumer implements InteractConsumer {
         ensureExpireTime(key);
     }
 
+    @Override
     public void handleLikeMessage(LikeRabbitMessage message) {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
@@ -68,6 +69,7 @@ public class DataGrowingConsumer implements InteractConsumer {
         ensureExpireTime(key);
     }
 
+    @Override
     public void handleCommentMessage(CommentRabbitMessage message) {
         String key = buildKey(message.getAuthorId());
         RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, 1);
@@ -76,14 +78,14 @@ public class DataGrowingConsumer implements InteractConsumer {
 
     @Override
     public void handleReplyMessage(ReplyRabbitMessage message) {
-
+        handleCommentMessage(message);
     }
 
     @Override
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
         Integer author = articleRepository.getArticleAuthor(message.getArticleId());
         String key = buildKey(author);
-        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, message.getDeletedCount());
+        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, -1 * message.getDeletedCount());
         ensureExpireTime(key);
     }
 
@@ -96,6 +98,8 @@ public class DataGrowingConsumer implements InteractConsumer {
             RedisClient.hIncr(key, Constants.DATA_GROWING_ARTICLE, -1);
         } else if (ArticleRabbitMessage.Type.PUBLISH.equals(message.getType())) {
             RedisClient.hIncr(key, Constants.DATA_GROWING_ARTICLE, 1);
+        } else if (ArticleRabbitMessage.Type.VIEW.equals(message.getType())) {
+            RedisClient.hIncr(key, Constants.DATA_GROWING_VIEW, 1);
         }
         ensureExpireTime(key);
     }

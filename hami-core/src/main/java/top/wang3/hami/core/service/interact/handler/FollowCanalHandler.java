@@ -76,7 +76,7 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
         if (success) {
             Long res = RedisClient.executeScript(followingScript, List.of(followingListKey),
                     List.of(following, score, ZPageHandler.DEFAULT_MAX_SIZE));
-            log.info("following-userId: {}, following: {}, res: {}", userId, following, res);
+            log.info("userId: {}, following: {}, res: {}", userId, following, res);
         } else {
             followService.loadUserFollowings(followingListKey, userId, -1, -1);
         }
@@ -87,7 +87,7 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
         if (success) {
             Long res = RedisClient.executeScript(followerScript, List.of(followerListKey),
                     List.of(follower, score, ZPageHandler.DEFAULT_MAX_SIZE));
-            log.info("following-userId: {}, following: {}, res: {}", userId, follower, res);
+            log.info("userId: {}, follower: {}, res: {}", userId, follower, res);
         } else {
             followService.loadUserFollowers(followerListKey, userId, -1, -1);
         }

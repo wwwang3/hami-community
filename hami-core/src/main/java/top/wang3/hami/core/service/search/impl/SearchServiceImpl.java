@@ -5,18 +5,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.article.ArticleSearchDTO;
-import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
+import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.ArticleInfo;
+import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.SearchParam;
-import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.service.article.CategoryService;
+import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.search.SearchService;
-import top.wang3.hami.core.service.user.UserService;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -29,44 +27,30 @@ import static top.wang3.hami.common.constant.Constants.Hi_PRE_TAG;
 public class SearchServiceImpl implements SearchService {
 
     private final ArticleRepository articleRepository;
-    private final UserService userService;
-    private final CategoryService categoryService;
+    private final ArticleService articleService;
 
     @Override
-    public PageData<ArticleSearchDTO> searchArticle(SearchParam param) {
+    public PageData<ArticleDTO> searchArticle(SearchParam param) {
         Page<Article> page = param.toPage();
-        List<ArticleSearchDTO> articles = articleRepository.searchArticle(page, param.getKeyword());
+        List<Integer> ids = articleRepository.searchArticle(page, param.getKeyword());
+        List<ArticleDTO> articles = articleService.listArticleById(ids, new ArticleOptionsBuilder());
         highlightKeyword(articles, param.getKeyword());
-        buildCategory(articles);
-        buildAuthor(articles);
-        return PageData.<ArticleSearchDTO>builder()
+        return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
                 .data(articles)
                 .build();
     }
 
-    private void highlightKeyword(List<ArticleSearchDTO> articles, String keyword) {
+    private void highlightKeyword(List<ArticleDTO> articles, String keyword) {
         Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
         String replaced = Hi_PRE_TAG + keyword + Hi_POST_TAG;
-        for (ArticleSearchDTO article : articles) {
+        List<ArticleInfo> infos = ListMapperHandler.listTo(articles, ArticleDTO::getArticleInfo, false);
+        infos.forEach(article -> {
             String title = pattern.matcher(article.getTitle()).replaceAll(replaced);
             String summary = pattern.matcher(article.getSummary()).replaceAll(replaced);
             article.setTitle(title);
             article.setSummary(summary);
-        }
-    }
-
-    private void buildCategory(List<ArticleSearchDTO> articles) {
-        for (ArticleSearchDTO article : articles) {
-            article.setCategoryDTO(categoryService.getCategoryDTOById(article.getCategoryId()));
-        }
-    }
-
-    private void buildAuthor(List<ArticleSearchDTO> articles) {
-        List<Integer> userIds = ListMapperHandler.listTo(articles, ArticleSearchDTO::getUserId);
-        Collection<UserDTO> users = userService.listAuthorInfoById(userIds, UserOptionsBuilder.justInfo());
-        ListMapperHandler.doAssemble(articles, ArticleSearchDTO::getUserId, users,
-                UserDTO::getUserId, ArticleSearchDTO::setAuthor);
+        });
     }
 }
