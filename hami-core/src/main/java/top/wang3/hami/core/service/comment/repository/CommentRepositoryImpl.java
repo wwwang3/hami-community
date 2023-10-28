@@ -19,8 +19,8 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
 
 
     public static final String[] fields = {
-            "id", "article_id", "user_id", "is_author",
-            "ip_info", "content", "content_img", "root_id",
+            "id", "article_id", "user_id", "ip_info",
+            "content", "content_img", "root_id", "likes",
             "parent_id", "reply_to", "ctime"
     };
 
@@ -30,33 +30,33 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
                 .select(fields)
                 .eq("article_id", articleId)
                 .eq("root_id", 0)
-                .orderByDesc(sort.equals(0) ? "likes" : "id")
+                .orderByDesc(sort.equals(0) ? "likes" : "ctime")
                 .list(page);
     }
 
     @Override
     public List<Comment> listReply(Page<Comment> page, Integer articleId, Integer rootId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select(fields)
-                .eq("article_id", articleId)
-                .eq("root_id", rootId)
-                .orderByDesc("id")
-                .list(page);
+        return listReply(page, articleId, rootId, 1);
     }
 
     @Override
-    public Reply listIndexReply(Integer rootId) {
+    public Reply listIndexReply(Integer articleId, Integer rootId) {
         //获取第一页
         Page<Comment> page = new Page<>(1, 5);
-        List<Comment> comments = ChainWrappers.queryChain(getBaseMapper())
-                .select(fields)
-                .eq("root_id", rootId)
-                .orderByDesc("likes")
-                .list(page);
+        List<Comment> comments = listReply(page, articleId, rootId, 0);
         Reply reply = new Reply();
         reply.setComments(comments);
         reply.setTotal(page.getTotal());
         return reply;
+    }
+
+    private List<Comment> listReply(Page<Comment> page, Integer articleId, Integer rootId, int sort) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select(fields)
+                .eq("article_id", articleId)
+                .eq("root_id", rootId)
+                .orderByDesc(sort == 0 ? "likes" : "ctime")
+                .list(page);
     }
 
     @Override
@@ -97,17 +97,14 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
                 .update();
     }
 
+
     @Override
-    public int deleteComment(Integer userId, Integer id) {
+    public int deleteComment(Integer id) {
         UpdateWrapper<Comment> wrapper = Wrappers
                 .update(new Comment())
                 .eq("id", id)
-                .eq("user_id", userId);
-        int deleted = getBaseMapper().delete(wrapper);
-        if (deleted == 0) return 0;
-        UpdateWrapper<Comment> wrapper2 = Wrappers.update(new Comment())
-                .eq("root_id", id);//删除对应的回复
-        deleted += getBaseMapper().delete(wrapper2);
-        return deleted;
+                .or()
+                .eq("root_id", id);
+        return getBaseMapper().delete(wrapper);
     }
 }

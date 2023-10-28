@@ -77,7 +77,7 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     @Override
     public boolean increaseComments(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("comments = comment + {0}", count)
+                .setSql("comments = comments + {0}", count)
                 .eq("article_id", articleId)
                 .update();
     }
@@ -97,7 +97,6 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
         return ChainWrappers.updateChain(getBaseMapper())
                 .setSql("collects = collects - {0}", count)
                 .eq("article_id", articleId)
-                .gt("likes", 0)
                 .update();
     }
 
@@ -107,7 +106,6 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
         return ChainWrappers.updateChain(getBaseMapper())
                 .setSql("likes = likes - {0}", count)
                 .eq("article_id", articleId)
-                .gt("likes", 0)
                 .update();
     }
 
@@ -115,9 +113,8 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     @Override
     public boolean decreaseComments(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("comments = comments + {0}", count)
+                .setSql("comments = comments - {0}", count)
                 .eq("article_id", articleId)
-                .gt("likes", 0)
                 .update();
     }
 

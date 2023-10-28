@@ -21,18 +21,21 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/query_list")
-    public Result<PageData<CommentDTO>> listComment(@RequestBody CommentPageParam param) {
+    public Result<PageData<CommentDTO>> listComment(@RequestBody
+                                                    @Valid CommentPageParam param) {
         PageData<CommentDTO> data = commentService.listComment(param);
         return Result.successData(data);
     }
 
     @PostMapping("/reply/query_list")
-    public Result<PageData<CommentDTO>> listReply(@RequestBody CommentPageParam param) {
+    public Result<PageData<CommentDTO>> listReply(@RequestBody
+                                                  @Validated(value = CommentPageParam.Reply.class)
+                                                  CommentPageParam param) {
         PageData<CommentDTO> data = commentService.listReply(param);
         return Result.successData(data);
     }
 
-    @PostMapping("/comment/submit")
+    @PostMapping("/submit")
     public Result<Comment> publishComment(@RequestBody @Valid CommentParam param) {
         Comment comment = commentService.publishComment(param);
         return Result.ofNullable(comment)
@@ -47,7 +50,7 @@ public class CommentController {
                 .orElse("回复失败");
     }
 
-    @PostMapping("/comment/delete")
+    @PostMapping("/delete")
     public Result<Void> deleteComment(@RequestParam("id") Integer id) {
         boolean success = commentService.deleteComment(id);
         return Result.ofTrue(success)

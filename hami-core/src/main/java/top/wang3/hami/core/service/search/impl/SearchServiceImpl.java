@@ -4,13 +4,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.request.SearchParam;
+import top.wang3.hami.common.message.SearchRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.search.SearchService;
@@ -28,18 +32,27 @@ public class SearchServiceImpl implements SearchService {
 
     private final ArticleRepository articleRepository;
     private final ArticleService articleService;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Override
     public PageData<ArticleDTO> searchArticle(SearchParam param) {
+        String keyword = param.getKeyword();
+        rabbitMessagePublisher.publishMsg(new SearchRabbitMessage(keyword));
         Page<Article> page = param.toPage();
-        List<Integer> ids = articleRepository.searchArticle(page, param.getKeyword());
+        List<Integer> ids = articleRepository.searchArticle(page, keyword);
         List<ArticleDTO> articles = articleService.listArticleById(ids, new ArticleOptionsBuilder());
-        highlightKeyword(articles, param.getKeyword());
+        highlightKeyword(articles, keyword);
         return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
                 .data(articles)
                 .build();
+    }
+
+    @Override
+    public List<String> getHotSearch() {
+        String key = Constants.HOT_SEARCH;
+        return RedisClient.zRevPage(key, 1, 20);
     }
 
     private void highlightKeyword(List<ArticleDTO> articles, String keyword) {

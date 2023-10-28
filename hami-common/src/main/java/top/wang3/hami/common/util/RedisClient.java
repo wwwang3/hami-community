@@ -483,7 +483,6 @@ public class RedisClient {
                 .add(key, value, score));
     }
 
-
     public static <T> boolean zAddIfAbsent(String key, T value, double score) {
         return Boolean.TRUE.equals(redisTemplate.opsForZSet()
                 .addIfAbsent(key, value, score)
@@ -544,14 +543,14 @@ public class RedisClient {
         return new ArrayList<>(set);
     }
 
-    public static <T> Collection<T> zRevPage(String key, long current, long size) {
+    public static <T> List<T> zRevPage(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
         long max = current * size - 1;
         Set<T> set = redisTemplate.opsForZSet()
                 .reverseRange(key, min, max);
         if (set == null) return Collections.emptyList();
-        return set;
+        return new ArrayList<>(set);
     }
 
     public static <T> Collection<ZSetOperations.TypedTuple<T>> zRevPageWithScore(String key, long current, long size) {
@@ -597,6 +596,11 @@ public class RedisClient {
                     .pExpire(rawKey, timeUnit.toMillis(timeout));
             return null;
         });
+    }
+
+    public static Double zIncr(String key, String member, int incr) {
+        return redisTemplate.opsForZSet()
+                .incrementScore(key, member, incr);
     }
 
     /**
@@ -780,7 +784,7 @@ public class RedisClient {
     public static <T> T executeScript(RedisScript<T> script, List<String> keys, List<?> args) {
         Collection<String> stringArgs = ListMapperHandler.listTo(args, String::valueOf, false);
         Object[] argsArray = stringArgs.toArray(new String[0]);
-        return (T) redisTemplate.execute(script, redisTemplate.getKeySerializer(),
-                redisTemplate.getStringSerializer(), keys, argsArray);
+        return (T) redisTemplate.execute(script, redisTemplate.getStringSerializer(),
+                redisTemplate.getValueSerializer(), keys, argsArray);
     }
 }

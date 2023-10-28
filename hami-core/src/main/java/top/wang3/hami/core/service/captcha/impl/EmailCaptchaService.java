@@ -3,7 +3,6 @@ package top.wang3.hami.core.service.captcha.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
@@ -46,15 +45,6 @@ public class EmailCaptchaService implements CaptchaService {
     @Override
     public void deleteCaptcha(String type, String item) {
         RedisClient.deleteObject(type + item);
-    }
-
-    public static String resolveCaptchaType(String type) {
-        return switch (type) {
-            case "register" -> Constants.REGISTER_EMAIL_CAPTCHA;
-            case "reset" -> Constants.RESET_EMAIL_CAPTCHA;
-            case "update" -> Constants.UPDATE_EMAIL_CAPTCHA;
-            default -> throw new IllegalArgumentException(type);
-        };
     }
 
 }

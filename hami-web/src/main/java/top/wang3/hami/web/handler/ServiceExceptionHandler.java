@@ -13,6 +13,8 @@ import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.RateLimitException;
 
+import java.sql.SQLException;
+
 
 @RestControllerAdvice
 @Slf4j
@@ -42,6 +44,12 @@ public class ServiceExceptionHandler {
     public Result<Void> handleMethodArgsException(Exception e) {
         logError(e);
         return Result.error("参数错误");
+    }
+
+    @ExceptionHandler(value = {SQLException.class})
+    public Result<Void> handleSQLException(SQLException e) {
+        logError(e, true);
+        return Result.error("系统错误");
     }
 
     @ExceptionHandler(value = {Exception.class})

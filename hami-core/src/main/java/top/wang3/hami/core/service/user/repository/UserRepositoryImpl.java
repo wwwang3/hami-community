@@ -3,16 +3,11 @@ package top.wang3.hami.core.service.user.repository;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
-import top.wang3.hami.common.converter.UserConverter;
-import top.wang3.hami.common.dto.user.LoginProfile;
-import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.core.mapper.UserMapper;
 
@@ -30,30 +25,12 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
             "blog", "company", "position", "tag", "ctime", "mtime"
     };
 
-    @Resource
-    TransactionTemplate transactionTemplate;
-
     @Override
     public User getUserById(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(USER_PROFILE_FIELDS)
                 .eq("user_id", userId)
                 .one();
-    }
-
-    @Override
-    public UserProfile getUserProfile(Integer userId) {
-        User user = getUserById(userId);
-        return UserConverter.INSTANCE.toUserProfile(user);
-    }
-
-    @Override
-    public LoginProfile getLoginProfile(Integer userId) {
-        User user = ChainWrappers.queryChain(getBaseMapper())
-                .select(LOGIN_PROFILE_FIELDS)
-                .eq("user_id", userId)
-                .one();
-        return UserConverter.INSTANCE.toLoginProfile(user);
     }
 
     @Override

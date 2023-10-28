@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
@@ -35,7 +34,7 @@ public class UserInteractMessageConsumer implements InteractConsumer {
 
     @Override
     public void handleLikeMessage(LikeRabbitMessage message) {
-        String userLikeCountKey = Constants.USER_LIKE_COUNT + message.getLikeType().getType() + ":" + message;
+        String userLikeCountKey = Constants.USER_LIKE_COUNT + message.getLikeType().getType() + ":" + message.getUserId();
         RedisClient.deleteObject(userLikeCountKey);
     }
 
@@ -64,8 +63,7 @@ public class UserInteractMessageConsumer implements InteractConsumer {
 
     @Override
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
-        int deleted = likeRepository.deleteLikeItem(message.getArticleId(), LikeType.COMMENT);
-        log.info("article deleted, async to delete like-item, deleted-count: {}", deleted);
+
     }
 
 }

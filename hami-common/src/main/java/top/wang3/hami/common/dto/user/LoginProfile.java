@@ -27,9 +27,24 @@ public class LoginProfile {
     private String avatar;
 
     /**
+     * 职位
+     */
+    private String position;
+
+    /**
+     * 公司
+     */
+    private String company;
+
+    /**
      * 个人简介
      */
     private String profile;
+
+    /**
+     * 个人主页
+     */
+    private String blog;
 
     /**
      * 标签
@@ -62,4 +77,5 @@ public class LoginProfile {
     private Integer followings = 0;
 
     private UserStat stat;
+
 }

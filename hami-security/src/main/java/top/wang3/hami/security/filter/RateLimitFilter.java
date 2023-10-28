@@ -57,6 +57,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         try {
             rateLimiter.checkLimit(model);
         } catch (RateLimitException e) {
+            log.error("e: {}", e.getMessage());
             writeBlockedMessage(response);
             return;
         }

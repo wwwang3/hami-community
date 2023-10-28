@@ -3,7 +3,6 @@ package top.wang3.hami.web.controller.article;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDraftDTO;
@@ -44,12 +43,6 @@ public class ArticleDraftController {
     public Result<ArticleDraftDTO> getDraft(@RequestParam("draftId") long draftId) {
         ArticleDraftDTO draft = articleDraftService.getArticleDraftById(draftId);
         return Result.successData(draft);
-    }
-
-    @PostMapping("/upload/pic")
-    public Result<String> uploadPicture(@RequestPart("picture") MultipartFile picture) {
-        String url = imageService.upload(picture, "article-picture");
-        return Result.successData(url);
     }
 
     @RateLimit(capacity = 216, rate = 0.0025, scope = RateLimit.Scope.LOGIN_USER,

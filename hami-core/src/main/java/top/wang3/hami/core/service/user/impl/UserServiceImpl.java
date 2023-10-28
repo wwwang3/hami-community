@@ -12,7 +12,6 @@ import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
-import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.UserRabbitMessage;
@@ -63,13 +62,6 @@ public class UserServiceImpl implements UserService {
         LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
         buildLoginUserStat(loginProfile, loginUserId);
         return loginProfile;
-    }
-
-    @Override
-    public UserProfile getUserProfile() {
-        int userId = LoginUserContext.getLoginUserId();
-        User user = this.getUserById(userId);
-        return UserConverter.INSTANCE.toUserProfile(user);
     }
 
     @Override
@@ -162,6 +154,7 @@ public class UserServiceImpl implements UserService {
         if (Boolean.TRUE.equals(success)) {
             UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_UPDATE, loginUserId);
             rabbitMessagePublisher.publishMsg(message);
+            return true;
         }
         return false;
     }

@@ -14,13 +14,13 @@ public interface CommentRepository extends IService<Comment> {
 
     List<Comment> listReply(Page<Comment> page, Integer articleId, Integer rootId);
 
-    Reply listIndexReply(Integer rootId);
+    Reply listIndexReply(Integer articleId, Integer rootId);
 
     boolean increaseLikes(Integer id);
 
     boolean decreaseLikes(Integer id);
 
-    int deleteComment(Integer userId, Integer id);
+    int deleteComment(Integer id);
 
     List<Comment> listCommentById(List<Integer> commentIds);
 

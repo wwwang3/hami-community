@@ -1,32 +1,33 @@
 package top.wang3.hami.web.controller.user;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import top.wang3.hami.common.dto.request.RegisterParam;
-import top.wang3.hami.common.dto.request.ResetPassParam;
+import top.wang3.hami.common.converter.UserConverter;
+import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.request.UserProfileParam;
+import top.wang3.hami.common.dto.user.AccountInfo;
 import top.wang3.hami.common.dto.user.LoginProfile;
+import top.wang3.hami.common.model.LoginRecord;
+import top.wang3.hami.common.model.User;
+import top.wang3.hami.core.exception.ServiceException;
 import top.wang3.hami.core.service.account.AccountService;
-import top.wang3.hami.core.service.captcha.CaptchaService;
-import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
+import top.wang3.hami.core.service.account.LoginRecordService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 
-import java.util.concurrent.TimeUnit;
-
 @Validated
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
     private final UserService userService;
-    private final CaptchaService captchaService;
+    private final LoginRecordService loginRecordService;
 
     @GetMapping("/me")
     public Result<LoginProfile> me() {
@@ -34,33 +35,33 @@ public class AccountController {
         return Result.of(loginProfile);
     }
 
-    @GetMapping("/captcha")
-    public Result<Void> getRegisterCaptcha(@RequestParam("email") @NotBlank @Email String email,
-                                           @RequestParam("type") @Pattern(regexp = "(register|reset|update)") String type) {
-        String captchaType = EmailCaptchaService.resolveCaptchaType(type);
-        //6位验证码 有效期五分钟
-        captchaService.sendCaptcha(captchaType, email, 6, TimeUnit.MINUTES.toSeconds(5));
-        return Result.success("发送成功");
+    @GetMapping("/info")
+    public Result<AccountInfo> getAccountInfo() {
+        AccountInfo info = accountService.getAccountInfo();
+        return Result.successData(info);
     }
 
-
-    @PostMapping("/register")
-    public Result<Void> register(@RequestBody @Valid
-                                     RegisterParam param) {
-        return Result.ofTrue(accountService.register(param))
-                .orElse("注册失败");
+    @PostMapping("/update")
+    public Result<Void> updateUserProfile(@RequestBody @Valid
+                                          UserProfileParam userProfileParam) {
+        String username = userProfileParam.getUsername();
+        if (StringUtils.hasText(username)) {
+            boolean exists = accountService.checkUsername(userProfileParam.getUsername());
+            if (exists) {
+                //用户名已存在
+                throw new ServiceException("用户名已被使用");
+            }
+        }
+        User user = UserConverter.INSTANCE.toUser(userProfileParam);
+        boolean success = userService.updateProfile(user);
+        return Result.successIfTrue(success, "error");
     }
 
-    @PostMapping("/update-pass")
-    public Result<Void> updatePassword(@RequestBody @Valid ResetPassParam param) {
-        return Result.ofTrue(accountService.updatePassword(param))
-                .orElse("修改失败");
-    }
-
-    @PostMapping("/reset-pass")
-    public Result<Void> resetPassword(@RequestBody @Valid ResetPassParam param) {
-        return Result.ofTrue(accountService.resetPassword(param))
-                .orElse("重置失败");
+    @GetMapping("/login/log")
+    public Result<PageData<LoginRecord>> getLoginRecords(@RequestParam("pageNum") long pageNum,
+                                                         long pageSize) {
+        PageData<LoginRecord> records = loginRecordService.getRecordsByPage(new PageParam(pageNum, pageSize));
+        return Result.successData(records);
     }
 
 

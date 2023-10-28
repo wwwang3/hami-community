@@ -6,7 +6,6 @@ import org.mapstruct.factory.Mappers;
 import top.wang3.hami.common.dto.request.UserProfileParam;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
-import top.wang3.hami.common.dto.user.UserProfile;
 import top.wang3.hami.common.model.User;
 
 import java.util.ArrayList;
@@ -23,10 +22,7 @@ public interface UserConverter {
     @Mapping(target = "followings", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "collects", ignore = true)
-    @Mapping(source = "user.userId", target = "userId")
     LoginProfile toLoginProfile(User user);
-
-    UserProfile toUserProfile(User user);
 
     default List<UserDTO> toUserDTOList(List<User> users) {
         if (users == null || users.isEmpty()) {

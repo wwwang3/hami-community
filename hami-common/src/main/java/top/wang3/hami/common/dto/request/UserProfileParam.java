@@ -32,4 +32,9 @@ public class UserProfileParam {
      */
     private String blog;
 
+    /**
+     * 头像
+     */
+    private String avatar;
+
 }

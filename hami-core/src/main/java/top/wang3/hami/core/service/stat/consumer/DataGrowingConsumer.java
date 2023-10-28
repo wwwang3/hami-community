@@ -78,7 +78,9 @@ public class DataGrowingConsumer implements InteractConsumer {
 
     @Override
     public void handleReplyMessage(ReplyRabbitMessage message) {
-        handleCommentMessage(message);
+        String key = buildKey(message.getAuthorId());
+        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, 1);
+        ensureExpireTime(key);
     }
 
     @Override

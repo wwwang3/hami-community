@@ -122,7 +122,7 @@ public class AccountServiceImpl implements AccountService {
 
 
     private boolean restPassword(ResetPassParam param, String type) {
-        String captchaType = EmailCaptchaService.resolveCaptchaType(type);
+        String captchaType = captchaService.resolveCaptchaType(type);
         final String email = param.getEmail();
         boolean verify = captchaService.verify(captchaType, email, param.getCaptcha());
         if (!verify) {

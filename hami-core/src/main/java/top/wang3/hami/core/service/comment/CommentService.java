@@ -13,7 +13,7 @@ public interface CommentService {
 
     PageData<CommentDTO> listReply(CommentPageParam commentPageParam);
 
-    ReplyDTO listIndexReply(Integer rootId);
+    ReplyDTO listIndexReply(Integer articleId, Integer rootId);
 
     Comment publishComment(CommentParam param);
 

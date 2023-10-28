@@ -16,9 +16,15 @@ public class CommentPageParam extends PageParam {
     @NotNull
     @Min(value = 1)
     private Integer articleId;
+
+    @NotNull(groups = Reply.class)
     private Integer rootId;
 
     @Min(value = 0)
     @Max(value = 1)
     private Integer sort;
+
+    public interface Reply {
+
+    }
 }

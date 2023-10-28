@@ -162,4 +162,5 @@ public final class Constants {
      */
     public static final String DATA_GROWING_CANCEL_FOLLOW = "cancel_follow_incr";
     public static final String VIEW_LIMIT = "view:limit:";
+    public static final String HOT_SEARCH = "hot:search:list";
 }
