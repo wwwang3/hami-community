@@ -7,10 +7,11 @@ import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.notify.NotifyType;
+import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.core.mapper.NotifyMsgMapper;
 
-import java.util.Map;
+import java.util.List;
 
 @Repository
 public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, NotifyMsg>
@@ -23,9 +24,9 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     }
 
     @Override
-    public Page<NotifyMsgDTO> listLikeCollectNotify(Page<NotifyMsgDTO> page, Integer receiver) {
+    public Page<NotifyMsgDTO> listLoveNotify(Page<NotifyMsgDTO> page, Integer receiver) {
         if (page == null || receiver == null) return null;
-        return getBaseMapper().listLikeCollectNotify(page, receiver);
+        return getBaseMapper().listLoveNotify(page, receiver);
     }
 
     @Override
@@ -35,8 +36,13 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     }
 
     @Override
-    public Map<Integer, Integer> selectNoReadNotify(Integer receiver) {
-        if (receiver == null) return null;
+    public Page<NotifyMsgDTO> listSystemNotifyMsg(Page<NotifyMsgDTO> page, Integer receiver) {
+        if (page == null || receiver == null) return null;
+        return getBaseMapper().listSystemNotifyMsg(page, receiver);
+    }
+
+    @Override
+    public List<NotifyCount> selectNoReadNotify(Integer receiver) {
         return getBaseMapper().selectNoReadNotify(receiver);
     }
 
@@ -57,7 +63,7 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
         return ChainWrappers.updateChain(getBaseMapper())
                 .set("state", Constants.ONE)
                 .eq("id", msgId)
-                .eq("user_id", loginUserId)
+                .eq("receiver", loginUserId)
                 .eq("state", Constants.ZERO)
                 .update();
     }

@@ -19,21 +19,27 @@ public class NotifyController {
 
     private final NotifyMsgService notifyMsgService;
 
-    @PostMapping("/comment/query_list")
-    public Result<PageData<NotifyMsgDTO>> queryCommentNotify(@RequestBody @Valid PageParam param)  {
+    @PostMapping("/reply/query_list")
+    public Result<PageData<NotifyMsgDTO>> listCommentNotify(@RequestBody @Valid PageParam param)  {
         PageData<NotifyMsgDTO> msgs = notifyMsgService.listCommentNotify(param);
         return Result.successData(msgs);
     }
 
-    @PostMapping("/like_collect/query_list")
-    public Result<PageData<NotifyMsgDTO>> queryLikeCollectNotify(@RequestBody @Valid PageParam param)  {
+    @PostMapping("/love/query_list")
+    public Result<PageData<NotifyMsgDTO>> listLikeCollectNotify(@RequestBody @Valid PageParam param)  {
         PageData<NotifyMsgDTO> msgs = notifyMsgService.listLikeCollectNotify(param);
         return Result.successData(msgs);
     }
 
     @PostMapping("/follow/query_list")
-    public Result<PageData<NotifyMsgDTO>> queryFollowNotify(@RequestBody @Valid PageParam param)  {
+    public Result<PageData<NotifyMsgDTO>> listFollowNotify(@RequestBody @Valid PageParam param)  {
         PageData<NotifyMsgDTO> msgs = notifyMsgService.listFollowNotify(param);
+        return Result.successData(msgs);
+    }
+
+    @PostMapping("/system/query_list")
+    public Result<PageData<NotifyMsgDTO>> listSystemMsg(@RequestBody @Valid PageParam param) {
+        PageData<NotifyMsgDTO> msgs = notifyMsgService.listSystemMsg(param);
         return Result.successData(msgs);
     }
 

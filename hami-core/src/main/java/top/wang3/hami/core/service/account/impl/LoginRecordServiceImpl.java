@@ -14,13 +14,15 @@ import top.wang3.hami.security.context.LoginUserContext;
 import java.util.List;
 
 @Service
-public class LoginRecordServiceImpl extends ServiceImpl<LoginRecordMapper, LoginRecord> implements LoginRecordService{
+public class LoginRecordServiceImpl extends ServiceImpl<LoginRecordMapper, LoginRecord>
+        implements LoginRecordService{
 
     @Override
     public PageData<LoginRecord> getRecordsByPage(PageParam param) {
         int userId = LoginUserContext.getLoginUserId();
         Page<LoginRecord> page = param.toPage();
         List<LoginRecord> records = ChainWrappers.queryChain(getBaseMapper())
+                .select("id", "user_id", "ip_info", "login_time")
                 .eq("user_id", userId)
                 .orderByDesc("login_time")
                 .list(page);

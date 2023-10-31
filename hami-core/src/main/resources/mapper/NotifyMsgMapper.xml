@@ -36,7 +36,7 @@
         </association>
     </resultMap>
 
-    <resultMap id="SimpleNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+    <resultMap id="FollowNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
         <id column="id" property="id"/>
         <result column="state" property="state"/>
         <result column="ctime" property="ctime"/>
@@ -47,6 +47,18 @@
             <result column="sender_avatar" property="image" />
         </association>
     </resultMap>
+
+    <resultMap id="SystemNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+        <id column="id" property="id"/>
+        <result column="state" property="state"/>
+        <result column="ctime" property="ctime"/>
+        <result column="type" property="type"/>
+        <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
+            <result column="item_id" property="id"/>
+            <result column="detail" property="name" />
+        </association>
+    </resultMap>
+
 
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
@@ -95,10 +107,10 @@
                 or
                     type = '${@top.wang3.hami.common.dto.notify.NotifyType@REPLY.getType()}'
             )
-        order by t1.id DESC
+        order by t1.ctime DESC
     </select>
 
-    <select id="listLikeCollectNotify" resultMap="NotifyMsgDTOResultMap">
+    <select id="listLoveNotify" resultMap="NotifyMsgDTOResultMap">
         select
         <include refid="NotifyMsgDTO_Column_List">
         </include>
@@ -113,10 +125,10 @@
                 or
                     t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@COLLECT.getType()}'
             )
-        order by t1.id DESC
+        order by t1.ctime DESC
     </select>
 
-    <select id="listFollowNotify" resultMap="SimpleNotifyMsgDTOResultMap">
+    <select id="listFollowNotify" resultMap="FollowNotifyMsgDTOResultMap">
         select t1.id       as id,
                t1.state    as state,
                t1.ctime    as ctime,
@@ -128,13 +140,28 @@
                  left join user t2 on t1.sender = t2.user_id and t2.deleted = 0
         where t1.receiver = #{receiver}
           and t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@FOLLOW.getType()}'
-        order by id DESC
+        order by t1.ctime DESC
     </select>
 
-    <select id="selectNoReadNotify" resultType="java.lang.Integer">
-        select type, count(*)
+    <select id="listSystemNotifyMsg" resultMap="SystemNotifyMsgDTOResultMap">
+        select t1.id      as id,
+               t1.state   as state,
+               t1.ctime   as ctime,
+               t1.type    as type,
+               t1.item_id as item_id,
+               t1.detail  as detail
+        from notify_msg t1
+
+        where t1.receiver = #{receiver}
+          and t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@SYSTEM.getType()}'
+        order by t1.ctime DESC
+    </select>
+
+    <select id="selectNoReadNotify" resultType="top.wang3.hami.common.model.NotifyCount">
+        select type, count(*) as `total`
         from notify_msg
         where receiver = 1 and state = 0
         group by type
     </select>
+
 </mapper>

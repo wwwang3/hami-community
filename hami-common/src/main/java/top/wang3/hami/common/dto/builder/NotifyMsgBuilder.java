@@ -12,7 +12,7 @@ public class NotifyMsgBuilder {
     private Integer relatedId; //关联的ID 文章ID或者评论ID
     private Integer itemId; //触发消息的ID 文章ID或者评论ID
     private NotifyType type; //消息类型
-    private String detail;
+    private String detail; //内容
 
     public NotifyMsgBuilder sender(Integer sender) {
         this.sender = sender;
@@ -116,6 +116,17 @@ public class NotifyMsgBuilder {
                 .build();
     }
 
+    public static NotifyMsg buildSystemMsg(Integer receiver, Integer itemId, String detail) {
+        return new NotifyMsgBuilder()
+                .sender(1)
+                .receiver(receiver)
+                .itemId(itemId)
+                .type(NotifyType.SYSTEM)
+                .detail(detail)
+                .build();
+
+    }
+
     public NotifyMsg build() {
         NotifyMsg notifyMsg = new NotifyMsg();
         notifyMsg.setItemId(itemId);
@@ -123,6 +134,7 @@ public class NotifyMsgBuilder {
         notifyMsg.setRelatedId(relatedId);
         notifyMsg.setSender(sender);
         notifyMsg.setType(type.getType());
+        notifyMsg.setDetail(detail);
         return notifyMsg;
     }
 

@@ -44,15 +44,4 @@ public class LoginRecord {
     @TableField(value = "login_time")
     private Date loginTime;
 
-    /**
-     * 创建时间
-     */
-    @TableField(value = "ctime")
-    private Date ctime;
-
-    /**
-     * 更新时间
-     */
-    @TableField(value = "mtime")
-    private Date mtime;
 }

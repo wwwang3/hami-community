@@ -14,6 +14,8 @@ public interface NotifyMsgService {
 
     PageData<NotifyMsgDTO> listFollowNotify(PageParam param);
 
+    PageData<NotifyMsgDTO> listSystemMsg(PageParam param);
+
     Map<Integer, Integer> getNoReadNotify();
 
     boolean doRead(Integer msgId);
