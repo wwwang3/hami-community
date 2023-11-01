@@ -22,6 +22,6 @@ public interface NotifyMsgMapper extends BaseMapper<NotifyMsg> {
     Page<NotifyMsgDTO> listSystemNotifyMsg(Page<NotifyMsgDTO> page, @Param("receiver") Integer receiver);
 
 
-    List<NotifyCount> selectNoReadNotify(Integer receiver);
+    List<NotifyCount> selectNoReadNotify(@Param("receiver") Integer receiver);
 
 }

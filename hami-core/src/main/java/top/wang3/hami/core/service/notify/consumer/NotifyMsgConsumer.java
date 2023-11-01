@@ -19,8 +19,8 @@ import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
+import top.wang3.hami.security.model.Result;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 @RabbitListener(bindings = {
@@ -88,8 +88,10 @@ public class NotifyMsgConsumer implements InteractConsumer {
             if (isSelf(message.getAuthorId(), message.getUserId())) {
                 return;
             }
+            String[] details = new String[]{message.getDetail()};
+            String detail = Result.MAPPER.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), message.getAuthorId(),
-                    message.getCommentId(), message.getArticleId(), message.getDetail());
+                    message.getCommentId(), message.getArticleId(), detail);
             save(msg);
         } catch (Exception e) {
             logError(e);
@@ -105,7 +107,8 @@ public class NotifyMsgConsumer implements InteractConsumer {
             if (comment == null || isSelf(message.getUserId(), comment.getUserId())) {
                 return;
             }
-            String detail = Arrays.toString(new String[]{comment.getContent(), message.getDetail()});
+            String[] details = new String[]{comment.getContent(), message.getDetail()};
+            String detail = Result.MAPPER.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder
                     .buildReplyMsg(
                             message.getUserId(), message.getReplyTo(),

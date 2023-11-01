@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.notify.Info;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.notify.NotifyMsgService;
 import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -20,7 +22,7 @@ import java.util.Map;
 public class NotifyMsgServiceImpl implements NotifyMsgService {
 
     private final NotifyMsgRepository notifyMsgRepository;
-
+    private final FollowService followService;
 
     @Override
     public PageData<NotifyMsgDTO> listCommentNotify(PageParam param) {
@@ -46,6 +48,13 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgDTO> page = param.toPage();
         page = notifyMsgRepository.listFollowNotifyMsg(page, loginUserId);
+        List<Integer> senders = ListMapperHandler
+                .listTo(page.getRecords(), item -> item.getSender().getId());
+        Map<Integer, Boolean> followed = followService.hasFollowed(loginUserId, senders);
+        ListMapperHandler.forEach(page.getRecords(), (item, index) -> {
+            Info sender = item.getSender();
+            sender.setFollowed(followed.get(sender.getId()));
+        });
         return PageData.build(page);
     }
 

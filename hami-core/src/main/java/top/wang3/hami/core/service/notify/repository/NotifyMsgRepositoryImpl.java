@@ -72,7 +72,7 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     public boolean deleteNotifyMsg(Integer msgId, int loginUserId) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .eq("id", msgId)
-                .eq("user_id", loginUserId)
+                .eq("receiver", loginUserId)
                 .remove();
     }
 }

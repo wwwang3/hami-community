@@ -23,7 +23,7 @@
         <result column="type" property="type"/>
         <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
             <result column="item_id" property="id"/>
-            <result column="detail" property="name" />
+            <result column="detail" property="detail" />
         </association>
         <association property="sender" javaType="top.wang3.hami.common.dto.notify.Info">
             <result column="sender_id" property="id" />
@@ -55,7 +55,7 @@
         <result column="type" property="type"/>
         <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
             <result column="item_id" property="id"/>
-            <result column="detail" property="name" />
+            <result column="detail" property="detail" />
         </association>
     </resultMap>
 
@@ -151,7 +151,6 @@
                t1.item_id as item_id,
                t1.detail  as detail
         from notify_msg t1
-
         where t1.receiver = #{receiver}
           and t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@SYSTEM.getType()}'
         order by t1.ctime DESC
@@ -160,7 +159,7 @@
     <select id="selectNoReadNotify" resultType="top.wang3.hami.common.model.NotifyCount">
         select type, count(*) as `total`
         from notify_msg
-        where receiver = 1 and state = 0
+        where receiver = #{receiver} and state = 0
         group by type
     </select>
 

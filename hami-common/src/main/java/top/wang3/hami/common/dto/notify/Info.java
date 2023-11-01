@@ -12,4 +12,5 @@ public class Info {
     private String name;
     private String image;
     private String detail;
+    private boolean followed;
 }
