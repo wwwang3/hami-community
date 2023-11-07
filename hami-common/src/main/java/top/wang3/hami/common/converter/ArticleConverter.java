@@ -6,7 +6,6 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.article.*;
-import top.wang3.hami.common.dto.request.ArticleDraftParam;
 import top.wang3.hami.common.model.*;
 import top.wang3.hami.common.util.ListMapperHandler;
 
@@ -38,9 +37,6 @@ public interface ArticleConverter {
     @Mapping(target = "ctime", ignore = true)
     Article toArticle(ArticleDraft draft);
 
-    @Mapping(target = "tagName", source = "name")
-    @Mapping(target = "tagId", source = "id")
-    TagDTO toTagDTO(Tag tag);
 
     ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<Tag> tags);
 
@@ -50,9 +46,6 @@ public interface ArticleConverter {
 
     ArticleStatDTO toArticleStatDTO(ArticleStat stat);
 
-    List<ArticleStatDTO> toArticleStatDTOList(List<ArticleStat> stat);
-
-    ArticleInfo toArticleInfo(Article article, Collection<Integer> tagIds);
 
     default ArticleDTO toArticleDTO(ArticleInfo articleInfo) {
         if (articleInfo == null) return null;

@@ -5,7 +5,7 @@ import top.wang3.hami.mail.model.PrepareMimeMessageHelper;
 import top.wang3.hami.mail.sender.CustomMailSender;
 
 
-public interface MailSenderSupplier {
+public interface MailSenderManager {
 
     CustomMailSender getMailSender();
 

@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftDTO;
-import top.wang3.hami.common.dto.request.ArticleDraftParam;
-import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.core.service.article.ArticleDraftService;
-import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
@@ -18,8 +17,6 @@ import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 @RequestMapping("/api/v1/article_draft")
 @RequiredArgsConstructor
 public class ArticleDraftController {
-
-    private final ImageService imageService;
 
     private final ArticleDraftService articleDraftService;
 

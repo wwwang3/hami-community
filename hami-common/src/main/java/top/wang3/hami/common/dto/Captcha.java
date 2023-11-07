@@ -3,7 +3,7 @@ package top.wang3.hami.common.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.RabbitMessage;
 
 @Data
@@ -33,11 +33,11 @@ public class Captcha implements RabbitMessage {
 
     @Override
     public String getExchange() {
-        return Constants.HAMI_DIRECT_EXCHANGE1;
+        return RabbitConstants.HAMI_DIRECT_EXCHANGE1;
     }
 
     @Override
     public String getRoute() {
-        return Constants.EMAIL_ROUTING;
+        return RabbitConstants.EMAIL_ROUTING;
     }
 }

@@ -21,10 +21,6 @@ public class UserController {
 
     private final UserService userService;
 
-    private final AccountService accountService;
-
-    private final LoginRecordService loginRecordService;
-
     @GetMapping("/info/{id}")
     public Result<UserDTO> getAuthorInfo(@PathVariable(name = "id") Integer userId) {
         UserDTO user = userService.getAuthorInfoById(userId);

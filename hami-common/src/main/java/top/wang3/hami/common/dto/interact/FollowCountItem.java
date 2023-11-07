@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto;
+package top.wang3.hami.common.dto.interact;
 
 
 import lombok.AllArgsConstructor;

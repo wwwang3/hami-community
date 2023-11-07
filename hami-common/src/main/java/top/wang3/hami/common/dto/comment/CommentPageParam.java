@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto.comment;
 
 
 import jakarta.validation.constraints.Max;
@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import top.wang3.hami.common.dto.PageParam;
 
 @Data
 @AllArgsConstructor

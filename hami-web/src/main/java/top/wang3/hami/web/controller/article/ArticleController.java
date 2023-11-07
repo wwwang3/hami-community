@@ -5,12 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.article.ArticleContentDTO;
-import top.wang3.hami.common.dto.article.ArticleDTO;
-import top.wang3.hami.common.dto.article.HotArticleDTO;
-import top.wang3.hami.common.dto.request.ArticlePageParam;
-import top.wang3.hami.common.dto.request.PageParam;
-import top.wang3.hami.common.dto.request.UserArticleParam;
+import top.wang3.hami.common.dto.PageParam;
+import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.core.service.article.ArticleRankService;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.security.model.Result;
@@ -34,10 +30,16 @@ public class ArticleController {
                 .orElse("获取失败");
     }
 
-    @PostMapping("/list/follow")
+    @PostMapping("/follow/query_list")
     public Result<PageData<ArticleDTO>> listFollowUserArticles(@RequestBody @Valid PageParam param) {
         PageData<ArticleDTO> articles = articleService.listFollowUserArticles(param);
         return Result.successData(articles);
+    }
+
+    @PostMapping("/user/query_list")
+    public Result<PageData<ArticleDTO>> listUserArticles(@RequestBody @Valid UserArticleParam param) {
+        PageData<ArticleDTO> data = articleService.listUserArticle(param);
+        return Result.successData(data);
     }
 
     @GetMapping("/detail")
@@ -52,11 +54,5 @@ public class ArticleController {
                                                       Integer categoryId) {
         List<HotArticleDTO> articles = rankService.getHotArticles(categoryId);
         return Result.successData(articles);
-    }
-
-    @PostMapping("/query_list")
-    public Result<PageData<ArticleDTO>> listUserArticles(@RequestBody @Valid UserArticleParam param) {
-        PageData<ArticleDTO> data = articleService.listUserArticle(param);
-        return Result.successData(data);
     }
 }

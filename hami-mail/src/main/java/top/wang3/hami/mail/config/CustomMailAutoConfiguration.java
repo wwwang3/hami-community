@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import top.wang3.hami.mail.sender.CustomMailSender;
 import top.wang3.hami.mail.service.MailSenderService;
-import top.wang3.hami.mail.supplier.MailSenderSupplier;
-import top.wang3.hami.mail.supplier.RandomMailSenderSupplier;
-import top.wang3.hami.mail.supplier.RoundRobinMailSenderSupplier;
+import top.wang3.hami.mail.supplier.MailSenderManager;
+import top.wang3.hami.mail.supplier.RandomMailSenderManager;
+import top.wang3.hami.mail.supplier.RoundRobinMailSenderManager;
 
 import java.util.*;
 
@@ -47,16 +47,16 @@ public class CustomMailAutoConfiguration {
     }
 
     @Bean("mailSenderService")
-    public MailSenderService mailSenderService(MailSenderSupplier handler, CustomMailProperties properties) {
+    public MailSenderService mailSenderService(MailSenderManager handler, CustomMailProperties properties) {
         return new MailSenderService(handler, properties);
     }
 
     @Bean("mailHandler")
-    public MailSenderSupplier mailHandler(List<CustomMailSender> senders, CustomMailProperties properties) {
+    public MailSenderManager mailHandler(List<CustomMailSender> senders, CustomMailProperties properties) {
         CustomMailProperties.Strategy strategy = properties.getStrategy();
-        MailSenderSupplier handler = switch (strategy) {
-            case RANDOM -> new RandomMailSenderSupplier(senders);
-            case ROUND_ROBIN -> new RoundRobinMailSenderSupplier(senders);
+        MailSenderManager handler = switch (strategy) {
+            case RANDOM -> new RandomMailSenderManager(senders);
+            case ROUND_ROBIN -> new RoundRobinMailSenderManager(senders);
         };
         handler.setRetry(properties.isRetry());
         return handler;

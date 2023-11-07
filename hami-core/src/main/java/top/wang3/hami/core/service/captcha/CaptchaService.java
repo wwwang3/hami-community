@@ -1,6 +1,6 @@
 package top.wang3.hami.core.service.captcha;
 
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.core.exception.CaptchaServiceException;
@@ -14,9 +14,9 @@ public interface CaptchaService {
 
     default String resolveCaptchaType(String type) {
         return switch (type) {
-            case "register" -> Constants.REGISTER_EMAIL_CAPTCHA;
-            case "reset" -> Constants.RESET_EMAIL_CAPTCHA;
-            case "update" -> Constants.UPDATE_EMAIL_CAPTCHA;
+            case "register" -> RedisConstants.REGISTER_EMAIL_CAPTCHA;
+            case "reset" -> RedisConstants.RESET_EMAIL_CAPTCHA;
+            case "update" -> RedisConstants.UPDATE_EMAIL_CAPTCHA;
             default -> throw new IllegalArgumentException(type);
         };
     }

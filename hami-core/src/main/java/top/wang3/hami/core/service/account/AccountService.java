@@ -1,10 +1,10 @@
 package top.wang3.hami.core.service.account;
 
-import top.wang3.hami.common.dto.request.RegisterParam;
-import top.wang3.hami.common.dto.request.ResetPassParam;
 import top.wang3.hami.common.dto.user.AccountInfo;
+import top.wang3.hami.common.dto.user.RegisterParam;
+import top.wang3.hami.common.dto.user.ResetPassParam;
 import top.wang3.hami.common.model.Account;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 
 public interface AccountService {
 
@@ -12,7 +12,7 @@ public interface AccountService {
 
     AccountInfo getAccountInfo();
 
-    boolean register(RegisterParam param) throws ServiceException;
+    boolean register(RegisterParam param) throws HamiServiceException;
 
     boolean resetPassword(ResetPassParam param);
 

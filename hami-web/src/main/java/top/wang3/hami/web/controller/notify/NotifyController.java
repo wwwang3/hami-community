@@ -5,8 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
-import top.wang3.hami.common.dto.request.PageParam;
 import top.wang3.hami.core.service.notify.NotifyMsgService;
 import top.wang3.hami.security.model.Result;
 
@@ -47,13 +47,6 @@ public class NotifyController {
     public Result<Map<Integer, Integer>> getUnreadNotify() {
         Map<Integer, Integer> unRead = notifyMsgService.getNoReadNotify();
         return Result.successData(unRead);
-    }
-
-    @PostMapping("/read")
-    public Result<Void> doRead(@RequestParam("msg_id") Integer msgId) {
-        boolean read = notifyMsgService.doRead(msgId);
-        return Result.ofTrue(read)
-                .orElse("操作失败");
     }
 
     @PostMapping("/delete")

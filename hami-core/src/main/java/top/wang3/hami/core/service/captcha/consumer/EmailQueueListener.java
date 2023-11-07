@@ -2,11 +2,11 @@ package top.wang3.hami.core.service.captcha.consumer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.mail.model.MailSendResult;
 import top.wang3.hami.mail.service.MailSenderService;
@@ -14,8 +14,16 @@ import top.wang3.hami.mail.service.MailSenderService;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RabbitListener(messageConverter = "#{rabbitMQJacksonConverter}",
-        queues = Constants.EMAIL_QUEUE, concurrency = "4")
+@RabbitListener(
+        bindings = {
+                @QueueBinding(
+                        value = @Queue(value = RabbitConstants.EMAIL_QUEUE, durable = Exchange.FALSE),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_DIRECT_EXCHANGE1),
+                        key = {RabbitConstants.EMAIL_ROUTING}
+                )
+        },
+        concurrency = "4"
+)
 @Slf4j
 public class EmailQueueListener {
 
@@ -23,7 +31,7 @@ public class EmailQueueListener {
 
     public static final String REGISTER_TEMPLATE = "欢迎注册Hami社区!%n您的验证码为: %s 有效期%s分钟, 请勿泄露~";
 
-    public static final String RESET_TEMPLATE = "你正在重置密码!%n您的验证码为: %s 有效期%s分钟, 请勿泄露, 如不是本人操作请忽略!";
+    public static final String RESET_TEMPLATE = "你正在重置密码!%n您的验证码为: %s 有效期%s分钟, 请勿泄露, 如非本人操作请忽略!";
 
 
     public EmailQueueListener(MailSenderService mailSenderService) {
@@ -56,10 +64,10 @@ public class EmailQueueListener {
     }
 
     private String getTemplate(Captcha captcha) {
-        if (Constants.REGISTER_EMAIL_CAPTCHA.equals(captcha.getType())) {
+        if (RedisConstants.REGISTER_EMAIL_CAPTCHA.equals(captcha.getType())) {
             return REGISTER_TEMPLATE.formatted(captcha.getValue(),
                     TimeUnit.SECONDS.toMinutes(captcha.getExpire()));
-        } else if (Constants.RESET_EMAIL_CAPTCHA.equals(captcha.getType())) {
+        } else if (RedisConstants.RESET_EMAIL_CAPTCHA.equals(captcha.getType())) {
             return RESET_TEMPLATE.formatted(captcha.getValue(),
                     TimeUnit.SECONDS.toMinutes(captcha.getExpire()));
         } else {
@@ -68,9 +76,9 @@ public class EmailQueueListener {
     }
 
     private String getSubject(String type) {
-        if (Constants.REGISTER_EMAIL_CAPTCHA.equals(type)) {
+        if (RedisConstants.REGISTER_EMAIL_CAPTCHA.equals(type)) {
             return "注册验证码";
-        } else if (Constants.RESET_EMAIL_CAPTCHA.equals(type)) {
+        } else if (RedisConstants.RESET_EMAIL_CAPTCHA.equals(type)) {
             return "重置密码验证码";
         } else {
             throw new UnsupportedOperationException("unsupported type :" + type);

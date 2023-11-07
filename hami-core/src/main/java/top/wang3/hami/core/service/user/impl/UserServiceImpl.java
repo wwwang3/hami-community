@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserStat;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -47,9 +47,7 @@ public class UserServiceImpl implements UserService {
     private final CountService countService;
     private final LikeService likeService;
     private final CollectService collectService;
-
     private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Resource
@@ -69,7 +67,7 @@ public class UserServiceImpl implements UserService {
         if (userId == null || userId < 0) {
             throw new IllegalArgumentException("参数异常");
         }
-        String redisKey = Constants.USER_INFO + userId;
+        String redisKey = RedisConstants.USER_INFO + userId;
         User user = RedisClient.getCacheObject(redisKey);
         if (user == null) {
             user = loadUserCache(redisKey, userId);
@@ -85,9 +83,9 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        List<User> users = RedisClient.getMultiCacheObject(Constants.USER_INFO, userIds, nullIds -> {
+        List<User> users = RedisClient.getMultiCacheObject(RedisConstants.USER_INFO, userIds, nullIds -> {
             List<User> absentUsers = userRepository.getUserByIds(nullIds);
-            Map<String, User> map = ListMapperHandler.listToMap(absentUsers, user -> Constants.USER_INFO + user.getUserId());
+            Map<String, User> map = ListMapperHandler.listToMap(absentUsers, user -> RedisConstants.USER_INFO + user.getUserId());
             RedisClient.cacheMultiObject(map, 10, 20, TimeUnit.DAYS);
             return absentUsers;
         });

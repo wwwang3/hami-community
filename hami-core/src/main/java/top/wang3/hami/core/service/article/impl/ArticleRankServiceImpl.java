@@ -5,14 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.article.HotArticleDTO;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.ArticleRankService;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@SuppressWarnings("unchecked")
 @RequiredArgsConstructor
 @Slf4j
 public class ArticleRankServiceImpl implements ArticleRankService {
@@ -51,16 +50,16 @@ public class ArticleRankServiceImpl implements ArticleRankService {
 
     private List<HotArticleDTO> getOverallHotArticles() {
         //总榜
-        String redisKey = Constants.OVERALL_HOT_ARTICLES;
+        String redisKey = RedisConstants.OVERALL_HOT_ARTICLES;
         return scanHotArticles(redisKey);
     }
 
 
     private List<HotArticleDTO> getHotArticlesByCate(Integer cateId) {
         if (cateId > 10008) {
-            throw new ServiceException("分类不存在");
+            throw new HamiServiceException("分类不存在");
         }
-        String redisKey = Constants.HOT_ARTICLE + cateId;
+        String redisKey = RedisConstants.HOT_ARTICLE + cateId;
         return scanHotArticles(redisKey);
     }
 

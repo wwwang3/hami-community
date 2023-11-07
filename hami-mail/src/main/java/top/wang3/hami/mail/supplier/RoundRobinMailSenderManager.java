@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 轮循策略
  */
-public class RoundRobinMailSenderSupplier extends AbstractMailSenderSupplier {
+public class RoundRobinMailSenderManager extends AbstractMailSenderManager {
 
     private final AtomicInteger current = new AtomicInteger(0);
 
-    public RoundRobinMailSenderSupplier(List<CustomMailSender> senders) {
+    public RoundRobinMailSenderManager(List<CustomMailSender> senders) {
         super(senders);
     }
 

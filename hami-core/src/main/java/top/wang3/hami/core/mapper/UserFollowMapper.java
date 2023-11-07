@@ -3,7 +3,7 @@ package top.wang3.hami.core.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import top.wang3.hami.common.dto.FollowCountItem;
+import top.wang3.hami.common.dto.interact.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 
 import java.util.List;

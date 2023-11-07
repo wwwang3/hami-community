@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.dto.FollowCountItem;
+import top.wang3.hami.common.dto.interact.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.component.ZPageHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.UserFollowMapper;
 
 import java.util.List;
@@ -127,7 +127,7 @@ public class FollowRepositoryImpl extends ServiceImpl<UserFollowMapper, UserFoll
             follow.setState(Constants.ONE);
             return super.save(follow);
         } else if (Objects.equals(userFollow.getState(), Constants.ONE)) {
-            throw new ServiceException("重复关注");
+            throw new HamiServiceException("重复关注");
         } else if (Objects.equals(userFollow.getState(), Constants.ZERO)) {
             //修改关注状态
             return ChainWrappers.updateChain(getBaseMapper())

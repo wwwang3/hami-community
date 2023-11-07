@@ -6,9 +6,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import top.wang3.hami.common.dto.request.RegisterParam;
-import top.wang3.hami.common.dto.request.ResetPassParam;
+import top.wang3.hami.common.dto.user.RegisterParam;
+import top.wang3.hami.common.dto.user.ResetPassParam;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
 import top.wang3.hami.security.model.Result;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
 
     private final CaptchaService captchaService;

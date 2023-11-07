@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import top.wang3.hami.common.dto.comment.CommentDTO;
-import top.wang3.hami.common.dto.request.CommentParam;
+import top.wang3.hami.common.dto.comment.CommentParam;
 import top.wang3.hami.common.model.Comment;
 
 import java.util.List;

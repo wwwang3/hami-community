@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 @EnableConfigurationProperties(CacheProperties.class)
 @Slf4j
-@SuppressWarnings(value = {"rawtypes"})
 public class CacheConfig {
 
     @Bean

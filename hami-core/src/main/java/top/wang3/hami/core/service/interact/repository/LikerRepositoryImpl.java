@@ -7,10 +7,10 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.LikeMapper;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
                     .eq("`state`", Constants.ZERO)
                     .update();
         } else {
-            throw new ServiceException("重复点赞");
+            throw new HamiServiceException("重复点赞");
         }
     }
 

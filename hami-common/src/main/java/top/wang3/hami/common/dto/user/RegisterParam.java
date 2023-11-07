@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,10 @@ import org.hibernate.validator.constraints.Length;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResetPassParam {
+public class RegisterParam {
+
+    @Pattern(regexp = "^([a-zA-Z0-9_\\u4e00-\\u9fa5]{2,20})$")
+    private String username;
 
     @Email
     @NotBlank

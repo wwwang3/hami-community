@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
+import top.wang3.hami.common.canal.annotation.CanalListener;
 
 import java.util.*;
 

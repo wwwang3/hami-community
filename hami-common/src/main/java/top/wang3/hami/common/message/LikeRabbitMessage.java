@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

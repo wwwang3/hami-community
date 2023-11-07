@@ -133,21 +133,21 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return getBaseMapper().getArticleAuthor(articleId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveArticle(Article article) {
         Assert.notNull(article, "article can not be null");
         return super.save(article);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateArticle(Article article) {
         Assert.notNull(article, "article can not be null");
         return super.updateById(article);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteArticle(Integer articleId, Integer userId) {
         return ChainWrappers.updateChain(getBaseMapper())

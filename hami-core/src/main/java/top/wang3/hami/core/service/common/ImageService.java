@@ -6,7 +6,7 @@ import jakarta.annotation.Resource;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
@@ -29,7 +29,7 @@ public class ImageService {
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public String upload(MultipartFile file, String type, Consumer<Thumbnails.Builder<? extends InputStream>> consumer) {
         if (file == null) {
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         }
         int id = LoginUserContext.getLoginUserId();
         FileInfo info = fileStorageService.of(file)

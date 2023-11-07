@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

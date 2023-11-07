@@ -5,10 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
+import top.wang3.hami.common.canal.annotation.CanalListener;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
@@ -36,7 +37,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     @Override
     public void processInsert(LikeItem entity) {
-        String key = Constants.LIST_USER_LIKE + entity.getItemType() + ":" + entity.getLikerId();
+        String key = RedisConstants.LIST_USER_LIKE + entity.getItemType() + ":" + entity.getLikerId();
         //点赞
         //key已经过期或者不存在返回false
         boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
@@ -80,13 +81,13 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     private void handleDelete(LikeItem item) {
         //删除
-        String key = Constants.LIST_USER_LIKE + item.getItemType() + ":" + item.getLikerId();
+        String key = RedisConstants.LIST_USER_LIKE + item.getItemType() + ":" + item.getLikerId();
         RedisClient.zRem(key, item.getItemId());
     }
 
     public void deleteCountCache(Integer likerId, Byte type) {
         //删除用户点赞数缓存(文章或评论被删除情况)
-        String userLikeCountKey = Constants.USER_LIKE_COUNT + type + ":" + likerId;
+        String userLikeCountKey = RedisConstants.USER_LIKE_COUNT + type + ":" + likerId;
         RedisClient.deleteObject(userLikeCountKey);
     }
 }

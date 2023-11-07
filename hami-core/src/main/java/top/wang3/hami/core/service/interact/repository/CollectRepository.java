@@ -18,13 +18,12 @@ public interface CollectRepository extends IService<ArticleCollect> {
     @Transactional(rollbackFor = Exception.class)
     boolean cancelCollect(Integer userId, Integer itemId);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean hasCollected(Integer userId, Integer itemId);
+
+    Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds);
 
     @Transactional(rollbackFor = Exception.class)
     int deleteCollectItem(Integer articleId);
-
-    Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds);
 
     Long getUserCollectCount(Integer userId);
 

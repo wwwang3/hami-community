@@ -9,6 +9,8 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
@@ -20,8 +22,8 @@ import java.util.List;
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue(value = "hami-user-interact-queue-1"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"*.follow", "*.like.*", "*.collect", "comment.*"}
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                key = {"*.follow", "*.like.*", "*.collect"}
         )
 }, concurrency = "2")
 @Component
@@ -34,20 +36,20 @@ public class UserInteractMessageConsumer implements InteractConsumer {
 
     @Override
     public void handleLikeMessage(LikeRabbitMessage message) {
-        String userLikeCountKey = Constants.USER_LIKE_COUNT + message.getLikeType().getType() + ":" + message.getUserId();
+        String userLikeCountKey = RedisConstants.USER_LIKE_COUNT + message.getLikeType().getType() + ":" + message.getUserId();
         RedisClient.deleteObject(userLikeCountKey);
     }
 
     @Override
     public void handleCollectMessage(CollectRabbitMessage message) {
-        String userCollectCountKey = Constants.USER_COLLECT_COUNT + message.getUserId();
+        String userCollectCountKey = RedisConstants.USER_COLLECT_COUNT + message.getUserId();
         RedisClient.deleteObject(userCollectCountKey);
     }
 
     @Override
     public void handleFollowMessage(FollowRabbitMessage message) {
-        String followingCountKey = Constants.USER_FOLLOWING_COUNT + message.getUserId();
-        String followerCountKey = Constants.USER_FOLLOWER_COUNT + message.getToUserId();
+        String followingCountKey = RedisConstants.USER_FOLLOWING_COUNT + message.getUserId();
+        String followerCountKey = RedisConstants.USER_FOLLOWER_COUNT + message.getToUserId();
         RedisClient.deleteObject(List.of(followingCountKey, followerCountKey));
     }
 

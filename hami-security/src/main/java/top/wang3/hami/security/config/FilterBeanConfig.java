@@ -21,8 +21,8 @@ public class FilterBeanConfig {
         return bean;
     }
 
-    @Profile(value = "dev")
     @Bean
+    @Profile(value = "dev")
     public FilterRegistrationBean<RequestTimeDebugFilter> requestTimeDebugFilterBean() {
         var bean = new FilterRegistrationBean<>(new RequestTimeDebugFilter());
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);

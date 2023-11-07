@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto.article;
 
 
 import jakarta.validation.constraints.NotEmpty;

@@ -17,7 +17,6 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@SuppressWarnings(value = {"rawtypes", "unchecked"})
 public class SlideWindowRateLimiterHandler implements RateLimiterHandler {
 
     private RedisScript<List<Long>> redisScript;

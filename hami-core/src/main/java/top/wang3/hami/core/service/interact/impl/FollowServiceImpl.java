@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.FollowRabbitMessage;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -18,7 +19,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.repository.FollowRepository;
 import top.wang3.hami.core.service.user.repository.UserRepository;
@@ -45,7 +46,7 @@ public class FollowServiceImpl implements FollowService {
     @NonNull
     @Override
     public Long getUserFollowingCount(Integer userId) {
-        String key = Constants.USER_FOLLOWING_COUNT + userId;
+        String key = RedisConstants.USER_FOLLOWING_COUNT + userId;
         Long count = RedisClient.getCacheObject(key);
         if (count != null) return count;
         synchronized (this) {
@@ -61,7 +62,7 @@ public class FollowServiceImpl implements FollowService {
     @NonNull
     @Override
     public Long getUserFollowerCount(Integer userId) {
-        String key = Constants.USER_FOLLOWER_COUNT + userId;
+        String key = RedisConstants.USER_FOLLOWER_COUNT + userId;
         Long count = RedisClient.getCacheObject(key);
         if (count != null) return count;
         synchronized (this) {
@@ -101,19 +102,19 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Map<Integer, Long> listUserFollowingCount(List<Integer> userIds) {
-        return RedisClient.getMultiCacheObjectToMap(Constants.USER_FOLLOWING_COUNT, userIds,
+        return RedisClient.getMultiCacheObjectToMap(RedisConstants.USER_FOLLOWING_COUNT, userIds,
                 followRepository::listUserFollowingCount);
     }
 
     @Override
     public Map<Integer, Long> listUserFollowerCount(List<Integer> userIds) {
-        return RedisClient.getMultiCacheObjectToMap(Constants.USER_FOLLOWER_COUNT, userIds,
+        return RedisClient.getMultiCacheObjectToMap(RedisConstants.USER_FOLLOWER_COUNT, userIds,
                 followRepository::listUserFollowerCount);
     }
 
     @Override
     public Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
-        String key = Constants.LIST_USER_FOLLOWING + userId;
+        String key = RedisConstants.LIST_USER_FOLLOWING + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowingCount(userId))
                 .loader((current, size) -> {
@@ -124,7 +125,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
-        String key = Constants.LIST_USER_FOLLOWER + userId;
+        String key = RedisConstants.LIST_USER_FOLLOWER + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowerCount(userId))
                 .source((current, size) -> {
@@ -203,14 +204,14 @@ public class FollowServiceImpl implements FollowService {
 
     private void checkUser(int userId, int following) {
         if (userId == following) {
-            throw new ServiceException("自己不能关注自己");
+            throw new HamiServiceException("自己不能关注自己");
         }
         if (!userRepository.checkUserExist(following)) {
-            throw new ServiceException("用户不存在");
+            throw new HamiServiceException("用户不存在");
         }
     }
 
     private String buildKey(Integer userId) {
-        return Constants.LIST_USER_FOLLOWING + userId;
+        return RedisConstants.LIST_USER_FOLLOWING + userId;
     }
 }

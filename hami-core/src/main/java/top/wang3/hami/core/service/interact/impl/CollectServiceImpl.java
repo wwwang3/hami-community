@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.CollectRabbitMessage;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -17,7 +18,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.interact.CollectService;
@@ -51,7 +52,7 @@ public class CollectServiceImpl implements CollectService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Integer author = articleRepository.getArticleAuthor(itemId);
         if (author == null) {
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         }
         Boolean success = transactionTemplate.execute(status -> {
             boolean success1 = collectRepository.doCollect(loginUserId, itemId);
@@ -73,7 +74,7 @@ public class CollectServiceImpl implements CollectService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Integer author = articleRepository.getArticleAuthor(itemId);
         if (author == null) {
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         }
         Boolean canceled = transactionTemplate.execute(status -> {
             boolean success = collectRepository.cancelCollect(loginUserId, itemId);
@@ -117,7 +118,7 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Long getUserCollectCount(Integer userId) {
-        String key = Constants.USER_COLLECT_COUNT + userId;
+        String key = RedisConstants.USER_COLLECT_COUNT + userId;
         Long count = RedisClient.getCacheObject(key);
         if (count != null) return count;
         synchronized (this) {
@@ -133,7 +134,7 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
-        String key = Constants.LIST_USER_COLLECT + userId;
+        String key = RedisConstants.LIST_USER_COLLECT + userId;
         return ZPageHandler
                 .<Integer>of(key, page, this)
                 .countSupplier(() -> getUserCollectCount(userId))
@@ -165,6 +166,6 @@ public class CollectServiceImpl implements CollectService {
     }
 
     private String buildKey(Integer userId) {
-        return Constants.LIST_USER_COLLECT + userId;
+        return RedisConstants.LIST_USER_COLLECT + userId;
     }
 }

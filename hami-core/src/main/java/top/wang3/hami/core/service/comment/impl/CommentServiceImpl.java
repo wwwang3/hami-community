@@ -11,13 +11,9 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
-import top.wang3.hami.common.dto.comment.CommentDTO;
-import top.wang3.hami.common.dto.comment.Reply;
-import top.wang3.hami.common.dto.comment.ReplyDTO;
-import top.wang3.hami.common.dto.request.CommentPageParam;
-import top.wang3.hami.common.dto.request.CommentParam;
+import top.wang3.hami.common.dto.comment.*;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.dto.user.UserDTO;
-import top.wang3.hami.common.enums.LikeType;
 import top.wang3.hami.common.message.CommentDeletedRabbitMessage;
 import top.wang3.hami.common.message.CommentRabbitMessage;
 import top.wang3.hami.common.message.RabbitMessage;
@@ -26,9 +22,8 @@ import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
-import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.interact.LikeService;
@@ -48,7 +43,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ArticleRepository articleRepository;
-    private final ArticleStatRepository articleStatRepository;
     private final LikeService likeService;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
@@ -170,7 +164,7 @@ public class CommentServiceImpl implements CommentService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Integer author = articleRepository.getArticleAuthor(param.getArticleId());
         if (author == null) {
-            throw new ServiceException("文章不存在");
+            throw new HamiServiceException("文章不存在");
         }
         Comment comment = CommentConverter.INSTANCE.toComment(param);
         comment.setUserId(loginUserId); //评论用户
@@ -193,16 +187,16 @@ public class CommentServiceImpl implements CommentService {
         Assert.isTrue(parentId != null && parentId != 0, "parentId can not be null or zero");
         Comment parentComment = commentRepository.getById(parentId);
         if (parentComment == null) {
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         } else if (Objects.equals(rootId, parentId) &&
                 parentComment.getRootId() != 0) {
             //二级评论 回复的是根评论
             //根评论的rootId应该为0
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         } else if (parentComment.getRootId() != 0 &&
                 !Objects.equals(parentComment.getRootId(), rootId)) {
             //三级以上的评论, 必须在同一个根评论下
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         }
         comment.setRootId(rootId);
         comment.setParentId(parentId);

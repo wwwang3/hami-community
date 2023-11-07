@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
+import top.wang3.hami.common.canal.annotation.CanalListener;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
@@ -37,7 +38,7 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
 
     @Override
     public void processInsert(ArticleCollect entity) {
-        String redisKey = Constants.LIST_USER_COLLECT + entity.getUserId();
+        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
         boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
         if (!success) {
             collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);
@@ -69,12 +70,12 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
     }
 
     private void handleDelete(ArticleCollect entity) {
-        String redisKey = Constants.LIST_USER_COLLECT + entity.getUserId();
+        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
         RedisClient.zRem(redisKey, entity.getArticleId());
     }
 
     private void deleteCountCache(Integer userId) {
-        String userCollectCountKey = Constants.USER_COLLECT_COUNT + userId;
+        String userCollectCountKey = RedisConstants.USER_COLLECT_COUNT + userId;
         RedisClient.deleteObject(userCollectCountKey);
     }
 

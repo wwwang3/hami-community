@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.LikeRabbitMessage;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -15,7 +16,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.component.ZPageHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.comment.repository.CommentRepository;
@@ -84,8 +85,8 @@ public class LikeServiceImpl implements LikeService {
     @Override
     public Long getUserLikeCount(Integer userId, LikeType likeType) {
         //获取用户点赞的实体数 (我赞过)
-        String key = Constants.USER_LIKE_COUNT + likeType.getType() + ":" + userId;
-        Long count = RedisClient.getCacheObject(Constants.USER_LIKE_COUNT);
+        String key = RedisConstants.USER_LIKE_COUNT + likeType.getType() + ":" + userId;
+        Long count = RedisClient.getCacheObject(key);
         if (count != null) {
             return count;
         }
@@ -166,7 +167,7 @@ public class LikeServiceImpl implements LikeService {
         } else if (LikeType.COMMENT.equals(likeType)) {
             itemUser = commentRepository.getCommentUser(itemId);
         }
-        if (itemUser == null) throw new ServiceException("参数错误");
+        if (itemUser == null) throw new HamiServiceException("参数错误");
         return itemUser;
     }
 
@@ -189,6 +190,6 @@ public class LikeServiceImpl implements LikeService {
     }
 
     private String buildKey(Integer userId, LikeType likeType) {
-        return Constants.LIST_USER_LIKE + likeType.getType() + ":" + userId;
+        return RedisConstants.LIST_USER_LIKE + likeType.getType() + ":" + userId;
     }
 }

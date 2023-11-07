@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.dto.request.ArticlePageParam;
+import top.wang3.hami.common.dto.article.ArticlePageParam;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.CategoryRepository;

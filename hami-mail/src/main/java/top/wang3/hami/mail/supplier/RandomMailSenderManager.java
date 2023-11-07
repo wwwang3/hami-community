@@ -8,9 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * 随机策略
  */
-public class RandomMailSenderSupplier extends AbstractMailSenderSupplier {
+public class RandomMailSenderManager extends AbstractMailSenderManager {
 
-    public RandomMailSenderSupplier(List<CustomMailSender> senders) {
+    public RandomMailSenderManager(List<CustomMailSender> senders) {
         super(senders);
     }
 

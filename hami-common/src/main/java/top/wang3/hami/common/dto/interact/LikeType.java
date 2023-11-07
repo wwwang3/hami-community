@@ -1,4 +1,4 @@
-package top.wang3.hami.common.enums;
+package top.wang3.hami.common.dto.interact;
 
 import lombok.Getter;
 import top.wang3.hami.common.constant.Constants;

@@ -67,7 +67,7 @@ public class CanalEntryMapper {
     }
 
 
-    private static final String[] PARSE_PATTERNS = new String[]{"yyyy-MM-dd HH:mm:ss.sss", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
+    private static final String[] PARSE_PATTERNS = new String[]{"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm", "yyyy-MM", "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss",
             "yyyy/MM/dd HH:mm", "yyyy/MM", "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss",
             "yyyy.MM.dd HH:mm", "yyyy.MM", }; //fix: Date类型解析失败, 导致NPE

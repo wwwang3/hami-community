@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.ArticleStatService;
@@ -15,12 +15,12 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue(value = "hami-stat-queue-1"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
                 key = {"comment.*"}
         ),
         @QueueBinding(
                 value = @Queue(value = "hami-stat-queue-2"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"article.delete"}
         )
 })

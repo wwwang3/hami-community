@@ -5,9 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
+import top.wang3.hami.common.canal.annotation.CanalListener;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
@@ -24,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 @CanalListener(value = "user_follow")
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings(value = "rawtypes")
 public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
 
@@ -42,9 +42,9 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
     @Override
     public void processInsert(UserFollow entity) {
         //用户关注列表
-        String following_list_key = Constants.LIST_USER_FOLLOWING + entity.getUserId();
+        String following_list_key = RedisConstants.LIST_USER_FOLLOWING + entity.getUserId();
         //用户粉丝列表
-        String follower_list_key = Constants.LIST_USER_FOLLOWER + entity.getFollowing();
+        String follower_list_key = RedisConstants.LIST_USER_FOLLOWER + entity.getFollowing();
 
         addFollowing(following_list_key, entity.getUserId(), entity.getFollowing(), (double) entity.getMtime().getTime());
         addFollower(follower_list_key, entity.getFollowing(), entity.getUserId(), (double) entity.getMtime().getTime());
@@ -65,8 +65,8 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
     @Override
     public void processDelete(UserFollow deletedEntity) {
-        String following_list_key = Constants.LIST_USER_FOLLOWING + deletedEntity.getUserId(); //用户关注列表
-        String follower_list_key = Constants.LIST_USER_FOLLOWER + deletedEntity.getFollowing(); //用户粉丝列表
+        String following_list_key = RedisConstants.LIST_USER_FOLLOWING + deletedEntity.getUserId(); //用户关注列表
+        String follower_list_key = RedisConstants.LIST_USER_FOLLOWER + deletedEntity.getFollowing(); //用户粉丝列表
         RedisClient.zRem(following_list_key, deletedEntity.getFollowing());
         RedisClient.zRem(follower_list_key, deletedEntity.getUserId());
     }

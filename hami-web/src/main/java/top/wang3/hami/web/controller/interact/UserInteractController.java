@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
-import top.wang3.hami.common.dto.request.LikeItemParam;
-import top.wang3.hami.common.dto.request.UserArticleParam;
+import top.wang3.hami.common.dto.interact.LikeItemParam;
+import top.wang3.hami.common.dto.article.UserArticleParam;
 import top.wang3.hami.common.dto.user.UserDTO;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
@@ -41,7 +41,6 @@ public class UserInteractController {
     private final CollectService collectService;
     private final ArticleService articleService;
     private final UserService userService;
-    private final CountService countService;
 
 
     @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
@@ -153,7 +152,7 @@ public class UserInteractController {
     private LikeType resolveLikerType(Byte type) {
         LikeType likeType = LikeType.of(type);
         if (likeType == null) {
-            throw new ServiceException("不支持的类型");
+            throw new HamiServiceException("不支持的类型");
         }
         return likeType;
     }

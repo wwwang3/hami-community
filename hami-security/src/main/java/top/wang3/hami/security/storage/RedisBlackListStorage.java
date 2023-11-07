@@ -2,6 +2,7 @@ package top.wang3.hami.security.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import top.wang3.hami.common.constant.Constants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +25,7 @@ public class RedisBlackListStorage implements BlacklistStorage {
         long remain = expireAt - System.currentTimeMillis();
         //已经过期了
         if (remain <= 0) return true;
-        redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + jwtId, "",
+        redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + jwtId, Constants.EMPTY_STRING,
                 remain, TimeUnit.MILLISECONDS);
         return true;
     }

@@ -14,7 +14,6 @@ public class ImageController {
 
     private final ImageService imageService;
 
-
     @PostMapping("/upload")
     public Result<String> upload(@RequestPart("image") MultipartFile image, @RequestParam("type") String type) {
         String url = imageService.upload(image, type);

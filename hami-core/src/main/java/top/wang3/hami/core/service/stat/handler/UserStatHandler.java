@@ -3,9 +3,9 @@ package top.wang3.hami.core.service.stat.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
+import top.wang3.hami.common.canal.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RedisClient;
 
@@ -33,6 +33,6 @@ public class UserStatHandler implements CanalEntryHandler<ArticleStat> {
 
     private void deleteUserStatCache(Integer userId) {
         log.debug("delete user-stat cache: {}", userId);
-        RedisClient.deleteObject(Constants.STAT_TYPE_USER + userId);
+        RedisClient.deleteObject(RedisConstants.STAT_TYPE_USER + userId);
     }
 }

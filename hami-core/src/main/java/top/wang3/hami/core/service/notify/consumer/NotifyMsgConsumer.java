@@ -4,15 +4,13 @@ package top.wang3.hami.core.service.notify.consumer;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.NotifyMsg;
@@ -21,15 +19,22 @@ import top.wang3.hami.core.service.comment.repository.CommentRepository;
 import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
 import top.wang3.hami.security.model.Result;
 
+import java.util.List;
 import java.util.Objects;
 
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue("hami-notify-queue-1"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"do.follow", "do.like.*", "do.collect", "comment.*"}
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                key = {"do.follow", "do.like.*", "do.collect", "comment.*", "notify.read"}
+        ),
+        @QueueBinding(
+                value = @Queue("hami-notify-queue-2"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                key = {"user.create"}
+
         )
-}, concurrency = "2")
+}, concurrency = "4")
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -37,6 +42,8 @@ public class NotifyMsgConsumer implements InteractConsumer {
 
     private final CommentRepository commentRepository;
     private final NotifyMsgRepository notifyMsgRepository;
+    public static final String welcome = "欢迎注册使用Hami";
+
 
     @Resource
     TransactionTemplate transactionTemplate;
@@ -128,15 +135,13 @@ public class NotifyMsgConsumer implements InteractConsumer {
 
     public void handleCollectMessage(CollectRabbitMessage message) {
         try {
-            if (Constants.ZERO.equals(message.getState())) {
+            int itemUser = message.getToUserId();
+            if (Constants.ZERO.equals(message.getState())
+                    || isSelf(message.getUserId(), itemUser)) {
                 return;
             }
             //收藏消息 xx收藏了你的文章
             int articleId = message.getItemId();
-            int itemUser = message.getToUserId();
-            if (isSelf(message.getUserId(), itemUser)) {
-                return;
-            }
             NotifyMsg msg = NotifyMsgBuilder
                     .buildCollectMsg(message.getUserId(), itemUser, articleId);
             save(msg);
@@ -160,6 +165,28 @@ public class NotifyMsgConsumer implements InteractConsumer {
         }
     }
 
+    @RabbitHandler
+    public void handleNotifyReadMessage(NotifyRabbitReadMessage message) {
+        try {
+            Integer receiver = message.getReceiver();
+            List<Integer> types = message.getTypes();
+            notifyMsgRepository.updateNotifyState(receiver, types);
+        } catch (Exception e) {
+            logError(e);
+        }
+    }
+
+    @RabbitHandler
+    public void handleUserCreateMessage(UserRabbitMessage message) {
+        try {
+            Integer receiver = message.getUserId();
+            NotifyMsg msg = NotifyMsgBuilder.buildSystemMsg(receiver, -1, welcome);
+            save(msg);
+        } catch (Exception e) {
+            logError(e);
+        }
+    }
+
     private void save(NotifyMsg msg) {
         transactionTemplate.execute(status -> {
             notifyMsgRepository.save(msg);
@@ -173,6 +200,6 @@ public class NotifyMsgConsumer implements InteractConsumer {
 
 
     private void logError(Exception e) {
-        log.debug("error_class: {} error_msg: {}", e.getClass().getName(), e.getMessage());
+        log.error("error_class: {} error_msg: {}", e.getClass().getName(), e.getMessage());
     }
 }

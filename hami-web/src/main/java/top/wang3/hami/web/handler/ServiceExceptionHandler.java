@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import top.wang3.hami.core.exception.CaptchaServiceException;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.security.exception.NotLoginException;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.RateLimitException;
@@ -21,7 +21,7 @@ import java.sql.SQLException;
 public class ServiceExceptionHandler {
 
 
-    @ExceptionHandler(value = {CaptchaServiceException.class, ServiceException.class, NotLoginException.class})
+    @ExceptionHandler(value = {CaptchaServiceException.class, HamiServiceException.class, NotLoginException.class})
     public Result<Void> handleCaptchaException(Exception e) {
         logError(e);
         return Result.error(e.getMessage());

@@ -1,10 +1,11 @@
 package top.wang3.hami.core.service.notify.repository;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.model.NotifyCount;
@@ -59,13 +60,12 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     }
 
     @Override
-    public boolean updateNotifyState(Integer msgId, int loginUserId) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .set("state", Constants.ONE)
-                .eq("id", msgId)
-                .eq("receiver", loginUserId)
-                .eq("state", Constants.ZERO)
-                .update();
+    public int updateNotifyState(Integer receiver, List<Integer> types) {
+        UpdateWrapper<NotifyMsg> wrapper = Wrappers.update(new NotifyMsg())
+                .eq("receiver", receiver)
+                .in("type", types)
+                .set("`state`", 1);
+        return getBaseMapper().update(null, wrapper);
     }
 
     @Override

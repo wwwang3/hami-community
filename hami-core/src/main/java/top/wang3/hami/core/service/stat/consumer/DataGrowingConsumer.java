@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.*;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
@@ -19,12 +21,12 @@ import java.util.concurrent.TimeUnit;
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue(value = "hami-data-growing-queue-1"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
                 key = {"*.follow", "*.like.*", "*.collect", "comment.*"}
         ),
         @QueueBinding(
                 value = @Queue(value = "hami-data-growing-queue-2"),
-                exchange = @Exchange(value = Constants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
                 key = {"article.publish", "article.delete", "article.view"}
         )
 }, concurrency = "2")
@@ -39,10 +41,10 @@ public class DataGrowingConsumer implements InteractConsumer {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
             //新增关注
-            RedisClient.hIncr(key, Constants.DATA_GROWING_FOLLOWER, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_FOLLOWER, 1);
         } else {
             //取消关注
-            RedisClient.hIncr(key, Constants.DATA_GROWING_CANCEL_FOLLOW, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_CANCEL_FOLLOW, 1);
         }
         ensureExpireTime(key);
     }
@@ -51,9 +53,9 @@ public class DataGrowingConsumer implements InteractConsumer {
     public void handleCollectMessage(CollectRabbitMessage message) {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_COLLECT, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_COLLECT, 1);
         } else {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_COLLECT, -1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_COLLECT, -1);
         }
         ensureExpireTime(key);
     }
@@ -62,9 +64,9 @@ public class DataGrowingConsumer implements InteractConsumer {
     public void handleLikeMessage(LikeRabbitMessage message) {
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_LIKE, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_LIKE, 1);
         } else {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_LIKE, -1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_LIKE, -1);
         }
         ensureExpireTime(key);
     }
@@ -72,14 +74,14 @@ public class DataGrowingConsumer implements InteractConsumer {
     @Override
     public void handleCommentMessage(CommentRabbitMessage message) {
         String key = buildKey(message.getAuthorId());
-        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, 1);
+        RedisClient.hIncr(key, RedisConstants.DATA_GROWING_COMMENT, 1);
         ensureExpireTime(key);
     }
 
     @Override
     public void handleReplyMessage(ReplyRabbitMessage message) {
         String key = buildKey(message.getAuthorId());
-        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, 1);
+        RedisClient.hIncr(key, RedisConstants.DATA_GROWING_COMMENT, 1);
         ensureExpireTime(key);
     }
 
@@ -87,7 +89,7 @@ public class DataGrowingConsumer implements InteractConsumer {
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
         Integer author = articleRepository.getArticleAuthor(message.getArticleId());
         String key = buildKey(author);
-        RedisClient.hIncr(key, Constants.DATA_GROWING_COMMENT, -1 * message.getDeletedCount());
+        RedisClient.hIncr(key, RedisConstants.DATA_GROWING_COMMENT, -1 * message.getDeletedCount());
         ensureExpireTime(key);
     }
 
@@ -97,18 +99,18 @@ public class DataGrowingConsumer implements InteractConsumer {
         Integer authorId = message.getAuthorId();
         String key = buildKey(authorId);
         if (ArticleRabbitMessage.Type.DELETE.equals(message.getType())) {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_ARTICLE, -1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_ARTICLE, -1);
         } else if (ArticleRabbitMessage.Type.PUBLISH.equals(message.getType())) {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_ARTICLE, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_ARTICLE, 1);
         } else if (ArticleRabbitMessage.Type.VIEW.equals(message.getType())) {
-            RedisClient.hIncr(key, Constants.DATA_GROWING_VIEW, 1);
+            RedisClient.hIncr(key, RedisConstants.DATA_GROWING_VIEW, 1);
         }
         ensureExpireTime(key);
     }
 
     private String buildKey(Integer userId) {
         String date = DateUtil.formatDate(new Date());
-        return Constants.DATA_GROWING + date + ":" + userId;
+        return RedisConstants.DATA_GROWING + date + ":" + userId;
     }
 
     private void ensureExpireTime(String key) {

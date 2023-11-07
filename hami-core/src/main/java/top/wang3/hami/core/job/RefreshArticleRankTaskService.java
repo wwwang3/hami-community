@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings(value = {"unchecked"})
 public class RefreshArticleRankTaskService {
 
     private final CategoryService categoryService;
@@ -40,7 +39,7 @@ public class RefreshArticleRankTaskService {
             List<Category> categories =
                     categoryService.getAllCategories();
             categories.forEach(category -> {
-                String redisKey = Constants.HOT_ARTICLE + category.getId();
+                String redisKey = RedisConstants.HOT_ARTICLE + category.getId();
                 long time = DateUtil.offsetDay(new Date(), 30).getTime();
                 List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId(), time);
                 RedisClient.deleteObject(redisKey);
@@ -56,13 +55,13 @@ public class RefreshArticleRankTaskService {
         }
     }
 
-    @Scheduled(fixedDelay = 600, initialDelay = 10, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 600, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshOverallHotArticles() {
         try {
             long start = System.currentTimeMillis();
             log.info("start to refresh overall-article rank list");
-            String redisKey = Constants.OVERALL_HOT_ARTICLES;
+            String redisKey = RedisConstants.OVERALL_HOT_ARTICLES;
             RedisClient.deleteObject(redisKey);
             List<HotCounter> articles = articleStatRepository.getOverallHotArticles();
             RedisClient.zAddAll(redisKey, convertToTuple(articles));

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleCollectMapper;
 
 import java.util.Collection;
@@ -41,7 +41,7 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
                     .eq("`state`", Constants.ZERO)
                     .update();
         } else if (Constants.ONE.equals(articleCollect.getState())) {
-            throw new ServiceException("重复收藏");
+            throw new HamiServiceException("重复收藏");
         }
         return false;
     }

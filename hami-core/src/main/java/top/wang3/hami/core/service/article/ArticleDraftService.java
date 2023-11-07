@@ -1,9 +1,9 @@
 package top.wang3.hami.core.service.article;
 
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftDTO;
-import top.wang3.hami.common.dto.request.ArticleDraftParam;
-import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
 
 public interface ArticleDraftService {

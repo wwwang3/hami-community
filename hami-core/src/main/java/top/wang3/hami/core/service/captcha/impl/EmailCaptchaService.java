@@ -7,7 +7,7 @@ import top.wang3.hami.common.dto.Captcha;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.CaptchaServiceException;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.captcha.CaptchaService;
 
 import java.util.concurrent.TimeUnit;
@@ -30,7 +30,7 @@ public class EmailCaptchaService implements CaptchaService {
         //保存在redis
         boolean success = RedisClient.setNx(captchaKey, captcha.getValue(), captcha.getExpire(), TimeUnit.SECONDS);
         if (!success) {
-            throw new ServiceException("请求频繁, 请稍后再试");
+            throw new HamiServiceException("请求频繁, 请稍后再试");
         }
         rabbitMessagePublisher.publishMsg(captcha);
     }

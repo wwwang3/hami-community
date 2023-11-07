@@ -3,7 +3,7 @@ package top.wang3.hami.core.service.interact.repository;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.enums.LikeType;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.LikeItem;
 
 import java.util.List;

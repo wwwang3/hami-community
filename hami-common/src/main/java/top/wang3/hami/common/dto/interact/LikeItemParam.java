@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto.interact;
 
 
 import lombok.Data;

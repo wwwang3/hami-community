@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.request;
+package top.wang3.hami.common.dto.comment;
 
 
 import jakarta.validation.constraints.Min;

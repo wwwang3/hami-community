@@ -7,13 +7,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.request.PageParam;
-import top.wang3.hami.common.dto.request.UserProfileParam;
+import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.user.AccountInfo;
 import top.wang3.hami.common.dto.user.LoginProfile;
+import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.model.LoginRecord;
 import top.wang3.hami.common.model.User;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.account.LoginRecordService;
 import top.wang3.hami.core.service.user.UserService;
@@ -49,7 +49,7 @@ public class AccountController {
             boolean exists = accountService.checkUsername(userProfileParam.getUsername());
             if (exists) {
                 //用户名已存在
-                throw new ServiceException("用户名已被使用");
+                throw new HamiServiceException("用户名已被使用");
             }
         }
         User user = UserConverter.INSTANCE.toUser(userProfileParam);

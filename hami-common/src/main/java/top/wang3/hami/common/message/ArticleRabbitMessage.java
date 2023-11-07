@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +24,7 @@ public class ArticleRabbitMessage implements RabbitMessage {
 
     @Override
     public String getExchange() {
-        return Constants.HAMI_TOPIC_EXCHANGE2;
+        return RabbitConstants.HAMI_TOPIC_EXCHANGE2;
     }
 
     @Override

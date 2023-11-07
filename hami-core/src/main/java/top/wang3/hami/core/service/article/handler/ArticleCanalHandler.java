@@ -5,9 +5,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.annotation.CanalListener;
 import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.canal.annotation.CanalListener;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 
@@ -52,8 +52,8 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
             long time = after.getCtime().getTime();
             Long res = null;
             if (!Objects.equals(oldCate, newCate)) {
-                String oldCateListKey = Constants.CATE_ARTICLE_LIST + oldCate;
-                String newOldCateListKey = Constants.CATE_ARTICLE_LIST + newCate;
+                String oldCateListKey = RedisConstants.CATE_ARTICLE_LIST + oldCate;
+                String newOldCateListKey = RedisConstants.CATE_ARTICLE_LIST + newCate;
                 List<String> keys = List.of(oldCateListKey, newOldCateListKey);
                 List<?> args = List.of(id, time);
                 res = RedisClient.executeScript(update_article_script, keys, args);
@@ -75,9 +75,9 @@ public class ArticleCanalHandler implements CanalEntryHandler<Article> {
     }
 
     private List<String> buildKeys(Integer cateId, Integer userId) {
-        String articleListKey = Constants.ARTICLE_LIST;
-        String cateListKey = Constants.CATE_ARTICLE_LIST + cateId;
-        String userArticleListKey = Constants.LIST_USER_ARTICLE + userId;
+        String articleListKey = RedisConstants.ARTICLE_LIST;
+        String cateListKey = RedisConstants.CATE_ARTICLE_LIST + cateId;
+        String userArticleListKey = RedisConstants.LIST_USER_ARTICLE + userId;
         return List.of(articleListKey, cateListKey, userArticleListKey);
     }
 }

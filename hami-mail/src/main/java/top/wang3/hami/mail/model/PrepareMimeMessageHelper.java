@@ -12,7 +12,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.mail.sender.CustomMailSender;
-import top.wang3.hami.mail.supplier.MailSenderSupplier;
+import top.wang3.hami.mail.supplier.MailSenderManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,18 +28,18 @@ import java.util.*;
 @SuppressWarnings(value = {"unused"})
 public class PrepareMimeMessageHelper {
 
-    private final MailSenderSupplier supplier;
+    private final MailSenderManager supplier;
     private final CustomMailSender boundCustomSender;
     private final JavaMailSenderImpl mailSender;
     private final List<MessageWrapper> messages = new ArrayList<>();
 
-    public PrepareMimeMessageHelper(MailSenderSupplier supplier) {
+    public PrepareMimeMessageHelper(MailSenderManager supplier) {
        this.supplier = supplier;
        this.boundCustomSender = supplier.getMailSender();
        this.mailSender = boundCustomSender.getJavaMailSender();
     }
 
-    public PrepareMimeMessageHelper(MailSenderSupplier supplier, CustomMailSender boundCustomSender) {
+    public PrepareMimeMessageHelper(MailSenderManager supplier, CustomMailSender boundCustomSender) {
         this.supplier = supplier;
         this.boundCustomSender = boundCustomSender;
         this.mailSender = boundCustomSender.getJavaMailSender();

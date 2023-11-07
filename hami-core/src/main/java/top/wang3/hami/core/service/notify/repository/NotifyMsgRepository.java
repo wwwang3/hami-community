@@ -24,8 +24,7 @@ public interface NotifyMsgRepository extends IService<NotifyMsg> {
 
     boolean checkExist(Integer itemId, Integer sender, Integer receiver, NotifyType type);
 
-    @Transactional(rollbackFor = Exception.class)
-    boolean updateNotifyState(Integer msgId, int loginUserId);
+    int updateNotifyState(Integer receiver, List<Integer> types);
 
     @Transactional(rollbackFor = Exception.class)
     boolean deleteNotifyMsg(Integer msgId, int loginUserId);

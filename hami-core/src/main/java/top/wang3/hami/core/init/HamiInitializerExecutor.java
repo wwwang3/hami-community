@@ -36,7 +36,7 @@ public class HamiInitializerExecutor implements ApplicationRunner {
         this.initializers = initializers;
         if (initializers != null) {
             OrderComparator.sort(initializers);
-            log.debug("find {} initializer", initializers.size());
+            log.info("find {} initializer", initializers.size());
         }
     }
 

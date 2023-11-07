@@ -21,6 +21,7 @@ import java.io.InputStream;
 public class Ip2RegionSearcherImpl implements Ip2RegionSearcher {
 
     public static final String XDB_FILE = "classpath:ip2region/ip2region.xdb";
+
     private final ResourceLoader resourceLoader;
 
     private Searcher searcher;

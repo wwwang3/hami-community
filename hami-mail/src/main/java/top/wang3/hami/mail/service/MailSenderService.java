@@ -4,16 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import top.wang3.hami.mail.config.CustomMailProperties;
 import top.wang3.hami.mail.model.MailSendResult;
 import top.wang3.hami.mail.model.PrepareMimeMessageHelper;
-import top.wang3.hami.mail.supplier.MailSenderSupplier;
+import top.wang3.hami.mail.supplier.MailSenderManager;
 
 @Slf4j
 public class MailSenderService {
 
-    private final MailSenderSupplier supplier;
+    private final MailSenderManager supplier;
 
     CustomMailProperties config;
 
-    public MailSenderService(MailSenderSupplier supplier, CustomMailProperties config) {
+    public MailSenderService(MailSenderManager supplier, CustomMailProperties config) {
         this.config = config;
         this.supplier = supplier;
     }

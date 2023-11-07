@@ -12,13 +12,13 @@ import java.util.List;
 
 @Getter
 @Slf4j
-public abstract class AbstractMailSenderSupplier implements MailSenderSupplier {
+public abstract class AbstractMailSenderManager implements MailSenderManager {
 
     private final List<CustomMailSender> senders;
 
     private boolean retry;
 
-    public AbstractMailSenderSupplier(List<CustomMailSender> senders) {
+    public AbstractMailSenderManager(List<CustomMailSender> senders) {
         if (senders == null || senders.isEmpty())
             throw new IllegalStateException("mail-senders can not be null or empty");
         this.senders = senders;

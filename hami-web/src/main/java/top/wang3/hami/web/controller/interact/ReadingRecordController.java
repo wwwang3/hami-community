@@ -5,8 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.SearchParam;
 import top.wang3.hami.common.dto.article.ReadingRecordDTO;
-import top.wang3.hami.common.dto.request.SearchParam;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.security.model.Result;
 

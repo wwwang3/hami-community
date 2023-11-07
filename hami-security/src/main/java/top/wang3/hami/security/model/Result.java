@@ -12,10 +12,10 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public Result<T> orElse(Supplier<Result<T>> supplier) {
+    public Result<T> orElse(Supplier<T> supplier) {
         Objects.requireNonNull(supplier);
         if (checker != null && checker.check().get()) {
-            return supplier.get();
+            return Result.successData(supplier.get());
         }
         return this;
     }

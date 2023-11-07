@@ -10,16 +10,16 @@ import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
+import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftDTO;
-import top.wang3.hami.common.dto.request.ArticleDraftParam;
-import top.wang3.hami.common.dto.request.PageParam;
+import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.exception.ServiceException;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.service.article.*;
 import top.wang3.hami.core.service.article.repository.ArticleDraftRepository;
@@ -67,7 +67,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         int loginUserId = LoginUserContext.getLoginUserId();
         ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
         if (draft == null) {
-            throw new ServiceException("草稿不存在");
+            throw new HamiServiceException("草稿不存在");
         }
         log.debug("draft-{}", draft);
         List<Integer> tagsIds = draft.getTagIds();
@@ -99,7 +99,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         //更新草稿
         ArticleDraft draft = ArticleConverter.INSTANCE.toArticleDraft(param);
         if (draft.getId() == null) {
-            throw new ServiceException("参数错误");
+            throw new HamiServiceException("参数错误");
         }
         int loginUserId = LoginUserContext.getLoginUserId();
         //获取旧的
@@ -211,12 +211,12 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         validator.validate(draft);
         //校验分类
         if (categoryService.getCategoryDTOById(draft.getCategoryId()) == null) {
-            throw new ServiceException("请选择一个分类");
+            throw new HamiServiceException("请选择一个分类");
         }
         ///校验标签 若有个tagId不存在抛出错误
         List<Integer> tagIds = draft.getTagIds();
         if (!tagService.checkTags(tagIds)) {
-            throw new ServiceException("标签参数错误");
+            throw new HamiServiceException("标签参数错误");
         }
     }
 

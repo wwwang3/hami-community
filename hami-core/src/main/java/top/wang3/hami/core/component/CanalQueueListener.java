@@ -7,13 +7,12 @@ import com.alibaba.otter.canal.protocol.Message;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.common.canal.CanalEntryMapper;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RabbitConstants;
 
 import java.util.List;
 
@@ -21,8 +20,15 @@ import java.util.List;
  * todo FlatMessage支持
  */
 @Component
-@RabbitListener(queues = {Constants.CANAL_QUEUE}, messageConverter = "simpleMessageConverter",
-        concurrency = "16")
+@RabbitListener(
+        bindings = @QueueBinding(
+                value = @Queue(RabbitConstants.CANAL_QUEUE),
+                exchange = @Exchange(RabbitConstants.CANAL_EXCHANGE),
+                key = {RabbitConstants.CANAL_ROUTING}
+        ),
+        messageConverter = "simpleMessageConverter",
+        concurrency = "8"
+)
 @Slf4j
 public class CanalQueueListener {
 
