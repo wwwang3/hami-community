@@ -164,7 +164,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Integer> loadArticleListCache(String key,  Integer cateId, long current, long size) {
+    public List<Integer> loadArticleListCache(String key, Integer cateId, long current, long size) {
         List<Article> articles = articleRepository.listArticleByCateId(cateId);
         return cacheArticleListToRedis(key, current, size, articles);
     }
@@ -233,7 +233,7 @@ public class ArticleServiceImpl implements ArticleService {
                 if (dto == null) {
                     RedisClient.cacheEmptyObject(key, new ArticleDTO());
                 } else {
-                    RedisClient.setCacheObject(key, dto);
+                    RedisClient.setCacheObject(key, dto, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
                 }
             }
         }
@@ -266,7 +266,6 @@ public class ArticleServiceImpl implements ArticleService {
     public boolean updateArticle(Article article) {
         return articleRepository.updateArticle(article);
     }
-
 
     @Override
     public boolean deleteByArticleId(Integer articleId, Integer userId) {
@@ -303,13 +302,13 @@ public class ArticleServiceImpl implements ArticleService {
         if (content == null || content.isEmpty()) {
             //文章内容不会为空
             content = articleRepository.getArticleContentById(articleId);
-            RedisClient.setCacheObject(key, content);
+            RedisClient.setCacheObject(key, content, 24L + RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
         }
         return content;
     }
 
     public void buildArticleDTOs(List<ArticleDTO> articleDTOS,
-                                  ArticleOptionsBuilder builder) {
+                                 ArticleOptionsBuilder builder) {
         List<Integer> articleIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getId);
         List<Integer> userIds = ListMapperHandler.listTo(articleDTOS, ArticleDTO::getUserId);
         if (builder == null) {
@@ -372,10 +371,8 @@ public class ArticleServiceImpl implements ArticleService {
         if (loginUserId == null) {
             return;
         }
-        boolean liked =
-                likeService.hasLiked(loginUserId, articleDTO.getId(), LikeType.ARTICLE);
-        boolean collected =
-                collectService.hasCollected(loginUserId, articleDTO.getId());
+        boolean liked = likeService.hasLiked(loginUserId, articleDTO.getId(), LikeType.ARTICLE);
+        boolean collected = collectService.hasCollected(loginUserId, articleDTO.getId());
         articleDTO.setLiked(liked);
         articleDTO.setCollected(collected);
     }

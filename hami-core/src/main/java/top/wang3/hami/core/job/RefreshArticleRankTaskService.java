@@ -30,7 +30,7 @@ public class RefreshArticleRankTaskService {
     private final CategoryService categoryService;
     private final ArticleStatRepository articleStatRepository;
 
-    @Scheduled(fixedDelay = 600, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 600, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshHotArticles() {
         try {
@@ -55,7 +55,7 @@ public class RefreshArticleRankTaskService {
         }
     }
 
-    @Scheduled(fixedDelay = 600, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 600, initialDelay = 2, timeUnit = TimeUnit.SECONDS)
     @Async
     public void refreshOverallHotArticles() {
         try {

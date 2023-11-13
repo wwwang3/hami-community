@@ -40,9 +40,9 @@ public class AccountRepositoryImpl extends ServiceImpl<AccountMapper, Account>
 
     @Override
     public boolean checkUsername(String username) {
-        var wrapper = Wrappers.query(Account.class)
-                .eq("username", username);
-        return super.getBaseMapper().exists(wrapper);
+        return ChainWrappers.queryChain(getBaseMapper())
+                .eq("username", username)
+                .exists();
     }
 
     @Override

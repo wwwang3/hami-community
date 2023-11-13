@@ -3,9 +3,9 @@ package top.wang3.hami.common.converter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.model.User;
 
 import java.util.ArrayList;
@@ -39,11 +39,12 @@ public interface UserConverter {
     @Mapping(target = "followed", ignore = true)
     UserDTO toUserDTO(User user);
 
+
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "tag", ignore = true)
     @Mapping(target = "mtime", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "ctime", ignore = true)
-    @Mapping(target = "avatar", ignore = true)
+    @Mapping(target = "username", ignore = true)
     User toUser(UserProfileParam param);
 }

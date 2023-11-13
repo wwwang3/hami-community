@@ -15,9 +15,6 @@ public interface UserRepository extends IService<User> {
     List<Integer> scanUserIds(int lastUserId, int batchSize);
 
     @Transactional(rollbackFor = Exception.class)
-    boolean updateAvatar(Integer loginUserId, String url);
-
-    @Transactional(rollbackFor = Exception.class)
     boolean updateUser(Integer loginUserId, User user);
 
     boolean checkUserExist(Integer userId);

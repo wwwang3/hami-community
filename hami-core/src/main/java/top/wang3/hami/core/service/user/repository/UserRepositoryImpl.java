@@ -48,16 +48,6 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean updateAvatar(Integer loginUserId, String url) {
-        //更新头像地址
-        return ChainWrappers.updateChain(getBaseMapper())
-                .set("avatar", url)
-                .eq("user_id", loginUserId)
-                .update();
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
     public boolean updateUser(Integer loginUserId, final User user) {
         //更新用户信息
         Assert.notNull(user, "user cannot be null");

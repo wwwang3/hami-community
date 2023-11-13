@@ -6,22 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.multipart.MultipartFile;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
+import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserStat;
-import top.wang3.hami.common.dto.interact.LikeType;
-import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.service.account.repository.AccountRepository;
 import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
@@ -119,42 +116,6 @@ public class UserServiceImpl implements UserService {
             buildFollowState(dto);
         }
         return dto;
-    }
-
-    @Override
-    public String updateAvatar(MultipartFile avatar) {
-        //更新头像, 登录后才能上传
-        int loginUserId = LoginUserContext.getLoginUserId();
-        String url = imageService.upload(avatar, "avatar", th -> th.size(120, 120));
-        boolean success = userRepository.updateAvatar(loginUserId, url);
-        if (success) {
-            UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_UPDATE, loginUserId);
-            rabbitMessagePublisher.publishMsg(message);
-        }
-        return url;
-    }
-
-    @Override
-    public boolean updateProfile(User user) {
-        int loginUserId = LoginUserContext.getLoginUserId();
-
-        Boolean success = transactionTemplate.execute(status -> {
-            //暂不支持修改
-            //更新账号信息
-//            if (saved && StringUtils.hasText(username)) {
-//                Account account = new Account();
-//                account.setId(loginUserId);
-//                account.setUsername(username);
-//                return accountRepository.updateById(account);
-//            }
-            return userRepository.updateUser(loginUserId, user);
-        });
-        if (Boolean.TRUE.equals(success)) {
-            UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_UPDATE, loginUserId);
-            rabbitMessagePublisher.publishMsg(message);
-            return true;
-        }
-        return false;
     }
 
     private void buildUserStat(List<UserDTO> userDTOS) {

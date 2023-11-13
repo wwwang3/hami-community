@@ -33,14 +33,14 @@ public class Ip2RegionSearcherImpl implements Ip2RegionSearcher {
 
     @PostConstruct
     public void init() {
-        log.debug("start to load ip2region.xdb");
+        log.info("start to load ip2region.xdb");
         Resource resource = resourceLoader.getResource(XDB_FILE);
         try (InputStream stream = resource.getInputStream()) {
             this.searcher = Searcher.newWithBuffer(StreamUtils.copyToByteArray(stream));
             IpUtils.register(this);
-            log.debug("success load ip2region.xdb");
+            log.info("success load ip2region.xdb");
         } catch (IOException e) {
-            log.warn("load ip2region.xdb failed: {}", e.getMessage());
+            log.error("load ip2region.xdb failed: {}", e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class Ip2RegionSearcherImpl implements Ip2RegionSearcher {
     public void destroy() throws Exception {
         if (this.searcher != null) {
             this.searcher.close();
-            log.debug("destroy ip-searcher success");
+            log.info("destroy ip-searcher success");
         }
     }
 

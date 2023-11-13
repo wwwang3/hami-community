@@ -2,6 +2,7 @@ package top.wang3.hami.web.handler;
 
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,7 +47,7 @@ public class ServiceExceptionHandler {
         return Result.error("参数错误");
     }
 
-    @ExceptionHandler(value = {SQLException.class})
+    @ExceptionHandler(value = {SQLException.class, DataAccessException.class})
     public Result<Void> handleSQLException(SQLException e) {
         logError(e, true);
         return Result.error("系统错误");

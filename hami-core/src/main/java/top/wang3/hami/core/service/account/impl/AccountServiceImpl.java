@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.AccountConverter;
+import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.user.AccountInfo;
 import top.wang3.hami.common.dto.user.RegisterParam;
 import top.wang3.hami.common.dto.user.ResetPassParam;
+import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
@@ -121,6 +123,32 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean checkEmail(String email) {
         return accountRepository.checkEmail(email);
+    }
+
+    @Override
+    public boolean updateProfile(UserProfileParam param) {
+        User user = UserConverter.INSTANCE.toUser(param);
+        //暂不支持修改用户名
+        user.setUsername(null);
+        int loginUserId = LoginUserContext.getLoginUserId();
+
+        Boolean success = transactionTemplate.execute(status -> {
+            //暂不支持修改
+            //更新账号信息
+//            if (saved && StringUtils.hasText(username)) {
+//                Account account = new Account();
+//                account.setId(loginUserId);
+//                account.setUsername(username);
+//                return accountRepository.updateById(account);
+//            }
+            return userRepository.updateUser(loginUserId, user);
+        });
+        if (Boolean.TRUE.equals(success)) {
+            UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_UPDATE, loginUserId);
+            rabbitMessagePublisher.publishMsg(message);
+            return true;
+        }
+        return false;
     }
 
     @Override

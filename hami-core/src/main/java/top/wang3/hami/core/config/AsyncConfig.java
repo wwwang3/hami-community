@@ -12,8 +12,8 @@ import top.wang3.hami.core.component.TtlThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig {
 
-    @Bean("hami-thread-pool")
     @Primary
+    @Bean("hami-thread-pool")
     public TaskExecutor threadPoolExecutor() {
         TtlThreadPoolTaskExecutor taskExecutor = new TtlThreadPoolTaskExecutor();
         taskExecutor.setBeanName("hami-thread-pool");

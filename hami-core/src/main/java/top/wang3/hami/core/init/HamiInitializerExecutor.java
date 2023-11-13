@@ -42,11 +42,11 @@ public class HamiInitializerExecutor implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("start to execute initialization tasks");
+        log.info("\nstart to execute initialization tasks");
         if (initializers == null || initializers.isEmpty()) {
             return;
         }
-        StopWatch watch = new StopWatch();
+        StopWatch watch = new StopWatch("hami-cache-init-task");
         for (HamiInitializer initializer : initializers) {
             handleRun(initializer, watch);
         }
@@ -55,7 +55,7 @@ public class HamiInitializerExecutor implements ApplicationRunner {
     }
 
     private void handleRun(HamiInitializer initializer, StopWatch watch) {
-        watch.start("[initializing task]-" + initializer.getName());
+        watch.start("[task-" + initializer.getName() + "]") ;
         if (enabledInitializers == null || enabledInitializers.isEmpty()
                 || !enabledInitializers.contains(initializer.getName())) {
             return;
