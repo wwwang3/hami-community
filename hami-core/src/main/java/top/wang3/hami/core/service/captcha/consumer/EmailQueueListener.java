@@ -64,14 +64,17 @@ public class EmailQueueListener {
     }
 
     private String getTemplate(Captcha captcha) {
-        if (RedisConstants.REGISTER_EMAIL_CAPTCHA.equals(captcha.getType())) {
+        String type = captcha.getType();
+        if (RedisConstants.REGISTER_EMAIL_CAPTCHA.equals(type)) {
+            //注册
             return REGISTER_TEMPLATE.formatted(captcha.getValue(),
                     TimeUnit.SECONDS.toMinutes(captcha.getExpire()));
-        } else if (RedisConstants.RESET_EMAIL_CAPTCHA.equals(captcha.getType())) {
+        } else if (RedisConstants.RESET_EMAIL_CAPTCHA.equals(type) || RedisConstants.UPDATE_EMAIL_CAPTCHA.equals(type)) {
+            //重置密码
             return RESET_TEMPLATE.formatted(captcha.getValue(),
                     TimeUnit.SECONDS.toMinutes(captcha.getExpire()));
         } else {
-            throw new UnsupportedOperationException("unsupported type :" + captcha.getType());
+            throw new UnsupportedOperationException("unsupported type: " + type);
         }
     }
 
@@ -80,8 +83,11 @@ public class EmailQueueListener {
             return "注册验证码";
         } else if (RedisConstants.RESET_EMAIL_CAPTCHA.equals(type)) {
             return "重置密码验证码";
-        } else {
-            throw new UnsupportedOperationException("unsupported type :" + type);
+        } else if (RedisConstants.UPDATE_EMAIL_CAPTCHA.equals(type)) {
+            return "修改密码验证码";
+        }
+        else {
+            throw new UnsupportedOperationException("unsupported type: " + type);
         }
     }
 }

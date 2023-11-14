@@ -23,16 +23,16 @@
         <result column="type" property="type"/>
         <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
             <result column="item_id" property="id"/>
-            <result column="detail" property="detail" />
+            <result column="detail" property="detail"/>
         </association>
         <association property="sender" javaType="top.wang3.hami.common.dto.notify.Info">
-            <result column="sender_id" property="id" />
-            <result column="sender_name" property="name" />
-            <result column="sender_avatar" property="image" />
+            <result column="sender_id" property="id"/>
+            <result column="sender_name" property="name"/>
+            <result column="sender_avatar" property="image"/>
         </association>
         <association property="relatedInfo" javaType="top.wang3.hami.common.dto.notify.Info">
-            <result column="article_id" property="id" />
-            <result column="article_title" property="name" />
+            <result column="article_id" property="id"/>
+            <result column="article_title" property="name"/>
         </association>
     </resultMap>
 
@@ -42,9 +42,9 @@
         <result column="ctime" property="ctime"/>
         <result column="type" property="type"/>
         <association property="sender" javaType="top.wang3.hami.common.dto.notify.Info">
-            <result column="sender_id" property="id" />
-            <result column="sender_name" property="name" />
-            <result column="sender_avatar" property="image" />
+            <result column="sender_id" property="id"/>
+            <result column="sender_name" property="name"/>
+            <result column="sender_avatar" property="image"/>
         </association>
     </resultMap>
 
@@ -55,7 +55,7 @@
         <result column="type" property="type"/>
         <association property="itemInfo" javaType="top.wang3.hami.common.dto.notify.Info">
             <result column="item_id" property="id"/>
-            <result column="detail" property="detail" />
+            <result column="detail" property="detail"/>
         </association>
     </resultMap>
 
@@ -74,7 +74,7 @@
         mtime
     </sql>
 
-    <sql id="NotifyMsgDTO_Column_List" >
+    <sql id="NotifyMsgDTO_Column_List">
         <!--@sql select -->
         t1.id       as id,
         t1.state    as state,
@@ -115,8 +115,8 @@
         <include refid="NotifyMsgDTO_Column_List">
         </include>
         from notify_msg t1
-                 left join user t2 on t1.sender = t2.user_id and t2.deleted = 0
-                 left join article t3 on t1.related_id = t3.id and t3.deleted = 0
+                 join user t2 on t1.sender = t2.user_id
+                 join article t3 on t1.related_id = t3.id
         where t1.receiver = #{receiver}
           and (
                     t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@ARTICLE_LIKE.getType()}'
@@ -137,7 +137,7 @@
                t2.username as sender_name,
                t2.avatar   as sender_avatar
         from notify_msg t1
-                 left join user t2 on t1.sender = t2.user_id and t2.deleted = 0
+                 join user t2 on t1.sender = t2.user_id
         where t1.receiver = #{receiver}
           and t1.type = '${@top.wang3.hami.common.dto.notify.NotifyType@FOLLOW.getType()}'
         order by t1.ctime DESC
@@ -159,8 +159,8 @@
     <select id="selectNoReadNotify" resultType="top.wang3.hami.common.model.NotifyCount">
         select type, count(*) as `total`
         from notify_msg
-        where receiver = #{receiver} and state = 0
+        where receiver = #{receiver}
+          and state = 0
         group by type
     </select>
-
 </mapper>

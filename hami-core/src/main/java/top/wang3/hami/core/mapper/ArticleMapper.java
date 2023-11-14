@@ -26,14 +26,14 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     ArticleDO selectArticleById(@Param("articleId") Integer articleId);
 
-   List<ArticleDO> listArticleById(@Param("ids") Collection<Integer> ids);
+    List<ArticleDO> listArticleById(@Param("ids") Collection<Integer> ids);
 
     @Select("""
-        select id from article
-        where id > #{lastId} and deleted = 0
-        order by id
-        limit #{batchSize};
-    """)
+                select id from article
+                where id > #{lastId} and deleted = 0
+                order by id
+                limit #{batchSize};
+            """)
     List<Integer> scanArticleIds(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 
     List<ArticleDO> scanArticles(@Param("ids") List<Integer> ids);

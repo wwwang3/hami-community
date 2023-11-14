@@ -7,7 +7,6 @@
     <id column="id" property="id" />
     <result column="article_id" property="articleId" />
     <result column="tag_id" property="tagId" />
-    <result column="deleted" property="deleted" />
     <result column="ctime" property="ctime" />
     <result column="mtime" property="mtime" />
   </resultMap>
@@ -21,7 +20,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, article_id, tag_id, deleted, ctime, mtime
+    id, article_id, tag_id, ctime, mtime
   </sql>
 
 
@@ -29,8 +28,7 @@
     select article_tag.article_id as article_id, tag.name as tag_name, tag.id as tag_id
     from article_tag
     join tag on tag.id = article_tag.tag_id
-    where article_tag.deleted = 0 and
-    article_tag.article_id in
+    where article_tag.article_id in
     <foreach collection="articleIds" open="(" separator="," close=")" item="id">
       #{id}
     </foreach>

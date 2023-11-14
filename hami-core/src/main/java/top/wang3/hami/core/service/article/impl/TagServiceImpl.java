@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.PageParam;
+import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.service.article.TagService;
@@ -66,7 +66,7 @@ public class TagServiceImpl implements TagService {
         return ListMapperHandler.listTo(tagIds, id -> self.getTagById(id));
     }
 
-    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'tag'+#id",
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'tag-'+#id",
             cacheManager = Constants.CaffeineCacheManager)
     @Override
     public Tag getTagById(Integer id) {

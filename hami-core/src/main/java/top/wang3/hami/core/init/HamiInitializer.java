@@ -32,4 +32,9 @@ public interface HamiInitializer extends Runnable {
      * 数据
      */
     String STAT_CACHE = "stat_cache";
+
+    /**
+     * 热门文章
+     */
+    String HOT_ARTICLE = "hot_article";
 }

@@ -5,7 +5,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
-import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
@@ -66,7 +65,7 @@ public class ArticleCacheInitializer implements HamiInitializer {
 
     private void cacheArticleContent(List<ArticleDO> articleDOS) {
         Map<String, String> map = ListMapperHandler.listToMap(articleDOS,
-                item -> RedisConstants.ARTICLE_CONTENT + item.getId(), Article::getContent);
+                item -> RedisConstants.ARTICLE_CONTENT + item.getId(), ArticleDO::getContent);
         RedisClient.cacheMultiObject(map, 10, 30, TimeUnit.DAYS);
     }
 }

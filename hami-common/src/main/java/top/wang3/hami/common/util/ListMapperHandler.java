@@ -67,7 +67,7 @@ public class ListMapperHandler {
             return Collections.emptyList();
         }
         List<T> list = origin.subList(from, to);
-        return (ArrayList<R>) listTo(list, mapper);
+        return listTo(list, mapper);
     }
 
     public static <T, R> ArrayList<R> listTo(Collection<T> origin, BiFunction<T, Integer, R> mapper) {
