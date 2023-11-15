@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.dto.article.UserArticleParam;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeItemParam;
-import top.wang3.hami.common.dto.article.UserArticleParam;
-import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.interact.LikeType;
+import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.model.UserFollow;
@@ -20,7 +20,6 @@ import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.LikeService;
-import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
@@ -95,7 +94,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<ArticleCollect> page = param.toPage();
         Collection<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
-        List<ArticleDTO> data = articleService.listArticleById(articleIds, null);
+        List<ArticleDTO> data = articleService.listArticleDTOById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())
@@ -109,7 +108,7 @@ public class UserInteractController {
                                                                UserArticleParam param) {
         Page<LikeItem> page = param.toPage();
         Collection<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
-        Collection<ArticleDTO> data = articleService.listArticleById(articleIds, null);
+        Collection<ArticleDTO> data = articleService.listArticleDTOById(articleIds, null);
         PageData<ArticleDTO> pageData = PageData.<ArticleDTO>builder()
                 .pageNum(param.getPageNum())
                 .total(page.getTotal())

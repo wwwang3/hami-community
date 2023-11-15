@@ -30,8 +30,13 @@ public class HotArticleListInitializer implements HamiInitializer {
     private final ArticleStatRepository articleStatRepository;
 
     @Override
-    public String getName() {
-        return null;
+    public InitializerEnums getName() {
+        return InitializerEnums.HOT_ARTICLE;
+    }
+
+    @Override
+    public boolean alwaysExecute() {
+        return true;
     }
 
     @Override
@@ -48,7 +53,7 @@ public class HotArticleListInitializer implements HamiInitializer {
             long time = DateUtil.offsetDay(new Date(), 30).getTime();
             List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId(), time);
             RedisClient.deleteObject(redisKey);
-            if (articles != null && !articles.isEmpty()){
+            if (articles != null && !articles.isEmpty()) {
                 RedisClient.zAddAll(redisKey, convertToTuple(articles));
             }
         });

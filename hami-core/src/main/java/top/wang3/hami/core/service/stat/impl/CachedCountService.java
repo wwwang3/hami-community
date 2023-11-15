@@ -50,28 +50,21 @@ public class CachedCountService implements CountService {
         String redisKey = RedisConstants.STAT_TYPE_USER + userId;
         UserStat stat = RedisClient.getCacheObject(redisKey);
         if (stat == null) {
-            stat = loadUserStatCache(redisKey, userId);
+            synchronized (this) {
+                stat = RedisClient.getCacheObject(redisKey);
+                if (stat == null) {
+                    stat = this.loadUserStatCache(userId);
+                    RedisClient.setCacheObject(redisKey, stat, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
+                }
+            }
         }
-        Long followingCount = followService.getUserFollowingCount(userId);
-        Long followerCount = followService.getUserFollowerCount(userId);
-        stat.setTotalFollowings(followingCount.intValue());
-        stat.setTotalFollowers(followerCount.intValue());
         return stat;
     }
 
     @CostLog
     @Override
     public Map<Integer, UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        Map<Integer, UserStat> statMap = RedisClient.getMultiCacheObjectToMap(RedisConstants.STAT_TYPE_USER, userIds, this::loadUserStatCaches);
-        Map<Integer, Long> followings = followService.listUserFollowingCount(userIds);
-        Map<Integer, Long> followers = followService.listUserFollowerCount(userIds);
-        statMap.forEach((userId, item) -> {
-            Integer followingCount = followings.getOrDefault(userId, 0L).intValue();
-            Integer followerCount = followers.getOrDefault(userId, 0L).intValue();
-            item.setTotalFollowings(followingCount);
-            item.setTotalFollowers(followerCount);
-        });
-        return statMap;
+        return RedisClient.getMultiCacheObjectToMap(RedisConstants.STAT_TYPE_USER, userIds, this::loadUserStatCaches);
     }
 
     @Override
@@ -97,33 +90,39 @@ public class CachedCountService implements CountService {
         }
     }
 
-    private Map<Integer, ArticleStatDTO> loadArticleStateCaches(List<Integer> ids) {
+    @Override
+    public Map<Integer, ArticleStatDTO> loadArticleStateCaches(List<Integer> ids) {
         Map<Integer, ArticleStatDTO> dtoMap = articleStatService.listArticleStat(ids);
         Map<String, ArticleStatDTO> newMap = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_ARTICLE + id, (id) -> {
             return dtoMap.computeIfAbsent(id, ArticleStatDTO::new);
         });
-        RedisClient.cacheMultiObject(newMap, 10, 20, TimeUnit.HOURS);
+        RedisClient.cacheMultiObject(newMap, 10, 100, TimeUnit.HOURS);
         return dtoMap;
     }
 
-    private UserStat loadUserStatCache(String redisKey, Integer userId) {
-        synchronized (this) {
-            UserStat stat = RedisClient.getCacheObject(redisKey);
-            //stat为空
-            if (stat == null) {
-                stat = articleStatService.getUserStatByUserId(userId);
-                RedisClient.setCacheObject(redisKey, stat, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-            }
-            return stat;
-        }
+    private UserStat loadUserStatCache(Integer userId) {
+        UserStat stat = articleStatService.getUserStatByUserId(userId);
+        Long followingCount = followService.getUserFollowingCount(userId);
+        Long followerCount = followService.getUserFollowerCount(userId);
+        stat.setTotalFollowings(followingCount.intValue());
+        stat.setTotalFollowers(followerCount.intValue());
+        return stat;
     }
 
-    private Map<Integer, UserStat> loadUserStatCaches(List<Integer> ids) {
+    @Override
+    public Map<Integer, UserStat> loadUserStatCaches(List<Integer> ids) {
         Map<Integer, UserStat> statMap = articleStatService.listUserStat(ids);
-        Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_USER + id, id -> {
-            return statMap.computeIfAbsent(id, UserStat::new);
+        //关注和粉丝数据
+        final Map<Integer, Long> followings = followService.listUserFollowingCount(ids);
+        final Map<Integer, Long> followers = followService.listUserFollowerCount(ids);
+        statMap.forEach((userId, item) -> {
+            Integer followingCount = followings.getOrDefault(userId, 0L).intValue();
+            Integer followerCount = followers.getOrDefault(userId, 0L).intValue();
+            item.setTotalFollowings(followingCount);
+            item.setTotalFollowers(followerCount);
         });
-        RedisClient.cacheMultiObject(cache, 10, 20, TimeUnit.HOURS);
+        Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_USER + id, statMap::get);
+        RedisClient.cacheMultiObject(cache, 10, 10, TimeUnit.HOURS);
         return statMap;
     }
 

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -16,19 +15,18 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "hami.init.enable", havingValue = "true", matchIfMissing = true)
 @Slf4j
 public class HamiInitializerExecutor implements ApplicationRunner {
 
-    private final HamiProperties hamiProperties;
-
     private List<HamiInitializer> initializers;
-    private List<String> enabledInitializers;
+    private List<InitializerEnums> enabledInitializers;
+    private boolean enable;
 
     @Autowired
     public void setEnabledInitializers(HamiProperties hamiProperties) {
         enabledInitializers = hamiProperties
                 .getInit().getList();
+        enable = hamiProperties.getInit().isEnable();
     }
 
     @Autowired(required = false)
@@ -42,25 +40,45 @@ public class HamiInitializerExecutor implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("\nstart to execute initialization tasks");
         if (initializers == null || initializers.isEmpty()) {
             return;
         }
+        log.info("\nstart to execute initialization tasks");
         StopWatch watch = new StopWatch("hami-cache-init-task");
+        processInitializingTask(watch);
+        log.info("\ninitializing tasks execution status");
+        prettyPrint(watch);
+    }
+
+    private void processInitializingTask(StopWatch watch) {
         for (HamiInitializer initializer : initializers) {
+            if (!canRun(initializer)) {
+                continue;
+            }
             handleRun(initializer, watch);
         }
-        log.info("initializing tasks execution status");
-        System.out.println(watch.prettyPrint());
     }
 
     private void handleRun(HamiInitializer initializer, StopWatch watch) {
         watch.start("[task-" + initializer.getName() + "]") ;
-        if (enabledInitializers == null || enabledInitializers.isEmpty()
-                || !enabledInitializers.contains(initializer.getName())) {
-            return;
-        }
         initializer.run();
         watch.stop();
     }
+
+    private boolean canRun(HamiInitializer initializer) {
+        return initializer.alwaysExecute() || (enable && enabledInitializers.contains(initializer.getName()));
+    }
+
+    void prettyPrint(StopWatch watch) {
+        long nanos = watch.getTotalTimeNanos();
+        long minutes = nanos / 1_000_000_000 / 60;
+        long seconds = nanos / 1_000_000_000 % 60;
+        long millis = nanos % 1_000_000_000 / 1_000_000;
+        long ns = nanos % 1_000_000_000 % 1_000_000;
+        int count = watch.getTaskCount();
+        String s = "%s task cost: %sM %sS %sMS %sNS".formatted(count, minutes, seconds, millis, ns);
+        System.out.println(s);
+        System.out.println(watch.prettyPrint());
+    }
+
 }

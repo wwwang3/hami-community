@@ -15,11 +15,19 @@ public class ArticleRabbitMessage implements RabbitMessage {
     private Integer articleId;
     private Integer authorId;
     private Integer loginUserId = null; //当type为view时, 为当前登录用户的ID
+    private String ip = null;
 
     public ArticleRabbitMessage(Type type, Integer articleId, Integer authorId) {
         this.type = type;
         this.articleId = articleId;
         this.authorId = authorId;
+    }
+
+    public ArticleRabbitMessage(Type type, Integer articleId, Integer authorId, Integer loginUserId) {
+        this.type = type;
+        this.articleId = articleId;
+        this.authorId = authorId;
+        this.loginUserId = loginUserId;
     }
 
     @Override

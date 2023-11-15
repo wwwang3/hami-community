@@ -58,7 +58,7 @@ public class CacheConfig {
     @Bean
     public Caffeine<Object, Object> caffeine() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(1, TimeUnit.DAYS)
+                .expireAfterWrite(30, TimeUnit.DAYS) //缓存标签和分类数据
                 .initialCapacity(256)
                 .maximumSize(512)
                 .removalListener((k, v, reason) -> {

@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
-import top.wang3.hami.common.model.ArticleDO;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +30,7 @@ public interface ArticleRepository extends IService<Article> {
 
     List<Integer> scanArticleIds(int lastId, int batchSize);
 
-    List<ArticleDO> scanArticles(List<Integer> ids);
+    List<Article> scanArticleContent(int lastId, int batchSize);
 
     List<Integer> searchArticle(Page<Article> page, String keyword);
 

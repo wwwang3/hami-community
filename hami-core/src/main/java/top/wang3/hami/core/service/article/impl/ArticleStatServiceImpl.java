@@ -39,11 +39,7 @@ public class ArticleStatServiceImpl implements ArticleStatService {
     @Override
     public UserStat getUserStatByUserId(Integer userId) {
         UserStat stat = articleStatRepository.getUserStatByUserId(userId);
-        if (stat == null) {
-            stat = new UserStat();
-            stat.setUserId(userId);
-        }
-        return stat;
+        return stat == null ? new UserStat(userId) : stat;
     }
 
     @NonNull

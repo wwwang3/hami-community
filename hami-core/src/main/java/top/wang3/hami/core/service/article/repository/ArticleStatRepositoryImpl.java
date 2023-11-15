@@ -21,7 +21,7 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
         implements ArticleStatRepository {
 
     @Override
-    public List<ArticleStat> scanArticleStats(int lastArticle, int batchSize) {
+    public List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize) {
         return getBaseMapper().scanBatchStats(lastArticle, batchSize);
     }
 

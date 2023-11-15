@@ -11,6 +11,8 @@ import top.wang3.hami.core.service.article.TagService;
 
 import java.util.List;
 
+import static top.wang3.hami.core.init.InitializerEnums.LOCAL_CACHE;
+
 @Component
 @Slf4j
 @Order(1)
@@ -18,8 +20,13 @@ public class LocalCacheInitializer implements HamiInitializer {
 
 
     @Override
-    public String getName() {
+    public InitializerEnums getName() {
         return LOCAL_CACHE;
+    }
+
+    @Override
+    public boolean alwaysExecute() {
+        return true;
     }
 
     @Resource

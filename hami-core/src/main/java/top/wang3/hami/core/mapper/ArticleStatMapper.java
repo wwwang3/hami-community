@@ -1,10 +1,7 @@
 package top.wang3.hami.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.MapKey;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import top.wang3.hami.common.dto.article.ArticleStatDTO;
 import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.ArticleStat;
@@ -23,7 +20,8 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
         order by article_id
         limit #{batchSize};
     """)
-    List<ArticleStat> scanBatchStats(@Param("lastArticleId") int lastArticle, @Param("batchSize") int batchSize);
+    @ResultMap(value = "ArticleStatDTOMap")
+    List<ArticleStatDTO> scanBatchStats(@Param("lastArticleId") int lastArticle, @Param("batchSize") int batchSize);
 
     @MapKey(value = "userId")
     Map<Integer, UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);

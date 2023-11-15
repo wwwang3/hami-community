@@ -4,6 +4,7 @@ package top.wang3.hami.core;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import top.wang3.hami.core.init.InitializerEnums;
 
 import java.util.List;
 
@@ -19,6 +20,6 @@ public class HamiProperties {
     @Data
     public static class Init {
         boolean enable = false;
-        List<String> list;
+        List<InitializerEnums> list;
     }
 }

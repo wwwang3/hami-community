@@ -79,7 +79,7 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
 
     private void buildReadingRecord(Collection<ReadingRecordDTO> dtos, String keyword) {
         List<Integer> articleIds = ListMapperHandler.listTo(dtos, ReadingRecordDTO::getArticleId, false);
-        List<ArticleDTO> articleDTOS = articleService.listArticleById(articleIds, new ArticleOptionsBuilder());
+        List<ArticleDTO> articleDTOS = articleService.listArticleDTOById(articleIds, new ArticleOptionsBuilder());
         ListMapperHandler.doAssemble(dtos, ReadingRecordDTO::getArticleId,
                 articleDTOS, ArticleDTO::getId, ReadingRecordDTO::setContent);
         if (StringUtils.hasText(keyword)) {

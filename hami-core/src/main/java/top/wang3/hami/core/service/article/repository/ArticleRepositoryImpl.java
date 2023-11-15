@@ -104,10 +104,9 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<ArticleDO> scanArticles(List<Integer> ids) {
-       return getBaseMapper().scanArticles(ids);
+    public List<Article> scanArticleContent(int lastId, int batchSize) {
+        return getBaseMapper().scanArticleContent(lastId, batchSize);
     }
-
 
     public boolean checkArticleExist(Integer articleId) {
         return ChainWrappers.queryChain(getBaseMapper())

@@ -40,7 +40,7 @@ public class SearchServiceImpl implements SearchService {
         rabbitMessagePublisher.publishMsg(new SearchRabbitMessage(keyword));
         Page<Article> page = param.toPage();
         List<Integer> ids = articleRepository.searchArticle(page, keyword);
-        List<ArticleDTO> articles = articleService.listArticleById(ids, new ArticleOptionsBuilder());
+        List<ArticleDTO> articles = articleService.listArticleDTOById(ids, new ArticleOptionsBuilder());
         highlightKeyword(articles, keyword);
         return PageData.<ArticleDTO>builder()
                 .total(page.getTotal())

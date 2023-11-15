@@ -1,10 +1,8 @@
 package top.wang3.hami.core.service.user.impl;
 
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.UserConverter;
@@ -18,8 +16,6 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
-import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.service.common.ImageService;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.LikeService;
@@ -39,16 +35,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final ImageService imageService;
     private final FollowService followService;
     private final CountService countService;
     private final LikeService likeService;
     private final CollectService collectService;
     private final UserRepository userRepository;
-    private final RabbitMessagePublisher rabbitMessagePublisher;
-
-    @Resource
-    TransactionTemplate transactionTemplate;
 
     @Override
     public LoginProfile getLoginProfile() {
@@ -80,13 +71,7 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        List<User> users = RedisClient.getMultiCacheObject(RedisConstants.USER_INFO, userIds, nullIds -> {
-            List<User> absentUsers = userRepository.getUserByIds(nullIds);
-            Map<String, User> map = ListMapperHandler.listToMap(absentUsers, user -> RedisConstants.USER_INFO + user.getUserId());
-            RedisClient.cacheMultiObject(map, 10, 20, TimeUnit.DAYS);
-            return absentUsers;
-        });
-
+        List<User> users = RedisClient.getMultiCacheObject(RedisConstants.USER_INFO, userIds, this::loadUserCache);
         List<UserDTO> dtos = UserConverter.INSTANCE.toUserDTOList(users);
         if (builder == null || builder.stat) {
             //查询用户的粉丝数据
@@ -175,6 +160,14 @@ public class UserServiceImpl implements UserService {
             }
             return user;
         }
+    }
+
+    @Override
+    public List<User> loadUserCache(List<Integer> userIds) {
+        List<User> absentUsers = userRepository.getUserByIds(userIds);
+        Map<String, User> map = ListMapperHandler.listToMap(absentUsers, user -> RedisConstants.USER_INFO + user.getUserId());
+        RedisClient.cacheMultiObject(map, 10, 20, TimeUnit.DAYS);
+        return absentUsers;
     }
 
 }

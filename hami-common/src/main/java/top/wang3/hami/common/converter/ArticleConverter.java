@@ -45,6 +45,7 @@ public interface ArticleConverter {
     CategoryDTO toCategoryDTO(Category category);
 
     ArticleStatDTO toArticleStatDTO(ArticleStat stat);
+    List<ArticleStatDTO> toArticleStatDTOS(List<ArticleStat> stat);
 
 
     default ArticleDTO toArticleDTO(ArticleInfo articleInfo) {
@@ -68,8 +69,19 @@ public interface ArticleConverter {
         return dtos;
     }
 
-
-    ArticleContentDTO toArticleContentDTO(ArticleDTO dto, String content);
+    default ArticleContentDTO toArticleContentDTO(ArticleInfo info, String content) {
+        if (info == null && content == null) {
+            return null;
+        }
+        ArticleContentDTO dto = new ArticleContentDTO();
+        if (info != null) {
+            dto.setArticleInfo(info);
+            dto.setId(info.getId());
+            dto.setUserId(info.getUserId());
+        }
+        dto.setContent(content);
+        return dto;
+    }
 
 
     ArticleInfo toArticleInfo(ArticleDO articleDO, Collection<Integer> tagIds);

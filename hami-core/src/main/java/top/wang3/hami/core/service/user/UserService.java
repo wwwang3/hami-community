@@ -6,6 +6,7 @@ import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.User;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface UserService {
     LoginProfile getLoginProfile();
@@ -18,4 +19,5 @@ public interface UserService {
 
     UserDTO getAuthorInfoById(int userId, UserOptionsBuilder builder);
 
+    List<User> loadUserCache(List<Integer> userIds);
 }

@@ -11,6 +11,8 @@ import top.wang3.hami.core.service.article.repository.CategoryRepository;
 
 import java.util.List;
 
+import static top.wang3.hami.core.init.InitializerEnums.ARTICLE_LIST_CACHE;
+
 @Component
 @Order(2)
 @RequiredArgsConstructor
@@ -21,8 +23,13 @@ public class ArticleListInitializer implements HamiInitializer {
     private final ArticleService articleService;
 
     @Override
-    public String getName() {
+    public InitializerEnums getName() {
         return ARTICLE_LIST_CACHE;
+    }
+
+    @Override
+    public boolean alwaysExecute() {
+        return true;
     }
 
     @Override

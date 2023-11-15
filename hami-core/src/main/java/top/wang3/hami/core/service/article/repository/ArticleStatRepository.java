@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface ArticleStatRepository extends IService<ArticleStat> {
 
-    List<ArticleStat> scanArticleStats(int lastArticle, int batchSize);
+    List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize);
 
     List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date);
 
