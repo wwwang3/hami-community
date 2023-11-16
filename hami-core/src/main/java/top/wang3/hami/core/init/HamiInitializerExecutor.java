@@ -43,10 +43,10 @@ public class HamiInitializerExecutor implements ApplicationRunner {
         if (initializers == null || initializers.isEmpty()) {
             return;
         }
-        log.info("\nstart to execute initialization tasks");
+        log.info("start to execute initialization tasks");
         StopWatch watch = new StopWatch("hami-cache-init-task");
         processInitializingTask(watch);
-        log.info("\ninitializing tasks execution status");
+        log.info("\nInitializing tasks execution status");
         prettyPrint(watch);
     }
 

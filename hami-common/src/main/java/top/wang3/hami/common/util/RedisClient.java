@@ -81,7 +81,7 @@ public class RedisClient {
      * @param <T>     缓存对象的泛型
      */
     public static <T> void setCacheObject(final String key, final T value, final long timeout) {
-        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, value, timeout + randomSeconds(), TimeUnit.SECONDS);
     }
 
     /**
@@ -94,7 +94,7 @@ public class RedisClient {
      */
     public static <T> void setCacheObject(final String key, final T value,
                                           final long timeout, final TimeUnit timeUnit) {
-        redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+        redisTemplate.opsForValue().set(key, value, timeout + randomSeconds(), timeUnit);
     }
 
     public static <T> void cacheMultiObject(final Map<String, T> data) {
@@ -119,7 +119,7 @@ public class RedisClient {
                 byte[] rawKey = keyBytes(key);
                 connection.
                         keyCommands()
-                        .pExpire(rawKey, timeUnit.toMillis(RandomUtils.randomLong(min, max)));
+                        .pExpire(rawKey, timeUnit.toMillis(RandomUtils.randomLong(min, max)) + randomMills());
             });
             return null;
         });
@@ -593,7 +593,7 @@ public class RedisClient {
                 connection.zAdd(rawKey, new LinkedHashSet<>(list));
             }
             connection.keyCommands()
-                    .pExpire(rawKey, timeUnit.toMillis(timeout));
+                    .pExpire(rawKey, timeUnit.toMillis(timeout) + randomMills());
             return null;
         });
     }
@@ -649,7 +649,7 @@ public class RedisClient {
                 connection.hashCommands()
                         .hMSet(rawKey, serializeMap(value));
                 connection.keyCommands()
-                        .pExpire(rawKey, unit.toMillis(timeout));
+                        .pExpire(rawKey, unit.toMillis(timeout) + randomMills());
             });
             return null;
         });
@@ -787,4 +787,13 @@ public class RedisClient {
         return (T) redisTemplate.execute(script, redisTemplate.getStringSerializer(),
                 redisTemplate.getValueSerializer(), keys, argsArray);
     }
+
+    private static long randomSeconds() {
+        return RandomUtils.randomLong(33, 222);
+    }
+
+    private static long randomMills() {
+        return RandomUtils.randomLong(22, 333) * 1000;
+    }
+
 }

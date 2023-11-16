@@ -20,7 +20,7 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
         order by article_id
         limit #{batchSize};
     """)
-    @ResultMap(value = "ArticleStatDTOMap")
+    @ResultMap(value = "ArticleStatDTOResultMap")
     List<ArticleStatDTO> scanBatchStats(@Param("lastArticleId") int lastArticle, @Param("batchSize") int batchSize);
 
     @MapKey(value = "userId")

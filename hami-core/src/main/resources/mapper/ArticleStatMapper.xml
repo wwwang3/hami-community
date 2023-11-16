@@ -14,7 +14,7 @@
         <result column="mtime" property="mtime"/>
     </resultMap>
 
-    <resultMap id="ArticleDTOResultMap" type="top.wang3.hami.common.dto.article.ArticleStatDTO">
+    <resultMap id="ArticleStatDTOResultMap" type="top.wang3.hami.common.dto.article.ArticleStatDTO">
         <id column="article_id" property="articleId"/>
         <result column="views" property="views"/>
         <result column="likes" property="likes"/>
@@ -87,7 +87,7 @@
         limit 54;
     </select>
 
-    <select id="selectArticleStatsByArticleIds" resultMap="ArticleDTOResultMap">
+    <select id="selectArticleStatsByArticleIds" resultMap="ArticleStatDTOResultMap">
         select article_id, views, likes, comments, collects
         from article_stat
         where article_id in

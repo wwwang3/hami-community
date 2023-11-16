@@ -96,7 +96,7 @@ public class CachedCountService implements CountService {
         Map<String, ArticleStatDTO> newMap = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_ARTICLE + id, (id) -> {
             return dtoMap.computeIfAbsent(id, ArticleStatDTO::new);
         });
-        RedisClient.cacheMultiObject(newMap, 10, 100, TimeUnit.HOURS);
+        RedisClient.cacheMultiObject(newMap, 10, 50, TimeUnit.HOURS);
         return dtoMap;
     }
 
@@ -122,7 +122,7 @@ public class CachedCountService implements CountService {
             item.setTotalFollowers(followerCount);
         });
         Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_USER + id, statMap::get);
-        RedisClient.cacheMultiObject(cache, 10, 10, TimeUnit.HOURS);
+        RedisClient.cacheMultiObject(cache, 10, 50, TimeUnit.HOURS);
         return statMap;
     }
 

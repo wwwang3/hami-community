@@ -230,6 +230,9 @@ public class ArticleServiceImpl implements ArticleService {
             return null;
         } else if (info == null) {
             synchronized (this) {
+                info = RedisClient.getCacheObject(key);
+                if (info != null) return info;
+                //load cache
                 info = this.loadArticleInfoFromDB(id);
                 if (info == null) {
                     RedisClient.cacheEmptyObject(key, new ArticleInfo());
@@ -268,17 +271,24 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<ArticleInfo> loadArticleInfoCache(List<Integer> nullIds) {
         List<ArticleInfo> infos = articleRepository.listArticleById(nullIds);
-        RedisClient.cacheMultiObject(infos, a -> RedisConstants.ARTICLE_INFO + a.getId(), 10, 100, TimeUnit.DAYS);
+        RedisClient.cacheMultiObject(infos, a -> RedisConstants.ARTICLE_INFO + a.getId(), 10, 100, TimeUnit.HOURS);
         return infos;
     }
+
+
 
     private String loadArticleContent(Integer articleId) {
         String key = RedisConstants.ARTICLE_CONTENT + articleId;
         String content = RedisClient.getCacheObject(key);
         if (content == null || content.isEmpty()) {
             //文章内容不会为空
-            content = articleRepository.getArticleContentById(articleId);
-            RedisClient.setCacheObject(key, content, 24L + RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
+            synchronized (this) {
+                content = RedisClient.getCacheObject(key);
+                if (content == null || content.isEmpty()) {
+                    content = articleRepository.getArticleContentById(articleId);
+                    RedisClient.setCacheObject(key, content, 24L + RandomUtils.randomLong(1, 20), TimeUnit.HOURS);
+                }
+            }
         }
         return content;
     }
@@ -359,7 +369,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static List<Integer> cacheArticleListToRedis(String key, long current, long size, List<Article> articles) {
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(articles, Article::getId, article -> article.getCtime().getTime());
-        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(10, 30), TimeUnit.DAYS);
+        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(100, 200), TimeUnit.HOURS);
         return ListMapperHandler.subList(articles, Article::getId, current, size);
     }
 }
