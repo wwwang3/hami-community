@@ -1,8 +1,10 @@
 package top.wang3.hami.security.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import top.wang3.hami.common.util.ObjectMapperFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -10,7 +12,7 @@ import java.util.function.Supplier;
 
 public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checker) {
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final ObjectMapper MAPPER = ObjectMapperFactory.MAPPER;
 
     public Result<T> orElse(Supplier<T> supplier) {
         Objects.requireNonNull(supplier);
@@ -133,4 +135,12 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
 
     }
 
+    public static String writeValueAsString(Object value) {
+        try {
+           return MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            // ignore it
+            return null;
+        }
+    }
 }

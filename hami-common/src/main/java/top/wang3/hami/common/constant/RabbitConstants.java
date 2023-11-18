@@ -2,7 +2,7 @@ package top.wang3.hami.common.constant;
 
 public final class RabbitConstants {
 
-    public static final String HAMI_DIRECT_EXCHANGE1 = "hami-direct-exchange-1";
+    public static final String HAMI_EMAIL_EXCHANGE = "hami-direct-exchange-1";
 
     public static final String HAMI_TOPIC_EXCHANGE1 = "hami-topic-exchange-1";
 

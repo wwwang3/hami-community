@@ -1,7 +1,8 @@
-package top.wang3.hami.common.message;
+package top.wang3.hami.common.message.interact;
 
 import lombok.Data;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.message.RabbitMessage;
 
 @Data
 public abstract class InteractRabbitMessage implements RabbitMessage {

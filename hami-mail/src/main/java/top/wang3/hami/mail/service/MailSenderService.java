@@ -2,20 +2,22 @@ package top.wang3.hami.mail.service;
 
 import lombok.extern.slf4j.Slf4j;
 import top.wang3.hami.mail.config.CustomMailProperties;
+import top.wang3.hami.mail.manager.MailSenderManager;
 import top.wang3.hami.mail.model.MailSendResult;
 import top.wang3.hami.mail.model.PrepareMimeMessageHelper;
-import top.wang3.hami.mail.supplier.MailSenderManager;
+
+import java.util.List;
 
 @Slf4j
 public class MailSenderService {
 
-    private final MailSenderManager supplier;
+    private final MailSenderManager manager;
 
     CustomMailProperties config;
 
-    public MailSenderService(MailSenderManager supplier, CustomMailProperties config) {
+    public MailSenderService(MailSenderManager manager, CustomMailProperties config) {
         this.config = config;
-        this.supplier = supplier;
+        this.manager = manager;
     }
 
     /**
@@ -23,7 +25,7 @@ public class MailSenderService {
      * @return MessageWrapper
      */
     public PrepareMimeMessageHelper.MessageWrapper of() {
-        PrepareMimeMessageHelper helper = new PrepareMimeMessageHelper(supplier);
+        PrepareMimeMessageHelper helper = new PrepareMimeMessageHelper(manager);
         return helper.create();
     }
 
@@ -34,13 +36,13 @@ public class MailSenderService {
      * @return MessageWrapper
      */
     public PrepareMimeMessageHelper.MessageWrapper of(String key) {
-        var sender = supplier.getMailSender(key);
-        PrepareMimeMessageHelper helper = new PrepareMimeMessageHelper(supplier, sender);
+        var sender = manager.getMailSender(key);
+        PrepareMimeMessageHelper helper = new PrepareMimeMessageHelper(manager, sender);
         return helper.create();
     }
 
     public MailSendResult sendText(String subject, String text, String ...to) {
-       return new PrepareMimeMessageHelper(supplier, supplier.getMailSender())
+       return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
                 .to(to)
                 .subject(subject)
@@ -49,11 +51,29 @@ public class MailSenderService {
     }
 
     public MailSendResult sendHtml(String subject, String html, String ...to) {
-        return new PrepareMimeMessageHelper(supplier, supplier.getMailSender())
+        return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
                 .to(to)
                 .subject(subject)
                 .html(html)
+                .send();
+    }
+
+    public MailSendResult sendText(String subject, String text, List<String> tos) {
+        return new PrepareMimeMessageHelper(manager, manager.getMailSender())
+                .create()
+                .to(tos)
+                .subject(subject)
+                .text(text)
+                .send();
+    }
+
+    public MailSendResult sendHtml(String subject, String text, List<String> tos) {
+        return new PrepareMimeMessageHelper(manager, manager.getMailSender())
+                .create()
+                .to(tos)
+                .subject(subject)
+                .text(text)
                 .send();
     }
 

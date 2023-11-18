@@ -1,4 +1,4 @@
-package top.wang3.hami.common.message;
+package top.wang3.hami.common.message.interact;
 
 
 import lombok.Data;

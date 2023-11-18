@@ -10,7 +10,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.message.CollectRabbitMessage;
+import top.wang3.hami.common.message.interact.CollectRabbitMessage;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;

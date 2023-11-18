@@ -48,7 +48,7 @@ public class RateLimiter implements ApplicationContextAware {
             boolean allowed = results.get(0) == 1L;
             Long remain = results.get(1);
             if (!allowed) {
-                String msg = "[%s] is limited rate: %s, capacity: %s".formatted(key, model.getRate(), model.getScope());
+                String msg = "[%s] is limited rate: %s, capacity: %s".formatted(key, model.getRate(), model.getCapacity());
                 throw new RateLimitException(msg);
             }
             log.info("[{}] remain_requests: {}", key, remain);

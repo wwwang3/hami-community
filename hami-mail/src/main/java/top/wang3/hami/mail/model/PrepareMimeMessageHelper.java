@@ -6,13 +6,14 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.util.ByteArrayDataSource;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
+import top.wang3.hami.mail.manager.MailSenderManager;
 import top.wang3.hami.mail.sender.CustomMailSender;
-import top.wang3.hami.mail.supplier.MailSenderManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,19 +29,20 @@ import java.util.*;
 @SuppressWarnings(value = {"unused"})
 public class PrepareMimeMessageHelper {
 
-    private final MailSenderManager supplier;
+    private final MailSenderManager manager;
     private final CustomMailSender boundCustomSender;
+    @Getter
     private final JavaMailSenderImpl mailSender;
     private final List<MessageWrapper> messages = new ArrayList<>();
 
-    public PrepareMimeMessageHelper(MailSenderManager supplier) {
-       this.supplier = supplier;
-       this.boundCustomSender = supplier.getMailSender();
+    public PrepareMimeMessageHelper(MailSenderManager manager) {
+       this.manager = manager;
+       this.boundCustomSender = manager.getMailSender();
        this.mailSender = boundCustomSender.getJavaMailSender();
     }
 
-    public PrepareMimeMessageHelper(MailSenderManager supplier, CustomMailSender boundCustomSender) {
-        this.supplier = supplier;
+    public PrepareMimeMessageHelper(MailSenderManager manager, CustomMailSender boundCustomSender) {
+        this.manager = manager;
         this.boundCustomSender = boundCustomSender;
         this.mailSender = boundCustomSender.getJavaMailSender();
     }
@@ -106,11 +108,18 @@ public class PrepareMimeMessageHelper {
             tos.add(new Address(to));
             return this;
         }
+
         public MessageWrapper to(String ...tos) {
             if (tos != null) {
-                for (String to : tos) {
-                    this.tos.add(new Address(to));
-                }
+                return to(Arrays.asList(tos));
+            }
+            return this;
+        }
+
+        public MessageWrapper to(List<String> tos) {
+            if (tos != null && !tos.isEmpty()) {
+                List<Address> addresses = tos.stream().map(Address::new).toList();
+                this.tos.addAll(addresses);
             }
             return this;
         }
@@ -273,10 +282,6 @@ public class PrepareMimeMessageHelper {
         return this.boundCustomSender;
     }
 
-    public JavaMailSenderImpl getMailSender() {
-        return mailSender;
-    }
-
     public MimeMessage[] convertToMimeMessage(JavaMailSenderImpl sender) {
         var wrappers = this.messages;
         int size = wrappers.size();
@@ -300,6 +305,6 @@ public class PrepareMimeMessageHelper {
     }
 
     public MailSendResult doSend() {
-        return supplier.send(this);
+        return manager.send(this);
     }
 }

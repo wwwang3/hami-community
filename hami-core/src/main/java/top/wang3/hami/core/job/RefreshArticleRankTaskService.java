@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import top.wang3.hami.common.message.email.AlarmEmailMessage;
 import top.wang3.hami.core.init.HotArticleListInitializer;
+import top.wang3.hami.core.service.mail.MailMessageHandler;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +17,7 @@ import top.wang3.hami.core.init.HotArticleListInitializer;
 public class RefreshArticleRankTaskService {
 
     private final HotArticleListInitializer initializer;
+    private final MailMessageHandler handler;
 
     @Async
     @Scheduled(cron = "33 33 2 * * ? ")
@@ -26,6 +29,7 @@ public class RefreshArticleRankTaskService {
             long end = System.currentTimeMillis();
             log.info("refresh cate-article rank list success, cost: {}ms", end -start);
         } catch (Exception e) {
+            handler.handle(new AlarmEmailMessage("ArticleRank定时任务告警信息", e.getMessage()));
             e.printStackTrace();
             log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }
@@ -41,6 +45,7 @@ public class RefreshArticleRankTaskService {
             long end = System.currentTimeMillis();
             log.info("refresh overall-article list success, cost: {}ms", end - start);
         } catch (Exception e) {
+            handler.handle(new AlarmEmailMessage("ArticleRank定时任务告警信息", e.getMessage()));
             log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }

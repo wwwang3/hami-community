@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
-import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.AccountConverter;
 import top.wang3.hami.common.converter.UserConverter;
+import top.wang3.hami.common.dto.captcha.CaptchaType;
 import top.wang3.hami.common.dto.user.AccountInfo;
 import top.wang3.hami.common.dto.user.RegisterParam;
 import top.wang3.hami.common.dto.user.ResetPassParam;
@@ -56,7 +56,7 @@ public class AccountServiceImpl implements AccountService {
         String email = param.getEmail();
         String username = param.getUsername();
         String captcha = param.getCaptcha();
-        if (!captchaService.verify(RedisConstants.REGISTER_EMAIL_CAPTCHA, email, captcha)) {
+        if (!captchaService.verify(CaptchaType.REGISTER, email, captcha)) {
             throw new CaptchaServiceException("验证码无效或过期");
         }
         //判断用户名和邮箱是否被注册过
@@ -64,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
             throw new HamiServiceException("用户名已被注册");
         }
         //验证完用户名再删除验证码
-        captchaService.deleteCaptcha(RedisConstants.REGISTER_EMAIL_CAPTCHA, email);
+        captchaService.deleteCaptcha(CaptchaType.REGISTER, email);
         if (checkEmail(email)) {
             throw new HamiServiceException("邮箱已被注册");
         }
@@ -100,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean resetPassword(ResetPassParam param) {
         //校验验证码
-        return restPassword(param, "reset");
+        return restPassword(param, CaptchaType.RESET_PASS);
     }
 
 
@@ -108,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
     public boolean updatePassword(ResetPassParam param) {
         //修改密码
         //清除用户所有的登录态
-        boolean success = restPassword(param, "update");
+        boolean success = restPassword(param, CaptchaType.UPDATE_PASS);
         if (success) {
             tokenService.kickout();
         }
@@ -159,14 +159,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    private boolean restPassword(ResetPassParam param, String type) {
-        String captchaType = captchaService.resolveCaptchaType(type);
+    private boolean restPassword(ResetPassParam param, CaptchaType type) {
         final String email = param.getEmail();
-        boolean verify = captchaService.verify(captchaType, email, param.getCaptcha());
+        boolean verify = captchaService.verify(type, email, param.getCaptcha());
         if (!verify) {
             throw new CaptchaServiceException("验证码无效或过期");
         }
-        captchaService.deleteCaptcha(captchaType, email);
+        captchaService.deleteCaptcha(type, email);
         //用户不存在
         if (!checkEmail(param.getEmail())) {
             throw new HamiServiceException("用户不存在");

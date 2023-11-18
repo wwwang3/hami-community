@@ -11,7 +11,9 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
-import top.wang3.hami.common.message.*;
+import top.wang3.hami.common.message.NotifyRabbitReadMessage;
+import top.wang3.hami.common.message.UserRabbitMessage;
+import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.core.component.InteractConsumer;
@@ -96,7 +98,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
                 return;
             }
             String[] details = new String[]{message.getDetail()};
-            String detail = Result.MAPPER.writeValueAsString(details);
+            String detail = Result.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), message.getAuthorId(),
                     message.getCommentId(), message.getArticleId(), detail);
             save(msg);
@@ -115,7 +117,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
                 return;
             }
             String[] details = new String[]{comment.getContent(), message.getDetail()};
-            String detail = Result.MAPPER.writeValueAsString(details);
+            String detail = Result.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder
                     .buildReplyMsg(
                             message.getUserId(), message.getReplyTo(),

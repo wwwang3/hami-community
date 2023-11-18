@@ -8,17 +8,17 @@ public final class RedisConstants {
     /**
      * 注册邮箱验证码
      */
-    public static final String REGISTER_EMAIL_CAPTCHA = "email:register:";
+    public static final String REGISTER_CAPTCHA = "captcha:register:";
 
     /**
      * 忘记密码邮箱验证码
      */
-    public static final String RESET_EMAIL_CAPTCHA = "email:reset:pass:";
+    public static final String RESET_PASS_CAPTCHA = "captcha:reset:pass:";
 
     /**
      * 更新密码邮箱验证码
      */
-    public static final String UPDATE_EMAIL_CAPTCHA = "email:update:pass:";
+    public static final String UPDATE_PASS_CAPTCHA = "captcha:update:pass:";
 
     /**
      * 用户点赞数(我点赞的文章/评论数)

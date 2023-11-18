@@ -1,4 +1,4 @@
-package top.wang3.hami.mail.supplier;
+package top.wang3.hami.mail.manager;
 
 import top.wang3.hami.mail.model.MailSendResult;
 import top.wang3.hami.mail.model.PrepareMimeMessageHelper;

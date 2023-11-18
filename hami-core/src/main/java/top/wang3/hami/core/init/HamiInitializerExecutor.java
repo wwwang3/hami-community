@@ -46,7 +46,6 @@ public class HamiInitializerExecutor implements ApplicationRunner {
         log.info("start to execute initialization tasks");
         StopWatch watch = new StopWatch("hami-cache-init-task");
         processInitializingTask(watch);
-        log.info("\nInitializing tasks execution status");
         prettyPrint(watch);
     }
 
@@ -77,8 +76,8 @@ public class HamiInitializerExecutor implements ApplicationRunner {
         long ns = nanos % 1_000_000_000 % 1_000_000;
         int count = watch.getTaskCount();
         String s = "%s task cost: %sM %sS %sMS %sNS".formatted(count, minutes, seconds, millis, ns);
-        System.out.println(s);
-        System.out.println(watch.prettyPrint());
+        String info = watch.prettyPrint();
+        log.info("\nInitializing tasks execution status: \n{}\n{}", s, info);
     }
 
 }

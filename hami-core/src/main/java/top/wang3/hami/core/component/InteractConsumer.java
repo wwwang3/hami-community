@@ -1,7 +1,7 @@
 package top.wang3.hami.core.component;
 
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import top.wang3.hami.common.message.*;
+import top.wang3.hami.common.message.interact.*;
 
 public interface InteractConsumer {
 

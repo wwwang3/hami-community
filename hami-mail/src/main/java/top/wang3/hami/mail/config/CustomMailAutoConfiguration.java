@@ -6,11 +6,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import top.wang3.hami.mail.manager.MailSenderManager;
+import top.wang3.hami.mail.manager.RandomMailSenderManager;
+import top.wang3.hami.mail.manager.RoundRobinMailSenderManager;
 import top.wang3.hami.mail.sender.CustomMailSender;
 import top.wang3.hami.mail.service.MailSenderService;
-import top.wang3.hami.mail.supplier.MailSenderManager;
-import top.wang3.hami.mail.supplier.RandomMailSenderManager;
-import top.wang3.hami.mail.supplier.RoundRobinMailSenderManager;
 
 import java.util.*;
 

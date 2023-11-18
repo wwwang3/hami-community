@@ -1,32 +1,13 @@
 package top.wang3.hami.core.service.captcha;
 
-import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.dto.Captcha;
-import top.wang3.hami.common.util.RandomUtils;
+import top.wang3.hami.common.dto.captcha.Captcha;
+import top.wang3.hami.common.dto.captcha.CaptchaType;
 import top.wang3.hami.core.exception.CaptchaServiceException;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 验证码服务接口
  */
 public interface CaptchaService {
-
-    default String resolveCaptchaType(String type) {
-        return switch (type) {
-            case "register" -> RedisConstants.REGISTER_EMAIL_CAPTCHA;
-            case "reset" -> RedisConstants.RESET_EMAIL_CAPTCHA;
-            case "update" -> RedisConstants.UPDATE_EMAIL_CAPTCHA;
-            default -> throw new IllegalArgumentException(type);
-        };
-    }
-
-    /**
-     *
-     * 发送验证码
-     * @param captcha Captcha
-     */
-    void sendCaptcha(Captcha captcha) throws CaptchaServiceException;
 
     /**
      * 发送验证码
@@ -35,19 +16,16 @@ public interface CaptchaService {
      * @param length 长度
      * @param expire 有效期单位s
      */
-    default void sendCaptcha(String type, String item, int length, long expire) throws CaptchaServiceException {
-        String value = Integer.toString(RandomUtils.getRandom(length));
-        Captcha captcha = new Captcha(type, item, value, expire);
-        sendCaptcha(captcha);
-    }
+     void sendCaptcha(CaptchaType type, String item, int length, long expire) throws CaptchaServiceException;
+
 
     /**
      * 发送验证码 默认长度6位, 有效期五分钟
      * @param type 类型
      * @param item 主体
      */
-    default void sendCaptcha(String type, String item) throws CaptchaServiceException {
-        sendCaptcha(type, item, 6, TimeUnit.MINUTES.toSeconds(5));
+    default void sendCaptcha(CaptchaType type, String item) throws CaptchaServiceException {
+        sendCaptcha(type, item, 6, Captcha.DEFAULT_EXPIRE);
     }
 
     /**
@@ -57,7 +35,7 @@ public interface CaptchaService {
      * @param value 验证码
      * @return true-匹配 false-不匹配或者过期了
      */
-    boolean verify(String type, String item, String value);
+    boolean verify(CaptchaType type, String item, String value);
 
-    void deleteCaptcha(String type, String item);
+    void deleteCaptcha(CaptchaType type, String item);
 }

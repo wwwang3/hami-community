@@ -34,7 +34,9 @@ public class RabbitBrokerConfig {
     @Bean("rabbitMQJacksonConverter")
     @Primary
     public Jackson2JsonMessageConverter rabbitMQMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setAlwaysConvertToInferredType(true);
+        return converter;
     }
 
     @Bean("simpleMessageConverter")

@@ -1,4 +1,4 @@
-package top.wang3.hami.mail.supplier;
+package top.wang3.hami.mail.manager;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

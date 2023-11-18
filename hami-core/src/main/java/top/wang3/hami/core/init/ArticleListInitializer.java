@@ -28,11 +28,6 @@ public class ArticleListInitializer implements HamiInitializer {
     }
 
     @Override
-    public boolean alwaysExecute() {
-        return true;
-    }
-
-    @Override
     public void run() {
         cacheTotal();
         cacheSub();
