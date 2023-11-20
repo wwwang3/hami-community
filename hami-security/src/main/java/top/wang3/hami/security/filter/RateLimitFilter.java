@@ -7,14 +7,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import top.wang3.hami.common.component.SnowflakeIdGenerator;
 import top.wang3.hami.common.util.IpUtils;
 import top.wang3.hami.security.model.RateLimiterModel;
 import top.wang3.hami.security.model.Result;
@@ -39,13 +37,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private RateLimiter rateLimiter;
 
     RequestMappingHandlerMapping requestMappingHandlerMapping;
-    SnowflakeIdGenerator generator;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        long reqId = generator.nextId();
-        MDC.put("reqId", String.valueOf(reqId));
         RateLimiterModel model = RateLimiterModel.builder()
                 .algorithm(algorithm)
                 .scope(scope)

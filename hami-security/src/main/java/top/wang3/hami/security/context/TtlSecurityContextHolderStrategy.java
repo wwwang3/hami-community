@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
 import java.util.function.Supplier;
 
 /**
- * 阿里transmittable-thread-local实现SecurityContextHolderStrategy
+ * transmittable-thread-local实现SecurityContextHolderStrategy
  */
 public class TtlSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 

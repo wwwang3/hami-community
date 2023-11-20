@@ -8,7 +8,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import top.wang3.hami.common.component.SnowflakeIdGenerator;
 import top.wang3.hami.security.filter.RateLimitFilter;
 import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.ratelimit.RateLimiter;
@@ -27,12 +26,10 @@ public class RateLimitConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<RateLimitFilter> rateLimiterFilter(RateLimiter rateLimiter, SnowflakeIdGenerator generator,
-                                                                     RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public FilterRegistrationBean<RateLimitFilter> rateLimiterFilter(RateLimiter rateLimiter, RequestMappingHandlerMapping requestMappingHandlerMapping) {
         WebSecurityProperties.RateLimitFilterProperties config = properties.getRateLimit();
         RateLimitFilter filter = new RateLimitFilter();
         filter.setRateLimiter(rateLimiter);
-        filter.setGenerator(generator);
         //IP
         filter.setScope(RateLimit.Scope.IP);
         filter.setCapacity(config.getCapacity());

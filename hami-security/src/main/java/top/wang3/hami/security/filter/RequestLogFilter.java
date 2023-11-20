@@ -60,7 +60,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
         int status = wrapper.getStatus();
         byte[] bytes = wrapper.getContentAsByteArray();
         String content = status != 200 ?
-                status + " 错误" : new String(bytes, 0, 256);
+                status + " 错误" : new String(bytes, 0, Math.min(512, bytes.length));
         log.info("请求处理耗时: {}ms | 响应结果: {}", time, content);
     }
 

@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import top.wang3.hami.security.filter.RequestLogFilter;
 import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
@@ -70,6 +71,7 @@ public class WebSecurityConfig {
         log.debug("token-service: {}", tokenService.getClass().getSimpleName());
         AuthenticationPostHandler handler = new AuthenticationPostHandler(tokenService, properties);
         TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter(tokenService, properties.getTokenName());
+        RequestLogFilter requestLogFilter = new RequestLogFilter();
         return http
                 .authorizeHttpRequests(auth -> { //接口访问配置
                     String[] apis = properties.getAllowedApis();
@@ -108,6 +110,7 @@ public class WebSecurityConfig {
                         .logoutSuccessHandler(handler::handleLogoutSuccess)
                 )
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(requestLogFilter, TokenAuthenticationFilter.class)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
