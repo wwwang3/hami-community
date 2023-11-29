@@ -81,7 +81,7 @@ public class ZPageHandler {
             if (current * size > max && max != 0) {
                 //超过最大元素数量
                 //回源DB
-                return source == null ? Collections.emptyList() : source.apply(count, size);
+                return source == null ? Collections.emptyList() : source.apply(current, size);
             }
             //缓存过期
             return load(current, size);
