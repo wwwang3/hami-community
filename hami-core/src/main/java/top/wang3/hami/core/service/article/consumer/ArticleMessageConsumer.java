@@ -33,9 +33,11 @@ public class ArticleMessageConsumer {
             ),
     }, concurrency = "2")
     public void handleArticleMessage(ArticleRabbitMessage message) {
-        //删除缓存
-        String key = RedisConstants.ARTICLE_INFO + message.getArticleId();
-        String contentKey = RedisConstants.ARTICLE_CONTENT + message.getArticleId();
+        Integer articleId = message.getArticleId();
+        //文章信息缓存
+        String key = RedisConstants.ARTICLE_INFO + articleId;
+        //文章内容缓存
+        String contentKey = RedisConstants.ARTICLE_CONTENT + articleId;
         RedisClient.deleteObject(List.of(key, contentKey));
     }
 

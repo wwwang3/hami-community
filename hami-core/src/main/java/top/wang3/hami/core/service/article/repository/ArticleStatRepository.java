@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-
+@SuppressWarnings("unused")
 public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize);
@@ -56,4 +56,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     @Transactional(rollbackFor = Exception.class)
     void updateViews(Collection<ArticleStat> stats);
+
+    @Transactional(rollbackFor = Exception.class)
+    boolean deleteArticleStat(Integer articleId);
 }

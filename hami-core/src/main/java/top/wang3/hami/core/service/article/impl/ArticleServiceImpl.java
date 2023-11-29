@@ -270,6 +270,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleInfo> loadArticleInfoCache(List<Integer> nullIds) {
+        //根据ID批量获取,
         List<ArticleInfo> infos = articleRepository.listArticleById(nullIds);
         RedisClient.cacheMultiObject(infos, a -> RedisConstants.ARTICLE_INFO + a.getId(), 10, 100, TimeUnit.HOURS);
         return infos;

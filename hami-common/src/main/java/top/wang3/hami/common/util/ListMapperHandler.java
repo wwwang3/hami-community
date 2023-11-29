@@ -199,7 +199,8 @@ public class ListMapperHandler {
         }
         data.forEach(d -> {
             //忽略null
-            U value = assemble.get(getter.apply(d));
+            R key = getter.apply(d);
+            U value = assemble.get(key);
             if (value != null && d != null) {
                 setter.accept(d, value);
             }

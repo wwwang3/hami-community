@@ -13,7 +13,6 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
-import top.wang3.hami.core.service.interact.repository.LikeRepository;
 
 import java.util.List;
 
@@ -30,8 +29,6 @@ import java.util.List;
 @RequiredArgsConstructor
 //todo 消费失败先不管 _(≧∇≦」∠)_
 public class UserInteractMessageConsumer implements InteractConsumer {
-
-    private final LikeRepository likeRepository;
 
     @Override
     public void handleLikeMessage(LikeRabbitMessage message) {

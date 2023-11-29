@@ -3,12 +3,11 @@ local new_cate_list_key = KEYS[2]
 
 local article_id = tonumber(ARGV[1])
 local ctime = tonumber(ARGV[2])
-local max_count = 5000
+local max_count = 8000
 
-if (old_cate_id == new_cate_id) then
+if (old_cate_list_key == new_cate_list_key) then
     return 0
 end
-
 
 
 -- 加入新的列表

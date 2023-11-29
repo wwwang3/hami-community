@@ -59,7 +59,7 @@ public class ArticleInteractMessageConsumer {
             ),
             concurrency = "4"
     )
-    public void handleArticleDeleteMessage(ArticleRabbitMessage message) {
+    public void handleArticleMessage(ArticleRabbitMessage message) {
         if (message.getLoginUserId() != null) {
             readingRecordRepository.record(message.getLoginUserId(), message.getArticleId());
         }

@@ -10,7 +10,7 @@ import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.ArticleStatService;
-import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
 
 @Component
 @RabbitListener(bindings = {
@@ -29,12 +29,12 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 @Slf4j
 public class StatConsumer implements InteractConsumer {
 
-    private final ArticleRepository articleRepository;
+    private final ArticleStatRepository articleStatRepository;
     private final ArticleStatService articleStatService;
 
     @RabbitHandler
     public void handleArticleMessage(ArticleRabbitMessage message) {
-        articleRepository.deleteArticle(message.getArticleId(), message.getAuthorId());
+        articleStatRepository.deleteArticleStat(message.getArticleId());
     }
 
     @Override

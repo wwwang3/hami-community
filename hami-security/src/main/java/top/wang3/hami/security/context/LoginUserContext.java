@@ -1,7 +1,6 @@
 package top.wang3.hami.security.context;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +27,6 @@ public class LoginUserContext {
         Authentication authentication = context.getAuthentication();
         if (authentication == null) return null;
         //fix: 匿名登录时, 获取的principal不是LoginUser而是anonymousUser
-        if (!(authentication instanceof UsernamePasswordAuthenticationToken)) {
-            return null;
-        }
         Object principal = authentication.getPrincipal();
         if (principal instanceof LoginUser user) {
             return user;
