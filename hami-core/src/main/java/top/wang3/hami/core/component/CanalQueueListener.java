@@ -26,7 +26,7 @@ import java.util.List;
                 exchange = @Exchange(RabbitConstants.CANAL_EXCHANGE),
                 key = {RabbitConstants.CANAL_ROUTING}
         ),
-        messageConverter = "simpleMessageConverter",
+        messageConverter = "canalMessageConverter",
         concurrency = "8"
 )
 @Slf4j
@@ -34,7 +34,9 @@ public class CanalQueueListener {
 
     @PostConstruct
     public void init() {
-        log.debug("rabbit listener CanalQueueListener register for use");
+        if (log.isDebugEnabled()) {
+            log.debug("rabbit listener CanalQueueListener register for use");
+        }
     }
 
     @Resource
@@ -65,13 +67,13 @@ public class CanalQueueListener {
                 } catch (Exception e) {
                     e.printStackTrace();
                     //todo 处理失败重试
-                    log.debug("process CanalEntry failed: error_class: {} error_msg: {}",
+                    log.error("process CanalEntry failed: error_class: {} error_msg: {}",
                             e.getClass().getSimpleName(), e.getMessage());
                 }
             }
         }
         long end = System.currentTimeMillis();
-        log.debug("## process mysql data change cost: {}", end - start);
+        log.info("## process {} canal-entry cost: {}", entries.size(), end - start);
     }
 
     private <T> void processRowData(CanalEntry.RowData rowData, CanalEntryHandler<T> handler, CanalEntry.EventType type) throws Exception {

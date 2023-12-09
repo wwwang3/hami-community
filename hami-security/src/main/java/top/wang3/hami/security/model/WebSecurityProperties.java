@@ -95,7 +95,6 @@ public class WebSecurityProperties {
 
     /**
      * 全局限流过滤器配置
-     *
      */
     @Data
     public static class RateLimitFilterProperties {

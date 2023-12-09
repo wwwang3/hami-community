@@ -95,4 +95,72 @@
             #{id}
         </foreach>
     </select>
+
+    <update id="batchUpdateLikes" parameterType="java.util.List">
+        update article_stat
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="likes = likes + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.likes != null and item.likes != 0">
+                        when article_id = #{item.articleId} then #{item.likes}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where article_id in
+        <foreach collection="stats" item="item" open="(" close=")" separator=",">
+            #{item.articleId}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateComments" parameterType="java.util.List">
+        update article_stat
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="comments = comments + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.comments != null and item.comments != 0">
+                        when article_id = #{item.articleId} then #{item.comments}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where article_id in
+        <foreach collection="stats" item="item" open="(" close=")" separator=",">
+            #{item.articleId}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateCollects" parameterType="java.util.List">
+        update article_stat
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="collects = collects + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.collects != null and item.collects != 0">
+                        when article_id = #{item.articleId} then #{item.collects}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where article_id in
+        <foreach collection="stats" item="item" open="(" close=")" separator=",">
+            #{item.articleId}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateViews" parameterType="java.util.List">
+        update article_stat
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="views = views + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.views != null and item.views != 0">
+                        when article_id = #{item.articleId} then #{item.views}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where article_id in
+        <foreach collection="stats" item="item" open="(" close=")" separator=",">
+            #{item.articleId}
+        </foreach>
+    </update>
 </mapper>

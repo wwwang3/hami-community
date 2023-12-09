@@ -42,9 +42,9 @@ public class ArticleDraftController {
         return Result.successData(draft);
     }
 
-    @RateLimit(capacity = 216, rate = 0.0025, scope = RateLimit.Scope.LOGIN_USER,
-            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/create")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<ArticleDraft> createDraft(@RequestBody ArticleDraftParam param) {
         ArticleDraft draft = articleDraftService.createDraft(param);
         return Result.successIfNonNull(draft);

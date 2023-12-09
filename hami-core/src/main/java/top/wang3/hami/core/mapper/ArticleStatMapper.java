@@ -34,4 +34,9 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
 
     @MapKey("articleId")
     Map<Integer, ArticleStatDTO> selectArticleStatsByArticleIds(@Param("articleIds") List<Integer> articleIds);
+
+    Long batchUpdateLikes(@Param("stats") List<ArticleStat> stats);
+    Long batchUpdateComments(@Param("stats") List<ArticleStat> stats);
+    Long batchUpdateCollects(@Param("stats") List<ArticleStat> stats);
+    Long batchUpdateViews(@Param("stats") List<ArticleStat> stats);
 }

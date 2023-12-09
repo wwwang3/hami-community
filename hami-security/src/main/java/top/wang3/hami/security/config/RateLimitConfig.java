@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import top.wang3.hami.security.filter.RateLimitFilter;
 import top.wang3.hami.security.model.WebSecurityProperties;
 import top.wang3.hami.security.ratelimit.RateLimiter;
-import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 @Configuration
 @ComponentScan(basePackages = {"top.wang3.hami.security.ratelimit"})
@@ -30,8 +29,6 @@ public class RateLimitConfig {
         WebSecurityProperties.RateLimitFilterProperties config = properties.getRateLimit();
         RateLimitFilter filter = new RateLimitFilter();
         filter.setRateLimiter(rateLimiter);
-        //IP
-        filter.setScope(RateLimit.Scope.IP);
         filter.setCapacity(config.getCapacity());
         filter.setRate(config.getRate());
         filter.setAlgorithm(config.getAlgorithm());

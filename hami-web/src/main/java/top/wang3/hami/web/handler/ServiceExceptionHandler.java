@@ -32,7 +32,7 @@ public class ServiceExceptionHandler {
     public Result<Void> handleRateLimitException(RateLimitException e) {
         logError(e, true);
         return Result
-                .error("大哥别刷了( ´･･)ﾉ(._.`)");
+                .error(403, e.getMessage());
     }
 
     @ExceptionHandler(value = {ValidationException.class, BindException.class})

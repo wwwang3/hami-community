@@ -64,6 +64,30 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
                 .update();
     }
 
+    @Override
+    public boolean updateLikes(int articleId, int delta) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .setSql("likes = likes + ({0})", delta)
+                .eq("article_id", articleId)
+                .update();
+    }
+
+    @Override
+    public boolean updateComments(int articleId, int delta) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .setSql("comments = comments + ({0})", delta)
+                .eq("article_id", articleId)
+                .update();
+    }
+
+    @Override
+    public boolean updateCollects(int articleId, int delta) {
+        return ChainWrappers.updateChain(getBaseMapper())
+                .setSql("collects = collects + {0}", delta)
+                .eq("article_id", articleId)
+                .update();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean increaseCollects(int articleId, int count) {
@@ -128,5 +152,10 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticleStat(Integer articleId) {
         return super.removeById(articleId);
+    }
+
+    @Override
+    public Long batchUpdateLikes(List<ArticleStat> articleStats) {
+        return getBaseMapper().batchUpdateLikes(articleStats);
     }
 }

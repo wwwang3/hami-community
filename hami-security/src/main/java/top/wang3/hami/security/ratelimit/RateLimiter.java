@@ -5,9 +5,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.security.model.RateLimiterModel;
+import org.springframework.util.StringUtils;
+import top.wang3.hami.security.ratelimit.algorithm.RateLimiterAlgorithm;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
-import top.wang3.hami.security.ratelimit.handler.RateLimiterHandler;
+import top.wang3.hami.security.ratelimit.annotation.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 import top.wang3.hami.security.ratelimit.resolver.RateLimitKeyResolver;
 
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.List;
 @Component
 public class RateLimiter implements ApplicationContextAware {
 
-    private List<RateLimiterHandler> handlers;
+    private List<RateLimiterAlgorithm> algorithms;
 
     private List<RateLimitKeyResolver> resolvers;
 
@@ -26,30 +28,38 @@ public class RateLimiter implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         //没有抛异常
         try {
-            handlers = applicationContext.getBeansOfType(RateLimiterHandler.class).values().stream().toList();
+            algorithms = applicationContext.getBeansOfType(RateLimiterAlgorithm.class).values().stream().toList();
             resolvers = applicationContext.getBeansOfType(RateLimitKeyResolver.class).values().stream().toList();
-            log.info("load {} rate-limiter-handlers", handlers.size());
+            log.info("find {} rate-limiter-algorithms",algorithms.size());
             log.info("load {} key-resolvers", resolvers.size());
         } catch (BeansException e) {
-            log.error("no handler or resolver found: {}", e.getMessage());
+            log.error("no algorithm or resolver found: {}", e.getMessage());
         }
     }
 
 
+    /**
+     * 检查是否限流
+     * @param model model
+     * @throws RateLimitException 限流时抛出此异常
+     */
     public void checkLimit(RateLimiterModel model) throws RateLimitException {
         try {
             RateLimit.Algorithm algorithm = model.getAlgorithm();
             RateLimit.Scope scope = model.getScope();
-            RateLimiterHandler handler = getHandler(algorithm);
+            RateLimiterAlgorithm rateLimiterAlgorithm = getAlgorithm(algorithm);
             RateLimitKeyResolver resolver = getResolver(scope);
-            String key = RATE_LIMIT_PREFIX + algorithm + ":" + resolver.resolve(model);
 
-            List<Long> results = handler.execute(key, model.getRate(), model.getCapacity());
+            RateMeta rateMeta = model.getRateMeta();
+            String key = RATE_LIMIT_PREFIX + algorithm + ":" + resolver.resolve(model.getKeyMeta());
+            List<Long> results = rateLimiterAlgorithm.execute(key, rateMeta);
+
             boolean allowed = results.get(0) == 1L;
             Long remain = results.get(1);
             if (!allowed) {
-                String msg = "[%s] is limited rate: %s, capacity: %s".formatted(key, model.getRate(), model.getCapacity());
-                throw new RateLimitException(msg);
+                String msg = "[%s] is limited, rate: %s, capacity: %s".formatted(key, rateMeta.getRate(), rateMeta.getCapacity());
+                String blockMsg = model.getBlockMsg();
+                throw new RateLimitException(StringUtils.hasText(blockMsg) ? blockMsg : msg);
             }
             log.info("[{}] remain_requests: {}", key, remain);
         } catch (RateLimitException e) {
@@ -60,13 +70,13 @@ public class RateLimiter implements ApplicationContextAware {
     }
 
 
-    private RateLimiterHandler getHandler(RateLimit.Algorithm algorithm) throws RateLimitException {
-        for (RateLimiterHandler handler : handlers) {
-            if (handler.getSupportedAlgorithm().equals(algorithm)) {
-                return handler;
+    private RateLimiterAlgorithm getAlgorithm(RateLimit.Algorithm algorithm) {
+        for (RateLimiterAlgorithm val : algorithms) {
+            if (algorithm.equals(val.getName())) {
+                return val;
             }
         }
-        throw new RateLimitException("No handler found for this algorithm");
+        throw new RateLimitException("No implementation found for this algorithm.");
     }
 
     private RateLimitKeyResolver getResolver(RateLimit.Scope scope) throws RateLimitException {

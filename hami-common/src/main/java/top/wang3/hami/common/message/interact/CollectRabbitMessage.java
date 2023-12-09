@@ -14,7 +14,7 @@ public class CollectRabbitMessage extends InteractRabbitMessage {
     public CollectRabbitMessage() {
     }
 
-    public CollectRabbitMessage(int userId, int toUserId, byte state, Integer itemId) {
+    public CollectRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId) {
         super(userId, toUserId, state, itemId);
     }
 

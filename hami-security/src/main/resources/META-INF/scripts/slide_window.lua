@@ -1,5 +1,5 @@
 local key = KEYS[1]
-local m_key = KEYS[2]
+local member = KEYS[2]
 
 local rate = tonumber(ARGV[1])  -- 速率
 local capacity = tonumber(ARGV[2]) -- 最大容量
@@ -19,7 +19,7 @@ local remain_requests = capacity - last_requests
 local allowed = 0
 if (last_requests < capacity) then
     allowed = 1
-    redis.call("zadd", key, current, m_key)
+    redis.call("zadd", key, current, member)
 end
 
 

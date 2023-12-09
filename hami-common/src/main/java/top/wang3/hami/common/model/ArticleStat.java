@@ -32,7 +32,7 @@ public class ArticleStat {
     /**
      * 阅读量
      */
-    @TableField(value = "views", update = "%s+#{et.views}") //就给个%s+1挺恶心的
+    @TableField(value = "views")
     private Integer views;
 
     /**

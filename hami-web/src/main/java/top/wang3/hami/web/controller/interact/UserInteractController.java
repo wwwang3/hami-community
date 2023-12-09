@@ -42,23 +42,27 @@ public class UserInteractController {
     private final UserService userService;
 
 
-    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
-            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
+
     @PostMapping("/follow")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(followService.follow(followingId))
                 .orElse("操作失败");
     }
 
     @PostMapping("/follow/cancel")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(followService.unFollow(followingId))
                 .orElse("操作失败");
     }
 
-    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
-            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
+
     @PostMapping("/like")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> like(@RequestBody LikeItemParam param) {
         LikeType likeType = resolveLikerType(param.getItemType());
         return Result.ofTrue(likeService.doLike(param.getItemId(), likeType))
@@ -66,15 +70,17 @@ public class UserInteractController {
     }
 
     @PostMapping("/like/cancel")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> cancelLike(@RequestBody LikeItemParam param) {
         return Result
                 .ofTrue(likeService.cancelLike(param.getItemId(), resolveLikerType(param.getItemType())))
                 .orElse("操作失败");
     }
 
-    @RateLimit(capacity = 864, rate = 0.01, scope = RateLimit.Scope.LOGIN_USER,
-            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     @PostMapping("/collect")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> collect(@RequestParam("articleId") int articleId) {
         return Result
                 .ofTrue(collectService.doCollect(articleId))
@@ -82,6 +88,8 @@ public class UserInteractController {
     }
 
     @PostMapping("/collect/cancel")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+            algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<Void> cancelCollect(@RequestParam("articleId") int articleId) {
         return Result
                 .ofTrue(collectService.cancelCollect(articleId))

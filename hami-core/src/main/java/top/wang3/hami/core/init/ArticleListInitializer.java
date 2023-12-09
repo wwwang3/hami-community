@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.dto.article.ArticlePageParam;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.CategoryRepository;
@@ -28,25 +28,25 @@ public class ArticleListInitializer implements HamiInitializer {
     }
 
     @Override
+    public boolean alwaysExecute() {
+        return true;
+    }
+
+    @Override
     public void run() {
         cacheTotal();
         cacheSub();
     }
 
     private void cacheTotal() {
-        ArticlePageParam page = new ArticlePageParam(null, null);
-        page.setPageNum(1);
-        page.setPageSize(20);
-        articleService.listNewestArticles(page);
+        articleService.loadArticleListCache(RedisConstants.ARTICLE_LIST, null, -1, -1);
     }
 
     private void cacheSub() {
         List<Category> categories = categoryRepository.getAllCategories();
         for (Category category : categories) {
-            ArticlePageParam param = new ArticlePageParam(category.getId(), null);
-            param.setPageNum(1);
-            param.setPageSize(20);
-            articleService.listNewestArticles(param);
+            Integer cateId = category.getId();
+            articleService.loadArticleListCache(RedisConstants.CATE_ARTICLE_LIST + cateId, cateId, -1, -1);
         }
     }
 

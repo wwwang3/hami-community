@@ -10,10 +10,13 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.security.context.IpContext;
-import top.wang3.hami.security.model.RateLimiterModel;
+import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.ratelimit.RateLimitException;
 import top.wang3.hami.security.ratelimit.RateLimiter;
+import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
+import top.wang3.hami.security.ratelimit.annotation.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
 import java.lang.reflect.Method;
 
@@ -42,15 +45,21 @@ public class RateLimiterAspect {
 
     private RateLimiterModel buildModel(Method method, String className)  {
         RateLimit rateLimit = method.getAnnotation(RateLimit.class);
-        return RateLimiterModel
-                .builder()
-                .methodName(method.getName())
-                .className(className)
-                .rate(rateLimit.rate())
-                .capacity(rateLimit.capacity())
-                .algorithm(rateLimit.algorithm())
-                .scope(rateLimit.scope())
-                .ip(IpContext.getIpDefaultUnknown())
-                .build();
+        RateMeta rateMeta = new RateMeta(rateLimit.capacity(), rateLimit.rate(), rateLimit.interval());
+
+        KeyMeta keyMeta = new KeyMeta();
+        keyMeta.setIp(IpContext.getIpDefaultUnknown());
+        keyMeta.setClassName(className);
+        keyMeta.setMethodName(method.getName());
+        Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
+        keyMeta.setLoginUserId(loginUserId == null ? null : loginUserId.toString());
+
+        RateLimiterModel model = new RateLimiterModel();
+        model.setAlgorithm(rateLimit.algorithm());
+        model.setScope(rateLimit.scope());
+        model.setRateMeta(rateMeta);
+        model.setKeyMeta(keyMeta);
+        model.setBlockMsg(rateLimit.blockMsg());
+        return model;
     }
 }

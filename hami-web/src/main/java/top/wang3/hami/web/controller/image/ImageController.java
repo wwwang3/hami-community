@@ -16,7 +16,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/upload")
-    @RateLimit(capacity = 216, rate = 0.0025, scope = RateLimit.Scope.LOGIN_USER,
+    @RateLimit(capacity = 216, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<String> upload(@RequestPart("image") MultipartFile image, @RequestParam("type") String type) {
         String url = imageService.upload(image, type);

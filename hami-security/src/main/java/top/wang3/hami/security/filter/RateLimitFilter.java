@@ -13,12 +13,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import top.wang3.hami.common.util.IpUtils;
-import top.wang3.hami.security.model.RateLimiterModel;
+import top.wang3.hami.security.context.IpContext;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.RateLimitException;
 import top.wang3.hami.security.ratelimit.RateLimiter;
+import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
+import top.wang3.hami.security.ratelimit.annotation.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
 import java.io.IOException;
 
@@ -29,7 +31,6 @@ import java.io.IOException;
 @Setter
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private RateLimit.Scope scope;
     private RateLimit.Algorithm algorithm;
     private int rate;
     private int capacity;
@@ -41,27 +42,22 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        RateLimiterModel model = RateLimiterModel.builder()
-                .algorithm(algorithm)
-                .scope(scope)
-                .rate(rate)
-                .uri(request.getRequestURI())
-                .capacity(capacity)
-                .ip(IpUtils.getIp(request))
-                .build();
+        RateMeta rateMeta = new RateMeta(capacity, rate, capacity / rate);
+        KeyMeta keyMeta = new KeyMeta();
+        keyMeta.setIp(IpContext.getIpDefaultUnknown());
         HandlerMethod handlerMethod = getHandlerMethod(request);
         if (handlerMethod != null) {
-            model.setMethodName(handlerMethod.getMethod().getName());
-            model.setClassName(handlerMethod.getBeanType().getName());
+            keyMeta.setMethodName(handlerMethod.getMethod().getName());
+            keyMeta.setClassName(handlerMethod.getBeanType().getSimpleName());
         }
         try {
+            RateLimiterModel model = new RateLimiterModel(algorithm, RateLimit.Scope.IP, rateMeta, keyMeta);
             rateLimiter.checkLimit(model);
+            filterChain.doFilter(request, response);
         } catch (RateLimitException e) {
-            log.error("e: {}", e.getMessage());
+            log.error("msg: {}, cause: {}", e.getMessage(), e.getCause() == null ? "null": e.getCause());
             writeBlockedMessage(response);
-            return;
         }
-        filterChain.doFilter(request, response);
     }
 
    private HandlerMethod getHandlerMethod(HttpServletRequest request) {

@@ -125,6 +125,7 @@
         <foreach collection="ids" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
+        and deleted = 0
     </select>
 
     <select id="selectArticleById" resultMap="ArticleDOMap">

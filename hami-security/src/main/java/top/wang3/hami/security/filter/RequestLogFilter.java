@@ -60,7 +60,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
         int status = wrapper.getStatus();
         byte[] bytes = wrapper.getContentAsByteArray();
         String content = status != 200 ?
-                status + " 错误" : new String(bytes, 0, Math.min(512, bytes.length));
+                status + " 错误" : new String(bytes, 0, Math.min(256, bytes.length));
         log.info("请求处理耗时: {}ms | 响应结果: {}", time, content);
     }
 
@@ -75,11 +75,11 @@ public class RequestLogFilter extends OncePerRequestFilter {
         String ip = IpContext.getIp();
         if(loginUser != null) {
             log.info("请求URL: \"{}\" ({}) | 远程IP地址: {} │ 身份: {} (UID: {}) | 角色: {} | 请求参数列表: {}",
-                    request.getServletPath(), request.getMethod(), ip,
+                    request.getRequestURI(), request.getMethod(), ip,
                     loginUser.getUsername(), loginUser.getId(), loginUser.getAuthorities(), object);
         } else {
             log.info("请求URL: \"{}\" ({}) | 远程IP地址: {} │ 身份: 未验证 | 请求参数列表: {}",
-                    request.getServletPath(), request.getMethod(), ip, object);
+                    request.getRequestURI(), request.getMethod(), ip, object);
         }
     }
 }

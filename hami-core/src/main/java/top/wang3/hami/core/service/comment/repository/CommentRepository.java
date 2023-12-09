@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.comment.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.model.Comment;
 
@@ -18,6 +19,8 @@ public interface CommentRepository extends IService<Comment> {
 
     boolean increaseLikes(Integer id);
 
+    boolean updateLikes(Integer id, int delta);
+
     boolean decreaseLikes(Integer id);
 
     int deleteComment(Integer id);
@@ -27,4 +30,7 @@ public interface CommentRepository extends IService<Comment> {
     boolean checkCommentExist(int itemId);
 
     Integer getCommentUser(Integer id);
+
+    @Transactional(rollbackFor = Exception.class)
+    Long batchUpdateLikes(List<Comment> comments);
 }

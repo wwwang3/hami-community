@@ -142,6 +142,10 @@ public class RedisClient {
         return expire(key, timeout, TimeUnit.SECONDS);
     }
 
+    public static boolean pExpire(final String key, final long timeout) {
+        return expire(key, timeout, TimeUnit.MILLISECONDS);
+    }
+
     /**
      * 设置有效时间
      *

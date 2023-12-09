@@ -10,7 +10,7 @@ public abstract class InteractRabbitMessage implements RabbitMessage {
 
     }
 
-    public InteractRabbitMessage(int userId, int toUserId, byte state, Integer itemId) {
+    public InteractRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId) {
         this.userId = userId;
         this.toUserId = toUserId;
         this.state = state;
@@ -24,9 +24,9 @@ public abstract class InteractRabbitMessage implements RabbitMessage {
     private int userId;
 
     /**
-     * 接收行为的用户
+     * 接收行为的用户 maybe null
      */
-    private int toUserId;
+    private Integer toUserId;
 
     /**
      * 状态 取消还是触发行为

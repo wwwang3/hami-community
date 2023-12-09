@@ -19,7 +19,24 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, article_id, user_id, is_author, ip_info, content, content_img, root_id, parent_id, 
+    id, article_id, user_id, ip_info, content, content_img, root_id, parent_id,
     reply_to, deleted, ctime, mtime
   </sql>
+
+  <update id="batchUpdateLikes" parameterType="java.util.List">
+      update article_stat
+      <trim prefix="set" suffixOverrides=",">
+          <trim prefix="likes = likes + case" suffix="end,">
+              <foreach collection="comments" item="item" index="index">
+                  <if test="item.likes != null and item.likes != 0">
+                      when article_id = #{item.articleId} then #{item.likes}
+                  </if>
+              </foreach>
+          </trim>
+      </trim>
+      where article_id in
+      <foreach collection="comments" item="item" open="(" close=")" separator=",">
+          #{item.articleId}
+      </foreach>
+  </update>
 </mapper>

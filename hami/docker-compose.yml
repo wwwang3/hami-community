@@ -66,17 +66,17 @@ services:
     build:
       context: ./canal
       dockerfile: Dockerfile
+    privileged: true
     depends_on:
       - rabbitmq
     networks:
       hami_net:
         ipv4_address: 192.168.3.14
-    ports:
-      - "8386:11111"
     volumes:
       - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example 里面 的启动日志了
       - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
     environment:
+      - TZ=Asia/Shanghai
       - canal.destinations=example
       - canal.serverMode=rabbitMQ
       - canal.mq.flatMessage=false

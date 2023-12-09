@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.interact.LikeType;
 
 @Data
@@ -16,7 +17,7 @@ public class LikeRabbitMessage extends InteractRabbitMessage {
         this.likeType = likeType;
     }
 
-    public LikeRabbitMessage(int userId, int toUserId, byte state, Integer itemId, LikeType likeType) {
+    public LikeRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId, LikeType likeType) {
         super(userId, toUserId, state, itemId);
         this.likeType = likeType;
     }
@@ -24,8 +25,14 @@ public class LikeRabbitMessage extends InteractRabbitMessage {
     LikeType likeType;
 
     @Override
+    public String getExchange() {
+        return RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE;
+    }
+
+    @Override
     public String getRoute() {
-        return getPrefix() + "like." + likeType.getType(); //do.like.1 //do.like.2
+        //do.like.1.{userId % 5}
+        return getPrefix() + "like." + likeType.getType() + "." + getUserId() % 5;
     }
 
 

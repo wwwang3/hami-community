@@ -1,7 +1,7 @@
 package top.wang3.hami.security.ratelimit.resolver;
 
 import org.springframework.stereotype.Component;
-import top.wang3.hami.security.model.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 @Component
@@ -15,7 +15,7 @@ public class GlobalKeyResolver implements RateLimitKeyResolver {
     }
 
     @Override
-    public String resolve(RateLimiterModel model) {
+    public String resolve(KeyMeta keyMeta) {
         return GLOBAL_KEY;
     }
 }
