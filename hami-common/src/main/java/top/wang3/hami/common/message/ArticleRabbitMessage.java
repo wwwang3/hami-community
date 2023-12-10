@@ -15,7 +15,7 @@ public class ArticleRabbitMessage implements RabbitMessage {
     private Integer articleId;
     private Integer authorId;
     private Integer loginUserId = null; //当type为view时, 为当前登录用户的ID
-    private String ip = null;
+    private Integer cateId = null; // 当type为publish or delete时不为空
 
     public ArticleRabbitMessage(Type type, Integer articleId, Integer authorId) {
         this.type = type;

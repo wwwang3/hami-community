@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +47,14 @@ public class ListMapperHandler {
             ++index;
         }
     }
+
+    public static <K, T> Map<K, List<T>> group(List<T> items, Predicate<? super T> predicate, Function<T, K> mapper) {
+        if (CollectionUtils.isEmpty(items)) return Collections.emptyMap();
+        return items.stream()
+                .filter(predicate)
+                .collect(Collectors.groupingBy(mapper));
+    }
+
 
     public static <T> List<T> subList(List<T> origin, int current, int size) {
         return subList(origin, Function.identity(), current, size);

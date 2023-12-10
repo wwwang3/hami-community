@@ -15,6 +15,7 @@ import top.wang3.hami.core.mapper.ArticleCollectMapper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
@@ -42,6 +43,31 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
                     .update();
         } else if (Constants.ONE.equals(articleCollect.getState())) {
             throw new HamiServiceException("重复收藏");
+        }
+        return false;
+    }
+
+    @Override
+    public boolean collectArticle(Integer userId, Integer articleId, byte state) {
+        ArticleCollect item = ChainWrappers.queryChain(getBaseMapper())
+                .select("user_id", "article_id", "state")
+                .eq("user_id", userId)
+                .eq("article_id", articleId)
+                .one();
+        if (item == null && state == Constants.ONE) {
+            // 插入
+            ArticleCollect collect = new ArticleCollect();
+            collect.setArticleId(articleId);
+            collect.setUserId(userId);
+            collect.setState(state);
+            return super.save(collect);
+        } else if (item != null && !Objects.equals(state, item.getState())) {
+            // 更新
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("state", state)
+                    .eq("user_id", userId)
+                    .eq("article_id", articleId)
+                    .update();
         }
         return false;
     }

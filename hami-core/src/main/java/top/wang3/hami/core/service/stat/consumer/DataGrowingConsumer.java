@@ -19,18 +19,22 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RabbitListener(bindings = {
-        @QueueBinding(
-                value = @Queue(value = "hami-data-growing-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
-                key = {"*.follow", "*.like.*", "*.collect", "comment.*"}
-        ),
-        @QueueBinding(
-                value = @Queue(value = "hami-data-growing-queue-2"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                key = {"article.publish", "article.delete", "article.view"}
-        )
-}, concurrency = "2")
+@RabbitListener(
+        id = "DataGrowingMessageContainer-1",
+        bindings = {
+                @QueueBinding(
+                        value = @Queue(value = "hami-data-growing-queue-1"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
+                        key = {"*.follow.*", "*.collect.*", "comment.*", "*.like.*.*"}
+                ),
+                @QueueBinding(
+                        value = @Queue(value = "hami-data-growing-queue-2"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                        key = {"article.publish", "article.delete", "article.view"}
+                )
+        },
+        concurrency = "2"
+)
 @RequiredArgsConstructor
 public class DataGrowingConsumer implements InteractConsumer {
 
@@ -63,6 +67,7 @@ public class DataGrowingConsumer implements InteractConsumer {
 
     @Override
     public void handleLikeMessage(LikeRabbitMessage message) {
+        if (message.getToUserId() == null) return;
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
             RedisClient.hIncr(key, RedisConstants.DATA_GROWING_LIKE, 1);

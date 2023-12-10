@@ -8,16 +8,10 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.canal.CanalEntryHandler;
 import top.wang3.hami.common.canal.annotation.CanalListener;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.ArticleCollect;
-import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.interact.CollectService;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @CanalListener("article_collect")
@@ -38,29 +32,29 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
 
     @Override
     public void processInsert(ArticleCollect entity) {
-        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
-        boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-        if (!success) {
-            collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);
-        } else {
-            Integer member = entity.getArticleId();
-            Long score = entity.getMtime().getTime();
-            Long res = RedisClient.executeScript(collectScript, List.of(redisKey),
-                    List.of(member, score, ZPageHandler.DEFAULT_MAX_SIZE));
-            log.info("collect--userId: {}, articleId: {}, res: {}", entity.getUserId(), score, res);
-        }
+//        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
+//        boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
+//        if (!success) {
+//            collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);
+//        } else {
+//            Integer member = entity.getArticleId();
+//            Long score = entity.getMtime().getTime();
+//            Long res = RedisClient.executeScript(collectScript, List.of(redisKey),
+//                    List.of(member, score, ZPageHandler.DEFAULT_MAX_SIZE));
+//            log.info("collect--userId: {}, articleId: {}, res: {}", entity.getUserId(), score, res);
+//        }
     }
 
     @Override
     public void processUpdate(ArticleCollect before, ArticleCollect after) {
-        Byte oldState = before.getState();
-        Byte state = after.getState();
-        if (Constants.ZERO.equals(oldState) && Constants.ONE.equals(state)) {
-            //点赞
-            processInsert(after);
-        } else {
-            handleDelete(after);
-        }
+//        Byte oldState = before.getState();
+//        Byte state = after.getState();
+//        if (Constants.ZERO.equals(oldState) && Constants.ONE.equals(state)) {
+//            //点赞
+//            processInsert(after);
+//        } else {
+//            handleDelete(after);
+//        }
     }
 
     @Override

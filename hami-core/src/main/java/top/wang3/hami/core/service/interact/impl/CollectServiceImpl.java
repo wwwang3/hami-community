@@ -5,7 +5,6 @@ import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.zset.DefaultTuple;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
@@ -31,9 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Service
+//@Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("all")
 public class CollectServiceImpl implements CollectService {
 
     private final CollectRepository collectRepository;

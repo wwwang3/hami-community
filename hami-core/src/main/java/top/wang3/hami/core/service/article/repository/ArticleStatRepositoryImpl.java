@@ -158,4 +158,19 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     public Long batchUpdateLikes(List<ArticleStat> articleStats) {
         return getBaseMapper().batchUpdateLikes(articleStats);
     }
+
+    @Override
+    public Long batchUpdateComments(List<ArticleStat> articleStats) {
+        return getBaseMapper().batchUpdateComments(articleStats);
+    }
+
+    @Override
+    public Long batchUpdateCollects(List<ArticleStat> articleStats) {
+        return getBaseMapper().batchUpdateCollects(articleStats);
+    }
+
+    @Override
+    public Long batchUpdateViews(List<ArticleStat> articleStats) {
+        return getBaseMapper().batchUpdateViews(articleStats);
+    }
 }

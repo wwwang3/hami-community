@@ -15,7 +15,6 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.ArticleStatService;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 @Component
@@ -28,7 +27,7 @@ public class ArticleMessageConsumer {
     @RabbitListener(bindings = {
             @QueueBinding(
                     value = @Queue("hami-article-queue-1"),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                     key = {"article.update", "article.delete"}
             ),
     }, concurrency = "2")
@@ -39,25 +38,5 @@ public class ArticleMessageConsumer {
         //文章内容缓存
         String contentKey = RedisConstants.ARTICLE_CONTENT + articleId;
         RedisClient.deleteObject(List.of(key, contentKey));
-    }
-
-    @RabbitListener(bindings = {
-            @QueueBinding(
-                    value = @Queue("hami-article-queue-2"),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                    key = {"article.view"}
-            ),
-    }, concurrency = "2")
-    public void handleArticleViewMessage(ArticleRabbitMessage message) {
-        String ip = message.getIp();
-        if (ip == null) return;
-        String redisKey = RedisConstants.VIEW_LIMIT + ip + ":" + message.getArticleId();
-        boolean success = RedisClient.setNx(redisKey, "view-lock", 15, TimeUnit.SECONDS);
-        if (!success) {
-            log.debug("ip: {} access repeat", ip);
-            return;
-        }
-        //增加阅读量
-        articleStatService.increaseViews(message.getArticleId(), 1);
     }
 }

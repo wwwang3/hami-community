@@ -6,24 +6,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RabbitConstants;
-import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.interact.LikeRabbitMessage;
-import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.interact.repository.LikeRepository;
 
 
 /**
  * 用户点赞行为消费
  * 将点赞操作写入数据库
+ * 一个容器相当于一个消费者(concurrent设置为1), 多个绑定产生多个队列, 相当于消费多个队列的消息
+ * 这里五个消费者, 消费不同主题的队列, 对于userId相同的消息, 路由到同一个队列, 保证对单个用户点赞写入和删除操作的顺序性
  */
 @RabbitListeners(value = {
         @RabbitListener(
                 id = "LikeMessageContainer-1",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.LIKE_QUEUE_1),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.*.1"
                 )
         ),
@@ -31,7 +30,7 @@ import top.wang3.hami.core.service.interact.repository.LikeRepository;
                 id = "LikeMessageContainer-2",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.LIKE_QUEUE_2),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.*.2"
                 )
         ),
@@ -39,7 +38,7 @@ import top.wang3.hami.core.service.interact.repository.LikeRepository;
                 id = "LikeMessageContainer-3",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.LIKE_QUEUE_3),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.*.3"
                 )
         ),
@@ -47,7 +46,7 @@ import top.wang3.hami.core.service.interact.repository.LikeRepository;
                 id = "LikeMessageContainer-4",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.LIKE_QUEUE_4),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.*.4"
                 )
         ),
@@ -55,7 +54,7 @@ import top.wang3.hami.core.service.interact.repository.LikeRepository;
                 id = "LikeMessageContainer-5",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.LIKE_QUEUE_5),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.*.5"
                 )
         )
@@ -70,24 +69,18 @@ public class LikeMessageConsumer {
 
     @RabbitHandler
     public void handleMessage(LikeRabbitMessage message) {
+        if (message == null || message.getToUserId() == null) {
+            return;
+        }
         try {
-            if (message.getToUserId() == null) {
-                return;
-            }
-            int userId = message.getUserId();
-            Integer itemId = message.getItemId();
-            LikeType likeType = message.getLikeType();
-            if (message.getState() == Constants.ONE) {
-                likeRepository.doLike(userId, itemId, likeType);
-            } else {
-                likeRepository.cancelLike(userId, itemId, likeType);
-            }
-        } catch (HamiServiceException e) {
-            // ignore it
+            likeRepository.like(
+                    message.getUserId(), message.getItemId(),
+                    message.getLikeType(), message.getState()
+            );
         } catch (Exception e) {
             // todo 消费失败处理
             // ignore it
-            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            log.error("message: {}, error_class: {}, error_msg: {}", message, e.getClass(), e.getMessage());
         }
     }
 

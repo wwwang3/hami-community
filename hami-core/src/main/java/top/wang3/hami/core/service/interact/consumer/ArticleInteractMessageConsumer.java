@@ -28,33 +28,33 @@ public class ArticleInteractMessageConsumer {
     @RabbitListener(
             bindings = @QueueBinding(
                     value = @Queue(value = "hami-user-interact-queue-2"),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                     key = {"article.delete"}
             )
     )
     public void handleArticleMessageForLike(ArticleRabbitMessage message) {
         //文章删除消息
         int deleted = likeRepository.deleteLikeItem(message.getArticleId(), LikeType.ARTICLE);
-        log.info("article deleted, async to delete like-item, deleted-count: {}", deleted);
+        log.warn("article deleted, async to delete like-item, deleted-count: {}", deleted);
     }
 
     @RabbitListener(
             bindings = @QueueBinding(
                     value = @Queue(value = "hami-user-interact-queue-3"),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                     key = {"article.delete"}
             )
     )
     public void handleArticleMessageForCollect(ArticleRabbitMessage message) {
         //文章删除消息
         int deleted = collectRepository.deleteCollectItem(message.getArticleId());
-        log.info("article deleted, async to delete collect-item, deleted-count: {}", deleted);
+        log.warn("article deleted, async to delete collect-item, deleted-count: {}", deleted);
     }
 
     @RabbitListener(
             bindings = @QueueBinding(
                     value = @Queue(value = "hami-user-interact-queue-4"),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                     key = {"article.view"}
             ),
             concurrency = "4"

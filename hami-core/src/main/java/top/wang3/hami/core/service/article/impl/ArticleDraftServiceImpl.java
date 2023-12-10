@@ -134,6 +134,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
                 if (success1) {
                     ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
                             article.getId(), article.getUserId());
+                    message.setCateId(article.getCategoryId());
                     rabbitMessagePublisher.publishMsg(message);
                     return true;
                 }
@@ -202,6 +203,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
             ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
                     article.getId(), article.getUserId());
             rabbitMessagePublisher.publishMsg(message);
+            message.setCateId(article.getCategoryId());
             return true;
         }
         return false;

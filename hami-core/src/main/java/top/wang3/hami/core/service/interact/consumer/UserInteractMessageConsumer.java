@@ -23,13 +23,17 @@ import java.util.concurrent.TimeUnit;
  * 用户行为消息消费者
  * 更新用户的点赞数, 收藏数, 关注数, 粉丝数
  */
-@RabbitListener(bindings = {
-        @QueueBinding(
-                value = @Queue(value = RabbitConstants.USER_INTERACT_QUEUE_1),
-                exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                key = "*.like.*.*"
-        ),
-}, concurrency = "4")
+@RabbitListener(
+        id = "UserInteractMessageContainer-1",
+        bindings = {
+                @QueueBinding(
+                        value = @Queue(value = RabbitConstants.USER_INTERACT_QUEUE_1),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        key = {"*.like.*.*", "*.collect.*", "*.follow.*"}
+                )
+        },
+        concurrency = "4"
+)
 @Component
 @Slf4j
 @RequiredArgsConstructor

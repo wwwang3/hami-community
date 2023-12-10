@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import top.wang3.hami.common.message.email.EmailRabbitMessage;
-import top.wang3.hami.common.message.email.MailMessage;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class EmailCaptcha implements Captcha, MailMessage, EmailRabbitMessage {
+public abstract class EmailCaptcha implements Captcha, EmailRabbitMessage {
 
     private String item;
     private String value;

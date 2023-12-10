@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue("hami-article-count-queue-2"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                 key = {"article.publish", "article.delete"}
         ),
 }, concurrency = "2")

@@ -206,10 +206,15 @@ public class ArticleServiceImpl implements ArticleService {
         //记录阅读数据
         String ip = IpContext.getIp();
         if (ip == null) return;
+        String redisKey = RedisConstants.VIEW_LIMIT + ip + ":" + articleId;
+        boolean success = RedisClient.setNx(redisKey, "view-lock", 15, TimeUnit.SECONDS);
+        if (!success) {
+            log.debug("ip: {} access repeat", ip);
+            return;
+        }
         //发布消息
         ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
                 articleId, authorId, loginUserId);
-        message.setIp(ip);
         rabbitMessagePublisher.publishMsg(message);
     }
 

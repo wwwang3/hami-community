@@ -20,7 +20,7 @@ public class CollectRabbitMessage extends InteractRabbitMessage {
 
     @Override
     public String getRoute() {
-        return getPrefix() + "collect";
+        return getPrefix() + "collect." + getUserId() % 5;
     }
 
 }

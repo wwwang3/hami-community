@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
                 id = "CommentMessageContainer-2",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.COMMENT_QUEUE_1),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_LIKE_MESSAGE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.2.*"
                 ),
                 containerFactory = "batchRabbitListenerContainerFactory"

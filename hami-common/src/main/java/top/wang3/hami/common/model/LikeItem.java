@@ -25,6 +25,12 @@ public class LikeItem {
     private Integer id;
 
     /**
+     * 点赞人ID
+     */
+    @TableField(value = "liker_id")
+    private Integer likerId;
+
+    /**
      * 实体ID -文章/评论
      */
     @TableField(value = "item_id")
@@ -35,12 +41,6 @@ public class LikeItem {
      */
     @TableField(value = "item_type")
     private Byte itemType;
-
-    /**
-     * 点赞人ID
-     */
-    @TableField(value = "liker_id")
-    private Integer likerId;
 
     /**
      * 状态 0-未点赞 1-点赞

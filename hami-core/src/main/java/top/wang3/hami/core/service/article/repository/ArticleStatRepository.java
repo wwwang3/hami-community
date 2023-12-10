@@ -68,4 +68,11 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
     boolean deleteArticleStat(Integer articleId);
 
     Long batchUpdateLikes(List<ArticleStat> articleStats);
+
+    Long batchUpdateComments(List<ArticleStat> articleStats);
+
+    Long batchUpdateCollects(List<ArticleStat> articleStats);
+
+    Long batchUpdateViews(List<ArticleStat> articleStats);
+
 }

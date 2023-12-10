@@ -15,6 +15,7 @@ import top.wang3.hami.core.mapper.LikeMapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Repository
 public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
@@ -23,6 +24,40 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
     private static final String[] FIELDS = {"id", "item_id", "item_type", "liker_id", "`state`"};
     private static final String[] FULL_FIELDS = {"id", "item_id", "item_type", "liker_id", "`state`", "ctime", "mtime"};
 
+    public static final String[] FIELDS_2 = {"liker_id", "item_id", "item_type", "`state`"};
+
+    @Override
+    public boolean like(Integer userId, Integer itemId, LikeType likeType, byte state) {
+        byte itemType = likeType.getType();
+        LikeItem likeItem = ChainWrappers.queryChain(getBaseMapper())
+                .select(FIELDS_2)
+                .eq("liker_id", userId)
+                .eq("item_id", itemId)
+                .eq("item_type", itemType)
+                .one();
+        if (likeItem == null && state == Constants.ONE) {
+            // 插入
+            LikeItem item = new LikeItem(
+                    null,
+                    userId,
+                    itemId,
+                    itemType,
+                    state,
+                    null,
+                    null
+            );
+            return super.save(item);
+        } else if (likeItem != null && !Objects.equals(state, likeItem.getState())) {
+            // 更新
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("state", state)
+                    .eq("liker_id", userId)
+                    .eq("item_id", itemId)
+                    .eq("item_type", itemType)
+                    .update();
+        }
+        return false;
+    }
 
     @Override
     public boolean doLike(Integer likerId, Integer itemId, LikeType likeType) {
@@ -38,7 +73,7 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
             LikeItem item = new LikeItem(likerId, itemId, itemType);
             item.setState(Constants.ONE);
             return super.save(item);
-        } else if (Constants.ZERO.equals(likeItem.getState())){
+        } else if (Constants.ZERO.equals(likeItem.getState())) {
             //修改
             return ChainWrappers.updateChain(getBaseMapper())
                     .set("`state`", Constants.ONE)
