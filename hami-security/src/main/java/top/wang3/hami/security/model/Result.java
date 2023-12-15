@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import top.wang3.hami.common.util.ObjectMapperFactory;
+import top.wang3.hami.common.util.HamiFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checker) {
 
-    public static final ObjectMapper MAPPER = ObjectMapperFactory.MAPPER;
+    public static final ObjectMapper MAPPER = HamiFactory.MAPPER;
 
     public Result<T> orElse(Supplier<T> supplier) {
         Objects.requireNonNull(supplier);

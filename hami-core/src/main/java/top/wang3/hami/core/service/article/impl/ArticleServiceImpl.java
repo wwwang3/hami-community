@@ -23,9 +23,9 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.TagService;
@@ -79,7 +79,7 @@ public class ArticleServiceImpl implements ArticleService {
     public PageData<ArticleDTO> listUserArticle(UserArticleParam param) {
         //获取用户文章
         int userId = param.getUserId();
-        String redisKey = RedisConstants.LIST_USER_ARTICLE + userId;
+        String redisKey = RedisConstants.USER_ARTICLE_LIST + userId;
         Page<Article> page = param.toPage(false);
         Collection<Integer> ids = ZPageHandler.<Integer>of(redisKey, page, this)
                 .countSupplier(() -> this.getUserArticleCount(userId))

@@ -12,7 +12,7 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.component.ZPageHandler;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.service.interact.FollowService;
 
 import java.util.List;
@@ -42,9 +42,9 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
     @Override
     public void processInsert(UserFollow entity) {
         //用户关注列表
-        String following_list_key = RedisConstants.LIST_USER_FOLLOWING + entity.getUserId();
+        String following_list_key = RedisConstants.USER_FOLLOWING_LIST + entity.getUserId();
         //用户粉丝列表
-        String follower_list_key = RedisConstants.LIST_USER_FOLLOWER + entity.getFollowing();
+        String follower_list_key = RedisConstants.USER_FOLLOWER_LIST + entity.getFollowing();
 
         addFollowing(following_list_key, entity.getUserId(), entity.getFollowing(), (double) entity.getMtime().getTime());
         addFollower(follower_list_key, entity.getFollowing(), entity.getUserId(), (double) entity.getMtime().getTime());
@@ -65,8 +65,8 @@ public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {
 
     @Override
     public void processDelete(UserFollow deletedEntity) {
-        String following_list_key = RedisConstants.LIST_USER_FOLLOWING + deletedEntity.getUserId(); //用户关注列表
-        String follower_list_key = RedisConstants.LIST_USER_FOLLOWER + deletedEntity.getFollowing(); //用户粉丝列表
+        String following_list_key = RedisConstants.USER_FOLLOWING_LIST + deletedEntity.getUserId(); //用户关注列表
+        String follower_list_key = RedisConstants.USER_FOLLOWER_LIST + deletedEntity.getFollowing(); //用户粉丝列表
         RedisClient.zRem(following_list_key, deletedEntity.getFollowing());
         RedisClient.zRem(follower_list_key, deletedEntity.getUserId());
     }

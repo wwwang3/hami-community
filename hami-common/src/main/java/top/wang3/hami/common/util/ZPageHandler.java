@@ -1,10 +1,9 @@
-package top.wang3.hami.core.component;
+package top.wang3.hami.common.util;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ZSetOperations;
-import top.wang3.hami.common.util.RedisClient;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,24 +14,24 @@ public class ZPageHandler {
 
     public static final int DEFAULT_MAX_SIZE = 8000;
 
-    public static <T> ZPage<T> of(String key, Object lock) {
-        return new ZPageBuilder<T>(lock)
+    public static <T> ZPage<T> of(String key) {
+        return new ZPageBuilder<T>()
                 .key(key);
     }
 
-    public static <T> ZPage<T> of(String key, Page<?> page, Object lock) {
-        return new ZPageBuilder<T>(lock)
+    public static <T> ZPage<T> of(String key, Page<?> page) {
+        return new ZPageBuilder<T>()
                 .key(key)
                 .page(page);
     }
 
-    public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key, Object lock) {
-        return new ZPageWithScoreBuilder<T>(lock)
+    public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key) {
+        return new ZPageWithScoreBuilder<T>()
                 .key(key);
     }
 
-    public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key, Page<?> page, Object lock) {
-        return new ZPageWithScoreBuilder<T>(lock)
+    public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key, Page<?> page) {
+        return new ZPageWithScoreBuilder<T>()
                 .page(page)
                 .key(key);
     }
@@ -46,8 +45,6 @@ public class ZPageHandler {
         Page<?> page;
         //s=是否倒序查询
         boolean reversed = true;
-        //lock
-        final Object lock;
         //总数查询方法
         Supplier<Long> countSupplier;
 
@@ -88,7 +85,7 @@ public class ZPageHandler {
         }
 
         private Collection<T> load(long current, long size) {
-            synchronized (lock) {
+            synchronized (key.intern()) {
                 Collection<T> items = handleQuery(key, current, size);
                 if (!items.isEmpty()) {
                     return items;
@@ -143,10 +140,6 @@ public class ZPageHandler {
 
     public static class ZPageBuilder<T> extends ZPage<T> {
 
-        public ZPageBuilder(Object lock) {
-            super(lock);
-        }
-
         @Override
         public Collection<T> handleQuery(String key, long current, long size) {
             return RedisClient.zPage(key, current, size);
@@ -159,10 +152,6 @@ public class ZPageHandler {
     }
 
     public static class ZPageWithScoreBuilder<T> extends ZPage<ZSetOperations.TypedTuple<T>> {
-
-        public ZPageWithScoreBuilder(Object lock) {
-            super(lock);
-        }
 
         @Override
         public Collection<ZSetOperations.TypedTuple<T>> handleQuery(String key, long current, long size) {

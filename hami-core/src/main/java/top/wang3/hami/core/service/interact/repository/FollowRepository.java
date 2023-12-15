@@ -2,7 +2,6 @@ package top.wang3.hami.core.service.interact.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.UserFollow;
 
 import java.util.List;
@@ -40,10 +39,11 @@ public interface FollowRepository extends IService<UserFollow> {
 
     List<Integer> listUserFollowers(Page<UserFollow> page, int userId);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean follow(int userId, int followingId);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean unFollow(int userId, int followingId);
+
+    boolean followUser(int userId, int toUserId, byte state);
+
 
 }

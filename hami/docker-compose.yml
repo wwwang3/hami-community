@@ -75,6 +75,7 @@ services:
     volumes:
       - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example 里面 的启动日志了
       - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./conf/canal/canal.properties:/home/admin/canal-server/conf/canal.properties
     environment:
       - TZ=Asia/Shanghai
       - canal.destinations=example
@@ -83,10 +84,10 @@ services:
       - canal.mq.topic=/canal
       - rabbitmq.host=192.168.3.13
       - rabbitmq.virtual.host=/
-      - rabbitmq.exchange=hami-canal
+      - rabbitmq.exchange=hami-canal-exchange
       - rabbitmq.username=root
       - rabbitmq.password=123456
-      - rabbitmq.deliveryMode=direct
+      - rabbitmq.deliveryMode=topic
       - rabbitmq.routingKey=/canal
       - rabbitmq.queue=hami-canal-queue
 

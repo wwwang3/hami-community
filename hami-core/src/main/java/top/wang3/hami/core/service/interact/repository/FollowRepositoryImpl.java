@@ -8,7 +8,7 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.interact.FollowCountItem;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.component.ZPageHandler;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.UserFollowMapper;
 
@@ -148,5 +148,29 @@ public class FollowRepositoryImpl extends ServiceImpl<UserFollowMapper, UserFoll
                 .eq("following", followingId)
                 .eq("`state`", Constants.ONE)
                 .update();
+    }
+
+    @Override
+    public boolean followUser(int userId, int following, byte state) {
+        UserFollow item = ChainWrappers.queryChain(getBaseMapper())
+                .eq("user_id", userId)
+                .eq("following", following)
+                .one();
+        if (item == null && state == Constants.ONE) {
+            // 关注同时不存在记录
+            UserFollow follow = new UserFollow();
+            follow.setUserId(userId);
+            follow.setFollowing(following);
+            follow.setState(Constants.ONE);
+            return super.save(follow);
+        } else if (item != null && !Objects.equals(state, item.getState())) {
+            // 存在记录同时二者state不一致
+            return ChainWrappers.updateChain(getBaseMapper())
+                    .set("state", state)
+                    .eq("user_id", userId)
+                    .eq("following", following)
+                    .update();
+        }
+        return false;
     }
 }

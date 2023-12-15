@@ -16,7 +16,7 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.model.ArticleTag;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.core.component.ZPageHandler;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.mapper.ArticleMapper;
 
 import java.util.Collection;

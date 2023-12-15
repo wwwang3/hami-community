@@ -16,7 +16,8 @@ public class FollowRabbitMessage extends InteractRabbitMessage {
 
     @Override
     public String getRoute() {
-        return getPrefix() + "follow"; //do.follow cancel.follow
+        // do.follow.[1-5] cancel.follow.[1-5]
+        return getPrefix() + "follow." + getUserId() % 5;
     }
 
 }

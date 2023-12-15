@@ -32,7 +32,7 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
 
     @Override
     public void processInsert(ArticleCollect entity) {
-//        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
+//        String redisKey = RedisConstants.USER_COLLECT_LIST + entity.getUserId();
 //        boolean success = RedisClient.expire(redisKey, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
 //        if (!success) {
 //            collectService.loadUserCollects(redisKey, entity.getUserId(), -1, -1);
@@ -64,7 +64,7 @@ public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {
     }
 
     private void handleDelete(ArticleCollect entity) {
-        String redisKey = RedisConstants.LIST_USER_COLLECT + entity.getUserId();
+        String redisKey = RedisConstants.USER_COLLECT_LIST + entity.getUserId();
         RedisClient.zRem(redisKey, entity.getArticleId());
     }
 

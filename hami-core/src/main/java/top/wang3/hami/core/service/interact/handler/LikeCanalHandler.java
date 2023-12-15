@@ -30,7 +30,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     @Override
     public void processInsert(LikeItem entity) {
-//        String key = RedisConstants.LIST_USER_LIKE + entity.getItemType() + ":" + entity.getLikerId();
+//        String key = RedisConstants.USER_LIKE_LIST + entity.getItemType() + ":" + entity.getLikerId();
 //        //点赞
 //        //key已经过期或者不存在返回false
 //        boolean success = RedisClient.expire(key, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
@@ -72,7 +72,7 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     private void handleDelete(LikeItem item) {
         //删除
-        String key = RedisConstants.LIST_USER_LIKE + item.getItemType() + ":" + item.getLikerId();
+        String key = RedisConstants.USER_LIKE_LIST + item.getItemType() + ":" + item.getLikerId();
         RedisClient.zRem(key, item.getItemId());
     }
 

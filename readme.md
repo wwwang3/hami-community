@@ -120,9 +120,37 @@ Redis中维护用户的点赞数和用户最近的点赞列表,超过最大存�
 
 对于写入请求后续可以做异步写DB
 
-### 收藏，关注
+### 关注
 
-类似于点赞
+```SQL
+create table user_follow
+(
+    id        int auto_increment comment '主键ID'		  primary key,
+    user_id   int                                       not null comment '用户ID',
+    following int                                       not null comment '关注的用户ID',
+    state     tinyint      default 0                    not null comment '状态 0-未关注 1关注',
+    ctime     timestamp(3) default CURRENT_TIMESTAMP(3) not null comment '创建时间',
+    mtime     timestamp(3) default CURRENT_TIMESTAMP(3) not null on update CURRENT_TIMESTAMP(3) comment '更新时间',
+    constraint uk_user_follow
+    unique (user_id, following)
+) comment '用户关注表' row_format = DYNAMIC;
+```
+
+用户关注时，先写入Redis在通过消息队列异步写入MySQL，Redis使用ZSET存储用户的关注列表
+
+```tex
+user:article:list:{user_id}:[(关注时间:following_id)]
+```
+
+消息队列采用RabbitMQ，异步写入MySQL时，如果多个消费者同时消费，会可能会出现关注-取消关注写入顺序不一致的问题(对于点赞收藏，关注等行为貌似问题不大)，导致Redis和MySQL数据不一致，关注的前置判断以及关注状态的判断在Redis，MySQL关注记录的写入或者更新，不会影响Redis，在缓存过期重新读取前，用户感知不到MySQL写入成功与否。
+
+通过RabbitMQ的topic主题路由，可以实现每个用户操作的串行写入，路由Key加上用户ID取模，比如：
+
+```tex
+xx.follow.{user_id % 5}
+```
+
+或者直接单条队列，单个消费者。
 
 ### 文章数据和用户数据 
 

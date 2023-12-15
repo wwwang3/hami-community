@@ -13,10 +13,8 @@ import java.util.Map;
 public interface LikeRepository extends IService<LikeItem> {
 
 
-    @Transactional(rollbackFor = Exception.class)
     boolean like(Integer userId, Integer itemId, LikeType likeType, byte state);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean doLike(Integer likerId, Integer itemId, LikeType likeType);
 
     @Transactional(rollbackFor = Exception.class)

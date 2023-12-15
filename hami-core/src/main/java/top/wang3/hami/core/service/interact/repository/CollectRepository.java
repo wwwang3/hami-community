@@ -13,13 +13,10 @@ import java.util.Map;
 @SuppressWarnings("all")
 public interface CollectRepository extends IService<ArticleCollect> {
 
-    @Transactional(rollbackFor = Exception.class)
     boolean doCollect(Integer userId, Integer itemId);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean cancelCollect(Integer userId, Integer itemId);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean collectArticle(Integer userId, Integer articleId, byte state);
 
     boolean hasCollected(Integer userId, Integer itemId);

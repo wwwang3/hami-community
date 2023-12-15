@@ -20,7 +20,7 @@ import java.util.function.Function;
 /**
  * Redis工具类
  */
-@SuppressWarnings(value = {"unchecked", "rawtypes", "unused"})
+@SuppressWarnings(value = {"all"})
 @Slf4j
 public class RedisClient {
 

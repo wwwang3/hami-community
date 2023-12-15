@@ -45,17 +45,15 @@ public final class RedisConstants {
      */
     public static final String USER_ARTICLE_COUNT = "user:article:count:";
 
-    public static final String LIST_USER_FOLLOWING = "user:following:list:";
+    public static final String USER_FOLLOWING_LIST = "user:following:list:";
 
-    public static final String LIST_USER_FOLLOWER = "user:follower:list:";
+    public static final String USER_FOLLOWER_LIST = "user:follower:list:";
 
-    public static final String LIST_USER_COLLECT = "user:collect:list:";
+    public static final String USER_COLLECT_LIST = "user:collect:list:";
 
-    public static final String LIST_USER_LIKE = "user:like:list:";
+    public static final String USER_LIKE_LIST = "user:like:list:";
 
-    public static final String LIST_USER_LIKE_ARTICLES = "user:like:list:" + Constants.LIKE_TYPE_ARTICLE + ":";
-
-    public static final String LIST_USER_ARTICLE = "user:article:list:";
+    public static final String USER_ARTICLE_LIST = "user:article:list:";
 
     public static final String ARTICLE_LIST = "article:list:total";
     public static final String CATE_ARTICLE_LIST = "cate:article:list:";

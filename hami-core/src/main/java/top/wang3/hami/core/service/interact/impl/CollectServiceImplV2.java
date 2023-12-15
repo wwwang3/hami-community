@@ -13,9 +13,9 @@ import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.Interact;
@@ -124,7 +124,7 @@ public class CollectServiceImplV2 implements CollectService {
 
     @Override
     public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
-        String key = RedisConstants.LIST_USER_COLLECT + userId;
+        String key = RedisConstants.USER_COLLECT_LIST + userId;
         return ZPageHandler
                 .<Integer>of(key, page, key.intern())
                 .countSupplier(() -> getUserCollectCount(userId))
@@ -149,7 +149,7 @@ public class CollectServiceImplV2 implements CollectService {
     }
 
     private String buildKey(Integer userId) {
-        return RedisConstants.LIST_USER_COLLECT + userId;
+        return RedisConstants.USER_COLLECT_LIST + userId;
     }
 
     private Set<ZSetOperations.TypedTuple<Integer>> loadCollectList(int loginUserId) {

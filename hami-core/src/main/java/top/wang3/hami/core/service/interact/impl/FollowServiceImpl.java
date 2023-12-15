@@ -16,9 +16,9 @@ import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.repository.FollowRepository;
@@ -114,7 +114,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
-        String key = RedisConstants.LIST_USER_FOLLOWING + userId;
+        String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowingCount(userId))
                 .loader((current, size) -> {
@@ -125,7 +125,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     public Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
-        String key = RedisConstants.LIST_USER_FOLLOWER + userId;
+        String key = RedisConstants.USER_FOLLOWER_LIST + userId;
         return ZPageHandler.<Integer>of(key, page, this)
                 .countSupplier(() -> getUserFollowerCount(userId))
                 .source((current, size) -> {
@@ -212,6 +212,6 @@ public class FollowServiceImpl implements FollowService {
     }
 
     private String buildKey(Integer userId) {
-        return RedisConstants.LIST_USER_FOLLOWING + userId;
+        return RedisConstants.USER_FOLLOWING_LIST + userId;
     }
 }

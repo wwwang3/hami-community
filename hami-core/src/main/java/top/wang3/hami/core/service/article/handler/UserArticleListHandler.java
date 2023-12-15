@@ -33,7 +33,7 @@ public class UserArticleListHandler implements CanalEntryHandler<Article> {
     @Override
     public void processInsert(Article entity) {
         Integer userId = entity.getUserId();
-        String key = RedisConstants.LIST_USER_ARTICLE + userId;
+        String key = RedisConstants.USER_ARTICLE_LIST + userId;
         if (RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS)) {
             RedisClient.executeScript(insert_article_script,
                     List.of(key),
@@ -53,7 +53,7 @@ public class UserArticleListHandler implements CanalEntryHandler<Article> {
 
     @Override
     public void processDelete(Article deletedEntity) {
-        String key = RedisConstants.LIST_USER_ARTICLE + deletedEntity.getUserId();
+        String key = RedisConstants.USER_ARTICLE_LIST + deletedEntity.getUserId();
         RedisClient.zRem(key, deletedEntity.getId());
     }
 }

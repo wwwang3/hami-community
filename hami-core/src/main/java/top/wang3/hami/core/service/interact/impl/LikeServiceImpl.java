@@ -11,9 +11,9 @@ import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
-import top.wang3.hami.core.component.ZPageHandler;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
@@ -188,6 +188,6 @@ public class LikeServiceImpl implements LikeService {
     }
 
     private String buildKey(Integer userId, LikeType likeType) {
-        return RedisConstants.LIST_USER_LIKE + likeType.getType() + ":" + userId;
+        return RedisConstants.USER_LIKE_LIST + likeType.getType() + ":" + userId;
     }
 }
