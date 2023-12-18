@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.canal.annotation.CanalListener;
+import top.wang3.hami.canal.CanalEntryHandler;
+import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.RedisClient;
@@ -14,7 +14,7 @@ import top.wang3.hami.core.service.interact.LikeService;
 
 
 @Component
-@CanalListener(value = "tb_like")
+@CanalRabbitHandler(value = "tb_like")
 @RequiredArgsConstructor
 @Slf4j
 public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {

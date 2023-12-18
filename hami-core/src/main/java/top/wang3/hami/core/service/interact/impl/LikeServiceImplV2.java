@@ -122,7 +122,7 @@ public class LikeServiceImplV2 implements LikeService {
     public Collection<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
         //最近点赞的文章
         String key = buildKey(userId, LikeType.ARTICLE);
-        return ZPageHandler.<Integer>of(key, page, key.intern())
+        return ZPageHandler.<Integer>of(key, page)
                 .loader((c, s) -> {
                     return loadUserLikeItem(key, userId, LikeType.ARTICLE, c, s);
                 })

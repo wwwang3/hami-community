@@ -8,6 +8,6 @@ public class CanalRegistrarSelector implements ImportSelector {
 
     @Override
     public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-        return new String[]{HamiCanalRegistrar.class.getName()};
+        return new String[]{CanalRegistrar.class.getName()};
     }
 }

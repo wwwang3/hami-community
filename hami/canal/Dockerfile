@@ -1,1 +1,1 @@
-FROM canal/canal-server:latest
+FROM canal/canal-server:v1.1.7

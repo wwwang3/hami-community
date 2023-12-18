@@ -13,7 +13,7 @@ import top.wang3.hami.canal.annotation.CanalRabbitHandlerAnnotationBeanPostProce
  * Factory和Handler配置
  */
 @SuppressWarnings("all")
-public class HamiCanalRegistrar implements ImportBeanDefinitionRegistrar {
+public class CanalRegistrar implements ImportBeanDefinitionRegistrar {
 
     public static final String CANAL_RABBIT_HANDLER_BEAN_POST_PROCESSOR =
             "top.wang3.hami.canal.annotation.CanalRabbitHandlerAnnotationBeanPostProcessor";

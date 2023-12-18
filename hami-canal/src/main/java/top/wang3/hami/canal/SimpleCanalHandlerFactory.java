@@ -3,7 +3,10 @@ package top.wang3.hami.canal;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.google.common.base.CaseFormat;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -16,8 +19,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings(value = {"rawtypes"})
-public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
+@SuppressWarnings(value = {"rawtypes", "unchecked"})
+public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, ApplicationRunner {
 
     /**
      * handler未指定容器ID时, 放到这里
@@ -38,6 +41,8 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
      */
     private final Map<String, Map<String, Field>> tableFiledMap = new ConcurrentHashMap<>(32);
 
+    private int handlerSize = 0;
+
     @Override
     public <T> Class<T> getTableClass(String tableName) {
         return (Class<T>) tableClassMap.get(tableName);
@@ -50,12 +55,13 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
 
     @Override
     public List<CanalEntryHandler<?>> getContainerHandler(String containerId, String tableName) {
-        return null;
+        String key = containerId + "-" + tableName;
+        return containeredHandlerMap.get(key);
     }
 
     @Override
     public List<CanalEntryHandler<?>> getHandler(String tableName) {
-        return null;
+        return commonHandlerMap.get(tableName);
     }
 
     @Override
@@ -64,20 +70,20 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
     }
 
     @Override
-    public boolean addTableClass(String tableName, Class<?> tableClass) {
+    public boolean addTableClass(@NonNull String tableName, Class<?> tableClass) {
         tableClassMap.putIfAbsent(tableName, tableClass);
         addToTableClassFiledMap(tableName, tableClass);
         return true;
     }
 
     @Override
-    public boolean addHandleEntityClass(Class<? extends CanalEntryHandler> handlerClass, Class<?> tableClass) {
+    public boolean addHandlerEntityClass(Class<? extends CanalEntryHandler> handlerClass, Class<?> tableClass) {
         handlerEntityClassMap.putIfAbsent(handlerClass, tableClass);
         return true;
     }
 
     @Override
-    public boolean addCanalEntryHandler(String tableName, String containerId, CanalEntryHandler<?> handler) {
+    public boolean addCanalEntryHandler(@NonNull String tableName, String containerId, CanalEntryHandler<?> handler) {
         if (StringUtils.hasText(containerId)) {
             return addToContaineredHandlerMap(tableName, containerId, handler);
         } else {
@@ -96,13 +102,15 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
     }
 
     private boolean addToCommonHandlerMap(String tableName, CanalEntryHandler<?> handler) {
-        List<CanalEntryHandler<?>> handlers = commonHandlerMap.computeIfAbsent(tableName, (key) -> new ArrayList<>());
+        List<CanalEntryHandler<?>> handlers = commonHandlerMap.computeIfAbsent(tableName, key -> new ArrayList<>());
+        handlerSize++;
         return handlers.add(handler);
     }
 
     private boolean addToContaineredHandlerMap(String tableName, String containerId, CanalEntryHandler<?> handler) {
         String key = containerId + "-" + tableName;
         List<CanalEntryHandler<?>> handlers = containeredHandlerMap.computeIfAbsent(key, k -> new ArrayList<>());
+        handlerSize++;
         return handlers.add(handler);
     }
 
@@ -125,5 +133,10 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory {
             return name.substring(1, name.length() - 1);
         }
         return name;
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        log.info("found {} CanalEntryHandler", handlerSize);
     }
 }

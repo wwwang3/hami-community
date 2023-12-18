@@ -10,13 +10,27 @@ import java.util.Map;
 
 @Data
 @ConfigurationProperties(prefix = "hami.canal")
-public class HamiCanalProperties {
+public class CanalProperties {
 
-    private boolean flatMessage = false;
+    /**
+     * 数据库名
+     */
+    private String schema;
 
+    /**
+     * 交换机名称
+     */
     private String exchange;
 
+    /**
+     * 交换机类型
+     */
     private String exchangeType;
+
+    /**
+     * 发送的是否是FlatMessage格式的数据
+     */
+    private boolean flatMessage = false;
 
     @NestedConfigurationProperty
     private Map<String, CanalMessageContainer> containers;
@@ -32,32 +46,32 @@ public class HamiCanalProperties {
     public static class CanalMessageContainer {
 
         /**
-         * 该容器要绑定到交换机的队列
-         * 若多个容器绑定了相同routingKey的队列, 会造成消息重复消费
+         * 该容器要监听的表, 一张表一个队列
+         * 若多个容器监听了相同的表, 且@CanalRabbitHandler注解上没有提供containerId, 会造成消息的重复消费
          */
         @NestedConfigurationProperty
-        private List<Queue> queues;
+        private List<Table> tables;
 
         /**
          * 同RabbitListener
          */
-        private String concurrency;
+        private String concurrency = "1";
 
     }
 
     @Data
-    public static class Queue {
+    public static class Table {
 
         /**
-         * 该队列名称
+         * 表名
          */
-        String name;
+        private String name;
 
         /**
-         * 队列绑定到交换机的路由
+         * 该表生成的队列绑定到交换机的路由, 可以为空或null
+         * 默认为schema + '_' + name 数据库名_表名
          */
-        String routingKey;
-
+        private String routingKey;
 
     }
 

@@ -70,10 +70,6 @@
             <artifactId>spring-file-storage</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba.otter</groupId>
-            <artifactId>canal.protocol</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

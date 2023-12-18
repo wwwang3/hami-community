@@ -1,6 +1,7 @@
 package top.wang3.hami.canal.converter;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.otter.canal.protocol.CanalEntry;
 import com.alibaba.otter.canal.protocol.FlatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Setter;
@@ -50,9 +51,10 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
             CanalEntity<T> canalEntity = new CanalEntity<>();
             canalEntity.setTableClass(tableClass);
             canalEntity.setTableName(table);
+            canalEntity.setType(CanalEntry.EventType.valueOf(type));
             switch (type) {
                 case "INSERT" -> {
-                    canalEntity.setBefore(mapToEntity(table, tableClass, data.get(i)));
+                    canalEntity.setAfter(mapToEntity(table, tableClass, data.get(i)));
                     entities.add(canalEntity);
                 }
                 case "UPDATE" -> {
@@ -61,7 +63,7 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
                     entities.add(canalEntity);
                 }
                 case "DELETE" -> {
-                    canalEntity.setAfter(mapToEntity(table, tableClass, data.get(i)));
+                    canalEntity.setBefore(mapToEntity(table, tableClass, data.get(i)));
                     entities.add(canalEntity);
                 }
             }

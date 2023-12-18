@@ -72,12 +72,9 @@
             <version>0.0.1</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.otter</groupId>
-            <artifactId>canal.client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.otter</groupId>
-            <artifactId>canal.protocol</artifactId>
+            <groupId>top.wang3.hami.canal</groupId>
+            <artifactId>hami-canal</artifactId>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
 

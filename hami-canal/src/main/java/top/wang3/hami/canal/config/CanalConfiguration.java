@@ -8,18 +8,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
 import top.wang3.hami.canal.converter.CommonCanalMessageConverter;
 import top.wang3.hami.canal.converter.FlatCanalMessageConverter;
 
 @Configuration
-@EnableConfigurationProperties(HamiCanalProperties.class)
+@EnableConfigurationProperties(CanalProperties.class)
 @AutoConfigureAfter(RabbitAutoConfiguration.class)
-@Import(CanalListenerConfigurer.class)
 @RequiredArgsConstructor
-public class HamiCanalConfiguration {
+public class CanalConfiguration {
 
     @Bean("CanalMessageConverter")
     @ConditionalOnProperty(prefix = "hami.canal", name = "flat-message", havingValue = "false", matchIfMissing = true)

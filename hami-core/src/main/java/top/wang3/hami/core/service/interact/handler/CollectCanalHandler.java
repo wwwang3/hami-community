@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.canal.annotation.CanalListener;
+import top.wang3.hami.canal.CanalEntryHandler;
+import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.interact.CollectService;
 
 @Component
-@CanalListener("article_collect")
+@CanalRabbitHandler("article_collect")
 @RequiredArgsConstructor
 @Slf4j
 public class CollectCanalHandler implements CanalEntryHandler<ArticleCollect> {

@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.canal.annotation.CanalListener;
+import top.wang3.hami.canal.CanalEntryHandler;
+import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.UserFollow;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * 用户关注
  */
 @Component
-@CanalListener(value = "user_follow")
+@CanalRabbitHandler(value = "user_follow")
 @RequiredArgsConstructor
 @Slf4j
 public class FollowCanalHandler implements CanalEntryHandler<UserFollow> {

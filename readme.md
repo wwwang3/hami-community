@@ -1,13 +1,4 @@
 # HamiCommunity
-端口-DEV
-```text
-mysql: 8300
-redis: 8301
-rabbitmq: 8302, 8303
-spring-boot: 8304
-front-end: 8305
-```
-
 ## 项目功能
 
 #### 用户
@@ -63,19 +54,61 @@ front-end: 8305
 - [x] 点赞文章通知
 - [x] 通知查询
 
-### 后台管理
+#### 后台管理
 
 暂定
 
+## Canal整合RabbitMQ
+
+Canal发送消息到RabbitMQ不支持消息分区，但支持单表的路由，单个消费者可以保证单表的顺序性
+
+`canal.properties`
+
+```properties
+#主要配置 canal:v1.1.7
+canal.serverMode=rabbitMQ
+canal.destinations=example
+canal.mq.flatMessage=false
+canal.mq.topic=/canal
+canal.mq.dynamicTopic=.*\\..*
+rabbitmq.host=192.168.3.13
+rabbitmq.virtual.host=/
+rabbitmq.exchange=hami-canal-exchange
+rabbitmq.username=root
+rabbitmq.password=123456
+rabbitmq.deliveryMode=topic
+rabbitmq.queue=hami-canal-queue
+rabbitmq.routingKey=/canal
+```
+
+`instance.properties`
+
+```properties
+# position info
+canal.instance.master.address=192.168.3.11:3306
+# username/password
+canal.instance.dbUsername=canal
+canal.instance.dbPassword=123456
+canal.instance.defaultDatabaseName=db_hami_community
+canal.instance.connectionCharset = UTF-8
+# table regex
+# Only match all tables under db_hami_community
+canal.instance.filter.regex=db_hami_community\\..*
+# table black regex
+canal.instance.filter.black.regex=mysql\\.slave_.*
+```
+
+> 配置RabbitMQ动态路由时, `.*\\..*`与`test\\..*`都会发送至`数据库名_表名`对应的路由上, 与文档描述不一致
+
 ## 前端
 
-- [ ] 评论
+- [x] 评论
 - [x] 个人空间
 - [x] 文章
-- [ ] 消息通知
+- [x] 消息通知
 - [x] 创作者中心
-- [ ] 历史记录
-- [ ] 搜索
+- [x] 历史记录
+- [x] 搜索
 
 ## 方案设计
 
@@ -100,16 +133,12 @@ redis：
 用户数据量大存在key过多的问题，可通过Redis集群+分区Key解决
 
 ```
-{business_type}{use_id}:zset[{item_id}:{timestamp}]
+{business_type}:{user_id}:zset[{timestamp}:{item_id}]
 ```
 
+`timestamp`为score, `item_id`为member
+
 ### 点赞
-
-Redis中维护用户的点赞数和用户最近的点赞列表,超过最大存储数量时，回源DB查询
-
-用户点赞后，先更新DB和实体的点赞数(文章或者评论),然后发消息，刷新Redis
-
-后续可以抽象通用的点赞服务, 提供以下功能
 
 - 对某个文章/评论点赞（取消点赞）
 - 查询是否对 单个 或者 一批实体 点过赞 - 即点赞状态查询
@@ -118,49 +147,23 @@ Redis中维护用户的点赞数和用户最近的点赞列表,超过最大存�
 - 查询某个实体的点赞人列表
 - 查询用户收到的总点赞数
 
-对于写入请求后续可以做异步写DB
+Redis中维护用户的点赞数和用户最近的点赞列表,超过最大存储数量时，回源DB查询
 
-### 关注
+> 目前存储的是用户所有的点赞数据
 
-```SQL
-create table user_follow
-(
-    id        int auto_increment comment '主键ID'		  primary key,
-    user_id   int                                       not null comment '用户ID',
-    following int                                       not null comment '关注的用户ID',
-    state     tinyint      default 0                    not null comment '状态 0-未关注 1关注',
-    ctime     timestamp(3) default CURRENT_TIMESTAMP(3) not null comment '创建时间',
-    mtime     timestamp(3) default CURRENT_TIMESTAMP(3) not null on update CURRENT_TIMESTAMP(3) comment '更新时间',
-    constraint uk_user_follow
-    unique (user_id, following)
-) comment '用户关注表' row_format = DYNAMIC;
-```
-
-用户关注时，先写入Redis在通过消息队列异步写入MySQL，Redis使用ZSET存储用户的关注列表
-
-```tex
-user:article:list:{user_id}:[(关注时间:following_id)]
-```
-
-消息队列采用RabbitMQ，异步写入MySQL时，如果多个消费者同时消费，会可能会出现关注-取消关注写入顺序不一致的问题(对于点赞收藏，关注等行为貌似问题不大)，导致Redis和MySQL数据不一致，关注的前置判断以及关注状态的判断在Redis，MySQL关注记录的写入或者更新，不会影响Redis，在缓存过期重新读取前，用户感知不到MySQL写入成功与否。
+用户点赞后，先更新Redis，在异步更新MySQL，异步写入MySQL时，如果多个消费者同时消费，会可能会出现点赞-取消点赞写入顺序不一致的问题(对于点赞收藏，关注等行为貌似问题不大)，导致Redis和MySQL数据不一致，关注的前置判断以及关注状态的判断在Redis，MySQL关注记录的写入或者更新，不会影响Redis，在缓存过期重新读取前，用户感知不到MySQL写入成功与否。
 
 通过RabbitMQ的topic主题路由，可以实现每个用户操作的串行写入，路由Key加上用户ID取模，比如：
 
 ```tex
-xx.follow.{user_id % 5}
+xx.like.{user_id % 5}
 ```
 
 或者直接单条队列，单个消费者。
 
-### 文章数据和用户数据 
+收藏和关注类似于点赞
 
-文章：
-
-```
-{article_stat}{article_id}:hash
-```
-
-### 首页文章
+### 文章
 
 使用Redis zset保存最新发布的文章ID，每个zset最多保存1000篇，超过的回源数据库查询,每次更新时，没有超过1000，直接放入，
 
@@ -175,39 +178,3 @@ xx.follow.{user_id % 5}
 {article:list:}{cate_id}:zset
 {user:article:list}:zset
 ```
-
-#### 用户行为
-
-点赞/收藏/评论等
-
-写入数据库后，发送消息给消息队列。
-
-点赞 ==>写入数据库==> 发消息 ===> 点赞数更新 ===> 点赞通知
-
-## BUG
-
-```
-com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id '1000' as a subtype of `java.lang.Object`: no such class found
- at [Source: (byte[])"[1000,1001]"; line: 1, column: 7]
-
-```
-
-`Jackson反序列化集合失败`
-
-https://github.com/FasterXML/jackson-databind/issues/3892
-
-使用List.of(...)时，NO_FINAL，序列化时没有包含完整的通用类型信息，改为EVERYTHING，
-
-```java
-objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
-                                   ObjectMapper.DefaultTyping.NON_FINAL,
-                                   JsonTypeInfo.As.PROPERTY);
-====>
-objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
-                                   ObjectMapper.DefaultTyping.EVERYTHING,
-                                   JsonTypeInfo.As.PROPERTY);
-```
-
-### Canal同步数据时获取的字段为空
-
-Date类型值转化失败，返回null导致NPE

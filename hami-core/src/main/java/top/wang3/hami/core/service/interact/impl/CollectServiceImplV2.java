@@ -126,7 +126,7 @@ public class CollectServiceImplV2 implements CollectService {
     public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
         String key = RedisConstants.USER_COLLECT_LIST + userId;
         return ZPageHandler
-                .<Integer>of(key, page, key.intern())
+                .<Integer>of(key, page)
                 .countSupplier(() -> getUserCollectCount(userId))
                 .loader((c, s) -> {
                     return loadUserCollects(key, userId, c, s);

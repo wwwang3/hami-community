@@ -1,1 +1,0 @@
-Canal整合RabbitMQ

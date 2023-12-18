@@ -2,8 +2,8 @@ package top.wang3.hami.core.service.stat.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.common.canal.CanalEntryHandler;
-import top.wang3.hami.common.canal.annotation.CanalListener;
+import top.wang3.hami.canal.CanalEntryHandler;
+import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleStatDTO;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Component
-@CanalListener(value = "article_stat")
+@CanalRabbitHandler(value = "article_stat")
 @Slf4j
 //todo 失败重试
 public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {

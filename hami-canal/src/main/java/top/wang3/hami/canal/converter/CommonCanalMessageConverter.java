@@ -78,10 +78,11 @@ public class CommonCanalMessageConverter implements CanalMessageConverter {
         Map<String, Field> tableField = canalEntryHandlerFactory.getTableField(tableName);
         entity.setTableName(tableName);
         entity.setTableClass(tableClass);
+        entity.setType(eventType);
         switch (eventType) {
             case INSERT -> {
-                T before = getEntity(rowData.getBeforeColumnsList(), tableClass, tableField);
-                entity.setBefore(before);
+                T after = getEntity(rowData.getAfterColumnsList(), tableClass, tableField);
+                entity.setAfter(after);
             }
             case UPDATE -> {
                 T before = getEntity(rowData.getBeforeColumnsList(), tableClass, tableField);
@@ -90,8 +91,8 @@ public class CommonCanalMessageConverter implements CanalMessageConverter {
                 entity.setAfter(after);
             }
             case DELETE -> {
-                T after = getEntity(rowData.getAfterColumnsList(), tableClass, tableField);
-                entity.setAfter(after);
+                T before = getEntity(rowData.getBeforeColumnsList(), tableClass, tableField);
+                entity.setBefore(before);
             }
         }
         return entity;

@@ -29,7 +29,7 @@ public class ArticleListInitializer implements HamiInitializer {
 
     @Override
     public boolean alwaysExecute() {
-        return true;
+        return false;
     }
 
     @Override

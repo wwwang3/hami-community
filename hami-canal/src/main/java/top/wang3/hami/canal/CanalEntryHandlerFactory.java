@@ -1,5 +1,7 @@
 package top.wang3.hami.canal;
 
+import org.springframework.lang.NonNull;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +35,10 @@ public interface CanalEntryHandlerFactory {
 
     Map<String, Field> getTableField(String tableName);
 
-    boolean addTableClass(String tableName, Class<?> tableClass);
+    boolean addTableClass(@NonNull String tableName, Class<?> tableClass);
 
-    boolean addHandleEntityClass(Class<? extends CanalEntryHandler> handlerClass, Class<?> tableClass);
+    boolean addHandlerEntityClass(Class<? extends CanalEntryHandler> handlerClass, Class<?> tableClass);
 
-    boolean addCanalEntryHandler(String tableName, String containerId, CanalEntryHandler<?> handler);
+    boolean addCanalEntryHandler(@NonNull String tableName, String containerId, CanalEntryHandler<?> handler);
 
 }

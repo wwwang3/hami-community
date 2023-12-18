@@ -52,7 +52,7 @@ import top.wang3.hami.core.service.interact.repository.FollowRepository;
                 )
         ),
         @RabbitListener(
-                id = "LikeMessageContainer-5",
+                id = "FollowMessageContainer-5",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.FOLLOW_QUEUE_5),
                         exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),

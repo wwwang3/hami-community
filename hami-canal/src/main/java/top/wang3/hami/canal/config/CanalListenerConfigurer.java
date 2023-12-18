@@ -2,6 +2,7 @@ package top.wang3.hami.canal.config;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeBuilder;
@@ -14,82 +15,103 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
 import top.wang3.hami.canal.listener.CanalListenerEndpoint;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
-public class CanalListenerConfigurer implements RabbitListenerConfigurer, BeanFactoryAware, SmartInitializingSingleton {
+@Slf4j
+public class CanalListenerConfigurer implements RabbitListenerConfigurer,
+        BeanFactoryAware, SmartInitializingSingleton {
 
     private CanalEntryHandlerFactory canalEntryHandlerFactory;
 
     private CanalMessageConverter messageConverter;
 
-    private HamiCanalProperties hamiCanalProperties;
+    private CanalProperties canalProperties;
 
     private BeanFactory beanFactory;
-    private int increment = 0;
+    private int queueSize = 0;
+    private int bindingSize = 0;
 
     @Override
     public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
-        // todo 注册CanalListenerContainer
-        Map<String, HamiCanalProperties.CanalMessageContainer> containers =
-                hamiCanalProperties.getContainers();
-        Set<String> keySet = containers.keySet();
-        Exchange exchange = registerExchange(hamiCanalProperties.getExchange(), hamiCanalProperties.getExchangeType());
-        for (String id : keySet) {
+        var containers = canalProperties.getContainers();
+        log.info("start to register CanalMessageListenerContainer, found {} container-config", containers.size());
+        // 注册交换机
+        registerExchange(canalProperties.getExchange(), canalProperties.getExchangeType());
+        var entries = containers.entrySet();
+        for (var entry : entries) {
+            String id = entry.getKey();
+            var container = entry.getValue();
             CanalListenerEndpoint endpoint = new CanalListenerEndpoint();
-            endpoint.setCanalEntryHandlerFactory(canalEntryHandlerFactory);
-            endpoint.setCanalMessageConverter(messageConverter);
+            // 容器ID
             endpoint.setId(id);
-            HamiCanalProperties.CanalMessageContainer container = containers.get(id);
-            registerQueue(container.getQueues());
-            registerBinding(exchange, container.getQueues());
+            // 注册endpoint
             processEndpoint(endpoint, container);
             registrar.registerEndpoint(endpoint);
+            log.info("process endpoint success, container-id: {}", endpoint.getId());
         }
     }
 
-    private void registerBinding(Exchange exchange, List<HamiCanalProperties.Queue> queues) {
-        for (HamiCanalProperties.Queue queue : queues) {
-            Binding binding = new Binding(
-                    queue.getName(),
-                    Binding.DestinationType.QUEUE,
-                    exchange.getName(),
-                    queue.getRoutingKey(),
-                    null
-            );
-            String beanName = exchange.getName() + "." + queue.getName() + ++increment;
-            ((ConfigurableBeanFactory) beanFactory).registerSingleton(beanName, binding);
-        }
+    private void processEndpoint(CanalListenerEndpoint endpoint,
+                                 CanalProperties.CanalMessageContainer container) {
+        endpoint.setConcurrency(container.getConcurrency());
+        endpoint.setCanalEntryHandlerFactory(canalEntryHandlerFactory);
+        endpoint.setCanalMessageConverter(messageConverter);
+        // 注册队列
+        List<Queue> queues = registerQueue(container.getTables());
+        endpoint.setQueues(queues.toArray(Queue[]::new));
     }
 
-    private void registerQueue(List<HamiCanalProperties.Queue> queues) {
-        for (HamiCanalProperties.Queue queue : queues) {
-            Queue amqpQueue = new Queue(queue.getName(), true);
-            ((ConfigurableBeanFactory) beanFactory).registerSingleton(queue.getName() + (++increment), amqpQueue);
+    private List<Queue> registerQueue(List<CanalProperties.Table> tables) {
+        ArrayList<Queue> queues = new ArrayList<>(tables.size());
+        for (CanalProperties.Table table : tables) {
+            String queueOrBeanName = "canal-" + table.getName() + "-" + ++queueSize;
+            Queue amqpQueue = new Queue(queueOrBeanName, true);
+            // 向容器注册bean, Spring会帮我们声明队列
+            ((ConfigurableBeanFactory) beanFactory).registerSingleton(queueOrBeanName, amqpQueue);
+            registerBinding(table.getName(), queueOrBeanName, table.getRoutingKey());
+            queues.add(amqpQueue);
         }
+        return queues;
     }
 
-    private Exchange registerExchange(String exchange, String exchangeType) {
+    private void registerBinding(String tableName, String queueName, String routingKey) {
+        final String schema = canalProperties.getSchema();
+        final String exchange = canalProperties.getExchange();
+        String route = buildRoutingKey(schema, tableName, routingKey);
+        Binding binding = new Binding(
+                queueName,
+                Binding.DestinationType.QUEUE,
+                exchange,
+                route,
+                null
+        );
+        String beanName = exchange + "." + queueName + ++bindingSize;
+        ((ConfigurableBeanFactory) beanFactory).registerSingleton(beanName, binding);
+        log.info("register binding to exchange [{}] success: queue: {}, routing: {}",
+                exchange, queueName, route);
+    }
+
+    private void registerExchange(String exchange, String exchangeType) {
         ExchangeBuilder exchangeBuilder = new ExchangeBuilder(exchange, exchangeType);
         Exchange ex = exchangeBuilder.durable(true)
                 .build();
         ((ConfigurableBeanFactory) this.beanFactory).registerSingleton(exchange, ex);
-        return ex;
+        log.info("register canal exchange: {} success", ex.getName());
     }
 
-    private void processEndpoint(CanalListenerEndpoint endpoint,
-                                 HamiCanalProperties.CanalMessageContainer canalMessageContainer) {
-        endpoint.setConcurrency(canalMessageContainer.getConcurrency());
-        List<HamiCanalProperties.Queue> queues = canalMessageContainer.getQueues();
-        Queue[] queueNames = queues.stream().map(q -> new Queue(q.getName(), true)).toArray(Queue[]::new);
-        endpoint.setQueues(queueNames);
+    private String buildRoutingKey(String schema, String tableName, String routingKey) {
+        if (StringUtils.hasText(routingKey)) {
+            return routingKey;
+        }
+        return schema + "_" + tableName;
     }
 
     @Override
@@ -100,8 +122,8 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer, BeanFa
     @Override
     public void afterSingletonsInstantiated() {
         this.canalEntryHandlerFactory = beanFactory.getBean(
-                HamiCanalRegistrar.CANAL_ENTRY_HANDLER_FACTORY, CanalEntryHandlerFactory.class);
-        this.hamiCanalProperties = beanFactory.getBean(HamiCanalProperties.class);
+                CanalRegistrar.CANAL_ENTRY_HANDLER_FACTORY, CanalEntryHandlerFactory.class);
+        this.canalProperties = beanFactory.getBean(CanalProperties.class);
         this.messageConverter = beanFactory.getBean(CanalMessageConverter.class);
     }
 }

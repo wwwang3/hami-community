@@ -81,7 +81,7 @@ public class ArticleServiceImpl implements ArticleService {
         int userId = param.getUserId();
         String redisKey = RedisConstants.USER_ARTICLE_LIST + userId;
         Page<Article> page = param.toPage(false);
-        Collection<Integer> ids = ZPageHandler.<Integer>of(redisKey, page, this)
+        Collection<Integer> ids = ZPageHandler.<Integer>of(redisKey, page)
                 .countSupplier(() -> this.getUserArticleCount(userId))
                 .source((c, s) -> {
                     Page<Article> articlePage = new Page<>(c, s, false);
@@ -150,7 +150,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private List<ArticleDTO> listArticleByCate(Page<Article> page, Integer cateId) {
         String key = cateId == null ? RedisConstants.ARTICLE_LIST : RedisConstants.CATE_ARTICLE_LIST + cateId;
-        Collection<Integer> articleIds = ZPageHandler.<Integer>of(key, page, this)
+        Collection<Integer> articleIds = ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> this.getArticleCount(cateId))
                 .source((current, size) -> {
                     Page<Article> itemPage = new Page<>(current, size, false);
