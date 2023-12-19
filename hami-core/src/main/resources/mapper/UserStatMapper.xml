@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.wang3.hami.core.mapper.UserStatMapper">
+  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.UserStat">
+    <!--@mbg.generated-->
+    <!--@Table user_stat-->
+    <id column="user_id" property="userId" />
+    <result column="total_followings" property="totalFollowings" />
+    <result column="total_articles" property="totalArticles" />
+    <result column="total_views" property="totalViews" />
+    <result column="total_likes" property="totalLikes" />
+    <result column="total_comments" property="totalComments" />
+    <result column="total_collects" property="totalCollects" />
+    <result column="total_followers" property="totalFollowers" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    user_id, total_followings, total_articles, total_views, total_likes, total_comments, 
+    total_collects, total_followers
+  </sql>
+</mapper>
