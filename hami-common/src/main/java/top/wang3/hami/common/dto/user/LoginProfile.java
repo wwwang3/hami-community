@@ -2,6 +2,7 @@ package top.wang3.hami.common.dto.user;
 
 
 import lombok.Data;
+import top.wang3.hami.common.dto.stat.UserStatDTO;
 
 import java.util.Date;
 
@@ -76,6 +77,6 @@ public class LoginProfile {
      */
     private Integer followings = 0;
 
-    private UserStat stat;
+    private UserStatDTO stat;
 
 }

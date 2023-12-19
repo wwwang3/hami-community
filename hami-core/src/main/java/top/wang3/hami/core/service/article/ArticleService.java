@@ -50,4 +50,6 @@ public interface ArticleService {
     boolean deleteByArticleId(Integer userId, Integer articleId);
 
     List<ArticleInfo> loadArticleInfoCache(List<Integer> nullIds);
+
+    Long loadArticleCount(String key, String hKey);
 }

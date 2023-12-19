@@ -58,9 +58,14 @@ public final class RedisConstants {
     public static final String ARTICLE_LIST = "article:list:total";
     public static final String CATE_ARTICLE_LIST = "cate:article:list:";
 
-    public static final String TOTAL_ARTICLE_COUNT = "article:count:total";
+    /**
+     * 文章总数和分类文章数
+     */
+    public static final String ARTICLE_COUNT_KEY = "article:count:map";
 
-    public static final String CATE_ARTICLE_COUNT = "cate:article:count:";
+    public static final String TOTAL_ARTICLE_COUNT = "total";
+
+    public static final String CATE_ARTICLE_COUNT = "cate:";
     public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
     public static final String HOT_ARTICLE = "rank:article:";
 
@@ -72,11 +77,14 @@ public final class RedisConstants {
     public static final String STAT_TYPE_ARTICLE = "#stat:article:";
     public static final String STAT_TYPE_USER = "#stat:user:";
 
-    public static final String USER_STAT_ARTICLES = "user:total:articles";
-    public static final String USER_STAT_VIEWS = "user:received:views";
-    public static final String USER_STAT_LIKES = "user:received:likes";
-    public static final String USER_STAT_COMMENTS = "user:received:comments";
-    public static final String USER_STAT_COLLECTS = "user:received:collects";
+    public static final String USER_STAT_ID = "user_id";
+    public static final String USER_STAT_ARTICLES = "totalArticles";
+    public static final String USER_STAT_VIEWS = "totalViews";
+    public static final String USER_STAT_LIKES = "totalLikes";
+    public static final String USER_STAT_COMMENTS = "totalComments";
+    public static final String USER_STAT_COLLECTS = "totalCollects";
+    public static final String USER_STAT_FOLLOWERS = "totalFollowers";
+    public static final String USER_STAT_FOLLOWINGS = "totalFollowings";
 
 
     public static final String DATA_GROWING = "data:growing:";

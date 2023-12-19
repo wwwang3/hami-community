@@ -14,7 +14,8 @@ public interface CanalEntryHandler<T> {
 
     void processDelete(T deletedEntity);
 
-    static boolean isLogicDelete(Byte before, Byte after) {
-        return Constants.NOT_DELETED.equals(before) && Constants.DELETED.equals(after);
+    default boolean isLogicDelete(Byte old, Byte now) {
+        return Constants.ZERO.equals(old) && Constants.ONE.equals(now);
     }
+
 }

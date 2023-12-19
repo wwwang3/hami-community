@@ -12,7 +12,7 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleStatService;
+import top.wang3.hami.core.service.stat.ArticleStatService;
 
 import java.util.List;
 

@@ -1,9 +1,8 @@
-package top.wang3.hami.core.service.article.repository;
+package top.wang3.hami.core.service.stat.repository;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 
@@ -24,15 +23,6 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds);
 
-    /**
-     * 获取用户数据，不包含关注数据
-     * @param userId 用户ID
-     * @return UserStat
-     */
-    UserStat getUserStatByUserId(int userId);
-
-    Map<Integer, UserStat> getUserStatByUserIds(List<Integer> userIds);
-
     @Transactional(rollbackFor = Exception.class)
     boolean increaseViews(int articleId, int count);
 
@@ -43,36 +33,33 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
     boolean updateCollects(int articleId, int delta);
 
 
-    @Transactional(rollbackFor = Exception.class)
     boolean increaseCollects(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean increaseComments(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean increaseLikes(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean decreaseCollects(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean decreaseLikes(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean decreaseComments(int articleId, int count);
 
-    @Transactional(rollbackFor = Exception.class)
     void updateViews(Collection<ArticleStat> stats);
 
     @Transactional(rollbackFor = Exception.class)
     boolean deleteArticleStat(Integer articleId);
 
+    @Transactional(rollbackFor = Exception.class)
     Long batchUpdateLikes(List<ArticleStat> articleStats);
 
+    @Transactional(rollbackFor = Exception.class)
     Long batchUpdateComments(List<ArticleStat> articleStats);
 
+    @Transactional(rollbackFor = Exception.class)
     Long batchUpdateCollects(List<ArticleStat> articleStats);
 
+    @Transactional(rollbackFor = Exception.class)
     Long batchUpdateViews(List<ArticleStat> articleStats);
 
 }

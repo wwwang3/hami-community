@@ -19,7 +19,7 @@
 //import top.wang3.hami.core.component.RabbitMessagePublisher;
 //import top.wang3.hami.core.exception.HamiServiceException;
 //import top.wang3.hami.core.service.article.repository.ArticleRepository;
-//import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
+//import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 //import top.wang3.hami.core.service.interact.CollectService;
 //import top.wang3.hami.core.service.interact.repository.CollectRepository;
 //import top.wang3.hami.security.context.LoginUserContext;

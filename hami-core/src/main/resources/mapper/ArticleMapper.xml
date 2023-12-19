@@ -149,4 +149,16 @@
             #{id}
         </foreach>
     </select>
+
+    <select id="selectCateArticleCount" resultType="top.wang3.hami.common.model.ArticleCount">
+        select category_id as cate_id, count(*) as total from article
+        where category_id > 0 and deleted = 0
+        group by category_id
+    </select>
+
+    <select id="selectTotalArticleCount" resultType="java.lang.Long">
+        select count(*) as total
+        from article
+        where deleted = 0
+    </select>
 </mapper>

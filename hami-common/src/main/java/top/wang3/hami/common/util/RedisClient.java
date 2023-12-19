@@ -627,6 +627,18 @@ public class RedisClient {
         });
     }
 
+    public static <T> void hMSet(String key, Map<String, T> data, long timeout, TimeUnit timeUnit) {
+        Objects.requireNonNull(data);
+        final byte[] keyBytes = keyBytes(key);
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            connection.hashCommands()
+                    .hMSet(keyBytes, serializeMap(data));
+            connection.keyCommands()
+                    .pExpire(keyBytes, timeUnit.toMillis(timeout) + randomMills());
+            return null;
+        });
+    }
+
     /**
      * 使用Pipeline 批量写入Map, 不建议元素太多，推荐500个
      *

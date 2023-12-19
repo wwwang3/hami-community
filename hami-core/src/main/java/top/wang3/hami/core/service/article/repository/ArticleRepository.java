@@ -9,6 +9,7 @@ import top.wang3.hami.common.model.Article;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ArticleRepository extends IService<Article> {
 
@@ -35,6 +36,8 @@ public interface ArticleRepository extends IService<Article> {
     List<Integer> searchArticle(Page<Article> page, String keyword);
 
     Integer getArticleAuthor(Integer articleId);
+
+    Map<String, Long> getArticleCount();
 
     @Transactional(rollbackFor = Exception.class)
     boolean saveArticle(Article article);

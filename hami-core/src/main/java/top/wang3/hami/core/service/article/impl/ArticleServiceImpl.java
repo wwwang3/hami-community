@@ -10,6 +10,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
@@ -17,6 +18,7 @@ import top.wang3.hami.common.dto.article.*;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
@@ -116,18 +118,14 @@ public class ArticleServiceImpl implements ArticleService {
     @NonNull
     @Override
     public Long getArticleCount(Integer cateId) {
-        String redisKey = cateId == null ? RedisConstants.TOTAL_ARTICLE_COUNT : RedisConstants.CATE_ARTICLE_COUNT + cateId;
-        Long count = RedisClient.getCacheObject(redisKey);
-        if (count == null) {
-            synchronized (this) {
-                count = RedisClient.getCacheObject(redisKey);
-                if (count == null) {
-                    count = articleRepository.getArticleCount(cateId, null);
-                }
-                RedisClient.setCacheObject(redisKey, count, RandomUtils.randomLong(20, 30), TimeUnit.DAYS);
-            }
+        final String key = RedisConstants.ARTICLE_COUNT_KEY;
+        final String hKey = cateId == null ? RedisConstants.TOTAL_ARTICLE_COUNT :
+                RedisConstants.CATE_ARTICLE_COUNT + cateId;
+        Long count = RedisClient.getCacheMapValue(key, hKey);
+        if (count != null) {
+            return count;
         }
-        return count;
+        return loadArticleCount(key, hKey);
     }
 
     @NonNull
@@ -281,7 +279,19 @@ public class ArticleServiceImpl implements ArticleService {
         return infos;
     }
 
-
+    @Override
+    public Long loadArticleCount(String key, String hKey) {
+        Long count;
+        synchronized (key.intern()) {
+            count = RedisClient.getCacheMapValue(key, hKey);
+            if (count == null) {
+                Map<String, Long> countMap = articleRepository.getArticleCount();
+                count = countMap.get(hKey);
+                RedisClient.hMSet(key, countMap, TimeoutConstants.ARTICLE_COUNT_EXPIRE, TimeUnit.MILLISECONDS);
+            }
+        }
+        return count;
+    }
 
     private String loadArticleContent(Integer articleId) {
         String key = RedisConstants.ARTICLE_CONTENT + articleId;

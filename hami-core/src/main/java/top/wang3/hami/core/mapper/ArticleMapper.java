@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleCount;
 import top.wang3.hami.common.model.ArticleDO;
 
 import java.util.Collection;
@@ -45,4 +46,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
                 limit #{batchSize};
             """)
     List<Article> scanArticleContent(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
+
+    List<ArticleCount> selectCateArticleCount();
+
+    Long selectTotalArticleCount();
 }

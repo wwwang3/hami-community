@@ -1,0 +1,20 @@
+package top.wang3.hami.common.constant;
+
+import java.util.concurrent.TimeUnit;
+
+public class TimeoutConstants {
+
+    public static final long ARTICLE_COUNT_EXPIRE = TimeUnit.DAYS.toMillis(10);
+
+    public static final long ARTICLE_LIST_EXPIRE = TimeUnit.DAYS.toMillis(20);
+
+    public static final long USER_ARTICLE_LIST_EXPIRE = TimeUnit.HOURS.toHours(24);
+
+    public static final long ARTICLE_STAT_EXPIRE = TimeUnit.DAYS.toMillis(4);
+
+    public static final long USER_STAT_EXPIRE = TimeUnit.DAYS.toMillis(2);
+
+    public static final long USER_INFO_EXPIRE = TimeUnit.DAYS.toMillis(6);
+
+    public static final long ARTICLE_INFO_EXPIRE = TimeUnit.DAYS.toDays(8);
+}

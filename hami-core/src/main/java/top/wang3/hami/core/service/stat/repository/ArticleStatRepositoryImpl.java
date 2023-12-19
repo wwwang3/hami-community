@@ -1,12 +1,11 @@
-package top.wang3.hami.core.service.article.repository;
+package top.wang3.hami.core.service.stat.repository;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -43,16 +42,6 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     @Override
     public Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
         return getBaseMapper().selectArticleStatsByArticleIds(articleIds);
-    }
-
-    @Override
-    public UserStat getUserStatByUserId(int userId) {
-        return getBaseMapper().selectUserStat(userId);
-    }
-
-    @Override
-    public Map<Integer, UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        return getBaseMapper().selectUserStatsByUserIds(userIds);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -1,6 +1,7 @@
 package top.wang3.hami.common.dto.user;
 
 import lombok.Data;
+import top.wang3.hami.common.dto.stat.UserStatDTO;
 
 import java.util.Date;
 
@@ -55,7 +56,7 @@ public class UserDTO {
     /**
      * 用户数据
      */
-    private UserStat stat;
+    private UserStatDTO stat;
 
     /**
      * 是否关注

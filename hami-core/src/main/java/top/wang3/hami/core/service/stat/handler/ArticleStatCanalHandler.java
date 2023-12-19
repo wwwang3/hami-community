@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
+import top.wang3.hami.common.converter.StatConverter;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
@@ -26,7 +26,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
         //在文章数据表插入了一条数据
         //写入Redis
         String redisKey = RedisConstants.STAT_TYPE_ARTICLE + entity.getArticleId();
-        ArticleStatDTO dto = ArticleConverter.INSTANCE.toArticleStatDTO(entity);
+        ArticleStatDTO dto = StatConverter.INSTANCE.toArticleStatDTO(entity);
         RedisClient.setCacheObject(redisKey, dto, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
         log.debug("insert to Redis success: {}", entity);
     }
@@ -35,7 +35,7 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     public void processUpdate(ArticleStat before, ArticleStat after) {
         //更新
         String redisKey = RedisConstants.STAT_TYPE_ARTICLE + after.getArticleId();
-        RedisClient.setCacheObject(redisKey, ArticleConverter.INSTANCE.toArticleStatDTO(after));
+        RedisClient.setCacheObject(redisKey, StatConverter.INSTANCE.toArticleStatDTO(after));
         log.debug("update to Redis success: before: {}, after: {}", before, after);
     }
 

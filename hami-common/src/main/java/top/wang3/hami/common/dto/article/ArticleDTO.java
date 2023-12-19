@@ -2,6 +2,7 @@ package top.wang3.hami.common.dto.article;
 
 
 import lombok.Data;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.user.UserDTO;
 
 import java.util.List;

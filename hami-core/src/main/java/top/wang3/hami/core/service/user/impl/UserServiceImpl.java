@@ -5,15 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
+import top.wang3.hami.common.dto.stat.UserStatDTO;
 import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
-import top.wang3.hami.common.dto.user.UserStat;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.service.interact.CollectService;
@@ -56,11 +56,17 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("参数异常");
         }
         String redisKey = RedisConstants.USER_INFO + userId;
-        User user = RedisClient.getCacheObject(redisKey);
-        if (user == null) {
-            user = loadUserCache(redisKey, userId);
-        } else if (user.getUserId() == null) {
-            return null;
+        long timeout = TimeoutConstants.USER_INFO_EXPIRE;
+        User user;
+        if (RedisClient.pExpire(redisKey, timeout)) {
+            user = RedisClient.getCacheObject(redisKey);
+        } else {
+            synchronized (redisKey.intern()) {
+                user = RedisClient.getCacheObject(redisKey);
+                if (user == null) {
+                    user = loadUserCache(redisKey, userId);
+                }
+            }
         }
         return user;
     }
@@ -94,8 +100,8 @@ public class UserServiceImpl implements UserService {
         User user = this.getUserById(userId);
         UserDTO dto = UserConverter.INSTANCE.toUserDTO(user);
         if (builder == null || builder.stat) {
-            UserStat stat = countService.getUserStatById(userId);
-            dto.setStat(stat);
+            UserStatDTO userStat = countService.getUserStatDTOById(userId);
+            dto.setStat(userStat);
         }
         if (builder == null || builder.follow) {
             buildFollowState(dto);
@@ -106,7 +112,7 @@ public class UserServiceImpl implements UserService {
     private void buildUserStat(List<UserDTO> userDTOS) {
         //用户数据
         List<Integer> userIds = ListMapperHandler.listTo(userDTOS, UserDTO::getUserId);
-        Map<Integer, UserStat> stats = countService.getUserStatByUserIds(userIds);
+        Map<Integer, UserStatDTO> stats = countService.getUserStatDTOByUserIds(userIds);
         ListMapperHandler.doAssemble(userDTOS, UserDTO::getUserId, stats, UserDTO::setStat);
     }
 
@@ -131,7 +137,7 @@ public class UserServiceImpl implements UserService {
 
     private void buildLoginUserStat(LoginProfile loginProfile, int loginUserId) {
         //用户数据
-        UserStat stat = countService.getUserStatById(loginUserId);
+        UserStatDTO stat = countService.getUserStatDTOById(loginUserId);
         loginProfile.setStat(stat);
         //获取登录用户点赞的文章数
         Integer likes = likeService.getUserLikeCount(loginUserId, LikeType.ARTICLE).intValue();
@@ -140,26 +146,25 @@ public class UserServiceImpl implements UserService {
         Integer collects = collectService.getUserCollectCount(loginUserId).intValue();
         loginProfile.setCollects(collects);
         //获取登录用户关注的用户数
-        Integer followings = followService.getUserFollowingCount(loginUserId).intValue();
-        Integer followers = followService.getUserFollowerCount(loginUserId).intValue();
-        loginProfile.setFollowers(followers);
-        loginProfile.setFollowings(followings);
+//        Integer followings = followService.getUserFollowingCount(loginUserId).intValue();
+//        Integer followers = followService.getUserFollowerCount(loginUserId).intValue();
+        loginProfile.setFollowers(stat.getTotalFollowers());
+        loginProfile.setFollowings(stat.getTotalFollowings());
     }
 
     private User loadUserCache(String redisKey, Integer userId) {
-        User user;
-        synchronized (this) {
-            user = RedisClient.getCacheObject(redisKey);
-            if (user == null) {
-                user = userRepository.getUserById(userId);
-                if (user == null) {
-                    RedisClient.cacheEmptyObject(redisKey, new User());
-                } else {
-                    RedisClient.setCacheObject(redisKey, user, RandomUtils.randomLong(10, 20), TimeUnit.DAYS);
-                }
-            }
-            return user;
+        User user = userRepository.getUserById(userId);
+        if (user == null) {
+            RedisClient.cacheEmptyObject(redisKey, new User());
+        } else {
+            RedisClient.setCacheObject(
+                    redisKey,
+                    user,
+                    TimeoutConstants.USER_INFO_EXPIRE,
+                    TimeUnit.MILLISECONDS
+            );
         }
+        return user;
     }
 
     @Override

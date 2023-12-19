@@ -3,17 +3,13 @@ package top.wang3.hami.core.service.article.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import top.wang3.hami.common.converter.ArticleConverter;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.converter.StatConverter;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.core.service.article.ArticleStatService;
-import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
+import top.wang3.hami.core.service.stat.ArticleStatService;
+import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +23,7 @@ public class ArticleStatServiceImpl implements ArticleStatService {
     @Override
     public ArticleStatDTO getArticleStatByArticleId(int articleId) {
         ArticleStat stat = articleStatRepository.getArticleStatById(articleId);
-        return ArticleConverter.INSTANCE.toArticleStatDTO(stat);
+        return StatConverter.INSTANCE.toArticleStatDTO(stat);
     }
 
     @Override
@@ -35,23 +31,6 @@ public class ArticleStatServiceImpl implements ArticleStatService {
         return articleStatRepository.getArticleStatByIds(articleIds);
     }
 
-    @NonNull
-    @Override
-    public UserStat getUserStatByUserId(Integer userId) {
-        UserStat stat = articleStatRepository.getUserStatByUserId(userId);
-        return stat == null ? new UserStat(userId) : stat;
-    }
-
-    @NonNull
-    @Override
-    public Map<Integer, UserStat> listUserStat(List<Integer> userIds) {
-        if (CollectionUtils.isEmpty(userIds)) return Collections.emptyMap();
-        Map<Integer, UserStat> statMap = articleStatRepository.getUserStatByUserIds(userIds);
-        for (Integer userId : userIds) {
-            statMap.computeIfAbsent(userId, UserStat::new);
-        }
-        return statMap;
-    }
 
     @Override
     public boolean increaseViews(int articleId, int count) {

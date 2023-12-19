@@ -5,19 +5,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.converter.StatConverter;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
+import top.wang3.hami.common.dto.stat.UserStatDTO;
+import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
-import top.wang3.hami.core.service.article.ArticleStatService;
 import top.wang3.hami.core.service.interact.FollowService;
+import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
+import top.wang3.hami.core.service.stat.UserStatService;
+import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,16 +28,48 @@ import java.util.concurrent.TimeUnit;
 public class CachedCountService implements CountService {
 
     private final ArticleStatService articleStatService;
+    private final UserStatService userStatService;
+    private final UserStatRepository userStatRepository;
     private final FollowService followService;
 
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
-        String redisKey = RedisConstants.STAT_TYPE_ARTICLE + articleId;
-        ArticleStatDTO stat = RedisClient.getCacheObject(redisKey);
-        if (stat != null) {
-            return stat;
+        final String redisKey = RedisConstants.STAT_TYPE_ARTICLE + articleId;
+        long timeout = TimeoutConstants.ARTICLE_STAT_EXPIRE;
+        ArticleStatDTO dto;
+        if (RedisClient.pExpire(redisKey, timeout)) {
+            dto = RedisClient.getCacheObject(redisKey);
+        } else {
+            synchronized (redisKey.intern()) {
+                dto = RedisClient.getCacheObject(redisKey);
+                if (dto == null) {
+                    dto = loadArticleStatCache(redisKey, articleId);
+                }
+            }
         }
-        return loadArticleStatCache(redisKey, articleId);
+        return dto;
+    }
+
+    @Override
+    public UserStatDTO getUserStatDTOById(Integer userId) {
+        final String key = RedisConstants.STAT_TYPE_USER + userId;
+        long timeout = TimeoutConstants.USER_STAT_EXPIRE;
+        UserStatDTO dto;
+        if (RedisClient.pExpire(key, timeout)) {
+            Map<String, Integer> map = RedisClient.getCacheMap(key);
+            dto = StatConverter.INSTANCE.mapToUserStatDTO(map);
+        } else {
+            synchronized (key.intern()) {
+                Map<String, Integer> map = RedisClient.getCacheMap(key);
+                if (map.isEmpty()) {
+                    // 仍然为空
+                    dto = loadUserStatDTO(key, userId);
+                } else {
+                    dto = StatConverter.INSTANCE.mapToUserStatDTO(map);
+                }
+            }
+        }
+        return dto;
     }
 
     @CostLog
@@ -46,25 +80,14 @@ public class CachedCountService implements CountService {
     }
 
     @Override
-    public UserStat getUserStatById(Integer userId) {
-        String redisKey = RedisConstants.STAT_TYPE_USER + userId;
-        UserStat stat = RedisClient.getCacheObject(redisKey);
-        if (stat == null) {
-            synchronized (this) {
-                stat = RedisClient.getCacheObject(redisKey);
-                if (stat == null) {
-                    stat = this.loadUserStatCache(userId);
-                    RedisClient.setCacheObject(redisKey, stat, RandomUtils.randomLong(10, 100), TimeUnit.HOURS);
-                }
-            }
+    public Map<Integer, UserStatDTO> getUserStatDTOByUserIds(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) return Collections.emptyMap();
+        Map<Integer, UserStatDTO> map = new HashMap<>();
+        for (Integer userId : userIds) {
+            // 一个个获取算了
+            map.put(userId, getUserStatDTOById(userId));
         }
-        return stat;
-    }
-
-    @CostLog
-    @Override
-    public Map<Integer, UserStat> getUserStatByUserIds(List<Integer> userIds) {
-        return RedisClient.getMultiCacheObjectToMap(RedisConstants.STAT_TYPE_USER, userIds, this::loadUserStatCaches);
+        return map;
     }
 
     @Override
@@ -75,19 +98,18 @@ public class CachedCountService implements CountService {
     }
 
     private ArticleStatDTO loadArticleStatCache(String redisKey, Integer articleId) {
-        synchronized (this) {
-            ArticleStatDTO stat = RedisClient.getCacheObject(redisKey);
-            if (stat != null) {
-                return stat;
-            }
-            stat = articleStatService.getArticleStatByArticleId(articleId);
-            if (stat == null) {
-                RedisClient.cacheEmptyObject(redisKey, new ArticleStatDTO(articleId));
-            } else {
-                RedisClient.setCacheObject(redisKey, stat, RandomUtils.randomLong(10, 20), TimeUnit.HOURS);
-            }
-            return stat;
+        ArticleStatDTO stat = articleStatService.getArticleStatByArticleId(articleId);
+        if (stat == null) {
+            RedisClient.cacheEmptyObject(redisKey, new ArticleStatDTO(articleId));
+        } else {
+            RedisClient.setCacheObject(
+                    redisKey,
+                    stat,
+                    TimeoutConstants.ARTICLE_STAT_EXPIRE,
+                    TimeUnit.MILLISECONDS
+            );
         }
+        return stat;
     }
 
     @Override
@@ -100,31 +122,15 @@ public class CachedCountService implements CountService {
         return dtoMap;
     }
 
-    private UserStat loadUserStatCache(Integer userId) {
-        UserStat stat = articleStatService.getUserStatByUserId(userId);
-        Long followingCount = followService.getUserFollowingCount(userId);
-        Long followerCount = followService.getUserFollowerCount(userId);
-        stat.setTotalFollowings(followingCount.intValue());
-        stat.setTotalFollowers(followerCount.intValue());
-        return stat;
-    }
-
     @Override
-    public Map<Integer, UserStat> loadUserStatCaches(List<Integer> ids) {
-        Map<Integer, UserStat> statMap = articleStatService.listUserStat(ids);
-        //关注和粉丝数据
-        final Map<Integer, Long> followings = followService.listUserFollowingCount(ids);
-        final Map<Integer, Long> followers = followService.listUserFollowerCount(ids);
-        statMap.forEach((userId, item) -> {
-            Integer followingCount = followings.getOrDefault(userId, 0L).intValue();
-            Integer followerCount = followers.getOrDefault(userId, 0L).intValue();
-            item.setTotalFollowings(followingCount);
-            item.setTotalFollowers(followerCount);
-        });
-        Map<String, UserStat> cache = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_USER + id, statMap::get);
-        RedisClient.cacheMultiObject(cache, 10, 50, TimeUnit.HOURS);
-        return statMap;
+    public UserStatDTO loadUserStatDTO(String key, Integer userId) {
+        UserStat stat = userStatRepository.selectUserStatById(userId);
+        RedisClient.hMSet(
+                key,
+                StatConverter.INSTANCE.userStatToMap(stat),
+                TimeoutConstants.USER_STAT_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+        return StatConverter.INSTANCE.toUserStatDTO(stat);
     }
-
-
 }

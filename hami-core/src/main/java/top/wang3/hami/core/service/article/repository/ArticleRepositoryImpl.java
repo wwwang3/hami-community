@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleCount;
 import top.wang3.hami.common.model.ArticleDO;
 import top.wang3.hami.common.model.ArticleTag;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -22,6 +24,7 @@ import top.wang3.hami.core.mapper.ArticleMapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -130,6 +133,17 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public Integer getArticleAuthor(Integer articleId) {
         return getBaseMapper().getArticleAuthor(articleId);
+    }
+
+    @Override
+    public Map<String, Long> getArticleCount() {
+        List<ArticleCount> cateArticleCount = getBaseMapper().selectCateArticleCount();
+        Long totalArticleCount = getBaseMapper().selectTotalArticleCount();
+        Map<String, Long> map = ListMapperHandler.listToMap(cateArticleCount, item -> {
+            return RedisConstants.CATE_ARTICLE_COUNT + item.getCateId();
+        }, ArticleCount::getTotal);
+        map.put(RedisConstants.TOTAL_ARTICLE_COUNT, totalArticleCount);
+        return map;
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -10,8 +10,8 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.core.service.article.ArticleStatService;
-import top.wang3.hami.core.service.article.repository.ArticleStatRepository;
+import top.wang3.hami.core.service.stat.ArticleStatService;
+import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.security.model.Result;
 
 import java.util.List;

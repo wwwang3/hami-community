@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.dto.stat;
 
 
 import lombok.AllArgsConstructor;

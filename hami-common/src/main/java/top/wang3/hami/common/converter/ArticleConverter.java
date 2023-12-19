@@ -44,9 +44,6 @@ public interface ArticleConverter {
     @Mapping(target = "categoryName", source = "name")
     CategoryDTO toCategoryDTO(Category category);
 
-    ArticleStatDTO toArticleStatDTO(ArticleStat stat);
-    List<ArticleStatDTO> toArticleStatDTOS(List<ArticleStat> stat);
-
 
     default ArticleDTO toArticleDTO(ArticleInfo articleInfo) {
         if (articleInfo == null) return null;

@@ -6,10 +6,14 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import top.wang3.hami.common.model.ArticleCount;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @SpringBootTest
@@ -21,7 +25,13 @@ class HamiCommunityApplicationTest {
     @Autowired
     ArticleStatMapper articleStatMapper;
 
-//    @Test
+    @Autowired
+    ArticleMapper articleMapper;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    //    @Test
     void test01() {
         MybatisBatch.Method<ArticleStat> method = new MybatisBatch.Method<>(ArticleStatMapper.class);
         ArrayList<ArticleStat> stats = new ArrayList<>();
@@ -49,5 +59,12 @@ class HamiCommunityApplicationTest {
             stats.add(stat);
         }
         articleStatMapper.batchUpdateLikes(stats);
+    }
+
+    @Test
+    void test03() {
+        List<ArticleCount> counts =
+                articleMapper.selectCateArticleCount();
+        System.out.println(counts);
     }
 }

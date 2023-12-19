@@ -2,10 +2,10 @@ package top.wang3.hami.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.*;
-import top.wang3.hami.common.dto.article.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserStat;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
+import top.wang3.hami.common.model.UserStat;
 
 import java.util.List;
 import java.util.Map;
