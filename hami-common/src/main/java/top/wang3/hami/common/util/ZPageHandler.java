@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -52,6 +53,8 @@ public class ZPageHandler {
         BiFunction<Long, Long, Collection<T>> source;
 
         BiFunction<Long, Long, Collection<T>> loader;
+
+        Supplier<List<ZSetOperations.TypedTuple<T>>> valueLoader;
 
 
         public Collection<T> query() {

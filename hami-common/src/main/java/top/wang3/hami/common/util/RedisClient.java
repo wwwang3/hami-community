@@ -155,7 +155,7 @@ public class RedisClient {
      * @return true=设置成功；false=设置失败
      */
     public static boolean expire(final String key, final long timeout, final TimeUnit unit) {
-        return Boolean.TRUE.equals(redisTemplate.expire(key, timeout, unit));
+        return Boolean.TRUE.equals(redisTemplate.expire(key, timeout + randomMills(), unit));
     }
 
     /**

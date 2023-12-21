@@ -1,4 +1,4 @@
-package top.wang3.hami.core.config;
+package top.wang3.hami.core.cache;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
