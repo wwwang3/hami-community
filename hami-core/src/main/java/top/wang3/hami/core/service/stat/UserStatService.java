@@ -13,4 +13,8 @@ public interface UserStatService {
     List<UserStatDTO> getUserStatDTOByIds(List<Integer> userIds);
 
     List<UserStat> getUserStatByIds(List<Integer> useIds);
+
+    boolean insertUserStat(Integer userId);
+
+    boolean deleteUserStat(Integer userId);
 }

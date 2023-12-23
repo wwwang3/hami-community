@@ -60,6 +60,12 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     }
 
     @Override
+    public boolean saveNotifyMsg(NotifyMsg msg) {
+        int rows = getBaseMapper().saveNotifyMsg(msg);
+        return rows >= 1;
+    }
+
+    @Override
     public int updateNotifyState(Integer receiver, List<Integer> types) {
         UpdateWrapper<NotifyMsg> wrapper = Wrappers.update(new NotifyMsg())
                 .eq("receiver", receiver)

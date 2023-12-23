@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.stat;
 
+import org.springframework.lang.NonNull;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
 
@@ -20,6 +21,15 @@ public interface CountService {
     Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds);
 
     Map<Integer, UserStatDTO> getUserStatDTOByUserIds(List<Integer> userIds);
+
+    @NonNull
+    Integer getUserArticleCount(Integer userId);
+
+    @NonNull
+    Integer getUserFollowingCount(Integer userId);
+
+    @NonNull
+    Integer getUserFollowerCount(Integer userId);
 
     Map<String, Integer> getUserDailyDataGrowing(Integer userId);
 

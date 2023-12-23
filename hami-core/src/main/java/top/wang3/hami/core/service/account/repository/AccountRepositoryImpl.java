@@ -14,11 +14,8 @@ public class AccountRepositoryImpl extends ServiceImpl<AccountMapper, Account>
 
     @Override
     public Account getAccountByEmailOrUsername(String account) {
-       return ChainWrappers.queryChain(getBaseMapper())
-               .eq("username", account)
-               .or()
-               .eq("email", account)
-               .one();
+       return getBaseMapper()
+               .selectAccountByUsernameOrEmail(account);
     }
 
     @Override

@@ -73,6 +73,17 @@ public class RedisCacheService implements CacheService {
         return false;
     }
 
+    @Override
+    public <T> void syncSet(String key, T data) {
+        syncSet(key, data, DEFAULT_EXPIRE);
+    }
+
+    @Override
+    public <T> void syncSet(String key, T data, long mills) {
+        lockTemplate.execute(key, () -> {
+            RedisClient.setCacheObject(key, data, mills, TimeUnit.MILLISECONDS);
+        });
+    }
 
     private <T> T syncGet(String key, Supplier<T> loader, long timeout, TimeUnit timeUnit) {
         // 应该替换为分布式锁

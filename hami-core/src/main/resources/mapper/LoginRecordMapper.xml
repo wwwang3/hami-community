@@ -8,9 +8,10 @@
     <result column="user_id" property="userId" />
     <result column="ip_info" property="ipInfo" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
     <result column="login_time" property="loginTime" />
+    <result column="deleted" property="deleted" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, ip_info, login_time
+    id, user_id, ip_info, login_time, deleted
   </sql>
 </mapper>

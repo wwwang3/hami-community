@@ -15,4 +15,7 @@ public interface CacheService {
 
     boolean expireAndIncrBy(String key, int delta, long timeout, TimeUnit timeUnit);
 
+    <T> void syncSet(String key, T data);
+    <T> void syncSet(String key, T data, long mills);
+
 }

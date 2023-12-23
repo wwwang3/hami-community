@@ -1,12 +1,10 @@
 package top.wang3.hami.core.service.notify.consumer;
 
 
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
@@ -27,14 +25,13 @@ import java.util.Objects;
 @RabbitListener(bindings = {
         @QueueBinding(
                 value = @Queue("hami-notify-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
                 key = {"do.follow", "do.like.*.*", "do.collect", "comment.*", "notify.read"}
         ),
         @QueueBinding(
                 value = @Queue("hami-notify-queue-2"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_USER_EXCHANGE, type = "topic"),
                 key = {"user.create"}
-
         )
 }, concurrency = "4")
 @Component
@@ -46,9 +43,6 @@ public class NotifyMsgConsumer implements InteractConsumer {
     private final NotifyMsgRepository notifyMsgRepository;
     public static final String welcome = "欢迎注册使用Hami";
 
-
-    @Resource
-    TransactionTemplate transactionTemplate;
 
     //点赞 评论 收藏 关注等通知消息
     @Override
@@ -190,10 +184,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
     }
 
     private void save(NotifyMsg msg) {
-        transactionTemplate.execute(status -> {
-            notifyMsgRepository.save(msg);
-            return null;
-        });
+        notifyMsgRepository.saveNotifyMsg(msg);
     }
 
     private boolean isSelf(Integer sender, Integer receiver) {

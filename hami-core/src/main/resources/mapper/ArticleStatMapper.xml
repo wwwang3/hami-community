@@ -75,14 +75,15 @@
         from article t1
                  join article_stat t2 on t1.id = t2.article_id
         where t1.category_id = #{categoryId}  and t1.deleted = 0 and t1.ctime > #{date}
-        order by t2.hot_rank desc, t2.article_id desc
+        order by t2.hot_rank desc
         limit 24;
     </select>
 
     <select id="selectHotArticles" resultType="top.wang3.hami.common.model.HotCounter">
         select article_id, hot_rank
         from article_stat
-        order by hot_rank desc, article_id desc
+        where ctime >= #{date}
+        order by hot_rank desc
         limit 54;
     </select>
 

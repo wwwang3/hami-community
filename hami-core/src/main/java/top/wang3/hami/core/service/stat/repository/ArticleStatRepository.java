@@ -17,7 +17,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date);
 
-    List<HotCounter> getOverallHotArticles();
+    List<HotCounter> getOverallHotArticles(long timestamp);
 
     ArticleStat getArticleStatById(Integer articleId);
 
@@ -47,7 +47,6 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     void updateViews(Collection<ArticleStat> stats);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean deleteArticleStat(Integer articleId);
 
     @Transactional(rollbackFor = Exception.class)

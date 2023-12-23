@@ -13,6 +13,8 @@ public interface UserStatRepository extends IService<UserStat> {
 
     boolean updateArticles(Integer userId, int delta);
 
+    Long batchUpdateUserStats(List<UserStat> userStats);
+
     boolean updateFollowings(Integer userId, int delta);
 
     boolean updateFollowers(Integer userId, int delta);

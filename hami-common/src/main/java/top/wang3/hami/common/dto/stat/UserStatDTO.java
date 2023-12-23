@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 public class UserStatDTO {
-
-
+    
     /**
      * 用户ID
      */

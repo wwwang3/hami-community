@@ -32,4 +32,16 @@ public class UserStatServiceImpl implements UserStatService {
     public List<UserStat> getUserStatByIds(List<Integer> useIds) {
         return userStatRepository.selectUserStatByIds(useIds);
     }
+
+    @Override
+    public boolean insertUserStat(Integer userId) {
+        UserStat stat = new UserStat();
+        stat.setUserId(userId);
+        return userStatRepository.save(stat);
+    }
+
+    @Override
+    public boolean deleteUserStat(Integer userId) {
+        return userStatRepository.removeById(userId);
+    }
 }

@@ -4,6 +4,7 @@ package top.wang3.hami.common.message.interact;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.RabbitMessage;
 import top.wang3.hami.common.model.Comment;
 
@@ -30,6 +31,11 @@ public class ReplyRabbitMessage implements RabbitMessage {
         this.replyTo = comment.getReplyTo();
         this.parentId = comment.getParentId();
         this.rootId = comment.getRootId();
+    }
+
+    @Override
+    public String getExchange() {
+        return RabbitConstants.HAMI_INTERACT_EXCHANGE;
     }
 
     public String getRoute() {

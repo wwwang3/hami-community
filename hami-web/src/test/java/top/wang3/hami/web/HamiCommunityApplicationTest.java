@@ -7,13 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import top.wang3.hami.common.model.ArticleCount;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.mapper.ArticleMapper;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 @SpringBootTest
@@ -50,21 +48,7 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
-    void test02() {
-        ArrayList<ArticleStat> stats = new ArrayList<>();
-        for (int i = 100000; i < 100002; i++) {
-            ArticleStat stat = new ArticleStat();
-            stat.setArticleId(i);
-            stat.setLikes(100);
-            stats.add(stat);
-        }
-        articleStatMapper.batchUpdateLikes(stats);
-    }
+    void generateUsers() {
 
-    @Test
-    void test03() {
-        List<ArticleCount> counts =
-                articleMapper.selectCateArticleCount();
-        System.out.println(counts);
     }
 }

@@ -99,9 +99,10 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
     @Override
     public int deleteLikeItem(Integer itemId, LikeType likeType) {
         var wrapper = Wrappers.update(new LikeItem())
+                .set("state", 0)
                 .eq("item_id", itemId)
                 .eq("item_type", likeType.getType());
-        return getBaseMapper().delete(wrapper);
+        return getBaseMapper().update(wrapper);
     }
 
     @Override

@@ -94,8 +94,9 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
     @Override
     public int deleteCollectItem(Integer articleId) {
         var wrapper = Wrappers.update(new ArticleCollect())
+                .set("state", 0)
                 .eq("article_id", articleId);
-        return getBaseMapper().delete(wrapper);
+        return getBaseMapper().update(wrapper);
     }
 
     @Override

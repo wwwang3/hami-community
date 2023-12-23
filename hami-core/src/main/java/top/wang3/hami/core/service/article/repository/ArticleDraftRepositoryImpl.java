@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleDraft;
@@ -23,7 +22,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
     public ArticleDraft getDraftById(Long draftId, Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("id", draftId)
-                .eq("user_id", userId) //当前登录用户的草稿
+                .eq("user_id", userId)
                 .one();
     }
 
@@ -36,14 +35,12 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
                 .list(page);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveDraft(ArticleDraft draft) {
         Assert.notNull(draft, "draft cannot be null");
         return super.save(draft);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateDraft(ArticleDraft draft) {
         Assert.notNull(draft, "draft cannot be null");
@@ -54,7 +51,6 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
         return super.update(draft, wrapper);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteDraftById(Long draftId, Integer userId) {
         return ChainWrappers.updateChain(getBaseMapper())
@@ -64,7 +60,6 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
                 .remove();
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteDraftByArticleId(Integer articleId, Integer userId) {
        return  ChainWrappers.updateChain(getBaseMapper())

@@ -128,12 +128,10 @@ public class CommentServiceImpl implements CommentService {
             //评论区拥有者可以删除
             return false;
         }
-        Integer deleteCount = transactionTemplate.execute(status -> {
-            return commentRepository.deleteComment(id);
-        });
-        if (deleteCount != null && deleteCount > 0) {
+        int deleteCount = commentRepository.deleteComment(id);
+        if (deleteCount > 0) {
             //评论删除消息
-            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleteCount);
+            var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleteCount, owner);
             rabbitMessagePublisher.publishMsg(message);
             return true;
         }
@@ -143,10 +141,8 @@ public class CommentServiceImpl implements CommentService {
     private Comment publishComment(CommentParam param, boolean reply) {
         Comment comment = buildComment(param, reply);
         //评论
-        Boolean success = transactionTemplate.execute(status -> {
-            return commentRepository.save(comment);
-        });
-        if (Boolean.FALSE.equals(success)) {
+        boolean success = commentRepository.save(comment);
+        if (!success) {
             return null;
         }
         RabbitMessage message;

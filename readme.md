@@ -178,3 +178,11 @@ xx.like.{user_id % 5}
 {article:list:}{cate_id}:zset
 {user:article:list}:zset
 ```
+
+### 文章数据
+
+文章数据服务接收点赞，评论，收藏，文章发布消息，增加异步写入MySQL，同时使用Canal同步MySQL数据到Redis
+
+### 用户数据
+
+接收文章，点赞，评论，收藏，关注等消息

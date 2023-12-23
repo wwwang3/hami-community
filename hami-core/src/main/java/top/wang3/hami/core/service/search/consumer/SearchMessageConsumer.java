@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.search.consumer;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
@@ -15,12 +16,12 @@ import java.util.List;
 
 @Component
 @RabbitListener(
+        id = "SearchMessageContainer",
         bindings = @QueueBinding(
-                value = @Queue(value = "hami-search-interact-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                value = @Queue(value = "hami-search-queue-1"),
+                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = ExchangeTypes.TOPIC),
                 key = {"search.hot"}
-        ),
-        concurrency = "4"
+        )
 )
 @Slf4j
 public class SearchMessageConsumer {
@@ -39,7 +40,6 @@ public class SearchMessageConsumer {
         Long result = RedisClient.executeScript(redisScript,
                 List.of(RedisConstants.HOT_SEARCH),
                 List.of(keyword));
-//        Double result = RedisClient.zIncr(Constants.HOT_SEARCH, keyword, 1);
         log.debug("result: {}", result);
     }
 }

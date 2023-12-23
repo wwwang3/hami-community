@@ -30,8 +30,8 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
-    public List<HotCounter> getOverallHotArticles() {
-        return getBaseMapper().selectHotArticles();
+    public List<HotCounter> getOverallHotArticles(long timestamp) {
+        return getBaseMapper().selectHotArticles(timestamp);
     }
 
     @Override

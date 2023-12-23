@@ -4,13 +4,17 @@ package top.wang3.hami.core.service.stat.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.message.interact.*;
+import top.wang3.hami.common.message.interact.CollectRabbitMessage;
+import top.wang3.hami.common.message.interact.InteractRabbitMessage;
+import top.wang3.hami.common.message.interact.LikeRabbitMessage;
 import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.security.model.Result;
 
@@ -26,54 +30,21 @@ import java.util.stream.Collectors;
  * 这里批量消费, 最少200ms写入一次, 最长10s写入一次
  */
 @Component
-@RabbitListeners(value = {
-        @RabbitListener(
-                id = "StatMessageContainer-1",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.STAT_QUEUE_1),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.like.1.*"
-                ),
-                containerFactory = "batchRabbitListenerContainerFactory"
-        ),
-        @RabbitListener(
-                id = "StatMessageContainer-2",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.STAT_QUEUE_2),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*"
-                ),
-                containerFactory = "batchRabbitListenerContainerFactory"
-        ),
-        @RabbitListener(
-                id = "StatMessageContainer-3",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.STAT_QUEUE_3),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "article.view"
-                ),
-                containerFactory = "batchRabbitListenerContainerFactory"
-        ),
-        @RabbitListener(
-                id = "StatMessageContainer-4",
-                bindings = {
-                        @QueueBinding(
-                                value = @Queue(value = RabbitConstants.STAT_QUEUE_4),
-                                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
-                                key = {"comment.*"}
-                        )
-                },
-                concurrency = "2"
-        )
-})
 @RequiredArgsConstructor
 @Slf4j
-public class StatConsumer {
+public class ArticleStatConsumer {
 
     private final ArticleStatRepository articleStatRepository;
-    private final ArticleStatService articleStatService;
 
-    @RabbitHandler
+    @RabbitListener(
+            id = "StatMessageContainer-1",
+            bindings = @QueueBinding(
+                    value = @Queue(RabbitConstants.STAT_QUEUE_1),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                    key = "*.like.1.*"
+            ),
+            containerFactory = "batchRabbitListenerContainerFactory"
+    )
     public void handleLikeMessage(List<LikeRabbitMessage> messages) {
         try {
             List<ArticleStat> articleStats = messages.stream()
@@ -81,17 +52,15 @@ public class StatConsumer {
                     .collect(Collectors.groupingBy(InteractRabbitMessage::getItemId))
                     .values()
                     .stream()
-                    .map(msgs -> {
-                        return msgs.stream().reduce(new ArticleStat(), (stat, msg) -> {
-                            stat.setArticleId(msg.getItemId());
-                            Integer likes = stat.getLikes();
-                            int origin = likes == null ? 0 : likes;
-                            stat.setLikes(origin + delta(msg.getState()));
-                            return stat;
-                        }, (v1, v2) -> {
-                            return v1;
-                        });
-                    })
+                    .map(msgs -> msgs.stream().reduce(new ArticleStat(), (stat, msg) -> {
+                                stat.setArticleId(msg.getItemId());
+                                Integer likes = stat.getLikes();
+                                int origin = likes == null ? 0 : likes;
+                                stat.setLikes(origin + delta(msg.getState()));
+                                return stat;
+                            },
+                            (v1, v2) -> v1
+                    ))
                     .filter(s -> !Objects.equals(0, s.getLikes()))
                     .toList();
             articleStatRepository.batchUpdateLikes(articleStats);
@@ -102,22 +71,15 @@ public class StatConsumer {
         }
     }
 
-    @RabbitHandler
-    public void handleCommentMessage(CommentRabbitMessage message) {
-        articleStatService.increaseComments(message.getArticleId(), 1);
-    }
-
-    @RabbitHandler
-    public void handleReplyMessage(ReplyRabbitMessage message) {
-        articleStatService.increaseComments(message.getArticleId(), 1);
-    }
-
-    @RabbitHandler
-    public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
-        articleStatService.decreaseComments(message.getArticleId(), message.getDeletedCount());
-    }
-
-    @RabbitHandler
+    @RabbitListener(
+            id = "StatMessageContainer-2",
+            bindings = @QueueBinding(
+                    value = @Queue(RabbitConstants.STAT_QUEUE_2),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                    key = "*.collect.*"
+            ),
+            containerFactory = "batchRabbitListenerContainerFactory"
+    )
     public void handleCollectMessage(List<CollectRabbitMessage> messages) {
         try {
             List<ArticleStat> articleStats = messages.stream()
@@ -132,9 +94,7 @@ public class StatConsumer {
                         return msgs.stream().reduce(articleStat, (stat, msg) -> {
                             stat.setCollects(stat.getCollects() + delta(msg.getState()));
                             return stat;
-                        }, (v1, v2) -> {
-                            return v1;
-                        });
+                        }, (v1, v2) -> v1);
                     })
                     .filter(s -> !Objects.equals(0, s.getCollects()))
                     .toList();
@@ -146,8 +106,29 @@ public class StatConsumer {
         }
     }
 
-    @RabbitHandler
-    public void handleArticleMessage(List<ArticleRabbitMessage> messages) {
+    @RabbitListener(
+            id = "StatMessageContainer-3",
+            bindings = @QueueBinding(
+                    value = @Queue(RabbitConstants.STAT_QUEUE_3),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                    key = {"article.view"}
+            )
+    )
+    public void handleArticleDeletedMessage(ArticleRabbitMessage message) {
+        // 文章删除消息
+        articleStatRepository.deleteArticleStat(message.getArticleId());
+    }
+
+    @RabbitListener(
+            id = "StatMessageContainer-4",
+            bindings = @QueueBinding(
+                    value = @Queue(RabbitConstants.STAT_QUEUE_3),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                    key = {"article.view"}
+            ),
+            containerFactory = "batchRabbitListenerContainerFactory"
+    )
+    public void handleArticleViewMessage(List<ArticleRabbitMessage> messages) {
         try {
             List<ArticleStat> articleStats = messages.stream()
                     .collect(Collectors.groupingBy(ArticleRabbitMessage::getArticleId))

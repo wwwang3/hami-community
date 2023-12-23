@@ -1,18 +1,13 @@
 package top.wang3.hami.core.config;
 
 
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConversionException;
-import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.lang.NonNull;
 
 @Configuration
 public class RabbitBrokerConfig {
@@ -38,23 +33,7 @@ public class RabbitBrokerConfig {
     @Bean("rabbitMQJacksonConverter")
     @Primary
     public Jackson2JsonMessageConverter rabbitMQMessageConverter() {
-        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
-        converter.setAlwaysConvertToInferredType(true);
-        return converter;
-    }
-
-    @Bean("canalMessageConverter")
-    public MessageConverter canalMessageConverter() {
-        //fix: 兼容Canal1.1.7改变, content-type设置为text/plain会被转化为String类型
-        return new SimpleMessageConverter() {
-
-            @Override
-            @NonNull
-            public Object fromMessage(@NonNull Message message) throws MessageConversionException {
-                return message.getBody();
-            }
-
-        };
+        return new Jackson2JsonMessageConverter();
     }
 
 }

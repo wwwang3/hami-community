@@ -50,7 +50,7 @@ public class HotArticleListInitializer implements HamiInitializer {
                 categoryService.getAllCategories();
         categories.forEach(category -> {
             String redisKey = RedisConstants.HOT_ARTICLE + category.getId();
-            long time = DateUtil.offsetDay(new Date(), 30).getTime();
+            long time = DateUtil.offsetMonth(new Date(), -3).getTime();
             List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId(), time);
             RedisClient.deleteObject(redisKey);
             if (articles != null && !articles.isEmpty()) {
@@ -62,7 +62,8 @@ public class HotArticleListInitializer implements HamiInitializer {
     public void refreshOverallHotArticles() {
         String redisKey = RedisConstants.OVERALL_HOT_ARTICLES;
         RedisClient.deleteObject(redisKey);
-        List<HotCounter> articles = articleStatRepository.getOverallHotArticles();
+        long time = DateUtil.offsetMonth(new Date(), -3).getTime();
+        List<HotCounter> articles = articleStatRepository.getOverallHotArticles(time);
         RedisClient.zAddAll(redisKey, convertToTuple(articles));
     }
 

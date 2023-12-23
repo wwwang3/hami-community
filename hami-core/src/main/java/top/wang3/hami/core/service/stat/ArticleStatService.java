@@ -12,17 +12,7 @@ public interface ArticleStatService {
 
     Map<Integer, ArticleStatDTO> listArticleStat(List<Integer> articleIds);
 
-    boolean increaseViews(int articleId, int count);
-
-    boolean increaseCollects(int articleId, int count);
-
     boolean increaseComments(int articleId, int count);
-
-    boolean increaseLikes(int articleId, int count);
-
-    boolean decreaseCollects(int articleId, int count);
-
-    boolean decreaseLikes(int articleId, int count);
 
     boolean decreaseComments(int articleId, int count);
 

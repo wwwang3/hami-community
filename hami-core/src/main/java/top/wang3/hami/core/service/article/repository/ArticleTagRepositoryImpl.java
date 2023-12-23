@@ -23,12 +23,6 @@ public class ArticleTagRepositoryImpl extends ServiceImpl<ArticleTagMapper, Arti
                 .list();
     }
 
-    @Override
-    public List<Integer> getArticleTagIdsById(Integer articleId) {
-        List<ArticleTag> tags = getArticleTagsById(articleId);
-        return ListMapperHandler.listTo(tags, ArticleTag::getTagId);
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveArticleTags(final Integer articleId, List<Integer> tagIds) {

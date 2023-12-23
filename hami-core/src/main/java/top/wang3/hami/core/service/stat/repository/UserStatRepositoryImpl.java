@@ -42,6 +42,11 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     }
 
     @Override
+    public Long batchUpdateUserStats(List<UserStat> userStats) {
+        return getBaseMapper().batchUpdateUserStat(userStats);
+    }
+
+    @Override
     public boolean updateFollowings(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .set("followings = followings + ({0})", delta)

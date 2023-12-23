@@ -385,7 +385,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static List<Integer> cacheArticleListToRedis(String key, long current, long size, List<Article> articles) {
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(articles, Article::getId, article -> article.getCtime().getTime());
-        RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(100, 200), TimeUnit.HOURS);
+        RedisClient.zSetAll(key, tuples, TimeoutConstants.USER_ARTICLE_LIST_EXPIRE, TimeUnit.HOURS);
         return ListMapperHandler.subList(articles, Article::getId, current, size);
     }
 }

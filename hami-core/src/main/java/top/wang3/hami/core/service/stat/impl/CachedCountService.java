@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.stat.impl;
 import cn.hutool.core.date.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
@@ -21,6 +22,7 @@ import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -81,6 +83,33 @@ public class CachedCountService implements CountService {
                 TimeUnit.MILLISECONDS
         );
         return ListMapperHandler.listToMap(dtos, UserStatDTO::getUserId);
+    }
+
+    @Override
+    @NonNull
+    public Integer getUserArticleCount(Integer userId) {
+        UserStatDTO dto = getUserStatDTOById(userId);
+        return Optional.ofNullable(dto)
+                .map(UserStatDTO::getTotalArticles)
+                .orElse(0);
+    }
+
+    @Override
+    @NonNull
+    public Integer getUserFollowingCount(Integer userId) {
+        UserStatDTO dto = getUserStatDTOById(userId);
+        return Optional.ofNullable(dto)
+                .map(UserStatDTO::getTotalFollowings)
+                .orElse(0);
+    }
+
+    @Override
+    @NonNull
+    public Integer getUserFollowerCount(Integer userId) {
+        UserStatDTO dto = getUserStatDTOById(userId);
+        return Optional.ofNullable(dto)
+                .map(UserStatDTO::getTotalFollowers)
+                .orElse(0);
     }
 
     @Override

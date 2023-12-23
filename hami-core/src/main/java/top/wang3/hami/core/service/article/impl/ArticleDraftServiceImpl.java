@@ -140,9 +140,13 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
                 }
             } else {
                 //更新
-                return handleUpdate(article, draft);
+                success1 = handleUpdate(article, draft);
             }
-            return false;
+            if (!success1) {
+                status.setRollbackOnly();
+                return false;
+            }
+            return true;
         });
         return Boolean.TRUE.equals(success) ? draft : null;
     }
@@ -187,11 +191,12 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         draft.setArticleId(article.getId());
         draft.setState(Constants.ONE);
         if (success1) {
-            //插入文章标签
+            // 插入文章标签
             articleTagService.saveTags(article.getId(), draft.getTagIds());
-            //初始化文章数据
+            // 初始化文章数据
             articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
             ArticleDraft newDraft = new ArticleDraft(draft.getId(), article.getId(), Constants.ONE, draft.getVersion());
+            // 更新文章草稿
             return articleDraftRepository.updateDraft(newDraft);
         }
         return false;

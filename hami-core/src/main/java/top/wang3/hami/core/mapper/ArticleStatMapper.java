@@ -30,7 +30,7 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
 
     List<HotCounter> selectHotArticlesByCateId(@Param("categoryId") Integer categoryId, @Param("date") long date);
 
-    List<HotCounter> selectHotArticles();
+    List<HotCounter> selectHotArticles(@Param("date") long date);
 
     @MapKey("articleId")
     Map<Integer, ArticleStatDTO> selectArticleStatsByArticleIds(@Param("articleIds") List<Integer> articleIds);

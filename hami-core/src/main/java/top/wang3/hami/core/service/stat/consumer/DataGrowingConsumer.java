@@ -25,11 +25,11 @@ import java.util.concurrent.TimeUnit;
                 @QueueBinding(
                         value = @Queue(value = "hami-data-growing-queue-1"),
                         exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
-                        key = {"*.follow.*", "*.collect.*", "comment.*", "*.like.*.*"}
+                        key = {"*.follow.*", "*.collect.*", "comment.*", "*.like.1.*"}
                 ),
                 @QueueBinding(
                         value = @Queue(value = "hami-data-growing-queue-2"),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
                         key = {"article.publish", "article.delete", "article.view"}
                 )
         },

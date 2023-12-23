@@ -17,12 +17,6 @@ public interface CommentRepository extends IService<Comment> {
 
     Reply listIndexReply(Integer articleId, Integer rootId);
 
-    boolean increaseLikes(Integer id);
-
-    boolean updateLikes(Integer id, int delta);
-
-    boolean decreaseLikes(Integer id);
-
     int deleteComment(Integer id);
 
     List<Comment> listCommentById(List<Integer> commentIds);

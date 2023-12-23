@@ -10,8 +10,6 @@ public interface ArticleTagRepository extends IService<ArticleTag> {
 
     List<ArticleTag> getArticleTagsById(Integer articleId);
 
-    List<Integer> getArticleTagIdsById(Integer articleId);
-
     boolean saveArticleTags(Integer articleId, List<Integer> tagIds);
 
     /**

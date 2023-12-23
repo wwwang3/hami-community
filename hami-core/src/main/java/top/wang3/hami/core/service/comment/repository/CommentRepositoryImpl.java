@@ -81,32 +81,6 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
     }
 
     @Override
-    public boolean increaseLikes(Integer id) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("likes = likes + 1")
-                .eq("id", id)
-                .update();
-    }
-
-    @Override
-    public boolean updateLikes(Integer id, int delta) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("likes = likes + ({0})", delta)
-                .eq("id", id)
-                .update();
-    }
-
-    @Override
-    public boolean decreaseLikes(Integer id) {
-        return ChainWrappers.updateChain(getBaseMapper())
-                .setSql("likes = likes - 1")
-                .eq("id", id)
-                .gt("likes", 0)
-                .update();
-    }
-
-
-    @Override
     public int deleteComment(Integer id) {
         UpdateWrapper<Comment> wrapper = Wrappers
                 .update(new Comment())

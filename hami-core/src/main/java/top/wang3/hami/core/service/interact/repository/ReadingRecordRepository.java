@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface ReadingRecordRepository extends IService<ReadingRecord> {
 
-    @Transactional(rollbackFor = Exception.class)
     boolean record(int userId, int articleId);
 
     boolean record(List<ReadingRecord> records);
