@@ -34,4 +34,10 @@
     </foreach>
   </select>
 
+  <insert id="batchInsertArticleTag">
+      insert into article_tag (article_id, tag_id) values
+      <foreach collection="items" separator="," item="item">
+          (#{item.articleId}, #{item.tagId})
+      </foreach>
+  </insert>
 </mapper>

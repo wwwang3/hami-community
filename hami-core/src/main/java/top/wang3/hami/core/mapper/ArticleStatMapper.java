@@ -39,4 +39,6 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
     Long batchUpdateComments(@Param("stats") List<ArticleStat> stats);
     Long batchUpdateCollects(@Param("stats") List<ArticleStat> stats);
     Long batchUpdateViews(@Param("stats") List<ArticleStat> stats);
+
+    Long batchInsertArticleStat(@Param("items") List<ArticleStat> items);
 }

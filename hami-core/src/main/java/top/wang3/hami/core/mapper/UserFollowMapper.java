@@ -15,4 +15,6 @@ public interface UserFollowMapper extends BaseMapper<UserFollow> {
     List<FollowCountItem> selectUserFollowingCount(@Param("userIds") List<Integer> userIds);
 
     List<FollowCountItem> selectUserFollowerCount(@Param("userIds") List<Integer> userIds);
+
+    Long batchInsertFollowItem(@Param("items") List<UserFollow> items);
 }

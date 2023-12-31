@@ -38,8 +38,11 @@ public class ArticleListHandler implements CanalEntryHandler<Article> {
         long ctime = entity.getCtime().getTime();
         final String key = RedisConstants.ARTICLE_LIST;
         long timeout = TimeoutConstants.ARTICLE_LIST_EXPIRE;
-        Long result = RedisClient.executeScript(insert_article_script, List.of(key),
-                List.of(id, ctime, timeout, ZPageHandler.DEFAULT_MAX_SIZE));
+        Long result = RedisClient.executeScript(
+                insert_article_script,
+                List.of(key),
+                List.of(id, ctime, timeout, ZPageHandler.DEFAULT_MAX_SIZE)
+        );
         if (result == null || result == 0) {
             articleService.loadArticleListCache(key, null, -1, -1);
         }

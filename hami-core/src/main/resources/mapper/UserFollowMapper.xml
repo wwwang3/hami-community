@@ -1,38 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="top.wang3.hami.core.mapper.UserFollowMapper">
-  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.UserFollow">
-    <!--@mbg.generated-->
-    <!--@Table user_follow-->
-    <id column="id" property="id" />
-    <result column="user_id" property="userId" />
-    <result column="following" property="following" />
-    <result column="state" property="state" />
-    <result column="ctime" property="ctime" />
-    <result column="mtime" property="mtime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, user_id, `following`, `state`, ctime, mtime
-  </sql>
+    <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.UserFollow">
+        <!--@mbg.generated-->
+        <!--@Table user_follow-->
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="following" property="following"/>
+        <result column="state" property="state"/>
+        <result column="ctime" property="ctime"/>
+        <result column="mtime" property="mtime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        user_id,
+        `following`,
+        `state`,
+        ctime,
+        mtime
+    </sql>
 
-  <select id="selectUserFollowingCount" resultType="top.wang3.hami.common.dto.interact.FollowCountItem">
-    select user_id, count(following) as count
-    from user_follow
-    where `state` = 1 and user_id in
-    <foreach collection="userIds" item="userId" open="(" separator="," close=")">
-      #{userId}
-    </foreach>
-    group by user_id;
-  </select>
+    <select id="selectUserFollowingCount" resultType="top.wang3.hami.common.dto.interact.FollowCountItem">
+        select user_id, count(following) as count
+        from user_follow
+        where `state` = 1
+          and user_id in
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        group by user_id;
+    </select>
 
-  <select id="selectUserFollowerCount" resultType="top.wang3.hami.common.dto.interact.FollowCountItem">
-    select following as user_id, count(user_id) as `count`
-    from user_follow
-    where `state` = 1 and following in
-    <foreach collection="userIds" item="userId" open="(" separator="," close=")">
-      #{userId}
-    </foreach>
-    group by following;
-  </select>
+    <select id="selectUserFollowerCount" resultType="top.wang3.hami.common.dto.interact.FollowCountItem">
+        select following as user_id, count(user_id) as `count`
+        from user_follow
+        where `state` = 1
+          and following in
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        group by following;
+    </select>
+
+    <insert id="batchInsertFollowItem">
+        insert into user_follow (user_id, following) values
+        <foreach collection="items" separator="," item="item">
+            (#{item.userId}, #{item.following})
+        </foreach>
+    </insert>
 </mapper>

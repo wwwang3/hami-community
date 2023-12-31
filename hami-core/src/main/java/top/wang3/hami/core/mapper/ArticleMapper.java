@@ -37,7 +37,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             """)
     List<Integer> scanArticleIds(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 
-    List<ArticleDO> scanArticles(@Param("ids") List<Integer> ids);
+    List<Article> scanArticles(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 
     @Select("""
                 select id, content from article

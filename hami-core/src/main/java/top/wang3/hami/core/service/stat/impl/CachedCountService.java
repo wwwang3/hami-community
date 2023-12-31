@@ -145,6 +145,16 @@ public class CachedCountService implements CountService {
     }
 
     @Override
+    public void loadUserStatCaches(List<Integer> userIds) {
+        List<UserStatDTO> dtos = userStatService.getUserStatDTOByIds(userIds);
+        Map<String, UserStatDTO> dtoMap = ListMapperHandler.listToMap(
+                dtos,
+                dto -> RedisConstants.STAT_TYPE_USER + dto.getUserId()
+        );
+        RedisClient.cacheMultiObject(dtoMap);
+    }
+
+    @Override
     public UserStatDTO loadUserStatDTO(String key, Integer userId) {
         return userStatService.getUserStatDTOById(userId);
     }

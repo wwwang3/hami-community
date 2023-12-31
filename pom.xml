@@ -14,12 +14,13 @@
     <name>hami-community</name>
     <description>Hami社区</description>
     <modules>
-        <module>hami-web</module>
+        <module>hami-api</module>
         <module>hami-common</module>
         <module>hami-core</module>
         <module>hami-security</module>
         <module>hami-mail</module>
         <module>hami-canal</module>
+        <module>hami-test</module>
     </modules>
     <properties>
         <java.version>17</java.version>

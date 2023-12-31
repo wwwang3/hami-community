@@ -33,4 +33,8 @@ public final class RandomUtils {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
+    public static int randomInt(int start, int end) {
+        return ThreadLocalRandom.current().nextInt(start, end + 1);
+    }
+
 }

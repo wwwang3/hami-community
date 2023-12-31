@@ -13,4 +13,6 @@ public interface ArticleTagMapper extends BaseMapper<ArticleTag> {
 
 
     List<ArticleTagDTO> getArticleTagByArticleIds(@Param("articleIds") List<Integer> articleIds);
+
+    Long batchInsertArticleTag(@Param("items") List<ArticleTag> items);
 }

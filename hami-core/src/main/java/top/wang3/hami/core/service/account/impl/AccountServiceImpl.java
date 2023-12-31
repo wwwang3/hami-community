@@ -173,10 +173,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = getAccountByEmailOrUsername(email);
         final String old = account.getPassword();
         final String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        Boolean updated = transactionTemplate.execute(status -> {
-            return accountRepository.updatePassword(email, old, encryptedPassword);
-        });
-        return Boolean.TRUE.equals(updated);
+        return accountRepository.updatePassword(email, old, encryptedPassword);
     }
 
 }

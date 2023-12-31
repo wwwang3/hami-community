@@ -139,15 +139,12 @@
 
     <select id="scanArticles" resultMap="ArticleDOMap">
         select
-        <include refid="ARTICLDO_FULL_COLUMN_LIST">
+        <include refid="Base_Column_List">
         </include>
-        from article t1
-                 left join article_tag t2 on t1.id = t2.article_id
-        where t1.deleted = 0
-          and t1.id in
-        <foreach collection="ids" open="(" separator="," close=")" item="id">
-            #{id}
-        </foreach>
+        from article
+        where id > #{lastId} and deleted = 0
+        order by id
+        limit #{batchSize}
     </select>
 
     <select id="selectCateArticleCount" resultType="top.wang3.hami.common.model.ArticleCount">

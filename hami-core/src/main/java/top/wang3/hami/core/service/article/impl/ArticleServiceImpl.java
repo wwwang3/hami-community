@@ -298,7 +298,7 @@ public class ArticleServiceImpl implements ArticleService {
         String content = RedisClient.getCacheObject(key);
         if (content == null || content.isEmpty()) {
             //文章内容不会为空
-            synchronized (this) {
+            synchronized (key.intern()) {
                 content = RedisClient.getCacheObject(key);
                 if (content == null || content.isEmpty()) {
                     content = articleRepository.getArticleContentById(articleId);

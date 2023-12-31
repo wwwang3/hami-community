@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
@@ -15,18 +16,17 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "hami.init", value = "enable", havingValue = "true")
 @Slf4j
 public class HamiInitializerExecutor implements ApplicationRunner {
 
     private List<HamiInitializer> initializers;
     private List<InitializerEnums> enabledInitializers;
-    private boolean enable;
 
     @Autowired
     public void setEnabledInitializers(HamiProperties hamiProperties) {
         enabledInitializers = hamiProperties
                 .getInit().getList();
-        enable = hamiProperties.getInit().isEnable();
     }
 
     @Autowired(required = false)
@@ -65,7 +65,7 @@ public class HamiInitializerExecutor implements ApplicationRunner {
     }
 
     private boolean canRun(HamiInitializer initializer) {
-        return initializer.alwaysExecute() || (enable && enabledInitializers.contains(initializer.getName()));
+        return initializer.alwaysExecute() || (enabledInitializers.contains(initializer.getName()));
     }
 
     void prettyPrint(StopWatch watch) {
