@@ -10,4 +10,6 @@ import java.util.List;
 @Mapper
 public interface UserStatMapper extends BaseMapper<UserStat> {
     Long batchUpdateUserStat(@Param("stats") List<UserStat> userStats);
+
+    Long batchInsertUserStat(@Param("stats") List<UserStat> stats);
 }

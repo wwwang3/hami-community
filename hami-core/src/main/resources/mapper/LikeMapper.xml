@@ -24,9 +24,9 @@
     </sql>
 
     <insert id="batchInsertLikeItem">
-        insert into tb_like (liker_id, item_id, item_type) values
+        insert into tb_like (liker_id, item_id, item_type, state) values
         <foreach collection="items" separator="," item="item">
-            (#{item.likerId}, #{item.itemId}, #{item.itemType})
+            (#{item.likerId}, #{item.itemId}, #{item.itemType}, #{item.state})
         </foreach>
     </insert>
 </mapper>

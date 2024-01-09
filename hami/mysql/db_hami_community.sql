@@ -17,6 +17,9 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP DATABASE IF EXISTS db_hami_community;
+CREATE DATABASE db_hami_community;
+use db_hami_community;
 -- ----------------------------
 -- Table structure for account
 -- ----------------------------
@@ -50,7 +53,7 @@ CREATE TABLE `article`  (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '文章id',
   `user_id` int NOT NULL COMMENT '作者id',
   `category_id` int NOT NULL COMMENT '分类id',
-  `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '文章标题',
+  `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章标题',
   `summary` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章简介',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章内容',
   `picture` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'https://static-oss.wang3.top/hami-images/64f3e6a6e5c79555236b492e.jpg' COMMENT '文章封面',
@@ -77,7 +80,7 @@ CREATE TABLE `article_collect`  (
   `user_id` int NOT NULL COMMENT '用户ID',
   `article_id` int NOT NULL COMMENT '文章ID',
   `state` tinyint NOT NULL DEFAULT 0 COMMENT '状态',
-  `ctime` timestamp(3) NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `ctime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `mtime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_user_id_article_id`(`user_id` ASC, `article_id` ASC) USING BTREE,
@@ -108,9 +111,9 @@ CREATE TABLE `article_draft`  (
   `ctime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `mtime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `pk_article_draft`(`article_id` ASC) USING BTREE,
+  UNIQUE INDEX `uk_article_draft`(`article_id` ASC) USING BTREE,
   INDEX `idx_user_id_mtime`(`user_id` ASC, `state` ASC, `mtime` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '文章草稿表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '文章草稿表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of article_draft
@@ -186,26 +189,6 @@ INSERT INTO `category` VALUES (10005, '开发工具', 'tool', 0, '2023-03-10 12:
 INSERT INTO `category` VALUES (10006, '代码人生', 'coding', 0, '2023-03-10 12:06:49.000', '2023-03-21 20:12:36.000');
 INSERT INTO `category` VALUES (10007, '阅读', 'reading', 0, '2023-03-10 12:07:11.000', '2023-03-21 20:12:39.000');
 
--- ----------------------------
--- Table structure for collection
--- ----------------------------
-DROP TABLE IF EXISTS `collection`;
-CREATE TABLE `collection`  (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `title` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '收藏夹标题',
-  `user_id` int NOT NULL COMMENT '用户ID',
-  `public` tinyint NOT NULL COMMENT '是否公开 0-私有 1-公开',
-  `default` tinyint NOT NULL DEFAULT 0 COMMENT '默认收藏夹 0-否 1是',
-  `article_count` int NOT NULL DEFAULT 0 COMMENT '文章数量',
-  `deleted` tinyint NOT NULL DEFAULT 0,
-  `ctime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `mtime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '收藏夹' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of collection
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for comment
@@ -295,7 +278,7 @@ CREATE TABLE `notify_msg`  (
   `ctime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `mtime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '最后更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `uk_notify_msg`(`item_id` ASC, `sender` ASC, `receiver` ASC, `type` ASC) USING BTREE,
+  UNIQUE INDEX `uk_notify_msg`(`item_id` ASC, `sender` ASC, `receiver` ASC, `type` ASC) USING BTREE,
   INDEX `idx_receiver_type`(`receiver` ASC, `type` ASC, `ctime` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '消息通知列表' ROW_FORMAT = DYNAMIC;
 
@@ -313,7 +296,7 @@ CREATE TABLE `reading_record`  (
   `article_id` int NOT NULL COMMENT '文章ID',
   `reading_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '阅读时间',
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_reading_time`(`user_id` ASC, `reading_time` DESC) USING BTREE,
+  UNIQUE INDEX `idx_reading_time`(`user_id` ASC, `reading_time` DESC) USING BTREE,
   INDEX `uk_user_article_id`(`user_id` ASC, `article_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '阅读记录表' ROW_FORMAT = DYNAMIC;
 
@@ -409,12 +392,12 @@ CREATE TABLE `tb_like`  (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `liker_id` int NOT NULL COMMENT '点赞人ID',
   `item_id` int NOT NULL COMMENT '实体ID -文章/评论',
-  `item_type` tinyint NULL DEFAULT 1 COMMENT '实体类型 1-文章 2-评论',
+  `item_type` tinyint NOT NULL DEFAULT 1 COMMENT '实体类型 1-文章 2-评论',
   `state` tinyint NOT NULL DEFAULT 0 COMMENT '状态 0-未点赞 1-点赞',
   `ctime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `mtime` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uk_comment_liker`(`liker_id` ASC, `item_id` ASC, `item_type` ASC) USING BTREE,
+  UNIQUE INDEX `uk_like_item`(`liker_id` ASC, `item_id` ASC, `item_type` ASC) USING BTREE,
   INDEX `idx_liker_id_type`(`liker_id` ASC, `item_type` ASC, `state` ASC) USING BTREE,
   INDEX `idx_mtime`(`liker_id` ASC, `item_type` ASC, `state` ASC, `mtime` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '点赞通用表' ROW_FORMAT = DYNAMIC;

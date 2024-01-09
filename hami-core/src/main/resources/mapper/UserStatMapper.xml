@@ -71,4 +71,11 @@
       #{item.userId}
     </foreach>
   </update>
+
+  <insert id="batchInsertUserStat">
+    insert into user_stat (user_id, total_articles) values
+    <foreach collection="stats" separator="," item="item">
+      (#{item.userId}, #{item.totalArticles})
+    </foreach>
+  </insert>
 </mapper>

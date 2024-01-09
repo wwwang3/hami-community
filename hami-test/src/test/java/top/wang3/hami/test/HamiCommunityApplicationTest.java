@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.*;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -49,8 +51,22 @@ class HamiCommunityApplicationTest {
     @Autowired
     UserFollowMapper userFollowMapper;
 
+    @Autowired
+    JdbcClient jdbcClient;
+
+    @Autowired
+    UserStatMapper userStatMapper;
+
+    int MIN_ARTICLE_ID = 1;
+
+    int MAX_ARTICLE_ID = 2000000;
+
+    int MIN_USER_ID = 1;
+
+    int MAX_USER_ID = 200000;
 
     @Test
+    @Disabled
     void test01() {
         System.out.println(sqlSessionFactory);
         System.out.println(articleMapper);
@@ -83,6 +99,22 @@ class HamiCommunityApplicationTest {
 
     @Test
     @Disabled
+    void genUserStat() {
+        log.info("start to gen user-stat");
+        List<UserStat> stats = jdbcClient
+                .sql("select user_id as userId, count(*) as totalArticles from article group by user_id")
+                .query(UserStat.class)
+                .stream()
+                .toList();
+        List<List<UserStat>> lists = ListMapperHandler.split(stats, 1000);
+        for (List<UserStat> list : lists) {
+            userStatMapper.batchInsertUserStat(list);
+        }
+        log.info("finish to gen user-stat");
+    }
+
+    @Test
+    @Disabled
     void generateArticleTag() {
         log.info("start to gen article-tag");
         // 生成article_tag表数据
@@ -100,7 +132,6 @@ class HamiCommunityApplicationTest {
                         items.addAll(articleTags);
                     }, ArrayList::addAll);
             articleTagMapper.batchInsertArticleTag(tags);
-            log.info("insert article-tat success");
         }
         log.info("finish to gen article-tag");
     }
@@ -108,13 +139,11 @@ class HamiCommunityApplicationTest {
     @Test
     @Disabled
     void genArticleCollect() {
-        int min = 1;
-        int max = 1000000;
         log.info("start to gen article-collect");
-        ArrayList<ArticleCollect> items = new ArrayList<>(1024);
-        for (int i = min; i <= max; i++) {
-            int size = RandomUtils.randomInt(1, 20);
-            List<Integer> articleIds = genRandomId(min, max, size);
+        ArrayList<ArticleCollect> items = new ArrayList<>(1600);
+        for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
+            int size = RandomUtils.randomInt(1, 10);
+            List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
             final int userId = i;
             List<ArticleCollect> articleCollects = ListMapperHandler.listTo(
                     articleIds,
@@ -122,15 +151,16 @@ class HamiCommunityApplicationTest {
                         ArticleCollect item = new ArticleCollect();
                         item.setArticleId(id);
                         item.setUserId(userId);
+                        item.setState(Constants.ONE);
                         return item;
                     },
                     false
             );
             items.addAll(articleCollects);
-            if (items.size() >= 1000) {
+            if (items.size() >= 1500) {
                 articleCollectMapper.batchInsertArticleCollect(items);
                 items = null;
-                items = new ArrayList<>(1024);
+                items = new ArrayList<>(1600);
             }
         }
         if (!items.isEmpty()) {
@@ -142,13 +172,11 @@ class HamiCommunityApplicationTest {
     @Test
     @Disabled
     void genArticleLikeItem() {
-        int min = 1;
-        int max = 1000000;
         log.info("start to gen article-like-item");
-        ArrayList<LikeItem> items = new ArrayList<>(1024);
-        for (int i = min; i <= max; i++) {
-            int size = RandomUtils.randomInt(1, 10);
-            List<Integer> articleIds = genRandomId(min, max, size);
+        ArrayList<LikeItem> items = new ArrayList<>(1600);
+        for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
+            int size = RandomUtils.randomInt(1, 20);
+            List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
             final int userId = i;
             List<LikeItem> likeItems = ListMapperHandler.listTo(
                     articleIds,
@@ -157,15 +185,16 @@ class HamiCommunityApplicationTest {
                         item.setLikerId(userId);
                         item.setItemId(id);
                         item.setItemType(LikeType.ARTICLE.getType());
+                        item.setState(Constants.ONE);
                         return item;
                     },
                     false
             );
             items.addAll(likeItems);
-            if (items.size() >= 1000) {
+            if (items.size() >= 1500) {
                 likeMapper.batchInsertLikeItem(items);
                 items = null;
-                items = new ArrayList<>(1024);
+                items = new ArrayList<>(1600);
             }
         }
         if (!items.isEmpty()) {
@@ -177,29 +206,28 @@ class HamiCommunityApplicationTest {
     @Test
     @Disabled
     void genUserFollowItem() {
-        int min = 1;
-        int max = 1000000;
         log.info("start to gen user-follow-item");
-        ArrayList<UserFollow> items = new ArrayList<>(1024);
-        for (int i = min; i <= max; i++) {
+        ArrayList<UserFollow> items = new ArrayList<>(1600);
+        for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 10);
             final int userId = i;
-            List<Integer> followings = genRandomId(userId, min, max, size);
+            List<Integer> followings = genRandomId(userId, MIN_USER_ID, MAX_USER_ID, size);
             List<UserFollow> follows = ListMapperHandler.listTo(
                     followings,
                     id -> {
                         UserFollow follow = new UserFollow();
                         follow.setUserId(userId);
                         follow.setFollowing(id);
+                        follow.setState(Constants.ONE);
                         return follow;
                     },
                     false
             );
             items.addAll(follows);
-            if (items.size() >= 1000) {
+            if (items.size() >= 1500) {
                 userFollowMapper.batchInsertFollowItem(items);
                 items = null;
-                items = new ArrayList<>(1024);
+                items = new ArrayList<>(1600);
             }
         }
         if (!items.isEmpty()) {
