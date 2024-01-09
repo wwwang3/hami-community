@@ -10,9 +10,9 @@ import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.interact.CollectService;
 
 
-@CanalRabbitHandler(value = "article_collect", container = "canal-interact-container-2")
-@Component
 @Slf4j
+@Component
+@CanalRabbitHandler(value = "article_collect", container = "canal-interact-container-2")
 public class CollectCountHandler extends AbstractInteractCountHandler<ArticleCollect> {
 
     private final CollectService collectService;

@@ -55,15 +55,30 @@ public class CanalRabbitHandlerAnnotationBeanPostProcessor
         String containerId = canalRabbitHandler.container();
         String tableName = canalRabbitHandler.value();
         if (StringUtils.hasText(tableName)) {
+            // todo fix?: 一个表可能不止对应一个实体类
             canalEntryHandlerFactory.addTableClass(tableName, tableClass);
             canalEntryHandlerFactory.addHandlerEntityClass(handlerClass, tableClass);
             canalEntryHandlerFactory.addCanalEntryHandler(tableName, containerId, handler);
         }
     }
 
+
+    /**
+     * 获取CanalEntryHandler泛型接口的参数, 当直接实现时, 可以获取准确,
+     * 当继承抽象类, 抽象类直接实现接口时, 会获取超类的第一个泛型参数的类型, 可能后续实体转化时会失败
+     * @param handler CanalEntryHandler
+     * @return Class<T> 实体类型
+     * @param <T> 实体泛型
+     */
     private <T> Class<T> resolveTableClass(CanalEntryHandler<T> handler) {
         Class<? extends CanalEntryHandler> handlerClass = handler.getClass();
+        // 获取handler实现的接口类型
         Type[] interfacesTypes = handlerClass.getGenericInterfaces();
+        if (interfacesTypes.length == 0) {
+            // 为空获取其直接超类的泛型参数, 返回第一个
+            ParameterizedType type = (ParameterizedType) handlerClass.getGenericSuperclass();
+            return (Class<T>) type.getActualTypeArguments()[0];
+        }
         for (Type t : interfacesTypes) {
             Class clazz = (Class) ((ParameterizedType) t).getRawType();
             if (clazz.equals(CanalEntryHandler.class)) {
