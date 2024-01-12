@@ -1,4 +1,4 @@
-package top.wang3.hami.common.model;
+package top.wang3.hami.common.dto.user;
 
 
 import lombok.AllArgsConstructor;
@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HotCounter {
+public class AuthorRankDTO {
 
-    private Integer itemId;
+    private Integer userId;
     private Double hotIndex;
+    private UserDTO user;
 }

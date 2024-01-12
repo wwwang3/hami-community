@@ -4,6 +4,7 @@ package top.wang3.hami.core.service.stat.repository;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
+import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.core.mapper.UserStatMapper;
 
@@ -31,6 +32,11 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
                 .select(FIELDS)
                 .in("user_id", userIds)
                 .list();
+    }
+
+    @Override
+    public List<HotCounter> getAuthorRankList() {
+        return getBaseMapper().selectAuthorRankList();
     }
 
     @Override

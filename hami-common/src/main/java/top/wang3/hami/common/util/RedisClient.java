@@ -586,6 +586,20 @@ public class RedisClient {
                 .add(key, items);
     }
 
+    public static <T> void zSetAll(String key, Collection<? extends Tuple> items) {
+        final byte[] rawKey = keyBytes(key);
+        List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
+
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            connection.keyCommands()
+                    .del(rawKey);
+            for (List<? extends Tuple> list : lists) {
+                connection.zAdd(rawKey, new LinkedHashSet<>(list));
+            }
+            return null;
+        });
+    }
+
     public static <T> void zSetAll(String key, Collection<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
         final byte[] rawKey = keyBytes(key);
         List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);

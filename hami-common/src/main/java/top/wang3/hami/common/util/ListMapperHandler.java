@@ -20,10 +20,10 @@ import java.util.stream.Stream;
 public class ListMapperHandler {
 
     public static <T> List<List<T>> split(Collection<T> origin, int size) {
-        final List<List<T>> result = new ArrayList<>();
-        if (CollectionUtils.isEmpty(origin)) {
-            return result;
-        }
+        if (CollectionUtils.isEmpty(origin)) return new ArrayList<>(0);
+        int originSize = origin.size();
+        int newSize = (originSize / size + 1);
+        final List<List<T>> result = new ArrayList<>(newSize);
         ArrayList<T> subList = new ArrayList<>(size);
         for (T t : origin) {
             if (subList.size() >= size) {

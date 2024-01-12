@@ -1,81 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="top.wang3.hami.core.mapper.UserStatMapper">
-  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.UserStat">
-    <!--@mbg.generated-->
-    <!--@Table user_stat-->
-    <id column="user_id" property="userId" />
-    <result column="total_followings" property="totalFollowings" />
-    <result column="total_articles" property="totalArticles" />
-    <result column="total_views" property="totalViews" />
-    <result column="total_likes" property="totalLikes" />
-    <result column="total_comments" property="totalComments" />
-    <result column="total_collects" property="totalCollects" />
-    <result column="total_followers" property="totalFollowers" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    user_id, total_followings, total_articles, total_views, total_likes, total_comments, 
-    total_collects, total_followers
-  </sql>
+    <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.UserStat">
+        <!--@mbg.generated-->
+        <!--@Table user_stat-->
+        <id column="user_id" property="userId"/>
+        <result column="total_followings" property="totalFollowings"/>
+        <result column="total_articles" property="totalArticles"/>
+        <result column="total_views" property="totalViews"/>
+        <result column="total_likes" property="totalLikes"/>
+        <result column="total_comments" property="totalComments"/>
+        <result column="total_collects" property="totalCollects"/>
+        <result column="total_followers" property="totalFollowers"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        user_id,
+        total_followings,
+        total_articles,
+        total_views,
+        total_likes,
+        total_comments,
+        total_collects,
+        total_followers
+    </sql>
 
 
-  <update id="batchUpdateUserStat" parameterType="java.util.List">
-    update user_stat
-    <trim prefix="set" suffixOverrides=",">
-      <trim prefix="total_views = total_views + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalViews != null and item.totalViews != 0">
-            when user_id= #{item.userId} then #{item.totalViews}
-          </if>
+    <update id="batchUpdateUserStat" parameterType="java.util.List">
+        update user_stat
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="total_views = total_views + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalViews != null and item.totalViews != 0">
+                        when user_id = #{item.userId} then #{item.totalViews}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="total_likes = total_likes + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalLikes != null and item.totalLikes != 0">
+                        when user_id = #{item.userId} then #{item.totalLikes}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="total_comments = total_comments + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalComments != null != null and item.totalComments != 0">
+                        when user_id = #{item.userId} then #{item.totalComments}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="total_collects = total_collects + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalCollects != null and item.totalCollects != 0">
+                        when user_id = #{item.userId} then #{item.totalCollects}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="total_followings = likes + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalFollowings != null and item.totalFollowings != 0">
+                        when user_id = #{item.userId} then #{item.totalFollowings}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="total_followers = total_followers + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalFollowers != null and item.totalFollowers != 0">
+                        when user_id = #{item.userId} then #{item.totalFollowers}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where user_stat.user_id in
+        <foreach collection="stats" item="item" open="(" close=")" separator=",">
+            #{item.userId}
         </foreach>
-      </trim>
-      <trim prefix="total_likes = total_likes + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalLikes != null and item.totalLikes != 0">
-            when user_id= #{item.userId} then #{item.totalLikes}
-          </if>
-        </foreach>
-      </trim>
-      <trim prefix="total_comments = total_comments + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalComments != null != null and item.totalComments != 0">
-            when user_id= #{item.userId} then #{item.totalComments}
-          </if>
-        </foreach>
-      </trim>
-      <trim prefix="total_collects = total_collects + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalCollects != null and item.totalCollects != 0">
-            when user_id= #{item.userId} then #{item.totalCollects}
-          </if>
-        </foreach>
-      </trim>
-      <trim prefix="total_followings = likes + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalFollowings != null and item.totalFollowings != 0">
-            when user_id= #{item.userId} then #{item.totalFollowings}
-          </if>
-        </foreach>
-      </trim>
-      <trim prefix="total_followers = total_followers + case" suffix="end,">
-        <foreach collection="stats" item="item" index="index">
-          <if test="item.totalFollowers != null and item.totalFollowers != 0">
-            when user_id= #{item.userId} then #{item.totalFollowers}
-          </if>
-        </foreach>
-      </trim>
-    </trim>
-    where user_stat.user_id in
-    <foreach collection="stats" item="item" open="(" close=")" separator=",">
-      #{item.userId}
-    </foreach>
-  </update>
+    </update>
 
-  <insert id="batchInsertUserStat">
-    insert into user_stat (user_id, total_articles) values
-    <foreach collection="stats" separator="," item="item">
-      (#{item.userId}, #{item.totalArticles})
-    </foreach>
-  </insert>
+    <insert id="batchInsertUserStat">
+        insert into user_stat (user_id, total_articles) values
+        <foreach collection="stats" separator="," item="item">
+            (#{item.userId}, #{item.totalArticles})
+        </foreach>
+    </insert>
+
+    <select id="selectAuthorRankList" resultType="top.wang3.hami.common.model.HotCounter">
+        select user_id as item_id, hot_index
+        from user_stat
+        order by hot_index
+        limit 64;
+    </select>
 </mapper>
