@@ -15,7 +15,6 @@ import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.ArticleRankService;
 import top.wang3.hami.core.service.article.ArticleService;
-import top.wang3.hami.core.service.article.CategoryService;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,8 +24,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class ArticleRankServiceImpl implements ArticleRankService {
-
-    private final CategoryService categoryService;
 
     private final ArticleService articleService;
 

@@ -1,6 +1,5 @@
 package top.wang3.hami.core.service.stat.impl;
 
-import cn.hutool.core.date.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -9,6 +8,7 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
+import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
@@ -19,7 +19,6 @@ import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.stat.UserStatService;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -114,7 +113,7 @@ public class CachedCountService implements CountService {
 
     @Override
     public Map<String, Integer> getUserDailyDataGrowing(Integer userId) {
-        String date = DateUtil.formatDate(new Date());
+        String date = DateUtils.formatDate(System.currentTimeMillis());
         String key = RedisConstants.DATA_GROWING + date + ":" + userId;
         return RedisClient.hMGetAll(key);
     }

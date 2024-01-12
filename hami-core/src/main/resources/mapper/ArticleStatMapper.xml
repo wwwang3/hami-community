@@ -71,7 +71,7 @@
     </select>
 
     <select id="selectHotArticlesByCateId" resultType="top.wang3.hami.common.model.HotCounter">
-        select t2.article_id as article_id, t2.hot_rank as hot_rank
+        select t2.article_id as item_id, t2.hot_rank as hot_index
         from article t1
                  join article_stat t2 on t1.id = t2.article_id
         where t1.category_id = #{categoryId}
@@ -82,7 +82,7 @@
     </select>
 
     <select id="selectHotArticles" resultType="top.wang3.hami.common.model.HotCounter">
-        select article_id, hot_rank
+        select article_id as item_id, hot_rank as hot_index
         from article_stat
         where ctime >= #{date}
         order by hot_rank desc

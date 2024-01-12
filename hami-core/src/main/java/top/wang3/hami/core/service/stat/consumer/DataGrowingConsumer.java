@@ -11,6 +11,7 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.interact.*;
+import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
@@ -115,7 +116,7 @@ public class DataGrowingConsumer implements InteractConsumer {
     }
 
     private String buildKey(Integer userId) {
-        String date = DateUtil.formatDate(new Date());
+        String date = DateUtils.formatDate(System.currentTimeMillis());
         return RedisConstants.DATA_GROWING + date + ":" + userId;
     }
 

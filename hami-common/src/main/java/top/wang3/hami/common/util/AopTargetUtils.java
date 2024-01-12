@@ -12,8 +12,8 @@ public class AopTargetUtils {
     /**
      * 获取 目标对象
      * @param proxy 代理对象
-     * @return
-     * @throws Exception
+     * @return target 目标对象
+     * @throws Exception Exception
      */
     public static Object getTarget(Object proxy) throws Exception {
         if(!AopUtils.isAopProxy(proxy)) {
@@ -51,9 +51,7 @@ public class AopTargetUtils {
         Field advised = aopProxy.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
 
-        Object target = ((AdvisedSupport)advised.get(aopProxy)).getTargetSource().getTarget();
-
-        return target;
+        return ((AdvisedSupport) advised.get(aopProxy)).getTargetSource().getTarget();
     }
 
 }
