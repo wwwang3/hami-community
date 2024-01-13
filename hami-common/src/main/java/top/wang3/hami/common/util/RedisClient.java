@@ -38,7 +38,7 @@ public class RedisClient {
         return setNx(key, UUID.randomUUID().toString(), timeout, timeUnit);
     }
 
-    public static boolean unLock(String key) {
+    public static boolean simpleUnLock(String key) {
         return deleteObject(key);
     }
 
@@ -557,7 +557,7 @@ public class RedisClient {
         return new ArrayList<>(set);
     }
 
-    public static <T> Collection<ZSetOperations.TypedTuple<T>> zRevPageWithScore(String key, long current, long size) {
+    public static <T> Set<ZSetOperations.TypedTuple<T>> zRevPageWithScore(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
         long max = current * size - 1;
@@ -565,7 +565,7 @@ public class RedisClient {
                 .reverseRangeWithScores(key, min, max);
     }
 
-    public static <T> Collection<ZSetOperations.TypedTuple<T>> zPageWithScore(String key, long current, long size) {
+    public static <T> Set<ZSetOperations.TypedTuple<T>> zPageWithScore(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
         long max = current * size - 1;

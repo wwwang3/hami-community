@@ -4,6 +4,11 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeoutConstants {
 
+    /**
+     * 默认过期时间
+     */
+    public static final long DEFAULT_EXPIRE = TimeUnit.DAYS.toMillis(1);
+
     public static final long ARTICLE_COUNT_EXPIRE = TimeUnit.DAYS.toMillis(10);
 
     public static final long ARTICLE_LIST_EXPIRE = TimeUnit.DAYS.toMillis(20);

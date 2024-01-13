@@ -4,20 +4,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class RandomUtils {
 
-
-    public static int getRandom(int length) {
-        if (length < 1 || length > 9) throw new IllegalArgumentException("1 <= length <= 9");
-        int start = (int) Math.pow(10, length - 1);
-        int bound = (int) Math.pow(10, length);
-        return ThreadLocalRandom.current()
-                .nextInt(start, bound);
-    }
-
     public static String randomIntStr(int length) {
         if (length < 1) {
             length = 1;
         }
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             builder.append(randomInt(10));
         }

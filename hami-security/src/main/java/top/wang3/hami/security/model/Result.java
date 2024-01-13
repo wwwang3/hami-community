@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import top.wang3.hami.common.util.HamiFactory;
+import top.wang3.hami.common.HamiFactory;
 
 import java.util.Objects;
 import java.util.Optional;

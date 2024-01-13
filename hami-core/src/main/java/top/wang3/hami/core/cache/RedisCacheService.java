@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.support.NullValue;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.lock.LockTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;

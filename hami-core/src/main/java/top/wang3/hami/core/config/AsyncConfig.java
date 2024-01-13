@@ -24,8 +24,8 @@ public class AsyncConfig {
         taskExecutor.setQueueCapacity(1024);
         taskExecutor.setKeepAliveSeconds(60);
         taskExecutor.setPrestartAllCoreThreads(true);
-        taskExecutor.initialize();
         taskExecutor.setRejectedExecutionHandler(new TtlThreadPoolTaskExecutor.NewThreadPolicy(handler));
+        taskExecutor.initialize();
         return taskExecutor;
     }
 

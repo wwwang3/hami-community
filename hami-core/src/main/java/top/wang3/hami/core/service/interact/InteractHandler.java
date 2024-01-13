@@ -52,7 +52,7 @@ public class InteractHandler {
                 // 加载成功
                 result = execute(interact, timeout);
             } finally {
-                RedisClient.unLock(simpleKey);
+                RedisClient.simpleUnLock(simpleKey);
             }
         }
         if (result == 1) {

@@ -4,21 +4,27 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ZSetOperations;
+import top.wang3.hami.common.HamiFactory;
+import top.wang3.hami.common.lock.LockTemplate;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+
+/**
+ * Redis zset分页工具类
+ * zset保存的元素数量有限制, zcard获取的不是全部的元素数量, 所以需要提供获取元素总数的方法
+ * 通过传入MP的Page对象控制分页参数
+ */
 public class ZPageHandler {
 
     public static final int DEFAULT_MAX_SIZE = 8000;
 
-    public static <T> ZPage<T> of(String key) {
-        return new ZPageBuilder<T>()
-                .key(key);
-    }
 
     public static <T> ZPage<T> of(String key, Page<?> page) {
         return new ZPageBuilder<T>()
@@ -26,11 +32,13 @@ public class ZPageHandler {
                 .page(page);
     }
 
-    public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key) {
-        return new ZPageWithScoreBuilder<T>()
-                .key(key);
-    }
-
+    /**
+     * 同时获取member和score, List中的元素是TypedTupleTuple
+     * @param key zset对应的键
+     * @param page 分页对象
+     * @return ZPage对象
+     * @param <T> member泛型
+     */
     public static <T> ZPage<ZSetOperations.TypedTuple<T>> ofScore(String key, Page<?> page) {
         return new ZPageWithScoreBuilder<T>()
                 .page(page)
@@ -40,28 +48,29 @@ public class ZPageHandler {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public static abstract class ZPage<T> {
-        //zset对应的key
+        // zset对应的key
         String key;
-        //分页对象, 会设置total
+        // 分页对象, 会设置total
         Page<?> page;
-        //s=是否倒序查询
+        // 是否倒序查询
         boolean reversed = true;
         //总数查询方法
         Supplier<Long> countSupplier;
 
-        //超过zset存储的最大数量, 回源查询方法
-        BiFunction<Long, Long, Collection<T>> source;
+        // 超过zset存储的最大数量, 回源查询方法
+        BiFunction<Long, Long, List<T>> source;
 
-        BiFunction<Long, Long, Collection<T>> loader;
+        /**
+         * 加载缓存的方法
+         */
+        Supplier<List<T>> valueLoader;
 
-        Supplier<List<ZSetOperations.TypedTuple<T>>> valueLoader;
 
-
-        public Collection<T> query() {
+        public List<T> query() {
             Long count = countSupplier.get();
-            //count为0直接走人
+            // count为0直接走人
             if (count == null || count == 0) {
-                //empty
+                // empty
                 page.setTotal(0L);
                 return Collections.emptyList();
             }
@@ -69,44 +78,49 @@ public class ZPageHandler {
             long current = page.getCurrent();
             long size = page.getSize();
             if (current > page.getPages() ) {
-                //超过最大页数
+                // 超过最大页数
                 return Collections.emptyList();
             }
-            Collection<T> items = query(key, current, size);
+            List<T> items = doQuery(key, current, size);
             if (!items.isEmpty()) {
                 return items;
             }
-            //zset没有, 可能缓存过期或者超过了最大zset存储的数量
+            // zset没有, 可能缓存过期或者超过了最大zset存储的数量
             long max = RedisClient.zCard(key);
             if (current * size > max && max != 0) {
                 //超过最大元素数量
                 //回源DB
                 return source == null ? Collections.emptyList() : source.apply(current, size);
             }
-            //缓存过期
+            // 缓存过期, 自行在查询时排序, 因为不知道查询的是倒序还是逆序
             return load(current, size);
         }
 
-        private Collection<T> load(long current, long size) {
-            synchronized (key.intern()) {
-                Collection<T> items = handleQuery(key, current, size);
+        private List<T> load(long current, long size) {
+            LockTemplate lockTemplate = HamiFactory.getLockTemplate();
+            return lockTemplate.execute(key, () -> {
+                // 再查一次
+                List<T> items = doQuery(key, current, size);
                 if (!items.isEmpty()) {
-                    return items;
+                    // 有直接返回了
+                   return items;
                 }
-                return loader.apply(current, size);
-            }
+                items = valueLoader.get();
+                return ListMapperHandler.subList(items, Function.identity(), current, size);
+            });
         }
 
-        private Collection<T> query(String key, long current, long size) {
+
+        private List<T> doQuery(String key, long current, long size) {
             if (reversed) {
                 return handleRevQuery(key, current, size);
             }
             return handleQuery(key, current, size);
         }
 
-        public abstract Collection<T> handleQuery(String key, long current, long size);
+        public abstract List<T> handleQuery(String key, long current, long size);
 
-        public abstract Collection<T> handleRevQuery(String key, long current, long size);
+        public abstract List<T> handleRevQuery(String key, long current, long size);
 
 
         public ZPage<T> key(String key) {
@@ -130,13 +144,13 @@ public class ZPageHandler {
             return this;
         }
 
-        public ZPage<T> source(BiFunction<Long, Long, Collection<T>> func) {
+        public ZPage<T> source(BiFunction<Long, Long, List<T>> func) {
             this.source = func;
             return this;
         }
 
-        public ZPage<T> loader(BiFunction<Long, Long, Collection<T>> func) {
-            this.loader = func;
+        public ZPage<T> loader(Supplier<List<T>> valueLoader) {
+            this.valueLoader = valueLoader;
             return this;
         }
     }
@@ -144,12 +158,12 @@ public class ZPageHandler {
     public static class ZPageBuilder<T> extends ZPage<T> {
 
         @Override
-        public Collection<T> handleQuery(String key, long current, long size) {
+        public List<T> handleQuery(String key, long current, long size) {
             return RedisClient.zPage(key, current, size);
         }
 
         @Override
-        public Collection<T> handleRevQuery(String key, long current, long size) {
+        public List<T> handleRevQuery(String key, long current, long size) {
             return RedisClient.zRevPage(key, current, size);
         }
     }
@@ -157,13 +171,15 @@ public class ZPageHandler {
     public static class ZPageWithScoreBuilder<T> extends ZPage<ZSetOperations.TypedTuple<T>> {
 
         @Override
-        public Collection<ZSetOperations.TypedTuple<T>> handleQuery(String key, long current, long size) {
-            return RedisClient.zPageWithScore(key, current, size);
+        public List<ZSetOperations.TypedTuple<T>> handleQuery(String key, long current, long size) {
+            Set<ZSetOperations.TypedTuple<T>> items = RedisClient.zPageWithScore(key, current, size);
+            return new ArrayList<>(items);
         }
 
         @Override
-        public Collection<ZSetOperations.TypedTuple<T>> handleRevQuery(String key, long current, long size) {
-            return RedisClient.zRevPageWithScore(key, current, size);
+        public List<ZSetOperations.TypedTuple<T>> handleRevQuery(String key, long current, long size) {
+            Set<ZSetOperations.TypedTuple<T>> items = RedisClient.zRevPageWithScore(key, current, size);
+            return new ArrayList<>(items);
         }
     }
 }

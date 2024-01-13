@@ -1,16 +1,13 @@
 package top.wang3.hami.common.util;
 
-import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class InteractHandler {
 
@@ -39,6 +36,7 @@ public class InteractHandler {
         Runnable postAct = interact.postAct;
         if (success && postAct != null) {
             postAct.run();
+            return true;
         }
         return false;
     }
@@ -50,20 +48,18 @@ public class InteractHandler {
                 String simpleKey = "interact:" + interact.key;
                 try {
                     if (RedisClient.simpleLock(simpleKey, 3, TimeUnit.SECONDS)) {
-                        // 加锁成功
-                        Collection<Tuple> tuples = interact.loader.get();
-                        RedisClient.zSetAll(interact.key, tuples, interact.timeout, interact.timeUnit);
-                        // 执行lua脚本时会刷新缓存时间, 防止前面写入缓存失败
+                        // 加锁成功, 去加载缓存
+                        interact.loader.run();
                         yield executeScript(interact) == 1;
                     } else {
-                        // 加锁失败, 直接让用户尝试下一次
+                        // 加锁失败, 可能已经有请求在更新缓存或者其他原因, 直接让用户尝试下一次
                         yield false;
                     }
                 } finally {
-                    RedisClient.unLock(simpleKey);
+                    RedisClient.simpleUnLock(simpleKey);
                 }
             }
-            case 1 -> true;
+            case 1 -> true; // 操作成功
             case 2 -> throw new IllegalStateException("重复" + interact.opt);
             case 3 -> throw new IllegalStateException("当前用户未" + interact.opt + "过");
             default -> false;
@@ -71,6 +67,7 @@ public class InteractHandler {
     }
 
     private <T> int executeScript(InteractBuilder<T> interact) {
+        // 执行lua脚本时会刷新缓存时间, 防止前面写入缓存失败
         List<String> args = List.of(
                 String.valueOf(interact.timeUnit.toMillis(interact.timeout)),
                 String.valueOf(interact.member),
@@ -99,7 +96,7 @@ public class InteractHandler {
 
         Consumer<T> preCheck = i -> {};
 
-        Supplier<Collection<Tuple>> loader;
+        Runnable loader;
         Runnable postAct;
 
         public InteractBuilder<T> ofAction(String key, T member) {
@@ -128,7 +125,7 @@ public class InteractHandler {
             return this;
         }
 
-        public InteractBuilder<T> loader(Supplier<Collection<Tuple>> loader) {
+        public InteractBuilder<T> loader(Runnable loader) {
             this.loader = loader;
             return this;
         }

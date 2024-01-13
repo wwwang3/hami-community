@@ -1,4 +1,4 @@
-package top.wang3.hami.core.lock;
+package top.wang3.hami.common.lock;
 
 import java.util.concurrent.Callable;
 
