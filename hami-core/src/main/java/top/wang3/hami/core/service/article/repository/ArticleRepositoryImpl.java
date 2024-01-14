@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -146,21 +145,18 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return map;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean saveArticle(Article article) {
         Assert.notNull(article, "article can not be null");
         return super.save(article);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateArticle(Article article) {
         Assert.notNull(article, "article can not be null");
         return super.updateById(article);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean deleteArticle(Integer articleId, Integer userId) {
         return ChainWrappers.updateChain(getBaseMapper())

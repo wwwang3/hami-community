@@ -66,8 +66,10 @@ public final class RedisConstants {
     public static final String TOTAL_ARTICLE_COUNT = "total";
 
     public static final String CATE_ARTICLE_COUNT = "cate:";
-    public static final String OVERALL_HOT_ARTICLES = "rank:article:overall";
-    public static final String HOT_ARTICLE = "rank:article:";
+
+    public static final String TOTAL_HOT_ARTICLE = "rank:article:overall";
+
+    public static final String CATE_HOT_ARTICLE = "rank:article:";
 
     public static final String AUTHOR_RANKING = "rank:author";
 

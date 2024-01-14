@@ -1,23 +1,23 @@
 package top.wang3.hami.core.cache;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.support.NullValue;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class RedisCacheService implements CacheService {
 
     public static final long DEFAULT_EXPIRE = TimeUnit.DAYS.toMillis(1);
@@ -26,8 +26,9 @@ public class RedisCacheService implements CacheService {
 
     public static final Object EMPTY_OBJECT = NullValue.INSTANCE;
 
-
     private final LockTemplate lockTemplate;
+
+    private final ThreadPoolTaskExecutor executor;
 
     @Override
     public <T> T get(String key, Supplier<T> loader) {
@@ -71,12 +72,67 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
+    public <T, R> List<R> multiGetById(final String keyPrefix, Collection<T> ids, Function<List<T>, List<R>> loader, long timeout, TimeUnit timeUnit) {
+        // 批量获取缓存数据
+        // keys, 不能去重, 不然位置对不上
+        List<String> keys = ListMapperHandler.listTo(ids, id -> keyPrefix + id, false);
+        // data, 缓存过期时对应的key为空
+        // 返回的是ArrayList
+        List<R> dataList = RedisClient.getMultiCacheObject(keys);
+        // 为空的Id
+        ArrayList<T> nullIds = new ArrayList<>();
+        // 结果
+        ArrayList<R> results = new ArrayList<>(ids.size());
+        ListMapperHandler.forEach(ids, (id, index) -> {
+            R value = dataList.get(index);
+            if (value == null) {
+                nullIds.add(id);
+            } else {
+                // 可能缓存了空对象
+                results.add(resolveValue(value));
+            }
+        });
+        if (!nullIds.isEmpty()) {
+            List<R> applied = loader.apply(nullIds);
+            results.addAll(applied);
+            // 异步写入缓存
+            asyncSetCache(keyPrefix, nullIds, applied, timeout, timeUnit);
+        }
+        return results;
+    }
+
+    @Override
     public boolean expireAndIncrBy(String key, int delta, long timeout, TimeUnit timeUnit) {
         if (RedisClient.expire(key, timeout, timeUnit)) {
             RedisClient.incrBy(key, delta);
             return true;
         }
         return false;
+    }
+
+    @Override
+    public  <T, R> void asyncSetCache(final String keyPrefix, List<T> ids, List<R> applied,
+                                      long timeout, TimeUnit timeUnit) {
+        // 每个ID提交一个task?
+        // 异步写入缓存
+        executor.submitCompletable(() -> {
+            ListMapperHandler.forEach(applied, (item, index) -> {
+                String key = keyPrefix + ids.get(index);
+                // 刷新缓存
+                refreshCache(key, item, timeUnit.toMillis(timeout));
+            });
+        }).whenComplete((rs, th) -> {
+            if (th != null) {
+                log.error(
+                        "async refresh cache failed, keyPrefix: {}, ids: {}, error_msg: {}",
+                        keyPrefix,
+                        ids,
+                        th.getMessage()
+                );
+            } else {
+                log.info("async refresh cache success, keyPrefix: {}", keyPrefix);
+            }
+        });
     }
 
     @Override
@@ -88,7 +144,7 @@ public class RedisCacheService implements CacheService {
     public <T> void refreshCache(String key, T data, long mills) {
         lockTemplate.execute(
                 key,
-                () -> RedisClient.setCacheObject(key, data, mills, TimeUnit.MILLISECONDS)
+                () -> setCache(key, data, mills)
         );
     }
 
@@ -121,11 +177,7 @@ public class RedisCacheService implements CacheService {
 
     private <T> T loadCache(String key, Supplier<T> loader, long timeout, TimeUnit timeUnit) {
         T data = loader.get();
-        if (data == null) {
-            RedisClient.setCacheObject(key, EMPTY_OBJECT, EMPTY_OBJECT_EXPIRE, TimeUnit.MILLISECONDS);
-        } else {
-            RedisClient.setCacheObject(key, data, timeout, timeUnit);
-        }
+        setCache(key, data, timeUnit.toMillis(timeout));
         return data;
     }
 
@@ -135,6 +187,15 @@ public class RedisCacheService implements CacheService {
         Map<String, T> hash = loader.get();
         RedisClient.hMSet(key, hash, timeout, timeUnit);
         return hash.get(hKey);
+    }
+
+
+    private <T> void setCache(String key, T data, long mills) {
+        if (data == null) {
+            RedisClient.setCacheObject(key, EMPTY_OBJECT, EMPTY_OBJECT_EXPIRE, TimeUnit.MILLISECONDS);
+        } else {
+            RedisClient.setCacheObject(key, data, mills, TimeUnit.MILLISECONDS);
+        }
     }
 
     private <T> T resolveValue(T value) {

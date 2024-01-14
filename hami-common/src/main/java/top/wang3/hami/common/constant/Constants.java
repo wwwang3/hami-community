@@ -25,9 +25,6 @@ public final class Constants {
 
     public static final String CaffeineCacheManager = "caffeineCacheManager";
 
-    public static final String RedisCacheManager = "redisCacheManager";
-
-    public static final String REDIS_CACHE_NAME = "CACHE_REDIS";
     public static final String CAFFEINE_CACHE_NAME = "CACHE_LOCAL";
 
     public static final String REQ_ID = "reqId";

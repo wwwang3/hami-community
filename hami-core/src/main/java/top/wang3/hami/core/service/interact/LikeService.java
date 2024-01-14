@@ -16,7 +16,7 @@ public interface LikeService {
 
     Long getUserLikeCount(Integer userId, LikeType likeType);
 
-    Collection<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId);
+    List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId);
 
     boolean hasLiked(Integer userId, Integer itemId, LikeType likeType);
 

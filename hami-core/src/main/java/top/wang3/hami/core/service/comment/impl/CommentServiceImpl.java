@@ -15,7 +15,6 @@ import top.wang3.hami.common.dto.comment.CommentPageParam;
 import top.wang3.hami.common.dto.comment.CommentParam;
 import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.dto.interact.LikeType;
-import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.message.RabbitMessage;
 import top.wang3.hami.common.message.interact.CommentDeletedRabbitMessage;
 import top.wang3.hami.common.message.interact.CommentRabbitMessage;
@@ -24,6 +23,7 @@ import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.vo.comment.CommentVo;
 import top.wang3.hami.common.vo.comment.ReplyVo;
+import top.wang3.hami.common.vo.user.UserVo;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
@@ -60,19 +60,20 @@ public class CommentServiceImpl implements CommentService {
         Integer articleId = commentPageParam.getArticleId();
         Assert.isTrue(articleId != null && articleId > 0, "invalid article_id");
         Integer sort = commentPageParam.getSort();
-        //获取文章评论
+        // 获取文章评论
         List<Comment> comments = commentRepository.listComment(page, articleId, sort);
-        List<CommentVo> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
-        //获取五条回复
-        buildIndexReply(dtos);
-        //用户信息
-        buildUserInfo(dtos);
-        //是否点赞评论
-        buildHasLiked(dtos);
+        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        // 获取五条回复
+        buildIndexReply(vos);
+        // 用户信息
+        List<Integer> userIds = getUserId(vos);
+        buildUserInfo(userIds, vos);
+        // 是否点赞评论
+        buildHasLiked(vos);
         return PageData.<CommentVo>builder()
                 .pageNum(page.getCurrent())
                 .total(page.getTotal())
-                .data(dtos)
+                .data(vos)
                 .build();
     }
 
@@ -86,15 +87,17 @@ public class CommentServiceImpl implements CommentService {
             return PageData.empty();
         }
         Page<Comment> page = commentPageParam.toPage();
-//        page.setSearchCount(false);
         List<Comment> comments = commentRepository.listReply(page, articleId, rootId);
-        List<CommentVo> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
-        buildUserInfo(dtos);
-        buildHasLiked(dtos);
+        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        List<Integer> userIds = getUserId(vos);
+        // 用户信息
+        buildUserInfo(userIds, vos);
+        // 是否点赞
+        buildHasLiked(vos);
         return PageData.<CommentVo>builder()
                 .pageNum(page.getCurrent())
                 .total(page.getTotal())
-                .data(dtos)
+                .data(vos)
                 .build();
     }
 
@@ -109,32 +112,32 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment publishComment(CommentParam param) {
-        //发表评论
+        // 发表评论
         //todo 敏感词过滤
         return publishComment(param, false);
     }
 
     @Override
     public Comment publishReply(CommentParam param) {
-        //回复
+        // 回复
         return publishComment(param, true);
     }
 
     @Override
     public boolean deleteComment(Integer id) {
-        //删除评论
+        // 删除评论
         Comment comment = commentRepository.getById(id);
         Integer articleId = comment.getArticleId();
         Integer owner = articleRepository.getArticleAuthor(articleId);
         int userId = LoginUserContext.getLoginUserId();
         if (userId != owner || userId != comment.getUserId()) {
-            //自己发表的可以删除
-            //评论区拥有者可以删除
+            // 自己发表的可以删除
+            // 评论区拥有者可以删除
             return false;
         }
         int deleteCount = commentRepository.deleteComment(id);
         if (deleteCount > 0) {
-            //评论删除消息
+            // 评论删除消息
             var message = new CommentDeletedRabbitMessage(comment.getArticleId(), deleteCount, owner);
             rabbitMessagePublisher.publishMsg(message);
             return true;
@@ -144,7 +147,7 @@ public class CommentServiceImpl implements CommentService {
 
     private Comment publishComment(CommentParam param, boolean reply) {
         Comment comment = buildComment(param, reply);
-        //评论
+        // 评论
         boolean success = commentRepository.save(comment);
         if (!success) {
             return null;
@@ -176,11 +179,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Comment buildReply(Comment comment, CommentParam param) {
-        //回复, parentId和rootId必须都大于0
-        //check rootId;
-        //check parentId;
-        //一级评论 rootId和parentId都为0
-        //二级评论 rootId = parentId != 0
+        // 回复, parentId和rootId必须都大于0
+        // check rootId;
+        // check parentId;
+        // 一级评论 rootId和parentId都为0
+        // 二级评论 rootId = parentId != 0
         Integer rootId = param.getRootId();
         Integer parentId = param.getParentId();
         Assert.isTrue(rootId != null && rootId != 0, "rootId can not be null or zero");
@@ -190,71 +193,69 @@ public class CommentServiceImpl implements CommentService {
             throw new HamiServiceException("参数错误");
         } else if (Objects.equals(rootId, parentId) &&
                 parentComment.getRootId() != 0) {
-            //二级评论 回复的是根评论
-            //根评论的rootId应该为0
+            // 二级评论 回复的是根评论
+            // 根评论的rootId应该为0
             throw new HamiServiceException("参数错误");
         } else if (parentComment.getRootId() != 0 &&
                 !Objects.equals(parentComment.getRootId(), rootId)) {
-            //三级以上的评论, 必须在同一个根评论下
+            // 三级以上的评论, 必须在同一个根评论下
             throw new HamiServiceException("参数错误");
         }
         comment.setRootId(rootId);
         comment.setParentId(parentId);
-        //回复的是父评论的userId
+        // 回复的是父评论的userId
         comment.setReplyTo(parentComment.getUserId());
         return comment;
     }
 
-    private void buildIndexReply(List<CommentVo> dtos) {
-        dtos.forEach(dto -> {
-            ReplyVo reply = this.listIndexReply(dto.getArticleId(), dto.getId());
-            dto.setReply(reply);
+    private void buildIndexReply(List<CommentVo> vos) {
+        vos.forEach(vo -> {
+            ReplyVo reply = this.listIndexReply(vo.getArticleId(), vo.getId());
+            vo.setReply(reply);
         });
     }
 
-    private void buildUserInfo(List<CommentVo> dtos) {
-        Collection<Integer> userIds = getUserId(dtos);
+    private void buildUserInfo(List<Integer> userIds, List<CommentVo> vos) {
         var builder = new UserOptionsBuilder()
                 .noStat()
                 .noFollowState();
-        Collection<UserDTO> users = userService.listAuthorInfoById(userIds, builder);
-        Map<Integer, UserDTO> map =
-                ListMapperHandler.listToMap(users, UserDTO::getUserId, Function.identity());
-        buildUserInfo(dtos, map);
+        List<UserVo> users = userService.listAuthorById(userIds, builder);
+        Map<Integer, UserVo> map = ListMapperHandler.listToMap(users, UserVo::getUserId, Function.identity());
+        buildUserInfo(vos, map);
     }
 
-    private void buildUserInfo(List<CommentVo> comments, Map<Integer, UserDTO> users) {
+    private void buildUserInfo(List<CommentVo> comments, Map<Integer, UserVo> users) {
         for (CommentVo comment : comments) {
             ReplyVo reply = comment.getReply();
             setUserInfo(comment, users);
             if (reply != null && reply.getList() != null) {
                 var list = reply.getList();
-                for (CommentVo dto : list) {
-                    setUserInfo(dto, users);
+                for (CommentVo vo : list) {
+                    setUserInfo(vo, users);
                 }
             }
         }
     }
 
-    private void setUserInfo(CommentVo dto, Map<Integer, UserDTO> users) {
-        dto.setUser(users.get(dto.getUserId()));
-        Integer reply = dto.getReplyTo();
+    private void setUserInfo(CommentVo vo, Map<Integer, UserVo> users) {
+        vo.setUser(users.get(vo.getUserId()));
+        Integer reply = vo.getReplyTo();
         if (reply != null) {
-            dto.setReplyUser(users.get(reply));
+            vo.setReplyUser(users.get(reply));
         }
     }
 
     private void buildHasLiked(List<CommentVo> comments) {
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         if (loginUserId == null) return;
-        ArrayList<Integer> items = new ArrayList<>(128);
+        ArrayList<Integer> items = new ArrayList<>(comments.size() + comments.size() * 5);
         for (CommentVo comment : comments) {
             items.add(comment.getId());
             ReplyVo reply = comment.getReply();
             if (reply != null && reply.getList() != null) {
                 var list = reply.getList();
-                for (CommentVo dto : list) {
-                    items.add(dto.getId());
+                for (CommentVo vo : list) {
+                    items.add(vo.getId());
                 }
             }
         }
@@ -277,10 +278,10 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-    private Collection<Integer> getUserId(List<CommentVo> comments) {
-        Collection<Integer> set = new HashSet<>();
+    private List<Integer> getUserId(List<CommentVo> comments) {
+        Collection<Integer> set = new HashSet<>(comments.size() + comments.size() * 5);
         getUserId(set, comments);
-        return set;
+        return new ArrayList<>(set);
     }
 
     private void getUserId(Collection<Integer> data, List<CommentVo> comments) {

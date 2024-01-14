@@ -20,7 +20,7 @@ public interface CollectService {
 
     Long getUserCollectCount(Integer userId);
 
-    Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
+    List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 
     Collection<Integer> loadUserCollects(String key, Integer userId, long current, long size);
 }

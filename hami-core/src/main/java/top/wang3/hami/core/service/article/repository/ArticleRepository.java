@@ -3,7 +3,6 @@ package top.wang3.hami.core.service.article.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
 
@@ -39,13 +38,10 @@ public interface ArticleRepository extends IService<Article> {
 
     Map<String, Long> getArticleCount();
 
-    @Transactional(rollbackFor = Exception.class)
     boolean saveArticle(Article article);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean updateArticle(Article article);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean deleteArticle(Integer articleId, Integer userId);
 
 }

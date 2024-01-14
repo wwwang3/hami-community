@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthorRank {
+public class HotAuthor {
 
     private Integer userId;
     private Double hotIndex;

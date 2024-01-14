@@ -1,5 +1,6 @@
 package top.wang3.hami.core.cache;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +17,12 @@ public interface CacheService {
 
     <T, R> List<R> multiGet(String keyPrefix, List<T> items, Function<T, R> loader, long timeout, TimeUnit timeUnit);
 
+    <T, R> List<R> multiGetById(String keyPrefix, Collection<T> ids, Function<List<T>, List<R>> loader, long timeout, TimeUnit timeUnit);
+
     boolean expireAndIncrBy(String key, int delta, long timeout, TimeUnit timeUnit);
+
+    <T, R> void asyncSetCache(String keyPrefix, List<T> ids, List<R> applied,
+                              long timeout, TimeUnit timeUnit);
 
     /**
      * 加锁刷新缓存, 默认一天过期时间

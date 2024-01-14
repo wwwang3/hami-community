@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import top.wang3.hami.common.vo.article.ArticleDTO;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticleContentVo extends ArticleDTO {
+public class ArticleContentVo extends ArticleVo {
     private String content;
 }

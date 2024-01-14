@@ -6,7 +6,7 @@ import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.CategoryDTO;
 import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
-import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class ArticleVo {
     /**
      * 作者信息
      */
-    private UserDTO author;
+    private UserVo author;
 
     /**
      * 分类

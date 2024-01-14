@@ -23,6 +23,7 @@ import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 import top.wang3.hami.core.service.article.*;
 import top.wang3.hami.core.service.article.repository.ArticleDraftRepository;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
@@ -41,6 +42,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     private final ArticleDraftRepository articleDraftRepository;
+    private final ArticleRepository articleRepository;
 
     @Resource
     Validator validator;
@@ -164,7 +166,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         int userId = LoginUserContext.getLoginUserId();
         Boolean success = transactionTemplate.execute(status -> {
             //删除文章
-            boolean deleted = articleService.deleteByArticleId(articleId, userId);
+            boolean deleted = articleRepository.deleteArticle(articleId, userId);
             if (!deleted) {
                 return false;
             }
@@ -186,8 +188,8 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     private boolean handleInsert(Article article, ArticleDraft draft, Integer loginUserId) {
-        //插入
-        boolean success1 = articleService.saveArticle(article);
+        // 插入
+        boolean success1 = articleRepository.saveArticle(article);
         draft.setArticleId(article.getId());
         draft.setState(Constants.ONE);
         if (success1) {
@@ -203,7 +205,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     private boolean handleUpdate(Article article, ArticleDraft draft) {
-        if (articleService.updateArticle(article) &&
+        if (articleRepository.updateArticle(article) &&
                 articleTagService.updateTags(article.getId(), draft.getTagIds())) {
             ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
                     article.getId(), article.getUserId());

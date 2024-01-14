@@ -125,7 +125,7 @@ public class CollectServiceImpl implements CollectService {
 
 
     @Override
-    public Collection<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
+    public List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
         String key = RedisConstants.USER_COLLECT_LIST + userId;
         return ZPageHandler
                 .<Integer>of(key, page)

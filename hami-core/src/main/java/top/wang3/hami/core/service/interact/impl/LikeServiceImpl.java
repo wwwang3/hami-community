@@ -124,7 +124,7 @@ public class LikeServiceImpl implements LikeService {
 
     @CostLog
     @Override
-    public Collection<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
+    public List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
         //最近点赞的文章
         String key = buildKey(userId, LikeType.ARTICLE);
         return ZPageHandler

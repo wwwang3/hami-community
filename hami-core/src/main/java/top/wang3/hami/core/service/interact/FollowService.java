@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.lang.NonNull;
 import top.wang3.hami.common.model.UserFollow;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -38,9 +37,9 @@ public interface FollowService {
 
     Map<Integer, Long> listUserFollowerCount(List<Integer> userIds);
 
-    Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId);
+    List<Integer> listUserFollowings(Page<UserFollow> page, int userId);
 
-    Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId);
+    List<Integer> listUserFollowers(Page<UserFollow> page, int userId);
 
     List<Integer> loadUserFollowings(String key, Integer userId, long current, long size);
 

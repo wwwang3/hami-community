@@ -3,10 +3,10 @@ package top.wang3.hami.common.converter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.vo.user.LoginProfile;
+import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,21 +24,20 @@ public interface UserConverter {
     @Mapping(target = "collects", ignore = true)
     LoginProfile toLoginProfile(User user);
 
-    default List<UserDTO> toUserDTOList(List<User> users) {
+    default List<UserVo> toUserVoList(List<User> users) {
         if (users == null || users.isEmpty()) {
             return Collections.emptyList();
         }
-        ArrayList<UserDTO> dtos = new ArrayList<>(users.size());
+        ArrayList<UserVo> dtos = new ArrayList<>(users.size());
         for (User user : users) {
-            dtos.add(toUserDTO(user));
+            dtos.add(toUserVo(user));
         }
         return dtos;
     }
 
     @Mapping(target = "stat", ignore = true)
     @Mapping(target = "followed", ignore = true)
-    UserDTO toUserDTO(User user);
-
+    UserVo toUserVo(User user);
 
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "tag", ignore = true)

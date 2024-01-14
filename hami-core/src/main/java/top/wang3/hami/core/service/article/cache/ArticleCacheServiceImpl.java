@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.zset.Tuple;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
@@ -12,11 +13,13 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
+import top.wang3.hami.common.vo.article.HotArticle;
 import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -78,10 +81,44 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     @Override
     public List<ArticleInfo> listArticleInfoById(List<Integer> articleIds) {
         // 从缓存中获取articleInfo
-        return cacheService.multiGet(
+        return cacheService.multiGetById(
                 RedisConstants.ARTICLE_INFO,
                 articleIds,
-                articleRepository::getArticleInfoById,
+                articleRepository::listArticleById,
+                TimeoutConstants.ARTICLE_INFO_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    @Override
+    public List<HotArticle> listHotArticle(Integer cateId) {
+        String key = cateId == null ? RedisConstants.TOTAL_HOT_ARTICLE : RedisConstants.CATE_HOT_ARTICLE + cateId;
+        // 数量较少, 直接读了
+        Set<ZSetOperations.TypedTuple<Integer>> typedTuples = RedisClient.zRevRangeWithScore(key, 0, -1);
+        return ListMapperHandler.listTo(typedTuples, item -> {
+            HotArticle hotArticle = new HotArticle();
+            hotArticle.setArticleId(item.getValue());
+            hotArticle.setHotRank(item.getScore());
+            return hotArticle;
+        });
+    }
+
+    @Override
+    public ArticleInfo getArticleInfoCache(Integer articleId) {
+        // 从缓存获取article-info
+        return cacheService.get(
+                RedisConstants.ARTICLE_INFO + articleId,
+                () -> articleRepository.getArticleInfoById(articleId),
+                TimeoutConstants.ARTICLE_INFO_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    @Override
+    public String getArticleContentCache(Integer articleId) {
+        return cacheService.get(
+                RedisConstants.ARTICLE_CONTENT + articleId,
+                () -> articleRepository.getArticleContentById(articleId),
                 TimeoutConstants.ARTICLE_INFO_EXPIRE,
                 TimeUnit.MILLISECONDS
         );

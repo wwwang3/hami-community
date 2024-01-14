@@ -149,7 +149,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public Collection<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
+    public List<Integer> listUserFollowings(Page<UserFollow> page, int userId) {
         String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> getUserFollowingCount(userId))
@@ -158,7 +158,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public Collection<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
+    public List<Integer> listUserFollowers(Page<UserFollow> page, int userId) {
         String key = RedisConstants.USER_FOLLOWER_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> getUserFollowerCount(userId))

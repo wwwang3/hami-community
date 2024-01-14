@@ -1,4 +1,4 @@
-package top.wang3.hami.core.component;
+package top.wang3.hami.core.async;
 
 import com.alibaba.ttl.TtlCallable;
 import com.alibaba.ttl.TtlRunnable;
