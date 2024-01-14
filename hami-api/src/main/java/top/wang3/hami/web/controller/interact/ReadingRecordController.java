@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.SearchParam;
-import top.wang3.hami.common.dto.article.ReadingRecordDTO;
+import top.wang3.hami.common.vo.article.ReadingRecordVo;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.security.model.Result;
 
@@ -18,9 +18,9 @@ public class ReadingRecordController {
     private final ReadingRecordService readingRecordService;
 
     @PostMapping("/reading_record/query_list")
-    public Result<PageData<ReadingRecordDTO>> listReadingRecord(@RequestBody
+    public Result<PageData<ReadingRecordVo>> listReadingRecord(@RequestBody
                                                                 @Valid SearchParam param) {
-        PageData<ReadingRecordDTO> pageData = readingRecordService
+        PageData<ReadingRecordVo> pageData = readingRecordService
                 .listReadingRecords(param);
         return Result.ofNullable(pageData)
                 .orElse("还没有历史记录");

@@ -1,17 +1,17 @@
-package top.wang3.hami.common.dto.comment;
+package top.wang3.hami.common.vo.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import top.wang3.hami.common.dto.IpInfo;
-import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentDTO {
+public class CommentVo {
 
     private Integer id;
     private Integer articleId;
@@ -28,9 +28,9 @@ public class CommentDTO {
     private Integer replyTo;
 
 
-    private UserDTO user;
-    private UserDTO replyUser;
-    private ReplyDTO reply;
+    private UserVo user;
+    private UserVo replyUser;
+    private ReplyVo reply;
     private Boolean liked = false;
 
 }

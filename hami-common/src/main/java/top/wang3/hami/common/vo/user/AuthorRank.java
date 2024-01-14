@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.user;
+package top.wang3.hami.common.vo.user;
 
 
 import lombok.AllArgsConstructor;
@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthorRankDTO {
+public class AuthorRank {
 
     private Integer userId;
     private Double hotIndex;
-    private UserDTO user;
+    private UserVo user;
 }

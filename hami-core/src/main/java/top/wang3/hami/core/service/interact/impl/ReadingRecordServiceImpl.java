@@ -9,12 +9,12 @@ import org.springframework.util.StringUtils;
 import top.wang3.hami.common.converter.ReadingRecordConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.SearchParam;
-import top.wang3.hami.common.dto.article.ArticleDTO;
 import top.wang3.hami.common.dto.article.ArticleInfo;
-import top.wang3.hami.common.dto.article.ReadingRecordDTO;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.vo.article.ArticleDTO;
+import top.wang3.hami.common.vo.article.ReadingRecordVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
@@ -40,7 +40,7 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Override
-    public PageData<ReadingRecordDTO> listReadingRecords(SearchParam param) {
+    public PageData<ReadingRecordVo> listReadingRecords(SearchParam param) {
         String keyword = param.getKeyword();
         Page<ReadingRecord> page = param.toPage();
         int loginUserId = LoginUserContext.getLoginUserId();
@@ -50,9 +50,9 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
         } else {
             records = readingRecordRepository.listReadingRecordByPage(page, loginUserId);
         }
-        Collection<ReadingRecordDTO> dtos = ReadingRecordConverter.INSTANCE.toReadingRecordDTOList(records);
+        Collection<ReadingRecordVo> dtos = ReadingRecordConverter.INSTANCE.toReadingRecordDTOList(records);
         buildReadingRecord(dtos, keyword);
-        return PageData.<ReadingRecordDTO>builder()
+        return PageData.<ReadingRecordVo>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
                 .data(dtos)
@@ -77,18 +77,18 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
         return readingRecordRepository.deleteRecords(LoginUserContext.getLoginUserId(), ids);
     }
 
-    private void buildReadingRecord(Collection<ReadingRecordDTO> dtos, String keyword) {
-        List<Integer> articleIds = ListMapperHandler.listTo(dtos, ReadingRecordDTO::getArticleId, false);
+    private void buildReadingRecord(Collection<ReadingRecordVo> dtos, String keyword) {
+        List<Integer> articleIds = ListMapperHandler.listTo(dtos, ReadingRecordVo::getArticleId, false);
         List<ArticleDTO> articleDTOS = articleService.listArticleDTOById(articleIds, new ArticleOptionsBuilder());
-        ListMapperHandler.doAssemble(dtos, ReadingRecordDTO::getArticleId,
-                articleDTOS, ArticleDTO::getId, ReadingRecordDTO::setContent);
+        ListMapperHandler.doAssemble(dtos, ReadingRecordVo::getArticleId,
+                articleDTOS, ArticleDTO::getId, ReadingRecordVo::setContent);
         if (StringUtils.hasText(keyword)) {
             highlightTitle(dtos, keyword);
         }
     }
 
-    private void highlightTitle(Collection<ReadingRecordDTO> dtos, String keyword) {
-        for (ReadingRecordDTO dto : dtos) {
+    private void highlightTitle(Collection<ReadingRecordVo> dtos, String keyword) {
+        for (ReadingRecordVo dto : dtos) {
             ArticleDTO content = dto.getContent();
             if (content == null) continue;
             ArticleInfo info = content.getArticleInfo();

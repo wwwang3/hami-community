@@ -26,11 +26,14 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
+import top.wang3.hami.common.vo.article.ArticleContentVo;
+import top.wang3.hami.common.vo.article.ArticleDTO;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.TagService;
+import top.wang3.hami.core.service.article.cache.ArticleCacheService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.LikeService;
@@ -61,6 +64,8 @@ public class ArticleServiceImpl implements ArticleService {
     private final TagService tagService;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
+    private final ArticleCacheService articleCacheService;
+
 
     @CostLog
     @Override
@@ -78,12 +83,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     @CostLog
     @Override
-    public PageData<ArticleDTO> listUserArticle(UserArticleParam param) {
+    public PageData<ArticleDTO> listUserArticles(UserArticleParam param) {
         //获取用户文章
         int userId = param.getUserId();
         String redisKey = RedisConstants.USER_ARTICLE_LIST + userId;
         Page<Article> page = param.toPage(false);
-        Collection<Integer> ids = ZPageHandler.<Integer>of(redisKey, page)
+        List<Integer> ids = ZPageHandler.<Integer>of(redisKey, page)
                 .countSupplier(() -> this.getUserArticleCount(userId))
                 .source((c, s) -> {
                     Page<Article> articlePage = new Page<>(c, s, false);
@@ -162,29 +167,28 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Integer> loadArticleListCache(String key, Integer cateId, long current, long size) {
-        List<Article> articles = articleRepository.listArticleByCateId(cateId);
-        return cacheArticleListToRedis(key, current, size, articles);
+    public List<ArticleDTO> listArticleDTOById(List<Integer> ids, ArticleOptionsBuilder builder) {
+        if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
+        // 从缓存中获取
+        List<ArticleInfo> infos = articleCacheService.listArticleInfoById(ids);
+        // 转化为DTO
+        List<ArticleDTO> dtos = ArticleConverter.INSTANCE.toArticleDTOS(infos);
+        this.buildArticleDTOs(dtos, builder);
+        return dtos;
     }
 
     @Override
-    public List<Integer> loadUserArticleListCache(String key, Integer userId, long current, long size) {
-        List<Article> articles = articleRepository.listUserArticle(userId);
-        return cacheArticleListToRedis(key, current, size, articles);
-    }
-
-    @Override
-    public ArticleContentDTO getArticleContentById(int articleId) {
+    public ArticleContentVo getArticleContentById(int articleId) {
         ArticleInfo info = this.getArticleInfoById(articleId);
         if (info == null || info.getId() == null || info.getDeleted() == Constants.DELETED) {
             return null;
         }
         String content = this.loadArticleContent(articleId);
         //no tag, category, author...
-        ArticleContentDTO dto = ArticleConverter.INSTANCE.toArticleContentDTO(info, content);
+        ArticleContentVo dto = ArticleConverter.INSTANCE.toArticleContentDTO(info, content);
 
         //build
-        List<ArticleContentDTO> dtos = List.of(dto);
+        List<ArticleContentVo> dtos = List.of(dto);
         this.buildCategory(dtos);
         this.buildArticleTags(dtos);
         //作者信息, 包含用户数据
@@ -214,16 +218,6 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
                 articleId, authorId, loginUserId);
         rabbitMessagePublisher.publishMsg(message);
-    }
-
-
-    @Override
-    public List<ArticleDTO> listArticleDTOById(Collection<Integer> ids, ArticleOptionsBuilder builder) {
-        if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
-        List<ArticleInfo> infos = this.listArticleInfoById(ids);
-        List<ArticleDTO> dtos = ArticleConverter.INSTANCE.toArticleDTOS(infos);
-        this.buildArticleDTOs(dtos, builder);
-        return dtos;
     }
 
     private ArticleInfo getArticleInfoById(Integer id) {

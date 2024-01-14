@@ -3,8 +3,8 @@ package top.wang3.hami.common.converter;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.user.AccountInfo;
 import top.wang3.hami.common.model.Account;
+import top.wang3.hami.common.vo.user.AccountInfo;
 
 @Mapper
 public interface AccountConverter {

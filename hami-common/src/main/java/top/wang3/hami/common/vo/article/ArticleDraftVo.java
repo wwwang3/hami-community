@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.vo.article;
 
 
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class ArticleDraftDTO {
+public class ArticleDraftVo {
 
 
     /**

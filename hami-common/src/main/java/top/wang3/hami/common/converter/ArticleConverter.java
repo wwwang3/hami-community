@@ -5,9 +5,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
-import top.wang3.hami.common.dto.article.*;
+import top.wang3.hami.common.dto.article.ArticleDraftParam;
+import top.wang3.hami.common.dto.article.ArticleInfo;
+import top.wang3.hami.common.dto.article.CategoryDTO;
 import top.wang3.hami.common.model.*;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.vo.article.ArticleContentVo;
+import top.wang3.hami.common.vo.article.ArticleDTO;
+import top.wang3.hami.common.vo.article.ArticleDraftVo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +43,7 @@ public interface ArticleConverter {
     Article toArticle(ArticleDraft draft);
 
 
-    ArticleDraftDTO toDraftDTO(ArticleDraft draft, List<Tag> tags);
+    ArticleDraftVo toDraftDTO(ArticleDraft draft, List<Tag> tags);
 
     @Mapping(target = "categoryId", source = "id")
     @Mapping(target = "categoryName", source = "name")
@@ -66,11 +71,11 @@ public interface ArticleConverter {
         return dtos;
     }
 
-    default ArticleContentDTO toArticleContentDTO(ArticleInfo info, String content) {
+    default ArticleContentVo toArticleContentDTO(ArticleInfo info, String content) {
         if (info == null && content == null) {
             return null;
         }
-        ArticleContentDTO dto = new ArticleContentDTO();
+        ArticleContentVo dto = new ArticleContentVo();
         if (info != null) {
             dto.setArticleInfo(info);
             dto.setId(info.getId());

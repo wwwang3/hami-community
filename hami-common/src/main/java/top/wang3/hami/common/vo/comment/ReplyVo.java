@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.comment;
+package top.wang3.hami.common.vo.comment;
 
 
 import lombok.AllArgsConstructor;
@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReplyDTO {
+public class ReplyVo {
 
     private long total;
-    private List<CommentDTO> list;
+    private List<CommentVo> list;
 }

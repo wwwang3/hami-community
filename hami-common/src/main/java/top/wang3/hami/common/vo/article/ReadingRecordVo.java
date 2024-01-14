@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.vo.article;
 
 
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReadingRecordDTO {
+public class ReadingRecordVo {
 
     private Integer id;
 
@@ -32,5 +32,5 @@ public class ReadingRecordDTO {
     /**
      * 文章内容
      */
-    private ArticleDTO content;
+    private ArticleVo content;
 }

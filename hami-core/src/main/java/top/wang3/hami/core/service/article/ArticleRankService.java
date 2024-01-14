@@ -1,6 +1,6 @@
 package top.wang3.hami.core.service.article;
 
-import top.wang3.hami.common.dto.article.HotArticleDTO;
+import top.wang3.hami.common.vo.article.HotArticleDTO;
 
 import java.util.List;
 

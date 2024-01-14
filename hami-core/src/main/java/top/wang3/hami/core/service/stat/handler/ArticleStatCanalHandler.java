@@ -46,6 +46,6 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
 
     private void setCache(ArticleStat stat) {
         String redisKey = RedisConstants.STAT_TYPE_ARTICLE + stat.getArticleId();
-        cacheService.syncSet(redisKey, StatConverter.INSTANCE.toArticleStatDTO(stat));
+        cacheService.refreshCache(redisKey, StatConverter.INSTANCE.toArticleStatDTO(stat));
     }
 }

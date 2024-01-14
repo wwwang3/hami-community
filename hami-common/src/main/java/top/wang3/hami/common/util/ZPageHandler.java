@@ -118,9 +118,9 @@ public class ZPageHandler {
             return handleQuery(key, current, size);
         }
 
-        public abstract List<T> handleQuery(String key, long current, long size);
+        protected abstract List<T> handleQuery(String key, long current, long size);
 
-        public abstract List<T> handleRevQuery(String key, long current, long size);
+        protected abstract List<T> handleRevQuery(String key, long current, long size);
 
 
         public ZPage<T> key(String key) {

@@ -38,6 +38,6 @@ public class UserStatHandler implements CanalEntryHandler<UserStat> {
 
     private void setCache(UserStat stat) {
         String redisKey = RedisConstants.STAT_TYPE_USER + stat.getUserId();
-        cacheService.syncSet(redisKey, StatConverter.INSTANCE.toUserStatDTO(stat));
+        cacheService.refreshCache(redisKey, StatConverter.INSTANCE.toUserStatDTO(stat));
     }
 }

@@ -1,12 +1,16 @@
-package top.wang3.hami.common.dto.user;
+package top.wang3.hami.common.vo.user;
+
 
 import lombok.Data;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
 
 import java.util.Date;
 
+/**
+ * 进入首页时获取, 以此判断是否登录
+ */
 @Data
-public class UserDTO {
+public class LoginProfile {
 
     /**
      * 用户ID
@@ -49,18 +53,30 @@ public class UserDTO {
     private String tag;
 
     /**
-     * 创建时间
+     * 加入时间
      */
     private Date ctime;
 
     /**
-     * 用户数据
+     * 我点赞的文章数
      */
-    private UserStatDTO stat;
+    private Integer likes = 0;
 
     /**
-     * 是否关注
+     * 我收藏的文章数
      */
-    private  boolean followed;
+    private Integer collects = 0;
+
+    /**
+     * 我的粉丝数
+     */
+    private Integer followers = 0;
+
+    /**
+     * 我的关注数
+     */
+    private Integer followings = 0;
+
+    private UserStatDTO stat;
 
 }

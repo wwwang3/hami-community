@@ -1,9 +1,9 @@
 package top.wang3.hami.core.service.user;
 
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
-import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.vo.user.LoginProfile;
 
 import java.util.Collection;
 import java.util.List;

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
-import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
+import top.wang3.hami.common.vo.notify.NotifyMsgVo;
 import top.wang3.hami.core.service.notify.NotifyMsgService;
 import top.wang3.hami.security.model.Result;
 
@@ -20,26 +20,26 @@ public class NotifyController {
     private final NotifyMsgService notifyMsgService;
 
     @PostMapping("/reply/query_list")
-    public Result<PageData<NotifyMsgDTO>> listCommentNotify(@RequestBody @Valid PageParam param)  {
-        PageData<NotifyMsgDTO> msgs = notifyMsgService.listCommentNotify(param);
+    public Result<PageData<NotifyMsgVo>> listCommentNotify(@RequestBody @Valid PageParam param)  {
+        PageData<NotifyMsgVo> msgs = notifyMsgService.listCommentNotify(param);
         return Result.successData(msgs);
     }
 
     @PostMapping("/love/query_list")
-    public Result<PageData<NotifyMsgDTO>> listLikeCollectNotify(@RequestBody @Valid PageParam param)  {
-        PageData<NotifyMsgDTO> msgs = notifyMsgService.listLikeCollectNotify(param);
+    public Result<PageData<NotifyMsgVo>> listLikeCollectNotify(@RequestBody @Valid PageParam param)  {
+        PageData<NotifyMsgVo> msgs = notifyMsgService.listLikeCollectNotify(param);
         return Result.successData(msgs);
     }
 
     @PostMapping("/follow/query_list")
-    public Result<PageData<NotifyMsgDTO>> listFollowNotify(@RequestBody @Valid PageParam param)  {
-        PageData<NotifyMsgDTO> msgs = notifyMsgService.listFollowNotify(param);
+    public Result<PageData<NotifyMsgVo>> listFollowNotify(@RequestBody @Valid PageParam param)  {
+        PageData<NotifyMsgVo> msgs = notifyMsgService.listFollowNotify(param);
         return Result.successData(msgs);
     }
 
     @PostMapping("/system/query_list")
-    public Result<PageData<NotifyMsgDTO>> listSystemMsg(@RequestBody @Valid PageParam param) {
-        PageData<NotifyMsgDTO> msgs = notifyMsgService.listSystemMsg(param);
+    public Result<PageData<NotifyMsgVo>> listSystemMsg(@RequestBody @Valid PageParam param) {
+        PageData<NotifyMsgVo> msgs = notifyMsgService.listSystemMsg(param);
         return Result.successData(msgs);
     }
 

@@ -16,7 +16,7 @@
         <result column="mtime" property="mtime"/>
     </resultMap>
 
-    <resultMap id="NotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+    <resultMap id="NotifyMsgDTOResultMap" type="top.wang3.hami.common.vo.notify.NotifyMsgVo">
         <id column="id" property="id"/>
         <result column="state" property="state"/>
         <result column="ctime" property="ctime"/>
@@ -36,7 +36,7 @@
         </association>
     </resultMap>
 
-    <resultMap id="FollowNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+    <resultMap id="FollowNotifyMsgDTOResultMap" type="top.wang3.hami.common.vo.notify.NotifyMsgVo">
         <id column="id" property="id"/>
         <result column="state" property="state"/>
         <result column="ctime" property="ctime"/>
@@ -48,7 +48,7 @@
         </association>
     </resultMap>
 
-    <resultMap id="SystemNotifyMsgDTOResultMap" type="top.wang3.hami.common.dto.notify.NotifyMsgDTO">
+    <resultMap id="SystemNotifyMsgDTOResultMap" type="top.wang3.hami.common.vo.notify.NotifyMsgVo">
         <id column="id" property="id"/>
         <result column="state" property="state"/>
         <result column="ctime" property="ctime"/>

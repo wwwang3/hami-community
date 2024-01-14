@@ -2,9 +2,9 @@ package top.wang3.hami.core.service.article;
 
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
-import top.wang3.hami.common.dto.article.ArticleDraftDTO;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
+import top.wang3.hami.common.vo.article.ArticleDraftVo;
 
 public interface ArticleDraftService {
 
@@ -14,7 +14,7 @@ public interface ArticleDraftService {
      * @param param 分页参数
      * @return PageData<ArticleDraftDTO>
      */
-    PageData<ArticleDraftDTO> getArticleDrafts(PageParam param, byte state);
+    PageData<ArticleDraftVo> getArticleDrafts(PageParam param, byte state);
 
     /**
      * 获取文章草稿
@@ -22,7 +22,7 @@ public interface ArticleDraftService {
      * @param draftId 文章草稿ID
      * @return ArticleDraft
      */
-    ArticleDraftDTO getArticleDraftById(long draftId);
+    ArticleDraftVo getArticleDraftById(long draftId);
 
     ArticleDraft createDraft(ArticleDraftParam param);
 

@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.vo.article;
 
 
 import lombok.AllArgsConstructor;
@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HotArticleDTO {
+public class HotArticle {
 
     private Integer articleId;
     private Double hotRank;
-    private ArticleDTO article;
+    private ArticleVo article;
 }

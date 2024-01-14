@@ -4,9 +4,9 @@ package top.wang3.hami.common.converter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.comment.CommentDTO;
 import top.wang3.hami.common.dto.comment.CommentParam;
 import top.wang3.hami.common.model.Comment;
+import top.wang3.hami.common.vo.comment.CommentVo;
 
 import java.util.List;
 
@@ -19,9 +19,9 @@ public interface CommentConverter {
     @Mapping(target = "reply", ignore = true)
     @Mapping(target = "liked", ignore = true)
     @Mapping(target = "replyUser", ignore = true)
-    CommentDTO toCommentDTO(Comment comment);
+    CommentVo toCommentDTO(Comment comment);
 
-    List<CommentDTO> toCommentDTOList(List<Comment> comments);
+    List<CommentVo> toCommentDTOList(List<Comment> comments);
 
     default Comment toComment(CommentParam param) {
         Comment comment = new Comment();

@@ -1,6 +1,6 @@
 package top.wang3.hami.core.service.user;
 
-import top.wang3.hami.common.dto.user.AuthorRankDTO;
+import top.wang3.hami.common.vo.user.AuthorRankDTO;
 
 import java.util.List;
 

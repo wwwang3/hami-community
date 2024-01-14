@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.SearchParam;
-import top.wang3.hami.common.dto.article.ArticleDTO;
+import top.wang3.hami.common.vo.article.ArticleDTO;
 import top.wang3.hami.core.service.search.SearchService;
 import top.wang3.hami.security.model.Result;
 

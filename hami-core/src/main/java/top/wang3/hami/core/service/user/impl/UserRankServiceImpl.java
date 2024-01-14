@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.dto.user.AuthorRankDTO;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.common.vo.user.AuthorRankDTO;
 import top.wang3.hami.core.service.user.UserRankService;
 import top.wang3.hami.core.service.user.UserService;
 

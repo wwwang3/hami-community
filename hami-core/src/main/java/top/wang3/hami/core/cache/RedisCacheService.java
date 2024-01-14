@@ -11,6 +11,7 @@ import top.wang3.hami.common.util.RedisClient;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,6 +43,11 @@ public class RedisCacheService implements CacheService {
         return syncGet(key, loader, timeout, timeUnit);
     }
 
+    @Override
+    public <T> T getMapValue(String key, String hKey, Supplier<Map<String, T>> loader, long timeout, TimeUnit timeUnit) {
+        T data = RedisClient.getCacheMapValue(key, hKey);
+        return data != null ? data : syncGetMapValue(key, hKey, loader, timeout, timeUnit);
+    }
 
     @Override
     public <T, R> List<R> multiGet(String keyPrefix, List<T> items, Function<T, R> loader,
@@ -74,15 +80,26 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
-    public <T> void syncSet(String key, T data) {
-        syncSet(key, data, DEFAULT_EXPIRE);
+    public <T> void refreshCache(String key, T data) {
+        refreshCache(key, data, DEFAULT_EXPIRE);
     }
 
     @Override
-    public <T> void syncSet(String key, T data, long mills) {
-        lockTemplate.execute(key, () -> {
-            RedisClient.setCacheObject(key, data, mills, TimeUnit.MILLISECONDS);
-        });
+    public <T> void refreshCache(String key, T data, long mills) {
+        lockTemplate.execute(
+                key,
+                () -> RedisClient.setCacheObject(key, data, mills, TimeUnit.MILLISECONDS)
+        );
+    }
+
+    @Override
+    public <T> void refreshHashCache(String key, Map<String, T> hash) {
+        refreshHashCache(key, hash, DEFAULT_EXPIRE);
+    }
+
+    @Override
+    public <T> void refreshHashCache(String key, Map<String, T> hash, long mills) {
+        lockTemplate.execute(key, () -> RedisClient.hMSet(key, hash, mills, TimeUnit.MILLISECONDS));
     }
 
     private <T> T syncGet(String key, Supplier<T> loader, long timeout, TimeUnit timeUnit) {
@@ -94,6 +111,14 @@ public class RedisCacheService implements CacheService {
         });
     }
 
+    private <T> T syncGetMapValue(String key, String hKey, Supplier<Map<String, T>> loader,
+                                  long timeout, TimeUnit timeUnit) {
+        return lockTemplate.execute(key, () -> {
+            T data = RedisClient.getCacheMapValue(key, hKey);
+            return data != null ? data : loadHashCache(key, hKey, loader, timeout,timeUnit);
+        });
+    }
+
     private <T> T loadCache(String key, Supplier<T> loader, long timeout, TimeUnit timeUnit) {
         T data = loader.get();
         if (data == null) {
@@ -102,6 +127,14 @@ public class RedisCacheService implements CacheService {
             RedisClient.setCacheObject(key, data, timeout, timeUnit);
         }
         return data;
+    }
+
+    private <T> T loadHashCache(String key, String hKey,
+                                Supplier<Map<String, T>> loader,
+                                long timeout, TimeUnit timeUnit) {
+        Map<String, T> hash = loader.get();
+        RedisClient.hMSet(key, hash, timeout, timeUnit);
+        return hash.get(hKey);
     }
 
     private <T> T resolveValue(T value) {

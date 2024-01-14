@@ -6,10 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
-import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.model.NotifyMsg;
+import top.wang3.hami.common.vo.notify.NotifyMsgVo;
 import top.wang3.hami.core.mapper.NotifyMsgMapper;
 
 import java.util.List;
@@ -19,25 +19,25 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
         implements NotifyMsgRepository {
 
     @Override
-    public Page<NotifyMsgDTO> listCommentNotify(Page<NotifyMsgDTO> page, Integer receiver) {
+    public Page<NotifyMsgVo> listCommentNotify(Page<NotifyMsgVo> page, Integer receiver) {
         if (page == null || receiver == null) return null;
         return getBaseMapper().listCommentNotify(page, receiver);
     }
 
     @Override
-    public Page<NotifyMsgDTO> listLoveNotify(Page<NotifyMsgDTO> page, Integer receiver) {
+    public Page<NotifyMsgVo> listLoveNotify(Page<NotifyMsgVo> page, Integer receiver) {
         if (page == null || receiver == null) return null;
         return getBaseMapper().listLoveNotify(page, receiver);
     }
 
     @Override
-    public Page<NotifyMsgDTO> listFollowNotifyMsg(Page<NotifyMsgDTO> page, Integer receiver) {
+    public Page<NotifyMsgVo> listFollowNotifyMsg(Page<NotifyMsgVo> page, Integer receiver) {
         if (page == null || receiver == null) return null;
         return getBaseMapper().listFollowNotify(page, receiver);
     }
 
     @Override
-    public Page<NotifyMsgDTO> listSystemNotifyMsg(Page<NotifyMsgDTO> page, Integer receiver) {
+    public Page<NotifyMsgVo> listSystemNotifyMsg(Page<NotifyMsgVo> page, Integer receiver) {
         if (page == null || receiver == null) return null;
         return getBaseMapper().listSystemNotifyMsg(page, receiver);
     }

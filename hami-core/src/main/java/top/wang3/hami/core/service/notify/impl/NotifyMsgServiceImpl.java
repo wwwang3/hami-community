@@ -7,11 +7,11 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.notify.Info;
-import top.wang3.hami.common.dto.notify.NotifyMsgDTO;
 import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.message.NotifyRabbitReadMessage;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.vo.notify.NotifyMsgVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.notify.NotifyMsgService;
@@ -30,30 +30,30 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Override
-    public PageData<NotifyMsgDTO> listCommentNotify(PageParam param) {
+    public PageData<NotifyMsgVo> listCommentNotify(PageParam param) {
         //type 1, 2
         int loginUserId = LoginUserContext.getLoginUserId();
-        Page<NotifyMsgDTO> page = param.toPage();
+        Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listCommentNotify(page, loginUserId);
         publishMessage(page, List.of(1, 2));
         return PageData.build(page);
     }
 
     @Override
-    public PageData<NotifyMsgDTO> listLikeCollectNotify(PageParam param) {
+    public PageData<NotifyMsgVo> listLikeCollectNotify(PageParam param) {
         //type 3, 4, 5
         int loginUserId = LoginUserContext.getLoginUserId();
-        Page<NotifyMsgDTO> page = param.toPage();
+        Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listLoveNotify(page, loginUserId);
         publishMessage(page, List.of(3, 4, 5));
         return PageData.build(page);
     }
 
     @Override
-    public PageData<NotifyMsgDTO> listFollowNotify(PageParam param) {
+    public PageData<NotifyMsgVo> listFollowNotify(PageParam param) {
         //type 6
         int loginUserId = LoginUserContext.getLoginUserId();
-        Page<NotifyMsgDTO> page = param.toPage();
+        Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listFollowNotifyMsg(page, loginUserId);
         List<Integer> senders = ListMapperHandler
                 .listTo(page.getRecords(), item -> item.getSender().getId());
@@ -67,10 +67,10 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
     }
 
     @Override
-    public PageData<NotifyMsgDTO> listSystemMsg(PageParam param) {
+    public PageData<NotifyMsgVo> listSystemMsg(PageParam param) {
         //type 0
         int loginUserId = LoginUserContext.getLoginUserId();
-        Page<NotifyMsgDTO> page = param.toPage();
+        Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listSystemNotifyMsg(page, loginUserId);
         publishMessage(page, List.of(0));
         return PageData.build(page);

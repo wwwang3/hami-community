@@ -1,14 +1,17 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.vo.article;
 
 
 import lombok.Data;
+import top.wang3.hami.common.dto.article.ArticleInfo;
+import top.wang3.hami.common.dto.article.CategoryDTO;
+import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.user.UserDTO;
 
 import java.util.List;
 
 @Data
-public class ArticleDTO {
+public class ArticleVo {
 
     private Integer id;
 

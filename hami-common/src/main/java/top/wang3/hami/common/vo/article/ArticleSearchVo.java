@@ -1,12 +1,13 @@
-package top.wang3.hami.common.dto.article;
+package top.wang3.hami.common.vo.article;
 
 import lombok.Data;
-import top.wang3.hami.common.dto.user.UserDTO;
+import top.wang3.hami.common.dto.article.CategoryDTO;
+import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.Date;
 
 @Data
-public class ArticleSearchDTO {
+public class ArticleSearchVo {
     private Integer id;
     private Integer userId;
     private Integer categoryId;
@@ -15,6 +16,6 @@ public class ArticleSearchDTO {
     private String summary;
     private Date ctime;
 
-    private UserDTO author;
+    private UserVo author;
     private CategoryDTO categoryDTO;
 }

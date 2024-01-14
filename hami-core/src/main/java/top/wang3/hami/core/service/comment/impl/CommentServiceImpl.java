@@ -11,7 +11,9 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
-import top.wang3.hami.common.dto.comment.*;
+import top.wang3.hami.common.dto.comment.CommentPageParam;
+import top.wang3.hami.common.dto.comment.CommentParam;
+import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.message.RabbitMessage;
@@ -20,6 +22,8 @@ import top.wang3.hami.common.message.interact.CommentRabbitMessage;
 import top.wang3.hami.common.message.interact.ReplyRabbitMessage;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.vo.comment.CommentVo;
+import top.wang3.hami.common.vo.comment.ReplyVo;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
@@ -51,21 +55,21 @@ public class CommentServiceImpl implements CommentService {
 
     @CostLog
     @Override
-    public PageData<CommentDTO> listComment(CommentPageParam commentPageParam) {
+    public PageData<CommentVo> listComment(CommentPageParam commentPageParam) {
         Page<Comment> page = commentPageParam.toPage();
         Integer articleId = commentPageParam.getArticleId();
         Assert.isTrue(articleId != null && articleId > 0, "invalid article_id");
         Integer sort = commentPageParam.getSort();
         //获取文章评论
         List<Comment> comments = commentRepository.listComment(page, articleId, sort);
-        List<CommentDTO> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        List<CommentVo> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
         //获取五条回复
         buildIndexReply(dtos);
         //用户信息
         buildUserInfo(dtos);
         //是否点赞评论
         buildHasLiked(dtos);
-        return PageData.<CommentDTO>builder()
+        return PageData.<CommentVo>builder()
                 .pageNum(page.getCurrent())
                 .total(page.getTotal())
                 .data(dtos)
@@ -74,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public PageData<CommentDTO> listReply(CommentPageParam commentPageParam) {
+    public PageData<CommentVo> listReply(CommentPageParam commentPageParam) {
         //获取回复
         Integer articleId = commentPageParam.getArticleId();
         Integer rootId = commentPageParam.getRootId();
@@ -84,10 +88,10 @@ public class CommentServiceImpl implements CommentService {
         Page<Comment> page = commentPageParam.toPage();
 //        page.setSearchCount(false);
         List<Comment> comments = commentRepository.listReply(page, articleId, rootId);
-        List<CommentDTO> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        List<CommentVo> dtos = CommentConverter.INSTANCE.toCommentDTOList(comments);
         buildUserInfo(dtos);
         buildHasLiked(dtos);
-        return PageData.<CommentDTO>builder()
+        return PageData.<CommentVo>builder()
                 .pageNum(page.getCurrent())
                 .total(page.getTotal())
                 .data(dtos)
@@ -95,9 +99,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ReplyDTO listIndexReply(Integer articleId, Integer rootId) {
+    public ReplyVo listIndexReply(Integer articleId, Integer rootId) {
         Reply reply = commentRepository.listIndexReply(articleId, rootId);
-        ReplyDTO dto = new ReplyDTO();
+        ReplyVo dto = new ReplyVo();
         dto.setTotal(reply.getTotal());
         dto.setList(CommentConverter.INSTANCE.toCommentDTOList(reply.getComments()));
         return dto;
@@ -201,14 +205,14 @@ public class CommentServiceImpl implements CommentService {
         return comment;
     }
 
-    private void buildIndexReply(List<CommentDTO> dtos) {
+    private void buildIndexReply(List<CommentVo> dtos) {
         dtos.forEach(dto -> {
-            ReplyDTO reply = this.listIndexReply(dto.getArticleId(), dto.getId());
+            ReplyVo reply = this.listIndexReply(dto.getArticleId(), dto.getId());
             dto.setReply(reply);
         });
     }
 
-    private void buildUserInfo(List<CommentDTO> dtos) {
+    private void buildUserInfo(List<CommentVo> dtos) {
         Collection<Integer> userIds = getUserId(dtos);
         var builder = new UserOptionsBuilder()
                 .noStat()
@@ -219,20 +223,20 @@ public class CommentServiceImpl implements CommentService {
         buildUserInfo(dtos, map);
     }
 
-    private void buildUserInfo(List<CommentDTO> comments, Map<Integer, UserDTO> users) {
-        for (CommentDTO comment : comments) {
-            ReplyDTO reply = comment.getReply();
+    private void buildUserInfo(List<CommentVo> comments, Map<Integer, UserDTO> users) {
+        for (CommentVo comment : comments) {
+            ReplyVo reply = comment.getReply();
             setUserInfo(comment, users);
             if (reply != null && reply.getList() != null) {
                 var list = reply.getList();
-                for (CommentDTO dto : list) {
+                for (CommentVo dto : list) {
                     setUserInfo(dto, users);
                 }
             }
         }
     }
 
-    private void setUserInfo(CommentDTO dto, Map<Integer, UserDTO> users) {
+    private void setUserInfo(CommentVo dto, Map<Integer, UserDTO> users) {
         dto.setUser(users.get(dto.getUserId()));
         Integer reply = dto.getReplyTo();
         if (reply != null) {
@@ -240,16 +244,16 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    private void buildHasLiked(List<CommentDTO> comments) {
+    private void buildHasLiked(List<CommentVo> comments) {
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         if (loginUserId == null) return;
         ArrayList<Integer> items = new ArrayList<>(128);
-        for (CommentDTO comment : comments) {
+        for (CommentVo comment : comments) {
             items.add(comment.getId());
-            ReplyDTO reply = comment.getReply();
+            ReplyVo reply = comment.getReply();
             if (reply != null && reply.getList() != null) {
                 var list = reply.getList();
-                for (CommentDTO dto : list) {
+                for (CommentVo dto : list) {
                     items.add(dto.getId());
                 }
             }
@@ -258,14 +262,14 @@ public class CommentServiceImpl implements CommentService {
         buildHasLiked(comments, liked);
     }
 
-    private void buildHasLiked(List<CommentDTO> comments, Map<Integer, Boolean> liked) {
+    private void buildHasLiked(List<CommentVo> comments, Map<Integer, Boolean> liked) {
         if (comments == null || comments.isEmpty()) return;
-        for (CommentDTO dto : comments) {
+        for (CommentVo dto : comments) {
             dto.setLiked(liked.get(dto.getId()));
-            ReplyDTO reply = dto.getReply();
+            ReplyVo reply = dto.getReply();
             if (reply != null && reply.getList() != null) {
-                List<CommentDTO> items = reply.getList();
-                for (CommentDTO item : items) {
+                List<CommentVo> items = reply.getList();
+                for (CommentVo item : items) {
                     item.setLiked(liked.get(item.getId()));
                 }
             }
@@ -273,22 +277,22 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-    private Collection<Integer> getUserId(List<CommentDTO> comments) {
+    private Collection<Integer> getUserId(List<CommentVo> comments) {
         Collection<Integer> set = new HashSet<>();
         getUserId(set, comments);
         return set;
     }
 
-    private void getUserId(Collection<Integer> data, List<CommentDTO> comments) {
+    private void getUserId(Collection<Integer> data, List<CommentVo> comments) {
         if (CollectionUtils.isEmpty(comments)) {
             return;
         }
-        for (CommentDTO dto : comments) {
+        for (CommentVo dto : comments) {
             data.add(dto.getUserId());
             if (dto.getReplyTo() != null && dto.getReplyTo() != 0) {
                 data.add(dto.getReplyTo());
             }
-            ReplyDTO reply = dto.getReply();
+            ReplyVo reply = dto.getReply();
             if (reply != null) {
                 getUserId(data, reply.getList());
             }

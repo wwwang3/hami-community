@@ -1,4 +1,4 @@
-package top.wang3.hami.common.dto.user;
+package top.wang3.hami.common.vo.user;
 
 import lombok.Data;
 

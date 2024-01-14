@@ -3,10 +3,10 @@ package top.wang3.hami.common.converter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import top.wang3.hami.common.dto.user.LoginProfile;
 import top.wang3.hami.common.dto.user.UserDTO;
 import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.vo.user.LoginProfile;
 
 import java.util.ArrayList;
 import java.util.Collections;

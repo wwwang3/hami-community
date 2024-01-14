@@ -26,7 +26,6 @@
         <java.version>17</java.version>
         <boot.version>${project.parent.version}</boot.version>
 		<canal.version>1.1.7</canal.version>
-		<hutool.version>5.8.16</hutool.version>
 		<ip2region.version>2.7.0</ip2region.version>
 		<jwt.version>0.11.5</jwt.version>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -80,11 +79,6 @@
                 <groupId>com.github.penggle</groupId>
                 <artifactId>kaptcha</artifactId>
                 <version>2.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>cn.hutool</groupId>
-                <artifactId>hutool-core</artifactId>
-                <version>${hutool.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>

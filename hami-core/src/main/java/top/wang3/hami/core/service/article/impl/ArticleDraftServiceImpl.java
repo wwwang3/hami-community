@@ -11,13 +11,13 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
-import top.wang3.hami.common.dto.article.ArticleDraftDTO;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -50,12 +50,12 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
 
     @Override
-    public PageData<ArticleDraftDTO> getArticleDrafts(PageParam param, byte state) {
+    public PageData<ArticleDraftVo> getArticleDrafts(PageParam param, byte state) {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<ArticleDraft> page = param.toPage();
         List<ArticleDraft> drafts = articleDraftRepository.getDraftsByPage(page, loginUserId, state);
-        List<ArticleDraftDTO> dtos = buildDrafts(drafts);
-        return PageData.<ArticleDraftDTO>builder()
+        List<ArticleDraftVo> dtos = buildDrafts(drafts);
+        return PageData.<ArticleDraftVo>builder()
                 .pageNum(page.getCurrent())
                 .total(page.getTotal())
                 .data(dtos)
@@ -63,7 +63,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     @Override
-    public ArticleDraftDTO getArticleDraftById(long draftId) {
+    public ArticleDraftVo getArticleDraftById(long draftId) {
         int loginUserId = LoginUserContext.getLoginUserId();
         ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
         if (draft == null) {
@@ -227,7 +227,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         }
     }
 
-    private List<ArticleDraftDTO> buildDrafts(List<ArticleDraft> drafts) {
+    private List<ArticleDraftVo> buildDrafts(List<ArticleDraft> drafts) {
         return drafts.stream()
                 .map(draft -> {
                     List<Integer> tagsIds = draft.getTagIds();
