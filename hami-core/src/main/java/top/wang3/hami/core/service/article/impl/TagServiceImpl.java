@@ -19,6 +19,7 @@ import top.wang3.hami.core.service.interact.repository.TagRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,56 +31,54 @@ public class TagServiceImpl implements TagService {
     TagService self;
 
 
-    @Autowired
     @Lazy
+    @Autowired
     public void setSelf(TagService self) {
         this.self = self;
     }
 
-    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'TAG_LIST'", cacheManager = Constants.CaffeineCacheManager)
     @Override
-    public List<Tag> getAllTags() {
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'TAG_LIST'", cacheManager = Constants.CaffeineCacheManager)
+    public List<Tag> getAllTag() {
         return tagRepository.getAllTags();
+    }
+
+    @Override
+    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'TAG_MAP'", cacheManager = Constants.CaffeineCacheManager)
+    public Map<Integer, Tag> getTagMap() {
+        List<Tag> tags = tagRepository.getAllTags();
+        return ListMapperHandler.listToMap(tags, Tag::getId);
     }
 
     @Override
     public PageData<Tag> getTagByPage(PageParam pageParam) {
         Page<Tag> page = pageParam.toPage();
-        List<Tag> tags = tagRepository.getTagsByPage(page);
-        page.setRecords(tags);
+        List<Tag> tags = self.getAllTag();
+        List<Tag> records = ListMapperHandler.subList(tags, page.getCurrent(), page.getSize());
+        page.setRecords(records);
         return PageData.build(page);
     }
 
     @Override
     public List<TagDTO> getTagDTOsByIds(List<Integer> tagIds) {
         if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
+        final Map<Integer, Tag> tagMap = self.getTagMap();
         return ListMapperHandler.listTo(tagIds, id -> {
-            Tag tag = self.getTagById(id);
+            Tag tag = tagMap.get(id);
             return new TagDTO(id, tag.getName());
-        });
+        }, false);
     }
 
     @Override
     public List<Tag> getTagsByIds(List<Integer> tagIds) {
         if (CollectionUtils.isEmpty(tagIds)) return Collections.emptyList();
-        return ListMapperHandler.listTo(tagIds, id -> self.getTagById(id));
+        final Map<Integer, Tag> tagsMap = self.getTagMap();
+        return ListMapperHandler.listTo(tagIds, tagsMap::get, false);
     }
 
-    @Cacheable(cacheNames = Constants.CAFFEINE_CACHE_NAME, key = "'tag-'+#id",
-            cacheManager = Constants.CaffeineCacheManager)
     @Override
     public Tag getTagById(Integer id) {
-        return tagRepository.getTagById(id);
-    }
-
-    @Override
-    public boolean checkTags(List<Integer> tagIds) {
-        for (Integer tagId : tagIds) {
-            if (self.getTagById(tagId) == null) {
-                return false;
-            }
-        }
-        return true;
+        return self.getTagMap().get(id);
     }
 
 }

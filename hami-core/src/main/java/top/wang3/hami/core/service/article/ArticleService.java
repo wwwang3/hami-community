@@ -5,7 +5,6 @@ import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticlePageParam;
 import top.wang3.hami.common.dto.article.UserArticleParam;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
-import top.wang3.hami.common.vo.article.ArticleContentVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
 
 import java.util.List;
@@ -44,11 +43,10 @@ public interface ArticleService {
 
     /**
      * 获取文章信息,包含用户数据和文章内容
+     *
      * @param articleId 文章Id
      * @return 文章信息
      */
-    ArticleContentVo getArticleContentById(int articleId);
-
-    boolean deleteByArticleId(Integer userId, Integer articleId);
+    ArticleVo getArticleContentById(int articleId);
 
 }

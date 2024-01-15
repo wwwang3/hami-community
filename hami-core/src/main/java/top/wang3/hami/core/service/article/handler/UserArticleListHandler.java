@@ -8,10 +8,11 @@ import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.service.article.cache.ArticleCacheService;
 
 import java.util.List;
 
@@ -21,7 +22,8 @@ import java.util.List;
 public class UserArticleListHandler implements CanalEntryHandler<Article> {
 
 
-    private final ArticleService articleService;
+    private final ArticleCacheService articleCacheService;
+    private final LockTemplate lockTemplate;
 
     private RedisScript<Long> insert_article_script;
 
@@ -43,7 +45,11 @@ public class UserArticleListHandler implements CanalEntryHandler<Article> {
                 List.of(id, ctime, timeout, ZPageHandler.DEFAULT_MAX_SIZE)
         );
         if (result == null || result == 0) {
-            articleService.loadUserArticleListCache(key, userId, -1, -1);
+            // 缓存过期
+            // 啥都不干, 重新读取吧
+//            lockTemplate.execute(RedisConstants.ARTICLE_LIST, () -> {
+//                articleCacheService.loadArticleListCache(null);
+//            });
         }
     }
 

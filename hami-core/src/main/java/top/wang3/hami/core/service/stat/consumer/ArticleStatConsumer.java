@@ -111,7 +111,7 @@ public class ArticleStatConsumer {
             bindings = @QueueBinding(
                     value = @Queue(RabbitConstants.STAT_QUEUE_3),
                     exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                    key = {"article.view"}
+                    key = {"article.delete"}
             )
     )
     public void handleArticleDeletedMessage(ArticleRabbitMessage message) {

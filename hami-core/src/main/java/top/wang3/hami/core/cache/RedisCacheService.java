@@ -111,6 +111,26 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
+    public <T, R> void asyncSetCache(String key, T data, long timeout, TimeUnit timeUnit) {
+        // 每个ID提交一个task?
+        // 异步写入缓存
+        executor.submitCompletable(() -> {
+            refreshCache(key, data, timeUnit.toMillis(timeout));
+        }).whenComplete((rs, th) -> {
+            if (th != null) {
+                log.error(
+                        "async refresh cache failed, key: {}, data: {}, error_msg: {}",
+                        key,
+                        data,
+                        th.getMessage()
+                );
+            } else {
+                log.info("async refresh cache success, key: {}, data: {}", key, data);
+            }
+        });
+    }
+
+    @Override
     public  <T, R> void asyncSetCache(final String keyPrefix, List<T> ids, List<R> applied,
                                       long timeout, TimeUnit timeUnit) {
         // 每个ID提交一个task?
@@ -131,6 +151,24 @@ public class RedisCacheService implements CacheService {
                 );
             } else {
                 log.info("async refresh cache success, keyPrefix: {}", keyPrefix);
+            }
+        });
+    }
+
+    @Override
+    public <T> void asyncSetHashCache(String key, Map<String, T> hash, long timeout, TimeUnit timeUnit) {
+        executor.submitCompletable(() -> {
+            refreshHashCache(key, hash, timeUnit.toMillis(timeout));
+        }).whenComplete((rs, th) -> {
+            if (th != null) {
+                log.error(
+                        "async refresh cache failed, key: {}, hash: {}, error_msg: {}",
+                        key,
+                        hash,
+                        th.getMessage()
+                );
+            } else {
+                log.info("async refresh cache success, key: {}, hash: {}", key, hash);
             }
         });
     }

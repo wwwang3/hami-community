@@ -11,7 +11,10 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
-import top.wang3.hami.common.dto.article.*;
+import top.wang3.hami.common.dto.article.ArticlePageParam;
+import top.wang3.hami.common.dto.article.CategoryDTO;
+import top.wang3.hami.common.dto.article.TagDTO;
+import top.wang3.hami.common.dto.article.UserArticleParam;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
@@ -20,7 +23,6 @@ import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.common.vo.article.ArticleContentVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.common.vo.user.UserVo;
 import top.wang3.hami.core.annotation.CostLog;
@@ -40,6 +42,7 @@ import top.wang3.hami.security.context.LoginUserContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 
@@ -117,7 +120,7 @@ public class ArticleServiceImpl implements ArticleService {
     public List<ArticleVo> listArticleVoById(List<Integer> ids, ArticleOptionsBuilder builder) {
         if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
         // 从缓存中获取
-        List<ArticleInfo> infos = articleCacheService.listArticleInfoById(ids);
+        List<Article> infos = articleCacheService.listArticleInfoById(ids);
         // 转化为Vo
         List<ArticleVo> dtos = ArticleConverter.INSTANCE.toArticleVos(infos);
         this.buildArticleVos(dtos, builder);
@@ -125,15 +128,15 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleContentVo getArticleContentById(int articleId) {
-        ArticleInfo info = articleCacheService.getArticleInfoCache(articleId);
-        if (info == null || info.getId() == null || info.getDeleted() == Constants.DELETED) {
+    public ArticleVo getArticleContentById(int articleId) {
+        Article info = articleCacheService.getArticleInfoCache(articleId);
+        if (info == null || info.getId() == null || Objects.equals(info.getDeleted(), Constants.DELETED)) {
             return null;
         }
         String content = articleCacheService.getArticleContentCache(articleId);
-        ArticleContentVo vo = ArticleConverter.INSTANCE.toArticleContentVo(info, content);
+        ArticleVo vo = ArticleConverter.INSTANCE.toArticleVo(info, content);
         // build category, tag, author, interact
-        List<ArticleContentVo> dtos = List.of(vo);
+        List<ArticleVo> dtos = List.of(vo);
         this.buildCategory(dtos);
         this.buildArticleTags(dtos);
         // 作者信息, 包含用户数据
@@ -150,7 +153,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private void record(int articleId, int authorId) {
-        //记录阅读数据
+        // 记录阅读数据
         String ip = IpContext.getIp();
         if (ip == null) return;
         String redisKey = RedisConstants.VIEW_LIMIT + ip + ":" + articleId;
@@ -159,7 +162,7 @@ public class ArticleServiceImpl implements ArticleService {
             log.debug("ip: {} access repeat", ip);
             return;
         }
-        //发布消息
+        // 发布消息
         ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
                 articleId, authorId, LoginUserContext.getLoginUserIdDefaultNull());
         rabbitMessagePublisher.publishMsg(message);
@@ -185,20 +188,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     public void buildCategory(List<? extends ArticleVo> dtos) {
-        dtos.forEach(t -> {
-            ArticleInfo info = t.getArticleInfo();
-            CategoryDTO categoryDTO = categoryService.getCategoryDTOById(info.getCategoryId());
-            t.setCategory(categoryDTO);
-        });
+        for (ArticleVo vo : dtos) {
+            CategoryDTO categoryDTO = categoryService.getCategoryDTOById(vo.getArticleInfo().getCategoryId());
+            vo.setCategory(categoryDTO);
+        }
     }
 
     public void buildArticleTags(List<? extends ArticleVo> dtos) {
-        dtos.forEach(dto -> {
-            ArticleInfo info = dto.getArticleInfo();
+        for (ArticleVo dto : dtos) {
+            Article info = dto.getArticleInfo();
             List<Integer> ids = info.getTagIds();
             List<TagDTO> tags = tagService.getTagDTOsByIds(ids);
             dto.setTags(tags);
-        });
+        }
     }
 
     public void buildArticleStat(List<ArticleVo> dtos, List<Integer> articleIds) {

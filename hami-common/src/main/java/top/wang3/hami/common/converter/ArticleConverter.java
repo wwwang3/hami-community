@@ -4,13 +4,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
-import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.article.CategoryDTO;
-import top.wang3.hami.common.model.*;
-import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.common.vo.article.ArticleContentVo;
+import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleDraft;
+import top.wang3.hami.common.model.Category;
+import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
 
@@ -50,54 +49,40 @@ public interface ArticleConverter {
     CategoryDTO toCategoryDTO(Category category);
 
 
-    default ArticleVo toArticleVo(ArticleInfo articleInfo) {
+    default ArticleVo toArticleVo(Article articleInfo) {
         if (articleInfo == null) return null;
-        ArticleVo articleDTO = new ArticleVo();
+        ArticleVo vo = new ArticleVo();
 
-        articleDTO.setId(articleInfo.getId());
-        articleDTO.setUserId(articleInfo.getUserId());
-        articleDTO.setArticleInfo(articleInfo);
-        return articleDTO;
+        vo.setId(articleInfo.getId());
+        vo.setUserId(articleInfo.getUserId());
+        vo.setArticleInfo(articleInfo);
+        return vo;
     }
 
-    default List<ArticleVo> toArticleVos(Collection<ArticleInfo> articleInfos) {
+    default ArticleVo toArticleVo(Article articleInfo, String content) {
+        if (articleInfo == null) return null;
+        // set content
+        articleInfo.setContent(content);
+        ArticleVo vo = new ArticleVo();
+
+        vo.setId(articleInfo.getId());
+        vo.setUserId(articleInfo.getUserId());
+        vo.setArticleInfo(articleInfo);
+        return vo;
+    }
+
+
+    default List<ArticleVo> toArticleVos(Collection<Article> articleInfos) {
         if (articleInfos == null || articleInfos.isEmpty()) {
             return Collections.emptyList();
         }
         ArrayList<ArticleVo> dtos = new ArrayList<>(articleInfos.size());
-        for (ArticleInfo articleInfo : articleInfos) {
+        for (Article articleInfo : articleInfos) {
             ArticleVo dto = toArticleVo(articleInfo);
             dtos.add(dto);
         }
         return dtos;
     }
 
-    default ArticleContentVo toArticleContentVo(ArticleInfo info, String content) {
-        if (info == null && content == null) {
-            return null;
-        }
-        ArticleContentVo vo = new ArticleContentVo();
-        if (info != null) {
-            vo.setArticleInfo(info);
-            vo.setId(info.getId());
-            vo.setUserId(info.getUserId());
-        }
-        vo.setContent(content);
-        return vo;
-    }
 
-
-    ArticleInfo toArticleInfo(ArticleDO articleDO, Collection<Integer> tagIds);
-
-    default List<ArticleInfo> toArticleInfos(List<ArticleDO> dos) {
-        if (CollectionUtils.isEmpty(dos)) {
-            return Collections.emptyList();
-        }
-        ArrayList<ArticleInfo> dtos = new ArrayList<>(dos.size());
-        for (ArticleDO item : dos) {
-            Collection<Integer> tagIds = ListMapperHandler.listTo(item.getTags(), ArticleTag::getTagId);
-            dtos.add(toArticleInfo(item, tagIds));
-        }
-        return dtos;
-    }
 }

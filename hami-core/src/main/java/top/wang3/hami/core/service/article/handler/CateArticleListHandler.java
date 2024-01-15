@@ -8,10 +8,11 @@ import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.service.article.cache.ArticleCacheService;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,15 +23,14 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CateArticleListHandler implements CanalEntryHandler<Article> {
 
-    private final ArticleService articleService;
+    private final ArticleCacheService articleCacheService;
+    private final LockTemplate lockTemplate;
 
     private RedisScript<Long> insert_article_script;
-    private RedisScript<Long> update_article_script;
 
     @PostConstruct
     public void init() {
         insert_article_script = RedisClient.loadScript("/META-INF/scripts/insert_article_list.lua");
-        update_article_script = RedisClient.loadScript("/META-INF/scripts/update_cate_article_list.lua");
     }
 
 
@@ -46,7 +46,10 @@ public class CateArticleListHandler implements CanalEntryHandler<Article> {
                 List.of(id, entity.getCtime().getTime(), timeout, ZPageHandler.DEFAULT_MAX_SIZE)
         );
         if (result == null || result == 0) {
-            articleService.loadArticleListCache(key, cateId, -1, -1);
+            // 缓存过期
+            lockTemplate.execute(RedisConstants.ARTICLE_LIST, () -> {
+                articleCacheService.loadArticleListCache(null);
+            });
         }
     }
 
@@ -58,13 +61,6 @@ public class CateArticleListHandler implements CanalEntryHandler<Article> {
             if (Objects.equals(before.getCategoryId(), after.getCategoryId())) {
                 return;
             }
-            String oldCateKey = buildKey(before.getCategoryId());
-            String newCateKey = buildKey(after.getCategoryId());
-            RedisClient.executeScript(
-                    update_article_script,
-                    List.of(oldCateKey, newCateKey),
-                    List.of(after.getId(), after.getCtime().getTime())
-            );
             // 分类ID改变, 插入到新的分类文章列表中
             processInsert(after);
             // 从旧的分类文章列表删除

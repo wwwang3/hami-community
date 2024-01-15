@@ -13,7 +13,7 @@ import top.wang3.hami.common.message.SearchRabbitMessage;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.common.vo.article.ArticleDTO;
+import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
@@ -35,14 +35,14 @@ public class SearchServiceImpl implements SearchService {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Override
-    public PageData<ArticleDTO> searchArticle(SearchParam param) {
+    public PageData<ArticleVo> searchArticle(SearchParam param) {
         String keyword = param.getKeyword();
         rabbitMessagePublisher.publishMsg(new SearchRabbitMessage(keyword));
         Page<Article> page = param.toPage();
         List<Integer> ids = articleRepository.searchArticle(page, keyword);
-        List<ArticleDTO> articles = articleService.listArticleDTOById(ids, new ArticleOptionsBuilder());
+        List<ArticleVo> articles = articleService.listArticleVoById(ids, new ArticleOptionsBuilder());
         highlightKeyword(articles, keyword);
-        return PageData.<ArticleDTO>builder()
+        return PageData.<ArticleVo>builder()
                 .total(page.getTotal())
                 .pageNum(page.getCurrent())
                 .data(articles)
@@ -55,10 +55,10 @@ public class SearchServiceImpl implements SearchService {
         return RedisClient.zRevPage(key, 1, 20);
     }
 
-    private void highlightKeyword(List<ArticleDTO> articles, String keyword) {
+    private void highlightKeyword(List<ArticleVo> articles, String keyword) {
         Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
         String replaced = Hi_PRE_TAG + keyword + Hi_POST_TAG;
-        List<ArticleInfo> infos = ListMapperHandler.listTo(articles, ArticleDTO::getArticleInfo, false);
+        List<ArticleInfo> infos = ListMapperHandler.listTo(articles, ArticleVo::getArticleInfo, false);
         infos.forEach(article -> {
             String title = pattern.matcher(article.getTitle()).replaceAll(replaced);
             String summary = pattern.matcher(article.getSummary()).replaceAll(replaced);

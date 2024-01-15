@@ -9,10 +9,11 @@ import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.service.article.cache.ArticleCacheService;
 
 import java.util.List;
 
@@ -23,7 +24,8 @@ import java.util.List;
 @Slf4j
 public class ArticleListHandler implements CanalEntryHandler<Article> {
 
-    private final ArticleService articleService;
+    private final ArticleCacheService articleCacheService;
+    private final LockTemplate lockTemplate;
 
     private RedisScript<Long> insert_article_script;
 
@@ -44,7 +46,10 @@ public class ArticleListHandler implements CanalEntryHandler<Article> {
                 List.of(id, ctime, timeout, ZPageHandler.DEFAULT_MAX_SIZE)
         );
         if (result == null || result == 0) {
-            articleService.loadArticleListCache(key, null, -1, -1);
+            // 缓存过期
+            lockTemplate.execute(RedisConstants.ARTICLE_LIST, () -> {
+                articleCacheService.loadArticleListCache(null);
+            });
         }
     }
 
@@ -57,6 +62,7 @@ public class ArticleListHandler implements CanalEntryHandler<Article> {
 
     @Override
     public void processDelete(Article deletedEntity) {
+        // 缓存过期重新读取吧
         Integer id = deletedEntity.getId();
         RedisClient.zRem(RedisConstants.ARTICLE_LIST, id);
     }

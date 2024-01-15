@@ -1,11 +1,13 @@
 package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 文章表
@@ -13,7 +15,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "article")
+@TableName(value = "article", autoResultMap = true)
 public class Article {
 
     /**
@@ -34,6 +36,12 @@ public class Article {
      */
     @TableField(value = "category_id")
     private Integer categoryId;
+
+    /**
+     * 文章标签
+     */
+    @TableField(value = "tag_ids", typeHandler = JacksonTypeHandler.class)
+    private List<Integer> tagIds;
 
     /**
      * 文章标题
@@ -77,4 +85,5 @@ public class Article {
      */
     @TableField(value = "mtime")
     private Date mtime;
+
 }

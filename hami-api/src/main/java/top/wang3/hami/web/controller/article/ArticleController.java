@@ -8,7 +8,6 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticlePageParam;
 import top.wang3.hami.common.dto.article.UserArticleParam;
-import top.wang3.hami.common.vo.article.ArticleContentVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.security.model.Result;
@@ -41,9 +40,8 @@ public class ArticleController {
     }
 
     @GetMapping("/detail")
-    public Result<ArticleContentVo> getArticleContentById(@RequestParam("article_id") int articleId) {
-        ArticleContentVo articleContentDTO = articleService.getArticleContentById(articleId);
-        return Result.ofNullable(articleContentDTO)
+    public Result<ArticleVo> getArticleContentById(@RequestParam("article_id") int articleId) {
+        return Result.ofNullable(articleService.getArticleContentById(articleId))
                 .orElse("文章不存在");
     }
 }

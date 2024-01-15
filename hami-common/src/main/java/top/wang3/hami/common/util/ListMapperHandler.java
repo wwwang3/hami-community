@@ -55,16 +55,11 @@ public class ListMapperHandler {
                 .collect(Collectors.groupingBy(mapper));
     }
 
+    public static <T> List<T> subList(List<T> origin, long current, long size) {
+        return subList(origin, (int) current, (int) size);
+    }
 
     public static <T> List<T> subList(List<T> origin, int current, int size) {
-        return subList(origin, Function.identity(), current, size);
-    }
-
-    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, long current, long size) {
-        return subList(origin, mapper, (int) current, (int) size);
-    }
-
-    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
         if (CollectionUtils.isEmpty(origin)) {
             return Collections.emptyList();
         }
@@ -75,8 +70,17 @@ public class ListMapperHandler {
         if (from >= length) {
             return Collections.emptyList();
         }
-        List<T> list = origin.subList(from, to);
-        return listTo(list, mapper);
+        return origin.subList(from, to);
+    }
+
+
+    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, long current, long size) {
+        return subList(origin, mapper, (int) current, (int) size);
+    }
+
+    public static <T, R> List<R> subList(List<T> origin, Function<T, R> mapper, int current, int size) {
+        List<T> subList = subList(origin, current, size);
+        return listTo(subList, mapper, false);
     }
 
     public static <T, R> ArrayList<R> listTo(Collection<T> origin, BiFunction<T, Integer, R> mapper) {
@@ -112,7 +116,7 @@ public class ListMapperHandler {
      * @return List<R>
      */
     public static <T, R> List<R> listTo(Collection<T> origin, Function<T, R> mapper) {
-        //默认去重
+        // 默认去重
         return listTo(origin, mapper, true);
     }
 
@@ -127,7 +131,7 @@ public class ListMapperHandler {
         return stream
                 .filter(Objects::nonNull)
                 .map(mapper)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
     }
 
     public static <T, R> Set<R> listToSet(List<T> origin, Function<T, R> mapper) {
@@ -135,7 +139,8 @@ public class ListMapperHandler {
                 .map(o -> o.stream()
                         .filter(Objects::nonNull)
                         .map(mapper)
-                        .collect(Collectors.toSet()))
+                        .collect(Collectors.toSet())
+                )
                 .orElse(Collections.emptySet());
     }
 

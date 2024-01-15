@@ -31,8 +31,8 @@ public class ArticleRankCanalHandler implements CanalEntryHandler<Article> {
     @Override
     public void processDelete(Article deletedEntity) {
         Integer id = deletedEntity.getId();
-        String total_key = RedisConstants.OVERALL_HOT_ARTICLES;
-        String cate_key = RedisConstants.HOT_ARTICLE + deletedEntity.getCategoryId();
+        String total_key = RedisConstants.TOTAL_HOT_ARTICLE;
+        String cate_key = RedisConstants.CATE_HOT_ARTICLE + deletedEntity.getCategoryId();
         Long res1 = RedisClient.zRem(total_key, id);
         Long res2 = RedisClient.zRem(cate_key, id);
         log.info("article deleted, remove it from hot_article_list, res1: {}, res2: {}", res1, res2);

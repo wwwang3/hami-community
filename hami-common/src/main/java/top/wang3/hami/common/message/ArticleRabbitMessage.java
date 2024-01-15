@@ -47,10 +47,15 @@ public class ArticleRabbitMessage implements RabbitMessage {
         DELETE("article.delete"),
         VIEW("article.view");
 
-        final String route;
+        public final String route;
 
         Type(String route) {
             this.route = route;
+        }
+
+
+        public String getRoute() {
+            return route;
         }
     }
 }

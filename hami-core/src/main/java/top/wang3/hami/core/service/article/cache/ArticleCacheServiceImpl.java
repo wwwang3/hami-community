@@ -8,7 +8,6 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
@@ -79,7 +78,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    public List<ArticleInfo> listArticleInfoById(List<Integer> articleIds) {
+    public List<Article> listArticleInfoById(List<Integer> articleIds) {
         // 从缓存中获取articleInfo
         return cacheService.multiGetById(
                 RedisConstants.ARTICLE_INFO,
@@ -104,7 +103,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    public ArticleInfo getArticleInfoCache(Integer articleId) {
+    public Article getArticleInfoCache(Integer articleId) {
         // 从缓存获取article-info
         return cacheService.get(
                 RedisConstants.ARTICLE_INFO + articleId,

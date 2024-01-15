@@ -9,12 +9,13 @@ import top.wang3.hami.common.vo.article.ArticleDraftVo;
 public interface ArticleDraftService {
 
     /**
-     * 获取文章草稿
+     * 分页获取文章草稿
      *
      * @param param 分页参数
+     * @param state 文章状态
      * @return PageData<ArticleDraftDTO>
      */
-    PageData<ArticleDraftVo> getArticleDrafts(PageParam param, byte state);
+    PageData<ArticleDraftVo> listDraftByPage(PageParam param, byte state);
 
     /**
      * 获取文章草稿

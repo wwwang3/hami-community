@@ -11,10 +11,12 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.cache.CacheService;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 
 @Component
@@ -23,7 +25,8 @@ import java.util.Objects;
 @Slf4j
 public class ArticleCountHandler implements CanalEntryHandler<Article> {
 
-    private final ArticleService articleService;
+    private final ArticleRepository articleRepository;
+    private final CacheService cacheService;
 
     private RedisScript<Long> insert_script;
     private RedisScript<Long> update_script;
@@ -60,7 +63,13 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
                     List.of(TimeoutConstants.ARTICLE_COUNT_EXPIRE)
             );
             if (result == null || result == 0) {
-                articleService.loadArticleCount(key, oldCate);
+                // 缓存过期, 重新设置缓存, 这里已经是mysql数据变化后
+                cacheService.asyncSetHashCache(
+                        key,
+                        articleRepository.getArticleCount(),
+                        TimeoutConstants.ARTICLE_COUNT_EXPIRE,
+                        TimeUnit.MILLISECONDS
+                );
             }
         }
     }
@@ -78,7 +87,13 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
         Long result = RedisClient.executeScript(insert_script, List.of(key, totalHKey, cateHKey),
                 List.of(TimeoutConstants.ARTICLE_COUNT_EXPIRE, delta));
         if (result == null || result == 0) {
-            articleService.loadArticleCount(key, totalHKey);
+            // 缓存过期, 重新设置缓存, 这里已经是mysql数据变化后
+            cacheService.asyncSetHashCache(
+                    key,
+                    articleRepository.getArticleCount(),
+                    TimeoutConstants.ARTICLE_COUNT_EXPIRE,
+                    TimeUnit.MILLISECONDS
+            );
         }
     }
 }

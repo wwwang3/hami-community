@@ -13,7 +13,6 @@ import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
-import top.wang3.hami.common.vo.article.ArticleDTO;
 import top.wang3.hami.common.vo.article.ReadingRecordVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;

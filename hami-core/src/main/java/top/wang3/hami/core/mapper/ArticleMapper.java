@@ -7,27 +7,22 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleCount;
-import top.wang3.hami.common.model.ArticleDO;
 
-import java.util.Collection;
 import java.util.List;
 
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
 
-    List<Integer> searchArticle(Page<Article> page, @Param("keyword") String keyword);
+    Article selectArticleById(@Param("id") Integer id);
 
+    List<Integer> searchArticle(Page<Article> page, @Param("keyword") String keyword);
     @Select("""
-                select user_id from article where id = #{articleId} and deleted = 0;
+                select user_id from article where id = #{articleId};
             """)
-    Integer getArticleAuthor(Integer articleId);
+    Integer selectArticleAuthor(Integer id);
 
     List<Integer> selectFollowUserArticles(Page<Article> page, @Param("user_id") int loginUserId);
-
-    ArticleDO selectArticleById(@Param("articleId") Integer articleId);
-
-    List<ArticleDO> listArticleById(@Param("ids") Collection<Integer> ids);
 
     @Select("""
                 select id from article

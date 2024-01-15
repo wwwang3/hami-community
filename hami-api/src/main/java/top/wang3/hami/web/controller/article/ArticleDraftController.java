@@ -24,7 +24,7 @@ public class ArticleDraftController {
     public Result<PageData<ArticleDraftVo>> getDrafts(@RequestParam("pageNum") long pageNum,
                                                       @RequestParam("pageSize") long pageSize) {
         PageParam param = new PageParam(pageNum, pageSize);
-        PageData<ArticleDraftVo> articleDrafts = articleDraftService.getArticleDrafts(param, Constants.ZERO);
+        PageData<ArticleDraftVo> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
         return Result.successData(articleDrafts);
     }
 
@@ -32,7 +32,7 @@ public class ArticleDraftController {
     public Result<PageData<ArticleDraftVo>> getArticles(@RequestParam("pageNum") long pageNum,
                                                         @RequestParam("pageSize") long pageSize) {
         PageParam param = new PageParam(pageNum, pageSize);
-        PageData<ArticleDraftVo> drafts = articleDraftService.getArticleDrafts(param, Constants.ONE);
+        PageData<ArticleDraftVo> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);
     }
 

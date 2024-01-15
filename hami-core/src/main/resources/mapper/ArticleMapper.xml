@@ -7,30 +7,18 @@
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="category_id" property="categoryId"/>
+        <result column="tag_ids" property="tagIds"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler" />
         <result column="title" property="title"/>
         <result column="summary" property="summary"/>
-        <result column="content" property="content"/>
         <result column="picture" property="picture"/>
         <result column="deleted" property="deleted"/>
         <result column="ctime" property="ctime"/>
         <result column="mtime" property="mtime"/>
     </resultMap>
 
-    <resultMap id="ArticleDOMap" type="top.wang3.hami.common.model.ArticleDO">
-        <id column="id" property="id"/>
-        <result column="user_id" property="userId"/>
-        <result column="category_id" property="categoryId"/>
-        <result column="content" property="content"/>
-        <result column="title" property="title"/>
-        <result column="summary" property="summary"/>
-        <result column="picture" property="picture"/>
-        <result column="deleted" property="deleted"/>
-        <result column="ctime" property="ctime"/>
-        <result column="mtime" property="mtime"/>
-        <collection property="tags" ofType="top.wang3.hami.common.model.ArticleTag">
-            <result column="article_id" property="articleId"/>
-            <result column="tag_id" property="tagId"/>
-        </collection>
+    <resultMap id="FullResultMap" type="top.wang3.hami.common.model.Article" extends="BaseResultMap">
+        <result column="content" property="content" />
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -38,6 +26,7 @@
         id,
         user_id,
         category_id,
+        tag_ids,
         title,
         summary,
         picture,
@@ -46,11 +35,12 @@
         mtime
     </sql>
 
-    <sql id="Full_Base_Column_List">
+    <sql id="Full_Column_List">
         <!--@mbg.generated-->
         id,
         user_id,
         category_id,
+        tag_ids,
         title,
         summary,
         content,
@@ -58,39 +48,6 @@
         deleted,
         ctime,
         mtime
-    </sql>
-
-    <sql id="ARTICLDO_COLUMN_LIST">
-        <!--@sql select -->
-        t1.id          as id,
-        t1.user_id     as user_id,
-        t1.summary     as summary,
-        t1.title       as title,
-        t1.deleted     as deleted,
-        t1.ctime       as ctime,
-        t1.mtime       as mtime,
-        t1.picture     as picture,
-        t1.category_id as category_id,
-        t2.tag_id      as tag_id,
-        t2.article_id  as article_id
-        <!--@sql from article t1 left join article_tag t2 -->
-    </sql>
-
-    <sql id="ARTICLDO_FULL_COLUMN_LIST">
-        <!--@sql select -->
-        t1.id          as id,
-        t1.user_id     as user_id,
-        t1.summary     as summary,
-        t1.title       as title,
-        t1.content     as content,
-        t1.deleted     as deleted,
-        t1.ctime       as ctime,
-        t1.mtime       as mtime,
-        t1.picture     as picture,
-        t1.category_id as category_id,
-        t2.tag_id      as tag_id,
-        t2.article_id  as article_id
-        <!--@sql from article t1 left join article_tag t2 -->
     </sql>
 
     <select id="searchArticle" resultType="java.lang.Integer">
@@ -115,29 +72,7 @@
         order by t1.id desc
     </select>
 
-    <select id="listArticleById" resultMap="ArticleDOMap">
-        select
-        <include refid="ARTICLDO_COLUMN_LIST">
-        </include>
-        from article t1
-                 left join article_tag t2 on t1.id = t2.article_id
-        where t1.id in <!-- fix: where条件写在了left join中导致查询了所有数据(我是傻逼) -->
-        <foreach collection="ids" open="(" separator="," close=")" item="id">
-            #{id}
-        </foreach>
-        and deleted = 0
-    </select>
-
-    <select id="selectArticleById" resultMap="ArticleDOMap">
-        select
-        <include refid="ARTICLDO_COLUMN_LIST">
-        </include>
-        from article t1
-                 left join article_tag t2 on t1.id = t2.article_id
-        where t1.id = #{articleId}
-    </select>
-
-    <select id="scanArticles" resultMap="ArticleDOMap">
+    <select id="scanArticles" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List">
         </include>
@@ -157,5 +92,13 @@
         select count(*) as total
         from article
         where deleted = 0
+    </select>
+
+    <select id="selectArticleById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List">
+        </include>
+        from article
+        where id = #{id};
     </select>
 </mapper>

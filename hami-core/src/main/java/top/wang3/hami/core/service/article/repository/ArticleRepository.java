@@ -3,7 +3,6 @@ package top.wang3.hami.core.service.article.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
 
 import java.util.Collection;
@@ -12,11 +11,11 @@ import java.util.Map;
 
 public interface ArticleRepository extends IService<Article> {
 
-    ArticleInfo getArticleInfoById(Integer articleId);
+    Article getArticleInfoById(Integer articleId);
 
     Long getArticleCount(Integer cateId, Integer userId);
 
-    List<ArticleInfo> listArticleById(Collection<Integer> ids);
+    List<Article> listArticleById(Collection<Integer> ids);
 
     List<Article> listUserArticle(int userId);
 

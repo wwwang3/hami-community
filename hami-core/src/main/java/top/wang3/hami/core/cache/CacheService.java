@@ -21,8 +21,12 @@ public interface CacheService {
 
     boolean expireAndIncrBy(String key, int delta, long timeout, TimeUnit timeUnit);
 
+    <T, R> void asyncSetCache(String key, T data, long timeout, TimeUnit timeUnit);
+
     <T, R> void asyncSetCache(String keyPrefix, List<T> ids, List<R> applied,
                               long timeout, TimeUnit timeUnit);
+
+    <T> void asyncSetHashCache(String key, Map<String, T> hash, long timeout, TimeUnit timeUnit);
 
     /**
      * 加锁刷新缓存, 默认一天过期时间

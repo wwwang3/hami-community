@@ -128,21 +128,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean updateProfile(UserProfileParam param) {
         User user = UserConverter.INSTANCE.toUser(param);
-        //暂不支持修改用户名
+        // 暂不支持修改用户名
         user.setUsername(null);
         int loginUserId = LoginUserContext.getLoginUserId();
-
-        Boolean success = transactionTemplate.execute(status -> {
-            //暂不支持修改
-            //更新账号信息
-//            if (saved && StringUtils.hasText(username)) {
-//                Account account = new Account();
-//                account.setId(loginUserId);
-//                account.setUsername(username);
-//                return accountRepository.updateById(account);
-//            }
-            return userRepository.updateUser(loginUserId, user);
-        });
+        boolean success = userRepository.updateUser(loginUserId, user);
         if (Boolean.TRUE.equals(success)) {
             UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_UPDATE, loginUserId);
             rabbitMessagePublisher.publishMsg(message);

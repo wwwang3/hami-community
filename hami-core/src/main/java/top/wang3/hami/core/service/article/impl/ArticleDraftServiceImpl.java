@@ -13,28 +13,28 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.model.Article;
-import top.wang3.hami.common.model.ArticleDraft;
-import top.wang3.hami.common.model.ArticleStat;
-import top.wang3.hami.common.model.Tag;
+import top.wang3.hami.common.model.*;
+import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.util.Predicates;
 import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
-import top.wang3.hami.core.service.article.*;
+import top.wang3.hami.core.service.article.ArticleDraftService;
+import top.wang3.hami.core.service.article.CategoryService;
+import top.wang3.hami.core.service.article.TagService;
 import top.wang3.hami.core.service.article.repository.ArticleDraftRepository;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ArticleDraftServiceImpl implements ArticleDraftService {
 
-    private final ArticleService articleService;
-    private final ArticleTagService articleTagService;
     private final ArticleStatMapper articleStatMapper;
 
     private final CategoryService categoryService;
@@ -52,7 +52,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
 
     @Override
-    public PageData<ArticleDraftVo> getArticleDrafts(PageParam param, byte state) {
+    public PageData<ArticleDraftVo> listDraftByPage(PageParam param, byte state) {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<ArticleDraft> page = param.toPage();
         List<ArticleDraft> drafts = articleDraftRepository.getDraftsByPage(page, loginUserId, state);
@@ -79,6 +79,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
     /**
      * 创建文章草稿
+     *
      * @param param 参数
      * @return ArticleDraft
      */
@@ -98,14 +99,14 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
     @Override
     public ArticleDraft updateDraft(ArticleDraftParam param) {
-        //更新草稿
+        // 更新草稿
         ArticleDraft draft = ArticleConverter.INSTANCE.toArticleDraft(param);
         if (draft.getId() == null) {
             throw new HamiServiceException("参数错误");
         }
         int loginUserId = LoginUserContext.getLoginUserId();
-        //获取旧的
-        ArticleDraft oldDraft = articleDraftRepository.getDraftById(draft.getId(),  loginUserId);
+        // 获取旧的
+        ArticleDraft oldDraft = articleDraftRepository.getDraftById(draft.getId(), loginUserId);
         draft.setVersion(oldDraft.getVersion());
         boolean success = articleDraftRepository.updateDraft(draft);
         return success ? draft : null;
@@ -119,68 +120,62 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
      */
     @Override
     public ArticleDraft publishArticle(Long draftId) {
-        //检查参数, 文章ID, 其他都不能为空
+        // 检查参数, 除了文章ID, 其他都不能为空
         int loginUserId = LoginUserContext.getLoginUserId();
-        //获取草稿
+        // 获取草稿
         final ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
-        //校验draft
+        // 校验draft
         checkDraft(draft);
-        //文章
+        // 文章
         Article article = ArticleConverter.INSTANCE.toArticle(draft);
         Boolean success = transactionTemplate.execute(status -> {
-            //发表文章
-            boolean success1;
-            if (article.getId() == null) {
-                //插入
-                success1 = handleInsert(article, draft, loginUserId);
-                if (success1) {
-                    ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
-                            article.getId(), article.getUserId());
-                    message.setCateId(article.getCategoryId());
-                    rabbitMessagePublisher.publishMsg(message);
-                    return true;
-                }
+            if (article.getId() == null && handleInsert(article, draft, loginUserId)) {
+                // 插入文章, 成功发布文章发表消息
+                ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
+                        article.getId(), article.getUserId());
+                message.setCateId(article.getCategoryId());
+                rabbitMessagePublisher.publishMsg(message);
+                return true;
+            } else if (article.getId() != null && handleUpdate(article)){
+                // 更新文章, 成功发布文章更新消息
+                ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
+                        article.getId(), article.getUserId());
+                rabbitMessagePublisher.publishMsg(message);
+                message.setCateId(article.getCategoryId());
+                return true;
             } else {
-                //更新
-                success1 = handleUpdate(article, draft);
-            }
-            if (!success1) {
+                // 插入或者更新失败
                 status.setRollbackOnly();
                 return false;
             }
-            return true;
         });
         return Boolean.TRUE.equals(success) ? draft : null;
     }
 
     @Override
     public boolean deleteDraft(long draftId) {
-        //刪除草稿
+        // 刪除草稿
         int userId = LoginUserContext.getLoginUserId();
         return articleDraftRepository.deleteDraftById(draftId, userId);
     }
 
     @Override
     public boolean deleteArticle(int articleId) {
-        //删除文章
-        int userId = LoginUserContext.getLoginUserId();
+        // 删除文章
+        int loginUserId = LoginUserContext.getLoginUserId();
         Boolean success = transactionTemplate.execute(status -> {
-            //删除文章
-            boolean deleted = articleRepository.deleteArticle(articleId, userId);
-            if (!deleted) {
-                return false;
-            }
-            //删除草稿
-            boolean removed = articleDraftRepository.deleteDraftByArticleId(articleId, userId);
-            if (!removed) {
+            // 同时删除草稿
+            if (articleRepository.deleteArticle(articleId, loginUserId) &&
+                articleDraftRepository.deleteDraftByArticleId(articleId, loginUserId)) {
+                return true;
+            } else {
                 status.setRollbackOnly();
                 return false;
             }
-            return true;
         });
         if (Boolean.TRUE.equals(success)) {
             var message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.DELETE,
-                    articleId, userId, userId);
+                    articleId, loginUserId, loginUserId);
             rabbitMessagePublisher.publishMsg(message);
             return true;
         }
@@ -188,53 +183,52 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     private boolean handleInsert(Article article, ArticleDraft draft, Integer loginUserId) {
-        // 插入
-        boolean success1 = articleRepository.saveArticle(article);
+        // 插入, 已经有文章标签ID了
+        boolean success = articleRepository.saveArticle(article);
         draft.setArticleId(article.getId());
         draft.setState(Constants.ONE);
-        if (success1) {
-            // 插入文章标签
-            articleTagService.saveTags(article.getId(), draft.getTagIds());
-            // 初始化文章数据
-            articleStatMapper.insert(new ArticleStat(article.getId(), loginUserId));
-            ArticleDraft newDraft = new ArticleDraft(draft.getId(), article.getId(), Constants.ONE, draft.getVersion());
-            // 更新文章草稿
-            return articleDraftRepository.updateDraft(newDraft);
-        }
-        return false;
+        final Integer articleId = article.getId();
+        return Predicates.check(success)
+                .then(() -> {
+                    // 初始化文章数据
+                    int rows = articleStatMapper.insert(new ArticleStat(articleId, loginUserId));
+                    return rows == 1;
+                })
+                .then(() -> {
+                    // 更新文章草稿
+                    ArticleDraft newDraft = new ArticleDraft(draft.getId(), articleId, Constants.ONE, draft.getVersion());
+                    return articleDraftRepository.updateDraft(newDraft);
+                }).get();
     }
 
-    private boolean handleUpdate(Article article, ArticleDraft draft) {
-        if (articleRepository.updateArticle(article) &&
-                articleTagService.updateTags(article.getId(), draft.getTagIds())) {
-            ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
-                    article.getId(), article.getUserId());
-            rabbitMessagePublisher.publishMsg(message);
-            message.setCateId(article.getCategoryId());
-            return true;
-        }
-        return false;
+    private boolean handleUpdate(Article article) {
+        // 直接更新即可, 不要在更新标签啦
+        return articleRepository.updateArticle(article);
     }
 
     private void checkDraft(ArticleDraft draft) {
         validator.validate(draft);
-        //校验分类
-        if (categoryService.getCategoryDTOById(draft.getCategoryId()) == null) {
-            throw new HamiServiceException("请选择一个分类");
+        // 校验分类
+        // assert cateId != null
+        Map<Integer, Category> categroyMap = categoryService.getCategroyMap();
+        if (categroyMap.containsKey(draft.getCategoryId())) {
+            throw new HamiServiceException("分类不存在");
         }
-        ///校验标签 若有个tagId不存在抛出错误
+        /// 校验标签 若有个tagId不存在抛出错误
         List<Integer> tagIds = draft.getTagIds();
-        if (!tagService.checkTags(tagIds)) {
-            throw new HamiServiceException("标签参数错误");
+        Map<Integer, Tag> tagsMap = tagService.getTagMap();
+        for (Integer tagId : tagIds) {
+            if (!tagsMap.containsKey(tagId)) {
+                throw new HamiServiceException("标签不存在");
+            }
         }
     }
 
     private List<ArticleDraftVo> buildDrafts(List<ArticleDraft> drafts) {
-        return drafts.stream()
-                .map(draft -> {
-                    List<Integer> tagsIds = draft.getTagIds();
-                    List<Tag> tags = tagService.getTagsByIds(tagsIds);
-                    return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
-                }).toList();
+        return ListMapperHandler.listTo(drafts, draft -> {
+            List<Integer> tagsIds = draft.getTagIds();
+            List<Tag> tags = tagService.getTagsByIds(tagsIds);
+            return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
+        }, false);
     }
 }

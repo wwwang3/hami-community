@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.SearchParam;
-import top.wang3.hami.common.vo.article.ArticleDTO;
+import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.service.search.SearchService;
 import top.wang3.hami.security.model.Result;
 
@@ -22,11 +22,11 @@ public class SearchController {
     private final SearchService searchService;
 
     @PostMapping("/query_list")
-    public Result<PageData<ArticleDTO>> searchArticle(@RequestBody @Valid SearchParam param) {
+    public Result<PageData<ArticleVo>> searchArticle(@RequestBody @Valid SearchParam param) {
         if (!StringUtils.hasText(param.getKeyword())) {
             return Result.of(PageData.empty());
         }
-        PageData<ArticleDTO> data = searchService.searchArticle(param);
+        PageData<ArticleVo> data = searchService.searchArticle(param);
         return Result.successData(data);
     }
 

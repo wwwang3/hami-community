@@ -7,7 +7,6 @@ import lombok.SneakyThrows;
 import top.wang3.hami.common.HamiFactory;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checker) {
@@ -16,14 +15,14 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
 
     public Result<T> orElse(Supplier<T> supplier) {
         Objects.requireNonNull(supplier);
-        if (checker != null && checker.check().get()) {
+        if (checker != null && checker.check()) {
             return Result.successData(supplier.get());
         }
         return this;
     }
 
     public Result<T> orElse(String errorMsg) {
-        if (checker != null && !checker.check().get()) {
+        if (checker != null && !checker.check()) {
             return Result.error(errorMsg);
         }
         return this;
@@ -35,7 +34,7 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
     }
 
     public static <T> Result<T> ofNullable(T data) {
-        return new Result<>(200, "success", data, new NullChecker<>(() -> data));
+        return new Result<>(200, "success", data, () -> data != null);
     }
 
     public static Result<Void> ofTrue(boolean success) {
@@ -45,7 +44,7 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
 
     public static Result<Void> ofTrue(Supplier<Boolean> supplier) {
         Objects.requireNonNull(supplier);
-        return new Result<>(200, "success", null, new BooleanChecker<>(supplier.get()));
+        return new Result<>(200, "success", null, supplier::get);
     }
 
 
@@ -90,48 +89,8 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
         return Objects.nonNull(o) ? Result.successData(o) : Result.error("error");
     }
 
-    public static <R> Result<R> successIfNoNull(Supplier<R> supplier) {
-        if (supplier == null) return Result.error("error");
-        return Optional
-                .ofNullable(supplier.get())
-                .map(Result::successData)
-                .orElse(Result.error("error"));
-    }
-
     public interface Checker {
-        Supplier<Boolean> TRUE = () -> true;
-        Supplier<Boolean> FALSE = () -> false;
-
-        Supplier<Boolean> check();
-
-    }
-
-    public static class NullChecker<T> implements Checker {
-
-        Supplier<T> supplier;
-
-        public NullChecker(Supplier<T> supplier) {
-            this.supplier = supplier;
-        }
-
-        @Override
-        public Supplier<Boolean> check() {
-            return supplier != null && supplier.get() != null ? TRUE : FALSE;
-        }
-    }
-
-    public static class BooleanChecker<T> implements Checker {
-
-        boolean success = true;
-
-        public BooleanChecker(boolean success) {
-            this.success = success;
-        }
-
-        @Override
-        public Supplier<Boolean> check() {
-            return success ? TRUE : FALSE;
-        }
+        boolean check();
 
     }
 

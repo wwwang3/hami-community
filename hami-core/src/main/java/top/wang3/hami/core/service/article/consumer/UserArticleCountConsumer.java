@@ -7,10 +7,12 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.core.cache.CacheService;
+import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 }, concurrency = "2")
 public class UserArticleCountConsumer {
 
-    private final ArticleService articleService;
+    private final CacheService cacheService;
+    private final ArticleRepository articleRepository;
 
     @RabbitHandler
     public void handleArticleMessage(ArticleRabbitMessage message) {
@@ -44,7 +47,12 @@ public class UserArticleCountConsumer {
         if (RedisClient.expire(key, RandomUtils.randomLong(10, 100), TimeUnit.HOURS)) {
             RedisClient.incrBy(key, delta);
         } else {
-            articleService.getUserArticleCount(userId);
+            cacheService.asyncSetCache(
+                    key,
+                    articleRepository.getArticleCount(null, userId),
+                    TimeoutConstants.USER_ARTICLE_LIST_EXPIRE,
+                    TimeUnit.MILLISECONDS
+            );
         }
     }
 }

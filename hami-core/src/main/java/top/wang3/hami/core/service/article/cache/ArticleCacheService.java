@@ -1,7 +1,6 @@
 package top.wang3.hami.core.service.article.cache;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.vo.article.HotArticle;
 
@@ -21,17 +20,15 @@ public interface ArticleCacheService {
 
     List<Integer> listUserArticleIdByPage(Page<Article> page, Integer userId);
 
-    List<ArticleInfo> listArticleInfoById(List<Integer> articleIds);
+    List<Article> listArticleInfoById(List<Integer> articleIds);
 
     List<HotArticle> listHotArticle(Integer cateId);
 
-    ArticleInfo getArticleInfoCache(Integer articleId);
+    Article getArticleInfoCache(Integer articleId);
 
     String getArticleContentCache(Integer articleId);
 
     List<Integer> loadArticleListCache(Integer cateId);
-
-    List<Integer> loadUserArticleListCache(Integer userId);
 
     List<Integer> loadUserArticleListCache(Integer userId);
 
