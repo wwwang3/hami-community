@@ -12,7 +12,6 @@ import top.wang3.hami.core.mapper.ArticleStatMapper;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @Slf4j
@@ -35,13 +34,13 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
-    public ArticleStat getArticleStatById(Integer articleId) {
+    public ArticleStat selectArticleStatById(Integer articleId) {
         return super.getById(articleId);
     }
 
     @Override
-    public Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
-        return getBaseMapper().selectArticleStatsByArticleIds(articleIds);
+    public List<ArticleStat> selectArticleStatList(List<Integer> articleIds) {
+        return super.listByIds(articleIds);
     }
 
     @Transactional(rollbackFor = Exception.class)

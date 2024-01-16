@@ -42,7 +42,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateArticles(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("articles = articles + ({0})", delta)
+                .set("total_articles = total_articles + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -55,7 +55,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateFollowings(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("followings = followings + ({0})", delta)
+                .set("total_followings = total_followings + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -63,7 +63,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateFollowers(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("followers = followers + ({0})", delta)
+                .set("total_followers = total_followers + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -71,7 +71,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateViews(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("views = views + ({0})", delta)
+                .set("total_views = total_views + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -79,7 +79,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateLikes(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("likes = likes + ({0})", delta)
+                .set("total_likes = total_likes + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -87,7 +87,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateComments(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("comments = comments + ({0})", delta)
+                .set("total_comments = total_comments + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }
@@ -95,7 +95,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     @Override
     public boolean updateCollects(Integer userId, int delta) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .set("collects = collects + ({0})", delta)
+                .set("total_collects = total_collects + ({0})", delta)
                 .eq("user_id", userId)
                 .update();
     }

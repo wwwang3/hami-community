@@ -60,22 +60,6 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
     }
 
     @Override
-    public List<Comment> listCommentById(List<Integer> commentIds) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select(fields)
-                .in("id", commentIds)
-                .list();
-    }
-
-    @Override
-    public boolean checkCommentExist(int itemId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select("id")
-                .exists("id", itemId)
-                .exists();
-    }
-
-    @Override
     public Integer getCommentUser(Integer id) {
         return getBaseMapper().selectCommentUserById(id);
     }

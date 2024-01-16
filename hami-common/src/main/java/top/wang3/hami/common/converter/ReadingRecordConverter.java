@@ -18,6 +18,6 @@ public interface ReadingRecordConverter {
     @Mapping(target = "content", ignore = true)
     ReadingRecordVo toReadingRecordDTO(ReadingRecord record);
 
-    List<ReadingRecordVo> toReadingRecordDTOList(Collection<ReadingRecord> record);
+    List<ReadingRecordVo> toReadingRecordVoList(Collection<ReadingRecord> record);
 
 }

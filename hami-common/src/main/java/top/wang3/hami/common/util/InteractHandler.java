@@ -2,6 +2,7 @@ package top.wang3.hami.common.util;
 
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.util.StringUtils;
+import top.wang3.hami.common.HamiFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -35,7 +36,7 @@ public class InteractHandler {
         boolean success = handleResult(result, interact);
         Runnable postAct = interact.postAct;
         if (success && postAct != null) {
-            postAct.run();
+            HamiFactory.getTaskExecutor().execute(postAct);
             return true;
         }
         return false;

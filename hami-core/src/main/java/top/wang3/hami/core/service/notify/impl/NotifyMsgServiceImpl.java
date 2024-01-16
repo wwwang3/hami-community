@@ -3,11 +3,9 @@ package top.wang3.hami.core.service.notify.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.notify.Info;
-import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.message.NotifyRabbitReadMessage;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -31,7 +29,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
 
     @Override
     public PageData<NotifyMsgVo> listCommentNotify(PageParam param) {
-        //type 1, 2
+        // type 1, 2
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listCommentNotify(page, loginUserId);
@@ -41,7 +39,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
 
     @Override
     public PageData<NotifyMsgVo> listLikeCollectNotify(PageParam param) {
-        //type 3, 4, 5
+        // type 3, 4, 5
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listLoveNotify(page, loginUserId);
@@ -51,7 +49,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
 
     @Override
     public PageData<NotifyMsgVo> listFollowNotify(PageParam param) {
-        //type 6
+        // type 6
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listFollowNotifyMsg(page, loginUserId);
@@ -68,7 +66,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
 
     @Override
     public PageData<NotifyMsgVo> listSystemMsg(PageParam param) {
-        //type 0
+        // type 0
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listSystemNotifyMsg(page, loginUserId);
@@ -82,13 +80,6 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         List<NotifyCount> notifyCounts = notifyMsgRepository.selectNoReadNotify(loginUserId);
         return ListMapperHandler.listToMap(notifyCounts,
                 NotifyCount::getType, NotifyCount::getTotal);
-    }
-
-    @Override
-    public int doRead(int receiver, List<NotifyType> types) {
-        List<Integer> typeIds = ListMapperHandler.listTo(types, NotifyType::getType);
-        if (CollectionUtils.isEmpty(typeIds)) return 0;
-        return notifyMsgRepository.updateNotifyState(receiver, typeIds);
     }
 
     @Override

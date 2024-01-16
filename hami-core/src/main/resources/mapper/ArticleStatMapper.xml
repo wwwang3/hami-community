@@ -89,15 +89,6 @@
         limit 54;
     </select>
 
-    <select id="selectArticleStatsByArticleIds" resultMap="ArticleStatDTOResultMap">
-        select article_id, views, likes, comments, collects
-        from article_stat
-        where article_id in
-        <foreach collection="articleIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </select>
-
     <update id="batchUpdateLikes" parameterType="java.util.List">
         update article_stat
         <trim prefix="set" suffixOverrides=",">

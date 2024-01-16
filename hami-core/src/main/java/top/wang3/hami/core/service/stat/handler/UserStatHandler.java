@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.converter.StatConverter;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.common.util.RedisClient;
@@ -38,6 +39,10 @@ public class UserStatHandler implements CanalEntryHandler<UserStat> {
 
     private void setCache(UserStat stat) {
         String redisKey = RedisConstants.STAT_TYPE_USER + stat.getUserId();
-        cacheService.refreshCache(redisKey, StatConverter.INSTANCE.toUserStatDTO(stat));
+        cacheService.refreshCache(
+                redisKey,
+                StatConverter.INSTANCE.toUserStatDTO(stat),
+                TimeoutConstants.USER_STAT_EXPIRE
+        );
     }
 }

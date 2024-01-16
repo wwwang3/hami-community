@@ -13,11 +13,9 @@ import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.cache.CacheService;
-import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.stat.UserStatService;
-import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -31,8 +29,6 @@ public class CachedCountService implements CountService {
 
     private final ArticleStatService articleStatService;
     private final UserStatService userStatService;
-    private final UserStatRepository userStatRepository;
-    private final FollowService followService;
     private final CacheService cacheService;
 
     @Override
@@ -41,7 +37,7 @@ public class CachedCountService implements CountService {
         long timeout = TimeoutConstants.ARTICLE_STAT_EXPIRE;
         return cacheService.get(
                 redisKey,
-                () -> getArticleStatById(articleId),
+                () -> articleStatService.getArticleStatId(articleId),
                 timeout,
                 TimeUnit.MILLISECONDS
         );
@@ -62,10 +58,10 @@ public class CachedCountService implements CountService {
     @CostLog
     @Override
     public Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds) {
-        List<ArticleStatDTO> dtos = cacheService.multiGet(
+        List<ArticleStatDTO> dtos = cacheService.multiGetById(
                 RedisConstants.STAT_TYPE_ARTICLE,
                 articleIds,
-                articleStatService::getArticleStatByArticleId,
+                articleStatService::listArticleStatById,
                 TimeoutConstants.ARTICLE_STAT_EXPIRE,
                 TimeUnit.MILLISECONDS
         );
@@ -74,10 +70,10 @@ public class CachedCountService implements CountService {
 
     @Override
     public Map<Integer, UserStatDTO> getUserStatDTOByUserIds(List<Integer> userIds) {
-        List<UserStatDTO> dtos = cacheService.multiGet(
+        List<UserStatDTO> dtos = cacheService.multiGetById(
                 RedisConstants.STAT_TYPE_USER,
                 userIds,
-                userStatService::getUserStatDTOById,
+                userStatService::getUserStatDTOByIds,
                 TimeoutConstants.USER_STAT_EXPIRE,
                 TimeUnit.MILLISECONDS
         );
@@ -118,43 +114,4 @@ public class CachedCountService implements CountService {
         return RedisClient.hMGetAll(key);
     }
 
-    private ArticleStatDTO loadArticleStatCache(String redisKey, Integer articleId) {
-        ArticleStatDTO stat = articleStatService.getArticleStatByArticleId(articleId);
-        if (stat == null) {
-            RedisClient.cacheEmptyObject(redisKey, new ArticleStatDTO(articleId));
-        } else {
-            RedisClient.setCacheObject(
-                    redisKey,
-                    stat,
-                    TimeoutConstants.ARTICLE_STAT_EXPIRE,
-                    TimeUnit.MILLISECONDS
-            );
-        }
-        return stat;
-    }
-
-    @Override
-    public Map<Integer, ArticleStatDTO> loadArticleStateCaches(List<Integer> ids) {
-        Map<Integer, ArticleStatDTO> dtoMap = articleStatService.listArticleStat(ids);
-        Map<String, ArticleStatDTO> newMap = ListMapperHandler.listToMap(ids, id -> RedisConstants.STAT_TYPE_ARTICLE + id, (id) -> {
-            return dtoMap.computeIfAbsent(id, ArticleStatDTO::new);
-        });
-        RedisClient.cacheMultiObject(newMap, 10, 50, TimeUnit.HOURS);
-        return dtoMap;
-    }
-
-    @Override
-    public void loadUserStatCaches(List<Integer> userIds) {
-        List<UserStatDTO> dtos = userStatService.getUserStatDTOByIds(userIds);
-        Map<String, UserStatDTO> dtoMap = ListMapperHandler.listToMap(
-                dtos,
-                dto -> RedisConstants.STAT_TYPE_USER + dto.getUserId()
-        );
-        RedisClient.cacheMultiObject(dtoMap);
-    }
-
-    @Override
-    public UserStatDTO loadUserStatDTO(String key, Integer userId) {
-        return userStatService.getUserStatDTOById(userId);
-    }
 }

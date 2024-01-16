@@ -33,10 +33,5 @@ public interface CountService {
 
     Map<String, Integer> getUserDailyDataGrowing(Integer userId);
 
-    Map<Integer, ArticleStatDTO> loadArticleStateCaches(List<Integer> ids);
-
-    void loadUserStatCaches(List<Integer> userIds);
-
-    UserStatDTO loadUserStatDTO(String key, Integer userId);
 
 }

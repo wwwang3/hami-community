@@ -11,10 +11,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
+import top.wang3.hami.common.message.email.AlarmEmailMessage;
 import top.wang3.hami.common.message.interact.CollectRabbitMessage;
 import top.wang3.hami.common.message.interact.InteractRabbitMessage;
 import top.wang3.hami.common.message.interact.LikeRabbitMessage;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.security.model.Result;
 
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 public class ArticleStatConsumer {
 
     private final ArticleStatRepository articleStatRepository;
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
             id = "StatMessageContainer-1",
@@ -65,9 +68,10 @@ public class ArticleStatConsumer {
                     .toList();
             articleStatRepository.batchUpdateLikes(articleStats);
         } catch (Exception e) {
-            // todo 消费失败重试
             String msgs = Result.writeValueAsString(messages);
-            log.error("messages: {}, error_class: {}, error_msg: {}", msgs, e.getClass(), e.getMessage());
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            AlarmEmailMessage message = new AlarmEmailMessage("更新文章点赞失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
         }
     }
 
@@ -100,9 +104,10 @@ public class ArticleStatConsumer {
                     .toList();
             articleStatRepository.batchUpdateCollects(articleStats);
         } catch (Exception e) {
-            // todo 消费失败重试
             String msgs = Result.writeValueAsString(messages);
-            log.error("messages: {}, error_class: {}, error_msg: {}", msgs, e.getClass(), e.getMessage());
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            AlarmEmailMessage message = new AlarmEmailMessage("更新文章收藏数据失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
         }
     }
 
@@ -144,9 +149,10 @@ public class ArticleStatConsumer {
                     .toList();
             articleStatRepository.batchUpdateViews(articleStats);
         } catch (Exception e) {
-            // todo 消费失败重试
             String msgs = Result.writeValueAsString(messages);
-            log.error("messages: {}, error_class: {}, error_msg: {}", msgs, e.getClass(), e.getMessage());
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            AlarmEmailMessage message = new AlarmEmailMessage("更新文章阅读量失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
         }
     }
 

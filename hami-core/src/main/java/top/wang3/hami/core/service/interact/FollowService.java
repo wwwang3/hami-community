@@ -41,7 +41,7 @@ public interface FollowService {
 
     List<Integer> listUserFollowers(Page<UserFollow> page, int userId);
 
-    List<Integer> loadUserFollowings(String key, Integer userId, long current, long size);
+    List<Integer> loadUserFollowings(Integer userId);
 
-    List<Integer> loadUserFollowers(String key, Integer userId, long current, long size);
+    List<Integer> loadUserFollowers(Integer userId);
 }

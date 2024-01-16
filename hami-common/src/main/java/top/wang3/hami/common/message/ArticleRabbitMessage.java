@@ -32,7 +32,7 @@ public class ArticleRabbitMessage implements RabbitMessage {
 
     @Override
     public String getExchange() {
-        return RabbitConstants.HAMI_TOPIC_EXCHANGE2;
+        return RabbitConstants.HAMI_ARTICLE_EXCHANGE;
     }
 
     @Override

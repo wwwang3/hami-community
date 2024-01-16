@@ -72,4 +72,11 @@ public class Account {
     @TableField(value = "mtime")
     private Date mtime;
 
+    public Account(String username, String email, String role, String password, Byte state) {
+        this.username = username;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+        this.state = state;
+    }
 }

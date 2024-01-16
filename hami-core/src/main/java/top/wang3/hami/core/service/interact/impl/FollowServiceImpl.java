@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.message.interact.FollowRabbitMessage;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.InteractHandler;
@@ -39,6 +40,7 @@ public class FollowServiceImpl implements FollowService {
     private final FollowRepository followRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
     private final CacheService cacheService;
+    private final LockTemplate lockTemplate;
 
     @Override
     public boolean follow(int followingId) {
@@ -51,14 +53,14 @@ public class FollowServiceImpl implements FollowService {
                 .preCheck(i -> {
                     // todo 检查用户ID是否存在
                 })
-                .loader(() -> loadUserFollowings(loginUserId))
+                .loader(() -> lockTemplate.execute(key, () -> loadUserFollowings(loginUserId)))
                 .postAct(() -> {
                     FollowRabbitMessage message = new FollowRabbitMessage(
                             loginUserId,
                             followingId,
                             Constants.ONE,
                             null);
-                    rabbitMessagePublisher.publishMsg(message);
+                    rabbitMessagePublisher.publishMsgSync(message);
                 })
                 .execute();
     }
@@ -74,7 +76,7 @@ public class FollowServiceImpl implements FollowService {
                 .preCheck(i -> {
                     // todo 检查用户ID是否存在
                 })
-                .loader(() -> loadUserFollowings(loginUserId))
+                .loader(() -> lockTemplate.execute(key, () -> loadUserFollowings(loginUserId)))
                 .postAct(() -> {
                     // 发布关注事件
                     FollowRabbitMessage message = new FollowRabbitMessage(
@@ -82,7 +84,7 @@ public class FollowServiceImpl implements FollowService {
                             followingId,
                             Constants.ZERO,
                             null);
-                    rabbitMessagePublisher.publishMsg(message);
+                    rabbitMessagePublisher.publishMsgSync(message);
                 })
                 .execute();
     }
@@ -124,15 +126,7 @@ public class FollowServiceImpl implements FollowService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.FOLLOWING_LIST_EXPIRE;
-        boolean success = RedisClient.pExpire(key, timeout);
-        if (!success) {
-            synchronized (key.intern()) {
-                success = RedisClient.pExpire(key, timeout);
-                if (!success) {
-                    loadUserFollowings(key, userId, -1, -1);
-                }
-            }
-        }
+        cacheService.expireThenExecute(key, () -> loadUserFollowings(userId), timeout);
         return RedisClient.zMContains(key, followingIds);
     }
 
@@ -153,7 +147,7 @@ public class FollowServiceImpl implements FollowService {
         String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> getUserFollowingCount(userId))
-                .loader((current, size) -> loadUserFollowings(key, userId, current, size))
+                .loader(() -> loadUserFollowings(userId))
                 .query();
     }
 
@@ -166,12 +160,13 @@ public class FollowServiceImpl implements FollowService {
                     page.setSearchCount(false);
                     return followRepository.listUserFollowers(page, userId);
                 })
-                .loader((current, size) -> loadUserFollowers(key, userId, current, size))
+                .loader(() -> loadUserFollowers(userId))
                 .query();
     }
 
     @Override
-    public List<Integer> loadUserFollowings(String key, Integer userId, long current, long size) {
+    public List<Integer> loadUserFollowings(Integer userId) {
+        String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         List<UserFollow> follows = followRepository.listUserFollowings(userId);
         if (CollectionUtils.isEmpty(follows)) {
             return Collections.emptyList();
@@ -181,38 +176,34 @@ public class FollowServiceImpl implements FollowService {
                 UserFollow::getFollowing,
                 item -> item.getMtime().getTime()
         );
-        setCache(key, tuples, TimeoutConstants.FOLLOWING_LIST_EXPIRE);
-        return ListMapperHandler.subList(follows, UserFollow::getFollowing, current, size);
-    }
-
-    public Collection<Tuple> loadUserFollowings(Integer userId) {
-        List<UserFollow> follows = followRepository.listUserFollowings(userId);
-        if (CollectionUtils.isEmpty(follows)) {
-            return Collections.emptyList();
-        }
-        return ListMapperHandler.listToTuple(
-                follows,
-                UserFollow::getFollowing,
-                item -> item.getMtime().getTime()
+        RedisClient.zSetAll(
+                key,
+                tuples,
+                TimeoutConstants.FOLLOWING_LIST_EXPIRE,
+                TimeUnit.MILLISECONDS
         );
+        return ListMapperHandler.listTo(follows, UserFollow::getFollowing, false);
     }
 
     @Override
-    public List<Integer> loadUserFollowers(String key, Integer userId, long current, long size) {
+    public List<Integer> loadUserFollowers(Integer userId) {
+        String key = RedisConstants.USER_FOLLOWER_LIST + userId;
         List<UserFollow> followers = followRepository.listUserFollowers(userId);
         if (CollectionUtils.isEmpty(followers)) {
             return Collections.emptyList();
         }
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(
                 followers,
-                UserFollow::getUserId,
+                UserFollow::getFollowing,
                 item -> item.getMtime().getTime()
         );
-        setCache(key, tuples, TimeoutConstants.FOLLOWER_LIST_EXPIRE);
-        return ListMapperHandler.subList(followers, UserFollow::getUserId, current, size);
+        RedisClient.zSetAll(
+                key,
+                tuples,
+                TimeoutConstants.FOLLOWER_LIST_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+        return ListMapperHandler.listTo(followers, UserFollow::getUserId, false);
     }
 
-    private void setCache(String key, Collection<Tuple> items, long timeout) {
-        RedisClient.zSetAll(key, items, timeout, TimeUnit.MILLISECONDS);
-    }
 }

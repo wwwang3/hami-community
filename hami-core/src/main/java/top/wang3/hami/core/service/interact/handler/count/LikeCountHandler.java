@@ -34,6 +34,7 @@ public class LikeCountHandler extends AbstractInteractCountHandler<LikeItem> {
     }
 
     @Override
+    @SuppressWarnings("all")
     protected void execute(LikeItem entity, int delta) {
         LikeType likeType = LikeType.of(entity.getItemType());
         if (LikeType.ARTICLE.equals(likeType)) {

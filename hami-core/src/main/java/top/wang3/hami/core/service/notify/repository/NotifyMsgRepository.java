@@ -2,7 +2,7 @@ package top.wang3.hami.core.service.notify.repository;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import top.wang3.hami.common.dto.notify.NotifyType;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.common.vo.notify.NotifyMsgVo;
@@ -21,10 +21,10 @@ public interface NotifyMsgRepository extends IService<NotifyMsg> {
 
     List<NotifyCount> selectNoReadNotify(Integer receiver);
 
-    boolean checkExist(Integer itemId, Integer sender, Integer receiver, NotifyType type);
-
+    @CanIgnoreReturnValue
     boolean saveNotifyMsg(NotifyMsg msg);
 
+    @CanIgnoreReturnValue
     int updateNotifyState(Integer receiver, List<Integer> types);
 
     boolean deleteNotifyMsg(Integer msgId, int loginUserId);

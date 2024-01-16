@@ -11,13 +11,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.message.email.AlarmEmailMessage;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.model.UserStat;
-import top.wang3.hami.core.service.mail.MailMessageHandler;
-import top.wang3.hami.core.service.stat.UserStatService;
+import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
+import top.wang3.hami.security.model.Result;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,61 +32,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserStatConsumer {
 
-    private final UserStatService userStatService;
     private final UserStatRepository userStatRepository;
-    private final MailMessageHandler mailMessageHandler;
-
-
-    @RabbitListener(
-            id = "UserStatContainer-1",
-            bindings = @QueueBinding(
-                    value = @Queue(value = RabbitConstants.USER_STAT_QUEUE_1),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                    key = {"article.publish", "article.delete"}
-            )
-    )
-    public void handleArticleMessage(ArticleRabbitMessage message) {
-        ArticleRabbitMessage.Type type = message.getType();
-        Integer authorId = message.getAuthorId();
-        switch (type) {
-            case PUBLISH -> userStatRepository.updateArticles(authorId, 1);
-            case DELETE -> userStatRepository.updateArticles(authorId, -1);
-        }
-    }
-
-    @RabbitListener(
-            id = "UserStatContainer-2",
-            bindings = {
-                    @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_2),
-                            exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = "topic"),
-                            key = {"user.create", "user.update"}
-                    ),
-            }, concurrency = "2")
-    public void handleUserMessage(UserRabbitMessage message) {
-        UserRabbitMessage.Type type = message.getType();
-        switch (type) {
-            case USER_CREATE -> userStatService.insertUserStat(message.getUserId());
-            // 感觉不删也行
-            case USER_DELETE -> userStatService.deleteUserStat(message.getUserId());
-        }
-    }
+    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
             id = "StatMessageContainer-3",
             bindings = {
                     @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_3),
+                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
                             exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                            key = {"article.view", "article.create", "article.delete"}
+                            key = {"article.view", "article.publish", "article.delete"}
                     ),
                     @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),
+                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_2),
                             exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                             key = {"*.like.1.*", "*.collect.*", "*.follow.*"}
                     ),
                     @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_5),
+                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_3),
                             exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
                             key = {"comment.*"}
                     )
@@ -111,9 +73,10 @@ public class UserStatConsumer {
                     .toList();
             userStatRepository.batchUpdateUserStats(userStats);
         } catch (Exception e) {
-            log.error("");
-            AlarmEmailMessage message = new AlarmEmailMessage("用户数据更新失败", e.getMessage());
-            mailMessageHandler.handle(message);
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            String msgs = Result.writeValueAsString(messages);
+            AlarmEmailMessage message = new AlarmEmailMessage("用户关注数据更新失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
         }
     }
 
@@ -122,7 +85,7 @@ public class UserStatConsumer {
             id = "UserStatContainer-4",
             bindings = {
                     @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_6),
+                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),
                             exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
                             key = "*.follow.*"
                     ),
@@ -148,10 +111,19 @@ public class UserStatConsumer {
                     }).toList();
             userStatRepository.batchUpdateUserStats(stats);
         } catch (Exception e) {
-
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            String msgs = Result.writeValueAsString(messages);
+            AlarmEmailMessage message = new AlarmEmailMessage("用户关注数据更新失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
         }
     }
 
+    /**
+     * shabi写法
+     * @param stat stat
+     * @param object object
+     * @return stat
+     */
     private UserStat handleObject(UserStat stat, Object object) {
         if (object instanceof ArticleRabbitMessage a) {
             // 文章消息

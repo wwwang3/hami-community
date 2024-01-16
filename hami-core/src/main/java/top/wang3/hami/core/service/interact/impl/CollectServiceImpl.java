@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.message.interact.CollectRabbitMessage;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.InteractHandler;
@@ -40,6 +41,7 @@ public class CollectServiceImpl implements CollectService {
     private final ArticleRepository articleRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
     private final CacheService cacheService;
+    private final LockTemplate lockTemplate;
 
     @Override
     public boolean doCollect(Integer itemId) {
@@ -58,7 +60,7 @@ public class CollectServiceImpl implements CollectService {
                             Constants.ONE,
                             itemId
                     );
-                    rabbitMessagePublisher.publishMsg(message);
+                    rabbitMessagePublisher.publishMsgSync(message);
                 })
                 .execute();
     }
@@ -79,7 +81,7 @@ public class CollectServiceImpl implements CollectService {
                             Constants.ZERO,
                             itemId
                     );
-                    rabbitMessagePublisher.publishMsg(message);
+                    rabbitMessagePublisher.publishMsgSync(message);
                 })
                 .execute();
     }
@@ -99,15 +101,7 @@ public class CollectServiceImpl implements CollectService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.COLLECT_LIST_EXPIRE;
-        boolean success = RedisClient.pExpire(key, timeout);
-        if (!success) {
-            synchronized (key.intern()) {
-                success = RedisClient.pExpire(key, timeout);
-                if (!success) {
-                    loadUserCollects(key, userId, -1, -1);
-                }
-            }
-        }
+        cacheService.expireThenExecute(key, () -> loadUserCollects(userId), timeout);
         return RedisClient.zMContains(key, itemIds);
     }
 
@@ -126,16 +120,17 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId) {
-        String key = RedisConstants.USER_COLLECT_LIST + userId;
+        String key = buildKey(userId);
         return ZPageHandler
                 .<Integer>of(key, page)
                 .countSupplier(() -> getUserCollectCount(userId))
-                .loader((c, s) -> loadUserCollects(key, userId, c, s))
+                .loader(() -> loadUserCollects(userId))
                 .query();
     }
 
     @Override
-    public Collection<Integer> loadUserCollects(String key, Integer userId, long current, long size) {
+    public List<Integer> loadUserCollects(Integer userId) {
+        String key = buildKey(userId);
         List<ArticleCollect> collects = collectRepository.listUserCollects(userId);
         if (CollectionUtils.isEmpty(collects)) {
             return Collections.emptyList();
@@ -145,24 +140,21 @@ public class CollectServiceImpl implements CollectService {
                 ArticleCollect::getArticleId,
                 (item) -> (double) item.getMtime().getTime()
         );
-        RedisClient.zSetAll(key, tuples, TimeoutConstants.COLLECT_LIST_EXPIRE, TimeUnit.MILLISECONDS);
-        return ListMapperHandler.subList(collects, ArticleCollect::getArticleId, current, size);
+        RedisClient.zSetAll(
+                key,
+                tuples,
+                TimeoutConstants.COLLECT_LIST_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+        return ListMapperHandler.listTo(collects, ArticleCollect::getArticleId, false);
     }
 
     private String buildKey(Integer userId) {
         return RedisConstants.USER_COLLECT_LIST + userId;
     }
 
-    private Collection<Tuple> loadCollectList(Integer userId) {
-        List<ArticleCollect> collects = collectRepository.listUserCollects(userId);
-        if (CollectionUtils.isEmpty(collects)) {
-            return Collections.emptyList();
-        }
-        return ListMapperHandler.listToTuple(
-                collects,
-                ArticleCollect::getArticleId,
-                (item) -> (double) item.getMtime().getTime()
-        );
+    private void loadCollectList(Integer userId) {
+        lockTemplate.execute(RedisConstants.USER_COLLECT_LIST + userId, () -> loadCollectList(userId));
     }
 
     private Integer getItemUser(Integer itemId) {

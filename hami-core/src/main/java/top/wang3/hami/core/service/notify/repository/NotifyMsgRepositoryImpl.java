@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
-import top.wang3.hami.common.dto.notify.NotifyType;
 import top.wang3.hami.common.model.NotifyCount;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.common.vo.notify.NotifyMsgVo;
@@ -47,17 +46,6 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
         return getBaseMapper().selectNoReadNotify(receiver);
     }
 
-    @Override
-    public boolean checkExist(Integer itemId, Integer sender, Integer receiver, NotifyType type) {
-        Long count = ChainWrappers
-                .queryChain(getBaseMapper())
-                .eq("item_id", itemId)
-                .eq("sender", receiver)
-                .eq("receiver", receiver)
-                .eq("type", type.getType())
-                .count();
-        return count != null && count > 0;
-    }
 
     @Override
     public boolean saveNotifyMsg(NotifyMsg msg) {

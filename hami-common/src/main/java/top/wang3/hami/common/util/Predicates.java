@@ -50,16 +50,18 @@ public class Predicates {
             consumer.accept(current);
         }
 
-        public void ifTrue(Runnable runnable) {
+        public Checker ifTrue(Runnable runnable) {
             if (current) {
                 runnable.run();
             }
+            return this;
         }
 
-        public void ifFalse(Runnable runnable) {
+        public Checker ifFalse(Runnable runnable) {
             if (!current) {
                 runnable.run();
             }
+            return this;
         }
 
     }

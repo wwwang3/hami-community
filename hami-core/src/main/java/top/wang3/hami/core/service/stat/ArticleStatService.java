@@ -1,19 +1,20 @@
 package top.wang3.hami.core.service.stat;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 
 import java.util.List;
-import java.util.Map;
 
-@SuppressWarnings(value = "all")
 public interface ArticleStatService {
 
-    ArticleStatDTO getArticleStatByArticleId(int articleId);
+    ArticleStatDTO getArticleStatId(int articleId);
 
-    Map<Integer, ArticleStatDTO> listArticleStat(List<Integer> articleIds);
+    List<ArticleStatDTO> listArticleStatById(List<Integer> articleIds);
 
+    @CanIgnoreReturnValue
     boolean increaseComments(int articleId, int count);
 
+    @CanIgnoreReturnValue
     boolean decreaseComments(int articleId, int count);
 
 }

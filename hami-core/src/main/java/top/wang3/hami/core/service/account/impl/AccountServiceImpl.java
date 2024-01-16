@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.AccountConverter;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.captcha.CaptchaType;
@@ -15,6 +16,8 @@ import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.model.UserStat;
+import top.wang3.hami.common.util.Predicates;
 import top.wang3.hami.common.vo.user.AccountInfo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.CaptchaServiceException;
@@ -22,6 +25,7 @@ import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.account.repository.AccountRepository;
 import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
+import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.service.TokenService;
@@ -34,6 +38,7 @@ public class AccountServiceImpl implements AccountService {
     private final EmailCaptchaService captchaService;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final UserStatRepository userStatRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Resource
@@ -52,43 +57,42 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean register(RegisterParam param) throws SecurityException {
-        //校验验证码
+        // 校验验证码
         String email = param.getEmail();
         String username = param.getUsername();
         String captcha = param.getCaptcha();
         if (!captchaService.verify(CaptchaType.REGISTER, email, captcha)) {
             throw new CaptchaServiceException("验证码无效或过期");
         }
-        //判断用户名和邮箱是否被注册过
+        // 判断用户名和邮箱是否被注册过
         if (checkUsername(param.getUsername())) {
             throw new HamiServiceException("用户名已被注册");
         }
-        //验证完用户名再删除验证码
+        // 验证完用户名再删除验证码
         captchaService.deleteCaptcha(CaptchaType.REGISTER, email);
         if (checkEmail(email)) {
             throw new HamiServiceException("邮箱已被注册");
         }
-        //加密密码
+        // 加密密码
         String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        Account account = Account.builder()
-                .username(username)
-                .email(email)
-                .role("user")
-                .state((byte) 1)
-                .password(encryptedPassword)
-                .build();
-        Boolean success = transactionTemplate.execute(status -> {
-            boolean saved1 = accountRepository.save(account);
-            if (!saved1) return false;
-            User user = new User(account.getId(), username);
-            if (account.getId() < 1000) {
-                user.setTag("内测用户");
-            }
-            if (!userRepository.save(user)) {
-                status.setRollbackOnly();
-            }
-            return true;
-        });
+        Account account = new Account(username, email, "user", encryptedPassword, Constants.ONE);
+        Boolean success = transactionTemplate.execute(status -> Predicates.check(accountRepository.save(account))
+                .then(() -> {
+                    // 插入用户表
+                    User user = new User(account.getId(), account.getUsername());
+                    if (account.getId() <= 1000) {
+                        user.setTag("内测用户");
+                    }
+                    return userRepository.save(user);
+                }).then(() -> {
+                    // 插入数据表, 异步插入感觉也行, 反正没几个访问量
+                    UserStat stat = new UserStat();
+                    stat.setUserId(account.getId());
+                    return userStatRepository.save(stat);
+                })
+                .ifFalse(status::setRollbackOnly)
+                .get()
+        );
         if (Boolean.TRUE.equals(success)) {
             UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_CREATE, account.getId());
             rabbitMessagePublisher.publishMsg(message);
@@ -99,16 +103,16 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean resetPassword(ResetPassParam param) {
-        //校验验证码
-        return restPassword(param, CaptchaType.RESET_PASS);
+        // 重置密码
+        return resetPassword(param, CaptchaType.RESET_PASS);
     }
 
 
     @Override
     public boolean updatePassword(ResetPassParam param) {
-        //修改密码
-        //清除用户所有的登录态
-        boolean success = restPassword(param, CaptchaType.UPDATE_PASS);
+        // 修改密码
+        // 清除用户所有的登录态 (jwt+黑名单机制无法做到清除所有登录态, 因为服务器没有保存相关信息)
+        boolean success = resetPassword(param, CaptchaType.UPDATE_PASS);
         if (success) {
             tokenService.kickout();
         }
@@ -148,20 +152,20 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    private boolean restPassword(ResetPassParam param, CaptchaType type) {
+    private boolean resetPassword(ResetPassParam param, CaptchaType type) {
         final String email = param.getEmail();
         boolean verify = captchaService.verify(type, email, param.getCaptcha());
         if (!verify) {
             throw new CaptchaServiceException("验证码无效或过期");
         }
         captchaService.deleteCaptcha(type, email);
-        //用户不存在
+        // 用户不存在
         if (!checkEmail(param.getEmail())) {
             throw new HamiServiceException("用户不存在");
         }
         Account account = getAccountByEmailOrUsername(email);
-        final String old = account.getPassword();
-        final String encryptedPassword = passwordEncoder.encode(param.getPassword());
+        String old = account.getPassword();
+        String encryptedPassword = passwordEncoder.encode(param.getPassword());
         return accountRepository.updatePassword(email, old, encryptedPassword);
     }
 

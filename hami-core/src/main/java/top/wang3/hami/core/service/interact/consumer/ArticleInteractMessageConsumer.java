@@ -33,7 +33,7 @@ public class ArticleInteractMessageConsumer {
             )
     )
     public void handleArticleMessageForLike(ArticleRabbitMessage message) {
-        //文章删除消息
+        // 文章删除消息
         int deleted = likeRepository.deleteLikeItem(message.getArticleId(), LikeType.ARTICLE);
         log.warn("article deleted, async to delete like-item, deleted-count: {}", deleted);
     }

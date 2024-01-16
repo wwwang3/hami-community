@@ -104,8 +104,8 @@ public class NotifyMsgConsumer implements InteractConsumer {
     @Override
     public void handleReplyMessage(ReplyRabbitMessage message) {
         try {
-            //把他爹也查出来 内容一起写入通知 xx回复了你的评论
-            //自己回复自己不需要通知
+            // 把他爹也查出来 内容一起写入通知 xx回复了你的评论
+            // 自己回复自己不需要通知
             Comment comment = commentRepository.getById(message.getParentId());
             if (comment == null || isSelf(message.getUserId(), comment.getUserId())) {
                 return;
@@ -126,7 +126,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
 
     @Override
     public void handleCommentDeleteMessage(CommentDeletedRabbitMessage message) {
-
+        // 评论删除消息
     }
 
     public void handleCollectMessage(CollectRabbitMessage message) {

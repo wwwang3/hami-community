@@ -12,9 +12,9 @@ import top.wang3.hami.common.message.RabbitMessage;
 @NoArgsConstructor
 public class CommentDeletedRabbitMessage implements RabbitMessage {
 
-    private Integer articleId;
-    private int deletedCount;
-    private int authorId;
+    private Integer articleId; // 文章Id
+    private int deletedCount; // 删除数量
+    private int authorId; // 作者ID
 
     @Override
     public String getExchange() {

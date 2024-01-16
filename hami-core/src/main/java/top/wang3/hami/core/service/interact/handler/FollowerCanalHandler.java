@@ -9,6 +9,7 @@ import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
@@ -27,6 +28,7 @@ public class FollowerCanalHandler implements CanalEntryHandler<UserFollow> {
 
 
     private final FollowService followService;
+    private final LockTemplate lockTemplate;
 
     private RedisScript<Long> followerScript;
 
@@ -74,7 +76,9 @@ public class FollowerCanalHandler implements CanalEntryHandler<UserFollow> {
                     List.of(follower, score, ZPageHandler.DEFAULT_MAX_SIZE));
             log.info("userId: {}, follower: {}, res: {}", userId, follower, res);
         } else {
-            followService.loadUserFollowers(followerListKey, userId, -1, -1);
+            lockTemplate.execute(followerListKey, () -> {
+                followService.loadUserFollowers(userId);
+            });
         }
     }
 }

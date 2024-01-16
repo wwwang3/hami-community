@@ -37,9 +37,10 @@ public class SearchMessageConsumer {
     public void handleMessage(SearchRabbitMessage message) {
         log.debug("handle search message");
         String keyword = message.getKeyword();
-        Long result = RedisClient.executeScript(redisScript,
+        RedisClient.executeScript(
+                redisScript,
                 List.of(RedisConstants.HOT_SEARCH),
-                List.of(keyword));
-        log.debug("result: {}", result);
+                List.of(keyword)
+        );
     }
 }

@@ -24,19 +24,19 @@
   </sql>
 
   <update id="batchUpdateLikes" parameterType="java.util.List">
-      update article_stat
+      update comment
       <trim prefix="set" suffixOverrides=",">
           <trim prefix="likes = likes + case" suffix="end,">
               <foreach collection="comments" item="item" index="index">
                   <if test="item.likes != null and item.likes != 0">
-                      when article_id = #{item.articleId} then #{item.likes}
+                      when id = #{item.id} then #{item.likes}
                   </if>
               </foreach>
           </trim>
       </trim>
-      where article_id in
+      where id in
       <foreach collection="comments" item="item" open="(" close=")" separator=",">
-          #{item.articleId}
+          #{item.id}
       </foreach>
   </update>
 </mapper>

@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.converter.FileDetailConverter;
 import top.wang3.hami.common.model.FileDetail;
 import top.wang3.hami.core.mapper.FileDetailMapper;
@@ -20,7 +19,6 @@ import top.wang3.hami.core.mapper.FileDetailMapper;
 public class FileRecordService extends ServiceImpl<FileDetailMapper, FileDetail> implements FileRecorder {
 
     @Override
-    @Transactional
     public boolean save(FileInfo fileInfo) {
         FileDetail detail = FileDetailConverter.INSTANCE.toFileDetail(fileInfo);
         boolean saved = super.save(detail);
@@ -36,7 +34,6 @@ public class FileRecordService extends ServiceImpl<FileDetailMapper, FileDetail>
         return FileDetailConverter.INSTANCE.toFileInfo(detail);
     }
 
-    @Transactional
     @Override
     public boolean delete(String url) {
         QueryWrapper<FileDetail> wrapper = Wrappers.query(getEntityClass())

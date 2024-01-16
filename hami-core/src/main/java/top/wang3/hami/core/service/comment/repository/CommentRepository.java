@@ -19,10 +19,6 @@ public interface CommentRepository extends IService<Comment> {
 
     int deleteComment(Integer id);
 
-    List<Comment> listCommentById(List<Integer> commentIds);
-
-    boolean checkCommentExist(int itemId);
-
     Integer getCommentUser(Integer id);
 
     @Transactional(rollbackFor = Exception.class)

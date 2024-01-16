@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.article.impl;
+package top.wang3.hami.core.service.stat.impl;
 
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -21,14 +20,15 @@ public class ArticleStatServiceImpl implements ArticleStatService {
     private final ArticleStatRepository articleStatRepository;
 
     @Override
-    public ArticleStatDTO getArticleStatByArticleId(int articleId) {
-        ArticleStat stat = articleStatRepository.getArticleStatById(articleId);
+    public ArticleStatDTO getArticleStatId(int articleId) {
+        ArticleStat stat = articleStatRepository.selectArticleStatById(articleId);
         return StatConverter.INSTANCE.toArticleStatDTO(stat);
     }
 
     @Override
-    public Map<Integer, ArticleStatDTO> listArticleStat(List<Integer> articleIds) {
-        return articleStatRepository.getArticleStatByIds(articleIds);
+    public List<ArticleStatDTO> listArticleStatById(List<Integer> articleIds) {
+        List<ArticleStat> stats = articleStatRepository.selectArticleStatList(articleIds);
+        return StatConverter.INSTANCE.toArticleStatDTOS(stats);
     }
 
     @Override

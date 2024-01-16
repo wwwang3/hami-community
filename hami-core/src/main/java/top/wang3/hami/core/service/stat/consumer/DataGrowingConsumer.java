@@ -43,13 +43,13 @@ public class DataGrowingConsumer implements InteractConsumer {
 
     @Override
     public void handleFollowMessage(FollowRabbitMessage message) {
-        //关注消息
+        // 关注消息
         String key = buildKey(message.getToUserId());
         if (Constants.ONE.equals(message.getState())) {
-            //新增关注
+            // 新增关注
             RedisClient.hIncr(key, RedisConstants.DATA_GROWING_FOLLOWER, 1);
         } else {
-            //取消关注
+            // 取消关注
             RedisClient.hIncr(key, RedisConstants.DATA_GROWING_CANCEL_FOLLOW, 1);
         }
         ensureExpireTime(key);
@@ -123,7 +123,7 @@ public class DataGrowingConsumer implements InteractConsumer {
     private void ensureExpireTime(String key) {
         long expire = RedisClient.getExpire(key);
         if (expire == -1) {
-            //没有设置就设置
+            // 没有设置就设置
             DateTime endOfDay = DateUtil.endOfDay(new Date());
             long timeout = endOfDay.getTime() - System.currentTimeMillis();
             RedisClient.expire(key, timeout, TimeUnit.MILLISECONDS);

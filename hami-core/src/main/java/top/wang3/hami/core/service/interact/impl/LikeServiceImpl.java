@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.dto.interact.LikeType;
+import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.message.interact.LikeRabbitMessage;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.*;
@@ -36,6 +38,7 @@ public class LikeServiceImpl implements LikeService {
     private final CommentRepository commentRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
     private final CacheService cacheService;
+    private final LockTemplate lockTemplate;
 
     @Override
     public boolean doLike(Integer itemId, LikeType likeType) {
@@ -81,7 +84,7 @@ public class LikeServiceImpl implements LikeService {
                             itemId,
                             likeType
                     );
-                    rabbitMessagePublisher.publishMsg(message);
+                    rabbitMessagePublisher.publishMsgSync(message);
                 })
                 .execute();
     }
@@ -90,13 +93,9 @@ public class LikeServiceImpl implements LikeService {
         return RedisConstants.USER_LIKE_LIST + likeType.getType() + ":" + userId;
     }
 
-    private Collection<Tuple> loadLikeList(int loginUserId, LikeType likeType) {
-        List<LikeItem> likeItems = likeRepository.listUserLikeItem(loginUserId, likeType);
-        return ListMapperHandler.listToTuple(
-                likeItems,
-                LikeItem::getItemId,
-                item -> (double) item.getMtime().getTime()
-        );
+    private void loadLikeList(int loginUserId, LikeType likeType) {
+        String key = buildKey(loginUserId, likeType);
+        lockTemplate.execute(key, () -> loadUserLikeItem(loginUserId, likeType));
     }
 
     private Integer getItemUser(Integer itemId, LikeType likeType) {
@@ -125,20 +124,20 @@ public class LikeServiceImpl implements LikeService {
     @CostLog
     @Override
     public List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId) {
-        //最近点赞的文章
+        // 最近点赞的文章
         String key = buildKey(userId, LikeType.ARTICLE);
         return ZPageHandler
                 .<Integer>of(key, page)
                 .countSupplier(() -> getUserLikeCount(userId, LikeType.ARTICLE))
-                .loader((c, s) -> loadUserLikeItem(key, userId, LikeType.ARTICLE, c, s))
+                .loader(() -> loadUserLikeItem(userId, LikeType.ARTICLE))
                 .query();
     }
 
     @Override
     public boolean hasLiked(Integer userId, Integer itemId, LikeType likeType) {
-        //两次redis操作
-        //感觉可以用hash结构存储ttl和点赞的item
-        //判断ttl过期则重新加载 减少一次io
+        // 两次redis操作
+        // 感觉可以用hash结构存储ttl和点赞的item
+        // 判断ttl过期则重新加载 减少一次io
         Map<Integer, Boolean> liked = hasLiked(userId, List.of(itemId), likeType);
         return liked.getOrDefault(itemId, false);
     }
@@ -157,7 +156,7 @@ public class LikeServiceImpl implements LikeService {
             synchronized (key.intern()) {
                 success = RedisClient.pExpire(key, timeout);
                 if (!success) {
-                    loadUserLikeItem(key, userId, likeType, -1, -1);
+                    loadUserLikeItem(userId, likeType);
                 }
             }
         }
@@ -165,16 +164,23 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public List<Integer> loadUserLikeItem(String key, Integer userId, LikeType likeType, long current, long size) {
+    public List<Integer> loadUserLikeItem(Integer userId, LikeType likeType) {
+        String key = buildKey(userId, likeType);
         List<LikeItem> likeItems = likeRepository.listUserLikeItem(userId, likeType);
+        if (CollectionUtils.isEmpty(likeItems)) {
+            return Collections.emptyList();
+        }
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(
                 likeItems,
                 LikeItem::getItemId,
                 item -> (double) item.getMtime().getTime()
         );
-        if (!tuples.isEmpty()) {
-            RedisClient.zSetAll(key, tuples, RandomUtils.randomLong(1, 100), TimeUnit.HOURS);
-        }
-        return ListMapperHandler.subList(likeItems, LikeItem::getItemId, current, size);
+        RedisClient.zSetAll(
+                key,
+                tuples,
+                TimeoutConstants.LIKE_LIST_EXPIRE,
+                TimeUnit.MILLISECONDS
+        );
+        return ListMapperHandler.listTo(likeItems, LikeItem::getItemId, false);
     }
 }

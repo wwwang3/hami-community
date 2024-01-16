@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.stat.repository;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
@@ -8,9 +9,8 @@ import top.wang3.hami.common.model.HotCounter;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-@SuppressWarnings("all")
+@SuppressWarnings("unused")
 public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize);
@@ -19,9 +19,9 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<HotCounter> getOverallHotArticles(long timestamp);
 
-    ArticleStat getArticleStatById(Integer articleId);
+    ArticleStat selectArticleStatById(Integer articleId);
 
-    Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds);
+    List<ArticleStat> selectArticleStatList(List<Integer> articleIds);
 
     @Transactional(rollbackFor = Exception.class)
     boolean increaseViews(int articleId, int count);
@@ -47,6 +47,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     void updateViews(Collection<ArticleStat> stats);
 
+    @CanIgnoreReturnValue
     boolean deleteArticleStat(Integer articleId);
 
     @Transactional(rollbackFor = Exception.class)
@@ -56,9 +57,11 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
     Long batchUpdateComments(List<ArticleStat> articleStats);
 
     @Transactional(rollbackFor = Exception.class)
+    @CanIgnoreReturnValue
     Long batchUpdateCollects(List<ArticleStat> articleStats);
 
     @Transactional(rollbackFor = Exception.class)
+    @CanIgnoreReturnValue
     Long batchUpdateViews(List<ArticleStat> articleStats);
 
 }

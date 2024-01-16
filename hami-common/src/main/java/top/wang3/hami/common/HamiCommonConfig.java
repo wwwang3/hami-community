@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 import top.wang3.hami.common.lock.LockTemplate;
 
@@ -17,7 +18,9 @@ public class HamiCommonConfig implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         LockTemplate template = applicationContext.getBean(LockTemplate.class);
+        ThreadPoolTaskExecutor taskExecutor = applicationContext.getBean(ThreadPoolTaskExecutor.class);
         Assert.notNull(template, "The implementation of LockTemplate cannot be found");
         HamiFactory.registerLockTemplate(template);
+        HamiFactory.registerTaskExecutor(taskExecutor);
     }
 }

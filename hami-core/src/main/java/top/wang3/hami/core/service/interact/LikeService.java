@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.LikeItem;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +21,5 @@ public interface LikeService {
 
     Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemIds, LikeType likeType);
 
-    Collection<Integer> loadUserLikeItem(String key, Integer userId, LikeType likeType, long current, long size);
+    List<Integer> loadUserLikeItem(Integer userId, LikeType likeType);
 }

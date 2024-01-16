@@ -122,8 +122,8 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("article_id", "user_id", "mtime")
                 .eq("user_id", userId)
-                .eq("`state`", Constants.ONE) //状态为1
-                .orderByDesc("mtime") //更新时间
+                .eq("`state`", Constants.ONE) // 状态为1
+                .orderByDesc("mtime") // 更新时间
                 .list();
     }
 

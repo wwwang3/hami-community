@@ -12,6 +12,7 @@ import top.wang3.hami.common.message.RabbitMessage;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnBean(RabbitTemplate.class)
+@SuppressWarnings("unused")
 @Slf4j
 public class RabbitMessagePublisher {
 
@@ -30,7 +31,7 @@ public class RabbitMessagePublisher {
     }
 
     public void publishMsgSync(RabbitMessage message) {
-        //内部调用不走aop
+        // 内部调用不走aop
         publishMsg(message);
     }
 

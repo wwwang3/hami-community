@@ -2,11 +2,9 @@ package top.wang3.hami.core.service.comment.impl;
 
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.PageData;
@@ -50,9 +48,6 @@ public class CommentServiceImpl implements CommentService {
     private final LikeService likeService;
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
-    @Resource
-    TransactionTemplate transactionTemplate;
-
     @CostLog
     @Override
     public PageData<CommentVo> listComment(CommentPageParam commentPageParam) {
@@ -80,7 +75,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public PageData<CommentVo> listReply(CommentPageParam commentPageParam) {
-        //获取回复
+        // 获取回复
         Integer articleId = commentPageParam.getArticleId();
         Integer rootId = commentPageParam.getRootId();
         if (rootId == null || rootId <= 0) {
@@ -170,8 +165,8 @@ public class CommentServiceImpl implements CommentService {
             throw new HamiServiceException("文章不存在");
         }
         Comment comment = CommentConverter.INSTANCE.toComment(param);
-        comment.setUserId(loginUserId); //评论用户
-        comment.setIpInfo(IpContext.getIpInfo()); //IP信息
+        comment.setUserId(loginUserId); // 评论用户
+        comment.setIpInfo(IpContext.getIpInfo()); // IP信息
         if (reply) {
             return buildReply(comment, param);
         }

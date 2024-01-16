@@ -14,7 +14,4 @@ public interface UserStatService {
 
     List<UserStat> getUserStatByIds(List<Integer> useIds);
 
-    boolean insertUserStat(Integer userId);
-
-    boolean deleteUserStat(Integer userId);
 }
