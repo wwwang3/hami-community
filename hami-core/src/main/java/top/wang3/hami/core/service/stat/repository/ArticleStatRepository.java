@@ -1,9 +1,9 @@
 package top.wang3.hami.core.service.stat.repository;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 
@@ -13,11 +13,9 @@ import java.util.List;
 @SuppressWarnings("unused")
 public interface ArticleStatRepository extends IService<ArticleStat> {
 
-    List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize);
+    List<ArticleStat> scanArticle(Page<ArticleStat> page);
 
-    List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date);
-
-    List<HotCounter> getOverallHotArticles(long timestamp);
+    List<HotCounter> loadHotArticle(Integer cateId, long timestamp);
 
     ArticleStat selectArticleStatById(Integer articleId);
 

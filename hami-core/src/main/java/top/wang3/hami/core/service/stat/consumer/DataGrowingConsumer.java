@@ -1,8 +1,6 @@
 package top.wang3.hami.core.service.stat.consumer;
 
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
@@ -17,7 +15,6 @@ import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @RabbitListener(
@@ -123,10 +120,9 @@ public class DataGrowingConsumer implements InteractConsumer {
     private void ensureExpireTime(String key) {
         long expire = RedisClient.getExpire(key);
         if (expire == -1) {
-            // 没有设置就设置
-            DateTime endOfDay = DateUtil.endOfDay(new Date());
-            long timeout = endOfDay.getTime() - System.currentTimeMillis();
-            RedisClient.expire(key, timeout, TimeUnit.MILLISECONDS);
+            // 没有设置就设置, 48小时,
+            long mills = DateUtils.plusHours(new Date(), 48);
+            RedisClient.pExpire(key, mills);
         }
     }
 }

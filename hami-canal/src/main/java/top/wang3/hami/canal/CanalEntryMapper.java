@@ -1,7 +1,6 @@
 package top.wang3.hami.canal;
 
 import com.alibaba.fastjson2.JSON;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.util.StringUtils;
 
@@ -9,7 +8,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 
-@SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class CanalEntryMapper {
 
     private static final String[] PARSE_PATTERNS = new String[]{"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss",
@@ -17,7 +15,7 @@ public class CanalEntryMapper {
             "yyyy/MM/dd HH:mm", "yyyy/MM", "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss",
             "yyyy.MM.dd HH:mm", "yyyy.MM", }; //fix: Date类型解析失败, 导致NPE
 
-    public static Object convertType(Class<?> type, String columnValue) throws JsonProcessingException {
+    public static Object convertType(Class<?> type, String columnValue) {
         if (!StringUtils.hasText(columnValue)) {
             return null;
         } else if (type.equals(String.class)){

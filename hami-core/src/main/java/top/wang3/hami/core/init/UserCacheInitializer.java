@@ -1,13 +1,20 @@
 package top.wang3.hami.core.init;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import top.wang3.hami.core.service.user.UserService;
+import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.model.User;
+import top.wang3.hami.common.util.ListMapperHandler;
+import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static top.wang3.hami.core.init.InitializerEnums.USER_CACHE;
 
@@ -17,7 +24,6 @@ import static top.wang3.hami.core.init.InitializerEnums.USER_CACHE;
 public class UserCacheInitializer implements HamiInitializer {
 
     private final UserRepository userRepository;
-    private final UserService userService;
 
 
     @Override
@@ -31,14 +37,22 @@ public class UserCacheInitializer implements HamiInitializer {
     }
 
     private void cacheUser() {
-        int lastId = 0;
-        while (true) {
-            List<Integer> userIds = userRepository.scanUserIds(lastId, 1000);
-            if (userIds == null || userIds.isEmpty()) {
+        Page<User> page = new Page<>(1, 1000);
+        int i = 1;
+        // 100页
+        int size = 100;
+        while (i <= size) {
+            List<User> users = userRepository.scanUser(page);
+            Map<String, User> map = ListMapperHandler.listToMap(users,
+                    item -> RedisConstants.USER_INFO + item.getUserId());
+            RedisClient.cacheMultiObject(map, TimeoutConstants.USER_INFO_EXPIRE, TimeUnit.MILLISECONDS);
+            i++;
+            page.setCurrent(i);
+            page.setRecords(null);
+            page.setSearchCount(false);
+            if (!page.hasNext()) {
                 break;
             }
-            userService.loadUserCache(userIds);
-            lastId = userIds.get(userIds.size() - 1);
         }
     }
 }

@@ -1,5 +1,6 @@
 package top.wang3.hami.core.service.stat.repository;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import top.wang3.hami.common.model.HotCounter;
@@ -11,11 +12,13 @@ import java.util.List;
 @SuppressWarnings("unused")
 public interface UserStatRepository extends IService<UserStat> {
 
+    List<UserStat> scanUserStat(Page<UserStat> page);
+
     UserStat selectUserStatById(Integer userId);
 
     List<UserStat> selectUserStatByIds(List<Integer> userIds);
 
-    List<HotCounter> getAuthorRankList();
+    List<HotCounter> loadAuthorRankList();
 
     boolean updateArticles(Integer userId, int delta);
 

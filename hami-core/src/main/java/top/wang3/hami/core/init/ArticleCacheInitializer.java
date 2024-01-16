@@ -1,18 +1,20 @@
 package top.wang3.hami.core.init;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Component
 @Order(3)
@@ -21,7 +23,6 @@ public class ArticleCacheInitializer implements HamiInitializer {
 
 
     private final ArticleRepository articleRepository;
-    private final ArticleService articleService;
 
     @Override
     public InitializerEnums getName() {
@@ -31,36 +32,38 @@ public class ArticleCacheInitializer implements HamiInitializer {
     @Override
     public void run() {
         cacheArticle();
-        cacheArticleContent();
     }
 
     private void cacheArticle() {
-        int lastId = 0;
-        while (true) {
-            List<Integer> ids = articleRepository.scanArticleIds(lastId, 1000);
-            if (ids == null || ids.isEmpty()) {
+        Page<Article> page = new Page<>(1, 1000);
+        int i = 1;
+        // 1000页
+        int size = 1000;
+        while (i <= size) {
+            List<Article> articles = articleRepository.scanArticle(page);
+            // 文章信息
+            cacheArticleInfo(articles);
+            // 文章内容
+            cacheContent(articles);
+            i++;
+            page.setCurrent(i);
+            page.setRecords(null);
+            page.setSearchCount(false);
+            if (!page.hasNext()) {
                 break;
             }
-            articleService.loadArticleInfoCache(ids);
-            lastId = ids.get(ids.size() - 1);
         }
     }
 
-    private void cacheArticleContent() {
-        int lastId = 0;
-        while (true) {
-            List<Article> articles = articleRepository.scanArticleContent(lastId, 500);
-            if (articles == null || articles.isEmpty()) {
-                break;
-            }
-            cacheContent(articles);
-            lastId = articles.get(articles.size() - 1).getId();
-        }
+    private void cacheArticleInfo(List<Article> articles) {
+        Map<String, Article> map = ListMapperHandler.listToMap(articles,
+                item -> RedisConstants.ARTICLE_INFO, Function.identity());
+        RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_INFO_EXPIRE, TimeUnit.MILLISECONDS);
     }
 
     private void cacheContent(List<Article> articles) {
         Map<String, String> map = ListMapperHandler.listToMap(articles,
                 item -> RedisConstants.ARTICLE_CONTENT + item.getId(), Article::getContent);
-        RedisClient.cacheMultiObject(map, 1, 30, TimeUnit.DAYS);
+        RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_INFO_EXPIRE, TimeUnit.MILLISECONDS);
     }
 }

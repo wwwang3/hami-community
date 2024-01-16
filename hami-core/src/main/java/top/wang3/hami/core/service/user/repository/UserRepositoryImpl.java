@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.user.repository;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,16 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
 
     public static final String[] USER_PROFILE_FIELDS = {
             "user_id", "username", "avatar", "profile",
-            "blog", "company", "position", "tag", "ctime", "mtime"
+            "blog", "company", "position", "tag", "deleted", "ctime", "mtime"
     };
+
+    @Override
+    public List<User> scanUser(Page<User> page) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select(USER_PROFILE_FIELDS)
+                .orderByDesc("user_id")
+                .list(page);
+    }
 
     @Override
     public User getUserById(Integer userId) {
@@ -37,11 +46,6 @@ public class UserRepositoryImpl extends ServiceImpl<UserMapper, User>
                 .select(USER_PROFILE_FIELDS)
                 .in("user_id", userIds)
                 .list();
-    }
-
-    @Override
-    public List<Integer> scanUserIds(int lastUserId, int batchSize) {
-        return getBaseMapper().scanUserIds(lastUserId, batchSize);
     }
 
     @Override

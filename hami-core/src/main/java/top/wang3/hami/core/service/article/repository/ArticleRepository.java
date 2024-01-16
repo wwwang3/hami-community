@@ -27,9 +27,7 @@ public interface ArticleRepository extends IService<Article> {
 
     String getArticleContentById(Integer articleId);
 
-    List<Integer> scanArticleIds(int lastId, int batchSize);
-
-    List<Article> scanArticleContent(int lastId, int batchSize);
+    List<Article> scanArticle(Page<Article> page);
 
     List<Integer> searchArticle(Page<Article> page, String keyword);
 

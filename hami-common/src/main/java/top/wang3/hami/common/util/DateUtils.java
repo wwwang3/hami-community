@@ -10,7 +10,6 @@ public final class DateUtils {
     public static final DateTimeFormatter NORMAL_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final DateTimeFormatter FULL_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-
     public static long offsetMonths(Date date, long offset) {
         return offset < 0 ? minusMonths(date, offset) : plusMonths(date, offset);
     }
@@ -25,6 +24,20 @@ public final class DateUtils {
     public static long minusMonths(Date date, long months) {
         return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
                 .minusMonths(months)
+                .toInstant()
+                .toEpochMilli();
+    }
+
+    public static long plusHours(Date date, long hours) {
+        return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
+                .plusHours(hours)
+                .toInstant()
+                .toEpochMilli();
+    }
+
+    public static long minusHours(Date date, long hours) {
+        return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
+                .minusHours(hours)
                 .toInstant()
                 .toEpochMilli();
     }

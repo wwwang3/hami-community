@@ -27,10 +27,6 @@ import java.util.Map;
 public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         implements ArticleRepository {
 
-    private final String[] fields = {"id", "user_id", "title", "summary", "picture", "category_id", "ctime", "mtime"};
-    private final String[] full_fields = {"id", "user_id", "title", "summary", "content", "picture", "category_id", "ctime", "mtime"};
-
-
     @Override
     public Article getArticleInfoById(Integer articleId) {
         return getBaseMapper().selectArticleById(articleId);
@@ -66,7 +62,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("id", "user_id", "ctime")
                 .eq(cateId != null, "category_id", cateId)
-                .orderByDesc("ctime") //根据ctime倒序
+                .orderByDesc("ctime") // 根据ctime倒序
                 .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
                 .list();
     }
@@ -93,13 +89,10 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<Integer> scanArticleIds(int lastId, int batchSize) {
-        return getBaseMapper().scanArticleIds(lastId, batchSize);
-    }
-
-    @Override
-    public List<Article> scanArticleContent(int lastId, int batchSize) {
-        return getBaseMapper().scanArticleContent(lastId, batchSize);
+    public List<Article> scanArticle(Page<Article> page) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .orderByDesc("id")
+                .list(page);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class RankListServiceImpl implements RankListService {
     @Override
     public List<HotArticle> listHotArticle(Integer cateId) {
         // 文章榜
-        String key = cateId == null ? RedisConstants.TOTAL_HOT_ARTICLE : RedisConstants.CATE_HOT_ARTICLE + cateId;
+        String key = cateId == null ? RedisConstants.OVERALL_HOT_ARTICLE : RedisConstants.CATE_HOT_ARTICLE + cateId;
         Collection<ZSetOperations.TypedTuple<Integer>> typedTuples = this.getRankList(key);
         ArrayList<Integer> ids = new ArrayList<>(typedTuples.size());
         List<HotArticle> articles = ListMapperHandler.listTo(typedTuples, item -> {

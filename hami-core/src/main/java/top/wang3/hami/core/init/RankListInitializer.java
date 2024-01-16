@@ -24,7 +24,6 @@ import java.util.List;
 @Order(1)
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings("")
 public class RankListInitializer implements HamiInitializer {
 
     private final CategoryService categoryService;
@@ -43,38 +42,44 @@ public class RankListInitializer implements HamiInitializer {
 
     @Override
     public void run() {
-        refreshHotArticles();
-        refreshOverallHotArticles();
+        refreshCateHotArticle();
+        refreshOverallHotArticle();
         refreshAuthorRankList();
     }
 
-    public void refreshHotArticles() {
+    public void refreshCateHotArticle() {
         List<Category> categories =
                 categoryService.getAllCategories();
         categories.forEach(category -> {
-            String redisKey = RedisConstants.HOT_ARTICLE + category.getId();
+            String redisKey = RedisConstants.CATE_HOT_ARTICLE + category.getId();
+            // 3个月内的
             long time = DateUtils.offsetMonths(new Date(), -3);
-            List<HotCounter> articles = articleStatRepository.getHotArticlesByCateId(category.getId(), time);
+            List<HotCounter> articles = articleStatRepository.loadHotArticle(category.getId(), time);
             if (articles != null && !articles.isEmpty()) {
                 refresh(redisKey, articles);
             }
         });
     }
 
-    public void refreshOverallHotArticles() {
-        String redisKey = RedisConstants.OVERALL_HOT_ARTICLES;
-        long time = DateUtils.offsetMonths(new Date(), -3);
-        List<HotCounter> articles = articleStatRepository.getOverallHotArticles(time);
+    public void refreshOverallHotArticle() {
+        String redisKey = RedisConstants.OVERALL_HOT_ARTICLE;
+        // 6个月内
+        long time = DateUtils.offsetMonths(new Date(), -6);
+        List<HotCounter> articles = articleStatRepository.loadHotArticle(null, time);
         refresh(redisKey, articles);
     }
 
     public void refreshAuthorRankList() {
-        List<HotCounter> counters = userStatRepository.getAuthorRankList();
+        List<HotCounter> counters = userStatRepository.loadAuthorRankList();
         refresh(RedisConstants.AUTHOR_RANKING, counters);
     }
 
     private void refresh(String key, List<HotCounter> counters) {
-        Collection<Tuple> tuples = ListMapperHandler.listToTuple(counters, HotCounter::getItemId, HotCounter::getHotIndex);
+        Collection<Tuple> tuples = ListMapperHandler.listToTuple(
+                counters,
+                HotCounter::getItemId,
+                HotCounter::getHotIndex
+        );
         RedisClient.zSetAll(key, tuples);
     }
 }

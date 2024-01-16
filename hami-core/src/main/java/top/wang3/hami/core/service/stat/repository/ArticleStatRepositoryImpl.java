@@ -1,11 +1,11 @@
 package top.wang3.hami.core.service.stat.repository;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -19,18 +19,19 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
         implements ArticleStatRepository {
 
     @Override
-    public List<ArticleStatDTO> scanArticleStats(int lastArticle, int batchSize) {
-        return getBaseMapper().scanBatchStats(lastArticle, batchSize);
+    public List<ArticleStat> scanArticle(Page<ArticleStat> page) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .orderByDesc("article_id")
+                .list(page);
     }
 
     @Override
-    public List<HotCounter> getHotArticlesByCateId(Integer categoryId, long date) {
-        return getBaseMapper().selectHotArticlesByCateId(categoryId, date);
-    }
-
-    @Override
-    public List<HotCounter> getOverallHotArticles(long timestamp) {
-        return getBaseMapper().selectHotArticles(timestamp);
+    public List<HotCounter> loadHotArticle(Integer cateId, long timestamp) {
+        if (cateId == null) {
+            return getBaseMapper().selectOverallHotArticle(timestamp);
+        } else {
+            return getBaseMapper().selectCateHotArticle(cateId, timestamp);
+        }
     }
 
     @Override

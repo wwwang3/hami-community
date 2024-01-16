@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.stat.repository;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
@@ -20,6 +21,14 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     };
 
     @Override
+    public List<UserStat> scanUserStat(Page<UserStat> page) {
+        return ChainWrappers.queryChain(getBaseMapper())
+                .select(FIELDS)
+                .orderByDesc("user_id")
+                .list(page);
+    }
+
+    @Override
     public UserStat selectUserStatById(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(FIELDS)
@@ -35,7 +44,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     }
 
     @Override
-    public List<HotCounter> getAuthorRankList() {
+    public List<HotCounter> loadAuthorRankList() {
         return getBaseMapper().selectAuthorRankList();
     }
 

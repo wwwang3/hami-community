@@ -57,11 +57,6 @@ public class RedisClient {
                 .decrement(key);
     }
 
-    public static <T> void cacheEmptyObject(String key, Object o) {
-        RedisClient.setCacheObject(key, o, 1, TimeUnit.MINUTES);
-    }
-
-
     /**
      * 缓存基本的对象，Integer、String、实体类等
      *
@@ -102,28 +97,30 @@ public class RedisClient {
                 .multiSet(data); //no expire
     }
 
-    public static <T> void cacheMultiObject(List<T> items, Function<T, String> keyMapper, long min, long max, TimeUnit timeUnit) {
-        Objects.requireNonNull(keyMapper);
-        Map<String, T> map = ListMapperHandler.listToMap(items, keyMapper);
-        cacheMultiObject(map, min, max, timeUnit);
-    }
-
-    public static <T> void cacheMultiObject(final Map<String, T> data, final long min, long max, final TimeUnit timeUnit) {
+    /**
+     * 同时缓存多个对象, 建议数据不要太多
+     * @param data data
+     * @param timeout 过期时间
+     * @param unit 单位
+     * @param <T> data泛型
+     */
+    public static <T> void cacheMultiObject(final Map<String, T> data, long timeout, TimeUnit unit) {
         Assert.notEmpty(data, "map can not be empty");
+        long millis = unit.toMillis(timeout);
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             Map<byte[], byte[]> map = serializeMap(data);
             connection
                     .stringCommands()
                     .mSet(map);
-            data.keySet().forEach(key -> {
-                byte[] rawKey = keyBytes(key);
+            for (Map.Entry<byte[], byte[]> entry : map.entrySet()) {
                 connection.
                         keyCommands()
-                        .pExpire(rawKey, timeUnit.toMillis(RandomUtils.randomLong(min, max)) + randomMills());
-            });
+                        .pExpire(entry.getKey(), millis + randomMills());
+            }
             return null;
         });
     }
+
 
     public static <T> boolean setNx(String key, final T value, final long timeout, TimeUnit timeUnit) {
         Boolean success = redisTemplate.opsForValue()
@@ -603,7 +600,7 @@ public class RedisClient {
     public static <T> void zSetAll(String key, Collection<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
         final byte[] rawKey = keyBytes(key);
         List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
-
+        long millis = timeUnit.toMillis(timeout);
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             connection.keyCommands()
                     .del(rawKey);
@@ -611,7 +608,7 @@ public class RedisClient {
                 connection.zAdd(rawKey, new LinkedHashSet<>(list));
             }
             connection.keyCommands()
-                    .pExpire(rawKey, timeUnit.toMillis(timeout) + randomMills());
+                    .pExpire(rawKey,  millis + randomMills());
             return null;
         });
     }

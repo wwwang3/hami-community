@@ -24,7 +24,7 @@ public class UserStatController {
     @GetMapping("/data_growing")
     public Result<Map<String, Integer>> dataGrowing() {
         int loginUserId = LoginUserContext.getLoginUserId();
-        Map<String, Integer> result = countService.getUserDailyDataGrowing(loginUserId);
+        Map<String, Integer> result = countService.getUserYesterdayDataGrowing(loginUserId);
         return Result.of(result);
     }
 

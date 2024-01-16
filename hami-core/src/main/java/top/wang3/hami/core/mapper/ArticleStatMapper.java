@@ -1,8 +1,9 @@
 package top.wang3.hami.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.*;
-import top.wang3.hami.common.dto.stat.ArticleStatDTO;
+import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.model.UserStat;
@@ -13,24 +14,14 @@ import java.util.Map;
 @Mapper
 public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
 
-    @Select("""
-        select article_id, likes, views, comments, collects
-        from article_stat
-        where article_id > #{lastArticleId}
-        order by article_id
-        limit #{batchSize};
-    """)
-    @ResultMap(value = "ArticleStatDTOResultMap")
-    List<ArticleStatDTO> scanBatchStats(@Param("lastArticleId") int lastArticle, @Param("batchSize") int batchSize);
-
     @MapKey(value = "userId")
     Map<Integer, UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
 
     UserStat selectUserStat(@Param("userId") int userId);
 
-    List<HotCounter> selectHotArticlesByCateId(@Param("categoryId") Integer categoryId, @Param("date") long date);
+    List<HotCounter> selectCateHotArticle(@Param("categoryId") Integer categoryId, @Param("timestamp") long timestamp);
 
-    List<HotCounter> selectHotArticles(@Param("date") long date);
+    List<HotCounter> selectOverallHotArticle(@Param("timestamp") long timestamp);
 
     Long batchUpdateLikes(@Param("stats") List<ArticleStat> stats);
     Long batchUpdateComments(@Param("stats") List<ArticleStat> stats);

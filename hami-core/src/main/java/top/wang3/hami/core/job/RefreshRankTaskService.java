@@ -25,13 +25,12 @@ public class RefreshRankTaskService {
         try {
             long start = System.currentTimeMillis();
             log.info("start to refresh cate-article rank list");
-            initializer.refreshHotArticles();
+            initializer.refreshCateHotArticle();
             long end = System.currentTimeMillis();
             log.info("refresh cate-article rank list success, cost: {}ms", end -start);
         } catch (Exception e) {
-            handler.handle(new AlarmEmailMessage("ArticleRank定时任务告警信息", e.getMessage()));
             e.printStackTrace();
-            log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
+            handler.handle(new AlarmEmailMessage("ArticleRank定时任务告警信息", e.getMessage()));
         }
     }
 
@@ -41,12 +40,12 @@ public class RefreshRankTaskService {
         try {
             long start = System.currentTimeMillis();
             log.info("start to refresh overall-article rank list");
-            initializer.refreshOverallHotArticles();
+            initializer.refreshOverallHotArticle();
             long end = System.currentTimeMillis();
             log.info("refresh overall-article list success, cost: {}ms", end - start);
         } catch (Exception e) {
+            e.printStackTrace();
             handler.handle(new AlarmEmailMessage("ArticleRank定时任务告警信息", e.getMessage()));
-            log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
@@ -60,8 +59,8 @@ public class RefreshRankTaskService {
             long end = System.currentTimeMillis();
             log.info("refresh author-rank list success, cost: {}ms", end - start);
         } catch (Exception e) {
+            e.printStackTrace();
             handler.handle(new AlarmEmailMessage("AuthorRankList定时任务告警信息", e.getMessage()));
-            log.error("error_class: {}, error_msg: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 }

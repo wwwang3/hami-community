@@ -31,7 +31,7 @@ public interface CountService {
     @NonNull
     Integer getUserFollowerCount(Integer userId);
 
-    Map<String, Integer> getUserDailyDataGrowing(Integer userId);
+    Map<String, Integer> getUserYesterdayDataGrowing(Integer userId);
 
 
 }
