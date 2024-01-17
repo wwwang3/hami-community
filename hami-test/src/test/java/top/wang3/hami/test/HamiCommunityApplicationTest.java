@@ -1,5 +1,6 @@
 package top.wang3.hami.test;
 
+import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.Disabled;
@@ -77,6 +78,7 @@ class HamiCommunityApplicationTest {
     @Disabled
     void generateArticleStat() {
         // 生成article_stat表数据
+        // todo fix: 生成点赞收藏数据, 但没有写入article_stat
         log.info("start to gen article-stat");
         int batchSize = 1000;
         int lastId = 0;
@@ -100,6 +102,7 @@ class HamiCommunityApplicationTest {
     @Test
     @Disabled
     void genUserStat() {
+        // todo fix: 同时生成了点赞, 收藏, 关注数据, 但没有写入user_stat
         log.info("start to gen user-stat");
         List<UserStat> stats = jdbcClient
                 .sql("select user_id as userId, count(*) as totalArticles from article group by user_id")
@@ -114,26 +117,19 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
-    @Disabled
-    void generateArticleTag() {
-        log.info("start to gen article-tag");
-        // 生成article_tag表数据
-        int batchSize = 500;
-        int lastId = 0;
-        while (true) {
-            List<Integer> articleIds = articleMapper.scanArticleIds(lastId, batchSize);
-            if (CollectionUtils.isEmpty(articleIds)) {
-                break;
-            }
-            lastId = articleIds.get(articleIds.size() - 1);
-            ArrayList<ArticleTag> tags = articleIds.stream()
-                    .collect(ArrayList::new, (items, id) -> {
-                        List<ArticleTag> articleTags = getUniqueTag(id);
-                        items.addAll(articleTags);
-                    }, ArrayList::addAll);
-            articleTagMapper.batchInsertArticleTag(tags);
+    void genArticleTag() {
+        // 生成tagId
+        // 一个个生成太麻烦了-_-
+        ArrayList<Article> articles = new ArrayList<>(2000000);
+        for (int i = MIN_ARTICLE_ID; i <= MAX_ARTICLE_ID; i++) {
+            Article article = new Article();
+            article.setId(i);
+            article.setTagIds(getUniqueTag());
+            articles.add(article);
         }
-        log.info("finish to gen article-tag");
+        MybatisBatch<Article> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, articles);
+        MybatisBatch.Method<Article> method = new MybatisBatch.Method<>(ArticleMapper.class);
+        mybatisBatch.execute(method.updateById());
     }
 
     @Test
@@ -236,13 +232,8 @@ class HamiCommunityApplicationTest {
         log.info("finish to gen user-follow-item");
     }
 
-    private List<ArticleTag> getUniqueTag(Integer articleId) {
-        List<Integer> items = genRandomId(1000, 1060, 3);
-        return ListMapperHandler.listTo(
-                items,
-                tagId -> new ArticleTag(articleId, tagId),
-                false
-        );
+    private List<Integer> getUniqueTag() {
+        return genRandomId(1000, 1060, 3);
     }
 
     private List<Integer> genRandomId(int start, int end, int size) {

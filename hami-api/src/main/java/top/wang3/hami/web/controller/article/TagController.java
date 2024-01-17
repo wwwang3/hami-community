@@ -27,7 +27,7 @@ public class TagController {
 
     @GetMapping("/all")
     public Result<List<Tag>> getAllTags() {
-        List<Tag> tags = tagService.getAllTags();
+        List<Tag> tags = tagService.getAllTag();
         return Result.successData(tags);
     }
 

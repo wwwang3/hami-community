@@ -30,7 +30,7 @@ public class AuthController {
     public Result<Void> sendCaptcha(@RequestParam("email") @NotBlank @Email String email,
                                     @RequestParam("type")  @Pattern(regexp = "([0-2])") String type) {
         CaptchaType captchaType = CaptchaType.values()[Integer.parseInt(type)];
-        //6位验证码 有效期五分钟
+        // 6位验证码 有效期五分钟
         captchaService.sendCaptcha(captchaType, email);
         return Result.success("发送成功");
     }
