@@ -17,6 +17,8 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
     @MapKey(value = "userId")
     Map<Integer, UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
 
+    List<UserStat> scanUserStats(@Param("userIds") List<Integer> userIds);
+
     UserStat selectUserStat(@Param("userId") int userId);
 
     List<HotCounter> selectCateHotArticle(@Param("categoryId") Integer categoryId, @Param("timestamp") long timestamp);

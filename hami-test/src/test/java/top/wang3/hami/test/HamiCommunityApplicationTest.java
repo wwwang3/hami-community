@@ -3,8 +3,7 @@ package top.wang3.hami.test;
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -19,6 +18,9 @@ import top.wang3.hami.core.mapper.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @SpringBootTest(
@@ -28,6 +30,7 @@ import java.util.List;
         },
         classes = TestApplication.class
 )
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
 class HamiCommunityApplicationTest {
 
@@ -58,16 +61,19 @@ class HamiCommunityApplicationTest {
     @Autowired
     UserStatMapper userStatMapper;
 
+    @Autowired
+    UserMapper userMapper;
+
     int MIN_ARTICLE_ID = 1;
 
     int MAX_ARTICLE_ID = 2000000;
 
     int MIN_USER_ID = 1;
 
-    int MAX_USER_ID = 200000;
+    int MAX_USER_ID = 100000;
 
     @Test
-    @Disabled
+    @Order(1)
     void test01() {
         System.out.println(sqlSessionFactory);
         System.out.println(articleMapper);
@@ -75,10 +81,9 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
-    @Disabled
+    @Order(2)
     void generateArticleStat() {
         // 生成article_stat表数据
-        // todo fix: 生成点赞收藏数据, 但没有写入article_stat
         log.info("start to gen article-stat");
         int batchSize = 1000;
         int lastId = 0;
@@ -90,7 +95,15 @@ class HamiCommunityApplicationTest {
             lastId = articles.get(articles.size() - 1).getId();
             List<ArticleStat> stats = ListMapperHandler.listTo(
                     articles,
-                    a -> new ArticleStat(a.getId(), a.getUserId()),
+                    a -> {
+                        // 随机数据算了, 不太好生成
+                        ArticleStat stat = new ArticleStat(a.getId(), a.getUserId());
+                        stat.setViews(RandomUtils.randomInt(100));
+                        stat.setCollects(RandomUtils.randomInt(10)); // 固定算了
+                        stat.setLikes(RandomUtils.randomInt(20)); // 固定算了
+                        stat.setComments(RandomUtils.randomInt(30)); // 固定算了
+                        return stat;
+                    },
                     false
             );
             articleStatMapper.batchInsertArticleStat(stats);
@@ -100,45 +113,72 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
-    @Disabled
+    @Order(3)
     void genUserStat() {
-        // todo fix: 同时生成了点赞, 收藏, 关注数据, 但没有写入user_stat
         log.info("start to gen user-stat");
-        List<UserStat> stats = jdbcClient
-                .sql("select user_id as userId, count(*) as totalArticles from article group by user_id")
-                .query(UserStat.class)
-                .stream()
-                .toList();
-        List<List<UserStat>> lists = ListMapperHandler.split(stats, 1000);
-        for (List<UserStat> list : lists) {
-            userStatMapper.batchInsertUserStat(list);
+        int batchSize = 1000;
+        int lastId = 0;
+        while (true) {
+            List<Integer> userIds = userMapper.scanUserIds(lastId, batchSize);
+            if (CollectionUtils.isEmpty(userIds)) {
+                break;
+            }
+            lastId = userIds.get(userIds.size() - 1);
+            List<UserStat> stats = articleStatMapper.scanUserStats(userIds);
+            for (UserStat stat : stats) {
+                // 随机算了
+                stat.setTotalFollowings(RandomUtils.randomInt(1, 10));
+                stat.setTotalFollowers(RandomUtils.randomInt(1, 10));
+            }
+            userStatMapper.batchInsertUserStat(stats);
         }
         log.info("finish to gen user-stat");
     }
 
     @Test
-    void genArticleTag() {
+    @Order(4)
+    @Disabled
+    void updateArticleTag() throws InterruptedException {
         // 生成tagId
         // 一个个生成太麻烦了-_-
-        ArrayList<Article> articles = new ArrayList<>(2000000);
-        for (int i = MIN_ARTICLE_ID; i <= MAX_ARTICLE_ID; i++) {
-            Article article = new Article();
-            article.setId(i);
-            article.setTagIds(getUniqueTag());
-            articles.add(article);
+        // 跑了31分钟 玩不了一点
+        log.info("start to update article-tag");
+        ArrayList<List<Article>> articles = new ArrayList<>(1000);
+        int id = 1;
+        ExecutorService service = Executors.newFixedThreadPool(32);
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
+        for (int i = 0; i < 1000; i++) {
+            ArrayList<Article> list = new ArrayList<>(2000);
+            for (int j = 0; j < 2000; j++) {
+                Article article = new Article();
+                article.setId(id);
+                article.setTagIds(getUniqueTag());
+                list.add(article);
+                id++;
+            }
+            articles.add(list);
         }
-        MybatisBatch<Article> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, articles);
-        MybatisBatch.Method<Article> method = new MybatisBatch.Method<>(ArticleMapper.class);
-        mybatisBatch.execute(method.updateById());
+        for (List<Article> list : articles) {
+            service.execute(() -> {
+                MybatisBatch<Article> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, list);
+                MybatisBatch.Method<Article> method = new MybatisBatch.Method<>(ArticleMapper.class);
+                mybatisBatch.execute(method.updateById());
+                countDownLatch.countDown();
+            });
+        }
+        countDownLatch.await();
+        log.info("finish to update article-tag");
     }
 
     @Test
+    @Order(5)
     @Disabled
     void genArticleCollect() {
         log.info("start to gen article-collect");
         ArrayList<ArticleCollect> items = new ArrayList<>(1600);
+        // 每个用户随机收藏1-20篇文章
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
-            int size = RandomUtils.randomInt(1, 10);
+            int size = RandomUtils.randomInt(1, 20);
             List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
             final int userId = i;
             List<ArticleCollect> articleCollects = ListMapperHandler.listTo(
@@ -166,10 +206,12 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
+    @Order(6)
     @Disabled
     void genArticleLikeItem() {
         log.info("start to gen article-like-item");
         ArrayList<LikeItem> items = new ArrayList<>(1600);
+        // 每个用户随机点赞1-20篇文章
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 20);
             List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
@@ -200,10 +242,12 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
+    @Order(7)
     @Disabled
     void genUserFollowItem() {
         log.info("start to gen user-follow-item");
         ArrayList<UserFollow> items = new ArrayList<>(1600);
+        // 每个用户随机关注1-10名用户
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 10);
             final int userId = i;

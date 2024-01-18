@@ -79,9 +79,17 @@
     </update>
 
     <insert id="batchInsertUserStat">
-        insert into user_stat (user_id, total_articles) values
+        insert into user_stat (user_id,
+                               total_followings,
+                               total_articles,
+                               total_views,
+                               total_likes,
+                               total_comments,
+                               total_collects,
+                               total_followers) values
         <foreach collection="stats" separator="," item="item">
-            (#{item.userId}, #{item.totalArticles})
+            (#{item.userId}, #{item.totalFollowings}, #{item.totalArticles}, #{item.totalViews}, #{item.totalLikes},
+             #{item.totalComments}, #{item.totalCollects}, #{item.totalFollowers})
         </foreach>
     </insert>
 

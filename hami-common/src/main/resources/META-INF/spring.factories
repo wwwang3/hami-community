@@ -1,2 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-top.wang3.hami.common.HamiCommonConfig
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+#top.wang3.hami.common.HamiCommonConfig

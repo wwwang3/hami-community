@@ -45,12 +45,27 @@
 
 
     <select id="selectUserStatsByUserIds" resultMap="UserStatResultMap">
-        select user_id           as user_id,
-               count(article_id) as total_articles,
-               sum(views)        as total_views,
-               sum(likes)        as total_likes,
-               sum(comments)     as total_comments,
-               sum(collects)     as total_collects
+        select user_id       as user_id,
+               count(*)      as total_articles,
+               sum(views)    as total_views,
+               sum(likes)    as total_likes,
+               sum(comments) as total_comments,
+               sum(collects) as total_collects
+        from article_stat
+        where user_id in
+        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+            #{userId}
+        </foreach>
+        group by user_id;
+    </select>
+
+    <select id="scanUserStats" resultMap="UserStatResultMap">
+        select user_id       as user_id,
+               count(*)      as total_articles,
+               sum(views)    as total_views,
+               sum(likes)    as total_likes,
+               sum(comments) as total_comments,
+               sum(collects) as total_collects
         from article_stat
         where user_id in
         <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
@@ -158,9 +173,14 @@
     </update>
 
     <insert id="batchInsertArticleStat">
-        insert into article_stat (article_id, user_id) values
+        insert into article_stat (article_id,
+                                  user_id,
+                                  views,
+                                  likes,
+                                  comments,
+                                  collects) values
         <foreach collection="items" separator="," item="item">
-            (#{item.articleId}, #{item.userId})
+            (#{item.articleId}, #{item.userId}, #{item.views}, #{item.likes}, #{item.comments}, #{item.collects})
         </foreach>
     </insert>
 </mapper>

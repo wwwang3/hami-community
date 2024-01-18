@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.SearchParam;
-import top.wang3.hami.common.dto.article.ArticleInfo;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.message.SearchRabbitMessage;
 import top.wang3.hami.common.model.Article;
@@ -58,7 +57,7 @@ public class SearchServiceImpl implements SearchService {
     private void highlightKeyword(List<ArticleVo> articles, String keyword) {
         Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
         String replaced = Hi_PRE_TAG + keyword + Hi_POST_TAG;
-        List<ArticleInfo> infos = ListMapperHandler.listTo(articles, ArticleVo::getArticleInfo, false);
+        List<Article> infos = ListMapperHandler.listTo(articles, ArticleVo::getArticleInfo, false);
         infos.forEach(article -> {
             String title = pattern.matcher(article.getTitle()).replaceAll(replaced);
             String summary = pattern.matcher(article.getSummary()).replaceAll(replaced);

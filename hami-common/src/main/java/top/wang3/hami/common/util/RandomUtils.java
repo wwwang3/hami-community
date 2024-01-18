@@ -20,10 +20,21 @@ public final class RandomUtils {
                 .nextLong(min, max + 1);
     }
 
+    /**
+     * 随机整数, [0, bound)
+     * @param bound bound
+     * @return random num
+     */
     public static int randomInt(int bound) {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
+    /**
+     * 随机整数, [start, end]
+     * @param start start
+     * @param end end
+     * @return random num
+     */
     public static int randomInt(int start, int end) {
         return ThreadLocalRandom.current().nextInt(start, end + 1);
     }
