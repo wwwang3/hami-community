@@ -34,27 +34,9 @@ public class RedisClient {
         return redisTemplate;
     }
 
-    public static boolean simpleLock(String key, long timeout, TimeUnit timeUnit) {
-        return setNx(key, UUID.randomUUID().toString(), timeout, timeUnit);
-    }
-
-    public static boolean simpleUnLock(String key) {
-        return deleteObject(key);
-    }
-
     public static Long incrBy(String key, long delta) {
         return redisTemplate.opsForValue()
                 .increment(key, delta);
-    }
-
-    public static Long incr(String key) {
-        return redisTemplate.opsForValue()
-                .increment(key);
-    }
-
-    public static Long decr(String key) {
-        return redisTemplate.opsForValue()
-                .decrement(key);
     }
 
     /**
@@ -99,10 +81,11 @@ public class RedisClient {
 
     /**
      * 同时缓存多个对象, 建议数据不要太多
-     * @param data data
+     *
+     * @param data    data
      * @param timeout 过期时间
-     * @param unit 单位
-     * @param <T> data泛型
+     * @param unit    单位
+     * @param <T>     data泛型
      */
     public static <T> void cacheMultiObject(final Map<String, T> data, long timeout, TimeUnit unit) {
         Assert.notEmpty(data, "map can not be empty");
@@ -490,6 +473,17 @@ public class RedisClient {
         );
     }
 
+    public static <T> long zCard(String key) {
+        Long count = redisTemplate.opsForZSet()
+                .zCard(key);
+        return count == null ? 0L : count;
+    }
+
+    public static <T> ZSetOperations.TypedTuple<T> zPopMin(String key) {
+        return redisTemplate.opsForZSet()
+                .popMin(key);
+    }
+
     public static <T> Long zRem(String key, T member) {
         return redisTemplate.opsForZSet()
                 .remove(key, member);
@@ -523,17 +517,6 @@ public class RedisClient {
         return map;
     }
 
-    public static <T> long zCard(String key) {
-        Long count = redisTemplate.opsForZSet()
-                .zCard(key);
-        return count == null ? 0L : count;
-    }
-
-    public static <T> Set<ZSetOperations.TypedTuple<T>> zRevRangeWithScore(String key, long start, long end) {
-        return redisTemplate.opsForZSet()
-                .reverseRangeWithScores(key, start, end);
-    }
-
     public static <T> List<T> zPage(String key, long current, long size) {
         size = Math.min(20, size);
         long min = (current - 1) * size;
@@ -542,6 +525,14 @@ public class RedisClient {
                 .range(key, min, max);
         if (set == null) return Collections.emptyList();
         return new ArrayList<>(set);
+    }
+
+    public static <T> Set<ZSetOperations.TypedTuple<T>> zPageWithScore(String key, long current, long size) {
+        size = Math.min(20, size);
+        long min = (current - 1) * size;
+        long max = current * size - 1;
+        return redisTemplate.opsForZSet()
+                .rangeWithScores(key, min, max);
     }
 
     public static <T> List<T> zRevPage(String key, long current, long size) {
@@ -562,27 +553,17 @@ public class RedisClient {
                 .reverseRangeWithScores(key, min, max);
     }
 
-    public static <T> Set<ZSetOperations.TypedTuple<T>> zPageWithScore(String key, long current, long size) {
-        size = Math.min(20, size);
-        long min = (current - 1) * size;
-        long max = current * size - 1;
+    public static <T> Set<ZSetOperations.TypedTuple<T>> zRevRangeWithScore(String key, long start, long end) {
         return redisTemplate.opsForZSet()
-                .rangeWithScores(key, min, max);
+                .reverseRangeWithScores(key, start, end);
     }
 
     /**
-     * 不能缓存空列表
-     *
-     * @param key
-     * @param items
+     * 设置zset缓存, items不能为空
+     * @param key zset key
+     * @param items items
      * @param <T>
-     * @return
      */
-    public static <T> Long zAddAll(String key, Set<ZSetOperations.TypedTuple<T>> items) {
-        return redisTemplate.opsForZSet()
-                .add(key, items);
-    }
-
     public static <T> void zSetAll(String key, Collection<? extends Tuple> items) {
         final byte[] rawKey = keyBytes(key);
         List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
@@ -608,14 +589,9 @@ public class RedisClient {
                 connection.zAdd(rawKey, new LinkedHashSet<>(list));
             }
             connection.keyCommands()
-                    .pExpire(rawKey,  millis + randomMills());
+                    .pExpire(rawKey, millis + randomMills());
             return null;
         });
-    }
-
-    public static Double zIncr(String key, String member, int incr) {
-        return redisTemplate.opsForZSet()
-                .incrementScore(key, member, incr);
     }
 
     /**
@@ -700,38 +676,6 @@ public class RedisClient {
         });
     }
 
-    public static <T> List<Map<String, T>> hMGetAll(List<String> keys) {
-        return (List<Map<String, T>>) redisTemplate
-                .executePipelined((RedisCallback<Map<String, T>>) connection -> {
-                    for (String key : keys) {
-                        connection.hashCommands()
-                                .hGetAll(hashKeyBytes(key));
-                    }
-                    return null;
-                }, redisTemplate.getHashValueSerializer());
-    }
-
-    public static <T> List<Map<String, T>> hMGetAll(List<String> keys, BiFunction<String, Integer, Map<String, T>> provider) {
-        List<Object> list = redisTemplate
-                .executePipelined((RedisCallback<Object>) connection -> {
-                    for (String key : keys) {
-                        connection.hashCommands()
-                                .hGetAll(hashKeyBytes(key));
-                    }
-                    return null;
-                }, redisTemplate.getHashValueSerializer());
-        ArrayList<Map<String, T>> result = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) {
-            Object o = list.get(i);
-            if (o instanceof Map<?, ?> map && !map.isEmpty()) {
-                result.add((Map<String, T>) o);
-            } else {
-                Map<String, T> data = provider.apply(keys.get(i), i);
-                result.add(data);
-            }
-        }
-        return result;
-    }
 
     public static <T> void hIncr(String key, String field, long cnt) {
         redisTemplate.execute((RedisCallback) connection -> {
@@ -798,7 +742,6 @@ public class RedisClient {
         return script;
     }
 
-
     public static <T> RedisScript<List<T>> loadScript(String path, Class<T> clazz) {
         DefaultRedisScript script = new DefaultRedisScript<>();
         ResourceScriptSource source = new ResourceScriptSource(new ClassPathResource(path));
@@ -816,11 +759,11 @@ public class RedisClient {
     }
 
     private static long randomSeconds() {
-        return RandomUtils.randomLong(33, 222);
+        return RandomUtils.randomLong(33L, 222L);
     }
 
     private static long randomMills() {
-        return RandomUtils.randomLong(22, 333) * 1000;
+        return RandomUtils.randomLong(22L, 3333L);
     }
 
 }

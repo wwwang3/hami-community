@@ -47,7 +47,8 @@ public class RedisCacheService implements CacheService {
     @Override
     public <T> T getMapValue(String key, String hKey, Supplier<Map<String, T>> loader, long timeout, TimeUnit timeUnit) {
         T data = RedisClient.getCacheMapValue(key, hKey);
-        return data != null ? data : syncGetMapValue(key, hKey, loader, timeout, timeUnit);
+        long millis = timeUnit.toMillis(timeout);
+        return data != null ? data : syncGetMapValue(key, hKey, loader, millis);
     }
 
     @Override
@@ -111,7 +112,7 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
-    public void expireThenExecute(String key, Runnable runnable, long mills) {
+    public void expiredThenExecute(String key, Runnable runnable, long mills) {
         // 刷新过期时间, 刷新失败则执行runnable
         if (!RedisClient.pExpire(key, mills)) {
             lockTemplate.execute(key, () -> {
@@ -215,10 +216,10 @@ public class RedisCacheService implements CacheService {
     }
 
     private <T> T syncGetMapValue(String key, String hKey, Supplier<Map<String, T>> loader,
-                                  long timeout, TimeUnit timeUnit) {
+                                  long mills) {
         return lockTemplate.execute(key, () -> {
             T data = RedisClient.getCacheMapValue(key, hKey);
-            return data != null ? data : loadHashCache(key, hKey, loader, timeout, timeUnit);
+            return data != null ? data : loadHashCache(key, hKey, loader, mills);
         });
     }
 
@@ -230,9 +231,9 @@ public class RedisCacheService implements CacheService {
 
     private <T> T loadHashCache(String key, String hKey,
                                 Supplier<Map<String, T>> loader,
-                                long timeout, TimeUnit timeUnit) {
+                                long mills) {
         Map<String, T> hash = loader.get();
-        RedisClient.hMSet(key, hash, timeout, timeUnit);
+        RedisClient.hMSet(key, hash, mills, TimeUnit.MILLISECONDS);
         return hash.get(hKey);
     }
 

@@ -48,9 +48,9 @@ public class LikeServiceImpl implements LikeService {
         int loginUserId = LoginUserContext.getLoginUserId();
         String key = buildKey(loginUserId, likeType);
         return InteractHandler
-                .of("点赞")
+                .build("点赞")
                 .ofAction(key, itemId)
-                .timeout(TimeoutConstants.LIKE_LIST_EXPIRE, TimeUnit.MILLISECONDS)
+                .millis(TimeoutConstants.LIKE_LIST_EXPIRE)
                 .loader(() -> loadLikeList(loginUserId, likeType))
                 .postAct(() -> {
                     // 执行成功的后置处理器. 发送MQ消息异步写入DB
@@ -71,10 +71,10 @@ public class LikeServiceImpl implements LikeService {
         int loginUserId = LoginUserContext.getLoginUserId();
         String key = buildKey(loginUserId, likeType);
         return InteractHandler
-                .of("取消点赞")
+                .build("取消点赞")
                 .ofCancelAction(key, itemId)
-                .timeout(TimeoutConstants.LIKE_LIST_EXPIRE, TimeUnit.MILLISECONDS)
-                .loader(() -> loadLikeList(loginUserId, likeType))
+                .millis(TimeoutConstants.LIKE_LIST_EXPIRE)
+                .loader(() -> loadUserLikeItem(loginUserId, likeType))
                 .postAct(() -> {
                     // 执行成功的后置处理器. 发送MQ消息异步写入DB
                     LikeRabbitMessage message = new LikeRabbitMessage(

@@ -18,6 +18,7 @@ import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.repository.CollectRepository;
@@ -49,9 +50,12 @@ public class CollectServiceImpl implements CollectService {
         int loginUserId = LoginUserContext.getLoginUserId();
         String key = RedisConstants.USER_COLLECT_LIST + loginUserId;
         return InteractHandler
-                .of("收藏")
+                .<Integer>build("收藏")
                 .ofAction(key, itemId)
-                .timeout(TimeoutConstants.COLLECT_LIST_EXPIRE, TimeUnit.MILLISECONDS)
+                .millis(TimeoutConstants.COLLECT_LIST_EXPIRE)
+                .preCheck(member -> {
+                    if (hasCollected(loginUserId, itemId)) throw new HamiServiceException("重复收藏");
+                })
                 .loader(() -> loadCollectList(loginUserId))
                 .postAct(() -> {
                     CollectRabbitMessage message = new CollectRabbitMessage(
@@ -70,10 +74,16 @@ public class CollectServiceImpl implements CollectService {
         int loginUserId = LoginUserContext.getLoginUserId();
         String key = RedisConstants.USER_COLLECT_LIST + loginUserId;
         return InteractHandler
-                .of("取消收藏")
+                .<Integer>build("取消收藏")
                 .ofCancelAction(key, itemId)
-                .timeout(TimeoutConstants.COLLECT_LIST_EXPIRE, TimeUnit.MILLISECONDS)
-                .loader(() -> loadCollectList(loginUserId))
+                .millis(TimeoutConstants.COLLECT_LIST_EXPIRE)
+                .preCheck(member -> {
+                    if (!hasCollected(loginUserId, member)) {
+                        // 没有收藏执行取消收藏
+                        throw new HamiServiceException("没有收藏该文章");
+                    }
+                })
+                .loader(() -> loadUserCollects(loginUserId))
                 .postAct(() -> {
                     CollectRabbitMessage message = new CollectRabbitMessage(
                             loginUserId,
@@ -101,7 +111,7 @@ public class CollectServiceImpl implements CollectService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.COLLECT_LIST_EXPIRE;
-        cacheService.expireThenExecute(key, () -> loadUserCollects(userId), timeout);
+        cacheService.expiredThenExecute(key, () -> loadUserCollects(userId), timeout);
         return RedisClient.zMContains(key, itemIds);
     }
 

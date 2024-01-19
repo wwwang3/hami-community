@@ -5,10 +5,14 @@ local member = tonumber(ARGV[2]) -- 成员
 local score = tonumber(ARGV[3]) -- 分数
 local state = tonumber(ARGV[4]) -- 状态 决定删除还是添加
 
+-- 刷新过期时间避免存在性判定后缓存过期
+local success = redis.call("pexpire", zset_key, timeout) == 0
+local size = redis.call("zcard", zset_key)
 if redis.call("pexpire", zset_key, timeout) == 0 then
      -- 缓存过期
     return -1
 end
+
 
 local exist = redis.call("zscore", zset_key, member)
 

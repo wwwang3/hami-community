@@ -39,7 +39,7 @@ public interface CacheService {
      * @param runnable runnable
      * @param mills 过期时间, 单位毫秒
      */
-    void expireThenExecute(String key, Runnable runnable, long mills);
+    void expiredThenExecute(String key, Runnable runnable, long mills);
 
     <T> void asyncSetCache(String key, T data, long timeout, TimeUnit timeUnit);
 

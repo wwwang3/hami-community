@@ -19,7 +19,7 @@ import java.util.List;
         id = "SearchMessageContainer",
         bindings = @QueueBinding(
                 value = @Queue(value = "hami-search-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE2, type = ExchangeTypes.TOPIC),
+                exchange = @Exchange(value = RabbitConstants.HAMI_SEARCH_EXCHANGE, type = ExchangeTypes.TOPIC),
                 key = {"search.hot"}
         )
 )
@@ -35,7 +35,6 @@ public class SearchMessageConsumer {
 
     @RabbitHandler
     public void handleMessage(SearchRabbitMessage message) {
-        log.debug("handle search message");
         String keyword = message.getKeyword();
         RedisClient.executeScript(
                 redisScript,

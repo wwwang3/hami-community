@@ -47,13 +47,10 @@ public class FollowServiceImpl implements FollowService {
         final int loginUserId = LoginUserContext.getLoginUserId();
         String key = RedisConstants.USER_FOLLOWING_LIST + loginUserId;
         return InteractHandler
-                .<Integer>of("关注")
+                .<Integer>build("关注")
                 .ofAction(key, followingId)
-                .timeout(TimeoutConstants.FOLLOWING_LIST_EXPIRE, TimeUnit.MILLISECONDS)
-                .preCheck(i -> {
-                    // todo 检查用户ID是否存在
-                })
-                .loader(() -> lockTemplate.execute(key, () -> loadUserFollowings(loginUserId)))
+                .millis(TimeoutConstants.FOLLOWING_LIST_EXPIRE)
+                .loader(() -> loadUserFollowings(loginUserId))
                 .postAct(() -> {
                     FollowRabbitMessage message = new FollowRabbitMessage(
                             loginUserId,
@@ -70,13 +67,10 @@ public class FollowServiceImpl implements FollowService {
         final int loginUserId = LoginUserContext.getLoginUserId();
         String key = RedisConstants.USER_FOLLOWING_LIST + loginUserId;
         return InteractHandler
-                .<Integer>of("取消关注")
+                .<Integer>build("取消关注")
                 .ofCancelAction(key, followingId)
-                .timeout(TimeoutConstants.FOLLOWING_LIST_EXPIRE, TimeUnit.MILLISECONDS)
-                .preCheck(i -> {
-                    // todo 检查用户ID是否存在
-                })
-                .loader(() -> lockTemplate.execute(key, () -> loadUserFollowings(loginUserId)))
+                .millis(TimeoutConstants.FOLLOWER_LIST_EXPIRE)
+                .loader(() -> loadUserFollowings(loginUserId))
                 .postAct(() -> {
                     // 发布关注事件
                     FollowRabbitMessage message = new FollowRabbitMessage(
@@ -126,7 +120,7 @@ public class FollowServiceImpl implements FollowService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.FOLLOWING_LIST_EXPIRE;
-        cacheService.expireThenExecute(key, () -> loadUserFollowings(userId), timeout);
+        cacheService.expiredThenExecute(key, () -> loadUserFollowings(userId), timeout);
         return RedisClient.zMContains(key, followingIds);
     }
 

@@ -142,10 +142,13 @@ class HamiCommunityApplicationTest {
         // 生成tagId
         // 一个个生成太麻烦了-_-
         // 跑了31分钟 玩不了一点
+        // 线程开大一点, mysql连接数配置大一点, 速度快很多
+        // 记得先把binlog关了, 不然写了几十g到硬盘(┯_┯)
+        // 速度快了2/3
         log.info("start to update article-tag");
         ArrayList<List<Article>> articles = new ArrayList<>(1000);
         int id = 1;
-        ExecutorService service = Executors.newFixedThreadPool(32);
+        ExecutorService service = Executors.newFixedThreadPool(200);
         CountDownLatch countDownLatch = new CountDownLatch(1000);
         for (int i = 0; i < 1000; i++) {
             ArrayList<Article> list = new ArrayList<>(2000);

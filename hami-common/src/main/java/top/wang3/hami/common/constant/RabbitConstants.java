@@ -8,6 +8,8 @@ public final class RabbitConstants {
 
     public static final String HAMI_TOPIC_EXCHANGE2 = "hami-topic-exchange-2";
 
+    public static final String HAMI_SEARCH_EXCHANGE = "hami-search-exchange";
+
     public static final String HAMI_INTERACT_EXCHANGE = "hami-interact-exchange";
 
     public static final String HAMI_COMMENT_EXCHANGE = "hami-comment-exchange";

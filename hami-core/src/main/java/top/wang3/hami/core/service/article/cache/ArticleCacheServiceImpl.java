@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.zset.Tuple;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.Article;
@@ -15,6 +16,7 @@ import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -111,6 +113,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     public List<Integer> loadArticleListCache(Integer cateId) {
         // 从数据库读取
         List<Article> articles = articleRepository.listArticleByCateId(cateId);
+        // fix: zset不能为空
+        if (CollectionUtils.isEmpty(articles)) return Collections.emptyList();
         String articleListKey = getArticleListKey(cateId);
         List<Integer> ids = ListMapperHandler.listTo(articles, Article::getId);
         // 刷新缓存
@@ -132,6 +136,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     public List<Integer> loadUserArticleListCache(Integer userId) {
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         List<Article> articles = articleRepository.listUserArticle(userId);
+        // zset不能为空
+        if (CollectionUtils.isEmpty(articles)) return Collections.emptyList();
         List<Integer> ids = ListMapperHandler.listTo(articles, Article::getId);
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(
                 articles,

@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -88,8 +87,8 @@ public class ZPageHandler {
             // zset没有, 可能缓存过期或者超过了最大zset存储的数量
             long max = RedisClient.zCard(key);
             if (current * size > max && max != 0) {
-                //超过最大元素数量
-                //回源DB
+                // 超过最大元素数量
+                // 回源DB
                 return source == null ? Collections.emptyList() : source.apply(current, size);
             }
             // 缓存过期, 自行在查询时排序, 因为不知道查询的是倒序还是逆序
@@ -106,7 +105,7 @@ public class ZPageHandler {
                    return items;
                 }
                 items = valueLoader.get();
-                return ListMapperHandler.subList(items, Function.identity(), current, size);
+                return ListMapperHandler.subList(items, current, size);
             });
         }
 

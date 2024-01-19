@@ -39,7 +39,7 @@ services:
     ports:
       - "8301:6379"
     volumes:
-      - ./conf/redis.conf:/etc/redis/redis.conf
+      - ./conf/redis/redis.conf:/etc/redis/redis.conf
       - redis_data:/data
     environment:
       - TZ=Asia/Shanghai
