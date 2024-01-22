@@ -43,20 +43,14 @@
         mtime
     </sql>
 
-
-    <select id="selectUserStatsByUserIds" resultMap="UserStatResultMap">
-        select user_id       as user_id,
-               count(*)      as total_articles,
-               sum(views)    as total_views,
-               sum(likes)    as total_likes,
-               sum(comments) as total_comments,
-               sum(collects) as total_collects
+    <select id="scanArticleStatDesc" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List">
+        </include>
         from article_stat
-        where user_id in
-        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
-            #{userId}
-        </foreach>
-        group by user_id;
+        where article_id &lt; #{maxId}
+        order by article_id desc
+        limit #{batchSize};
     </select>
 
     <select id="scanUserStats" resultMap="UserStatResultMap">
@@ -184,4 +178,7 @@
             #{item.comments}, #{item.collects}, #{item.ctime}, #{item.mtime})
         </foreach>
     </insert>
+
+    <select id="scanArticleStatDesc" resultMap="BaseResultMap">
+    </select>
 </mapper>

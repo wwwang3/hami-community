@@ -1,6 +1,5 @@
 package top.wang3.hami.core.init;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -10,10 +9,9 @@ import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
-import top.wang3.hami.core.service.stat.repository.UserStatRepository;
+import top.wang3.hami.core.mapper.ArticleStatMapper;
+import top.wang3.hami.core.mapper.UserStatMapper;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -23,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class StatInitializer implements HamiInitializer {
 
-    private final UserStatRepository userStatRepository;
-    private final ArticleStatRepository articleStatRepository;
+    private final ArticleStatMapper articleStatMapper;
+    private final UserStatMapper userStatMapper;
 
     @Override
     public InitializerEnums getName() {
@@ -38,41 +36,32 @@ public class StatInitializer implements HamiInitializer {
     }
 
     public void cacheArticleStat() {
-        Page<ArticleStat> page = new Page<>(1, 1000);
-        int size = 100;
-        int i = 1;
-        while (i <= size) {
-            List<ArticleStat> stats = articleStatRepository.scanArticle(page);
-            Map<String, ArticleStat> map = ListMapperHandler.listToMap(stats,
-                    stat -> RedisConstants.STAT_TYPE_ARTICLE + stat.getArticleId());
-            RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_STAT_EXPIRE, TimeUnit.MILLISECONDS);
-            ++i;
-            page.setCurrent(i);
-            page.setRecords(null);
-            // 后续不要查总数了
-            page.setSearchCount(false);
-            if (stats.isEmpty() || !page.hasNext()) {
-                break;
-            }
-        }
+        ListMapperHandler.scanDesc(
+                Integer.MAX_VALUE,
+                500,
+                1000,
+                articleStatMapper::scanArticleStatDesc,
+                data -> {
+                    Map<String, ArticleStat> map = ListMapperHandler.listToMap(data,
+                            stat -> RedisConstants.STAT_TYPE_ARTICLE + stat.getArticleId());
+                    RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_STAT_EXPIRE, TimeUnit.MILLISECONDS);
+                },
+                ArticleStat::getArticleId
+        );
     }
 
     public void cacheUserStat() {
-        Page<UserStat> page = new Page<>(1, 1000);
-        int size = 100;
-        int i = 1;
-        while (i <= size) {
-            List<UserStat> stats = userStatRepository.scanUserStat(page);
-            Map<String, UserStat> map = ListMapperHandler.listToMap(stats,
-                    stat -> RedisConstants.STAT_TYPE_USER + stat.getUserId());
-            RedisClient.cacheMultiObject(map, TimeoutConstants.USER_STAT_EXPIRE, TimeUnit.MILLISECONDS);
-            ++i;
-            page.setCurrent(i);
-            page.setRecords(null);
-            page.setSearchCount(false);
-            if (stats.isEmpty() || !page.hasNext()) {
-                break;
-            }
-        }
+        ListMapperHandler.scanDesc(
+                Integer.MAX_VALUE,
+                100,
+                1000,
+                userStatMapper::scanUserStatDesc,
+                data -> {
+                    Map<String, UserStat> map = ListMapperHandler.listToMap(data,
+                            stat -> RedisConstants.STAT_TYPE_USER + stat.getUserId());
+                    RedisClient.cacheMultiObject(map, TimeoutConstants.USER_STAT_EXPIRE, TimeUnit.MILLISECONDS);
+                },
+                UserStat::getUserId
+        );
     }
 }

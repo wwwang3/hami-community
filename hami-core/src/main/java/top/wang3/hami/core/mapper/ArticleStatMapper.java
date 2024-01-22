@@ -1,7 +1,6 @@
 package top.wang3.hami.core.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import top.wang3.hami.common.model.ArticleStat;
@@ -9,13 +8,11 @@ import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.model.UserStat;
 
 import java.util.List;
-import java.util.Map;
 
 @Mapper
 public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
 
-    @MapKey(value = "userId")
-    Map<Integer, UserStat> selectUserStatsByUserIds(@Param("userIds") List<Integer> userIds);
+    List<ArticleStat> scanArticleStatDesc(@Param("maxId") int maxId, @Param("batchSize") int batchSize);
 
     List<UserStat> scanUserStats(@Param("userIds") List<Integer> userIds);
 

@@ -15,4 +15,6 @@ public interface UserStatMapper extends BaseMapper<UserStat> {
     Long batchInsertUserStat(@Param("stats") List<UserStat> stats);
 
     List<HotCounter> selectAuthorRankList();
+
+    List<UserStat> scanUserStatDesc(@Param("maxId") int maxId, @Param("batchSize") int batchSize);
 }

@@ -99,4 +99,14 @@
         order by hot_index
         limit 64;
     </select>
+
+    <select id="scanUserStatDesc" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List">
+        </include>
+        from user_stat
+        where user_id &lt; #{maxId}
+        order by user_id desc
+        limit #{batchSize};
+    </select>
 </mapper>

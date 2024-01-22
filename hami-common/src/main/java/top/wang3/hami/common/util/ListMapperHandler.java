@@ -7,10 +7,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -219,5 +216,27 @@ public class ListMapperHandler {
                 setter.accept(d, value);
             }
         });
+    }
+
+    public static <T> void scanDesc(int maxId, int page, int batchSize,
+                                    BiFunction<Integer, Integer, List<T>> searcher, Function<T, Integer> next) {
+        scanDesc(maxId, page, batchSize, searcher, null, next);
+    }
+
+    public static <T> void scanDesc(int maxId, int page, int batchSize,
+                                    BiFunction<Integer, Integer, List<T>> searcher,
+                                    Consumer<List<T>> consumer, Function<T, Integer> next) {
+        int i = 0;
+        while (i < page) {
+            List<T> data = searcher.apply(maxId, batchSize);
+            if (data == null || data.isEmpty()) {
+                break;
+            }
+            if (consumer != null) {
+                consumer.accept(data);
+            }
+            ++i;
+            maxId = next.apply(data.get(data.size() - 1));
+        }
     }
 }

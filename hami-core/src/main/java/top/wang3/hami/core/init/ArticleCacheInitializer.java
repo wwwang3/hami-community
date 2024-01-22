@@ -34,21 +34,19 @@ public class ArticleCacheInitializer implements HamiInitializer {
     }
 
     private void cacheArticle() {
-        int maxId = Integer.MAX_VALUE;
-        int page = 0;
-        int size = 1000;
-        while (page < 1000) {
-            List<Article> articles = articleMapper.scanArticleDesc(maxId, size);
-            if (articles.isEmpty()) {
-                break;
-            }
-            // 文章信息
-            cacheArticleInfo(articles);
-            // 文章内容
-            cacheContent(articles);
-            ++page;
-            maxId = articles.get(articles.size() - 1).getId();
-        }
+        ListMapperHandler.scanDesc(
+                Integer.MAX_VALUE,
+                500,
+                1000,
+                articleMapper::scanArticleDesc,
+                articles -> {
+                    // 文章信息
+                    cacheArticleInfo(articles);
+                    // 文章内容
+                    cacheContent(articles);
+                },
+                Article::getId
+        );
     }
 
     private void cacheArticleInfo(List<Article> articles) {
