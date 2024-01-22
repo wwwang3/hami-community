@@ -1,9 +1,7 @@
 package top.wang3.hami.core.service.interact.handler;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.annotation.CanalRabbitHandler;
@@ -21,12 +19,6 @@ public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
 
     private final LikeService likeService;
 
-    private RedisScript<Long> likeScript;
-
-    @PostConstruct
-    public void init() {
-        likeScript = RedisClient.loadScript("/META-INF/scripts/like.lua");
-    }
 
     @Override
     public void processInsert(LikeItem entity) {

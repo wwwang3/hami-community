@@ -9,15 +9,14 @@ import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.HotCounter;
-import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -32,7 +31,7 @@ public class RankListInitializer implements HamiInitializer {
 
     @Override
     public InitializerEnums getName() {
-        return InitializerEnums.HOT_ARTICLE;
+        return InitializerEnums.RANK_LIST;
     }
 
     @Override
@@ -53,8 +52,8 @@ public class RankListInitializer implements HamiInitializer {
         categories.forEach(category -> {
             String redisKey = RedisConstants.CATE_HOT_ARTICLE + category.getId();
             // 3个月内的
-            long time = DateUtils.offsetMonths(new Date(), -3);
-            List<HotCounter> articles = articleStatRepository.loadHotArticle(category.getId(), time);
+            LocalDateTime dateTime = LocalDateTime.now().minusMonths(3);
+            List<HotCounter> articles = articleStatRepository.loadHotArticle(category.getId(), dateTime);
             if (articles != null && !articles.isEmpty()) {
                 refresh(redisKey, articles);
             }
@@ -64,8 +63,8 @@ public class RankListInitializer implements HamiInitializer {
     public void refreshOverallHotArticle() {
         String redisKey = RedisConstants.OVERALL_HOT_ARTICLE;
         // 6个月内
-        long time = DateUtils.offsetMonths(new Date(), -6);
-        List<HotCounter> articles = articleStatRepository.loadHotArticle(null, time);
+        LocalDateTime dateTime = LocalDateTime.now().minusMonths(6);
+        List<HotCounter> articles = articleStatRepository.loadHotArticle(null, dateTime);
         refresh(redisKey, articles);
     }
 

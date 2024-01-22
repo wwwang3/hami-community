@@ -58,9 +58,9 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<Article> listArticleByCateId(Integer cateId) {
+    public List<Article> loadArticleListByCateId(Integer cateId) {
         return ChainWrappers.queryChain(getBaseMapper())
-                .select("id", "user_id", "ctime")
+                .select( "id", "ctime")
                 .eq(cateId != null, "category_id", cateId)
                 .orderByDesc("ctime") // 根据ctime倒序
                 .last("limit " + ZPageHandler.DEFAULT_MAX_SIZE)
@@ -68,11 +68,11 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public List<Integer> listArticleByPage(Page<Article> page, Integer cateId, Integer userId) {
+    public List<Integer> loadArticleListByPage(Page<Article> page, Integer cateId, Integer userId) {
         List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
                 .select("id")
                 .eq(userId != null, "user_id", userId)
-                .eq("category_id", cateId)
+                .eq(cateId != null, "category_id", cateId)
                 .orderByDesc("ctime")
                 .list(page);
         return ListMapperHandler.listTo(articles, Article::getId);
@@ -86,13 +86,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
                 .oneOpt()
                 .map(Article::getContent)
                 .orElse("");
-    }
-
-    @Override
-    public List<Article> scanArticle(Page<Article> page) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .orderByDesc("id")
-                .list(page);
     }
 
     @Override
@@ -114,13 +107,14 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public Map<String, Long> getArticleCount() {
         List<ArticleCount> cateArticleCount = getBaseMapper().selectCateArticleCount();
-        Long totalArticleCount = getBaseMapper().selectTotalArticleCount();
+        long total = cateArticleCount.stream().mapToLong(ArticleCount::getTotal).sum();
+//        Long totalArticleCount = getBaseMapper().selectTotalArticleCount();
         Map<String, Long> map = ListMapperHandler.listToMap(
                 cateArticleCount,
                 item -> RedisConstants.CATE_ARTICLE_COUNT + item.getCateId(),
                 ArticleCount::getTotal
         );
-        map.put(RedisConstants.TOTAL_ARTICLE_COUNT, totalArticleCount);
+        map.put(RedisConstants.TOTAL_ARTICLE_COUNT, total);
         return map;
     }
 

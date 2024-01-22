@@ -1,6 +1,5 @@
 package top.wang3.hami.core.init;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -9,7 +8,7 @@ import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.mapper.ArticleMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import java.util.function.Function;
 public class ArticleCacheInitializer implements HamiInitializer {
 
 
-    private final ArticleRepository articleRepository;
+    private final ArticleMapper articleMapper;
 
     @Override
     public InitializerEnums getName() {
@@ -35,23 +34,20 @@ public class ArticleCacheInitializer implements HamiInitializer {
     }
 
     private void cacheArticle() {
-        Page<Article> page = new Page<>(1, 1000);
-        int i = 1;
-        // 1000页
+        int maxId = Integer.MAX_VALUE;
+        int page = 0;
         int size = 1000;
-        while (i <= size) {
-            List<Article> articles = articleRepository.scanArticle(page);
+        while (page < 1000) {
+            List<Article> articles = articleMapper.scanArticleDesc(maxId, size);
+            if (articles.isEmpty()) {
+                break;
+            }
             // 文章信息
             cacheArticleInfo(articles);
             // 文章内容
             cacheContent(articles);
-            i++;
-            page.setCurrent(i);
-            page.setRecords(null);
-            page.setSearchCount(false);
-            if (!page.hasNext()) {
-                break;
-            }
+            ++page;
+            maxId = articles.get(articles.size() - 1).getId();
         }
     }
 

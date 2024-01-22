@@ -4,14 +4,12 @@ package top.wang3.hami.core.component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.message.RabbitMessage;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnBean(RabbitTemplate.class)
 @SuppressWarnings("unused")
 @Slf4j
 public class RabbitMessagePublisher {

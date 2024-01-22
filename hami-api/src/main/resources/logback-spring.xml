@@ -37,7 +37,7 @@
     <springProfile name="dev">
         <logger name="top.wang3.hami" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
+<!--            <appender-ref ref="FILE"/>-->
         </logger>
     </springProfile>
 

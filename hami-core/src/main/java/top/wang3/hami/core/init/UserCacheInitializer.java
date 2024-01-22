@@ -1,7 +1,6 @@
 package top.wang3.hami.core.init;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -10,6 +9,7 @@ import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.mapper.UserMapper;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import static top.wang3.hami.core.init.InitializerEnums.USER_CACHE;
 public class UserCacheInitializer implements HamiInitializer {
 
     private final UserRepository userRepository;
-
+    private final UserMapper userMapper;
 
     @Override
     public InitializerEnums getName() {
@@ -37,22 +37,20 @@ public class UserCacheInitializer implements HamiInitializer {
     }
 
     private void cacheUser() {
-        Page<User> page = new Page<>(1, 1000);
-        int i = 1;
+        int maxId = Integer.MAX_VALUE;
         // 100页
-        int size = 100;
-        while (i <= size) {
-            List<User> users = userRepository.scanUser(page);
+        int page = 0;
+        int batchSize = 1000;
+        while (page < 100) {
+            List<User> users = userMapper.scanUserDesc(maxId, batchSize);
+            if (users.isEmpty()) {
+                break;
+            }
             Map<String, User> map = ListMapperHandler.listToMap(users,
                     item -> RedisConstants.USER_INFO + item.getUserId());
             RedisClient.cacheMultiObject(map, TimeoutConstants.USER_INFO_EXPIRE, TimeUnit.MILLISECONDS);
-            i++;
-            page.setCurrent(i);
-            page.setRecords(null);
-            page.setSearchCount(false);
-            if (!page.hasNext()) {
-                break;
-            }
+            ++page;
+            maxId = users.get(users.size() - 1).getUserId();
         }
     }
 }

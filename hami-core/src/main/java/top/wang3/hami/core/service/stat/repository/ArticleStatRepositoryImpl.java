@@ -8,8 +8,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
+import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,11 +28,11 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
-    public List<HotCounter> loadHotArticle(Integer cateId, long timestamp) {
+    public List<HotCounter> loadHotArticle(Integer cateId, LocalDateTime dateTime) {
         if (cateId == null) {
-            return getBaseMapper().selectOverallHotArticle(timestamp);
+            return getBaseMapper().selectOverallHotArticle(DateUtils.formatDateTime(dateTime));
         } else {
-            return getBaseMapper().selectCateHotArticle(cateId, timestamp);
+            return getBaseMapper().selectCateHotArticle(cateId, DateUtils.formatDateTime(dateTime));
         }
     }
 

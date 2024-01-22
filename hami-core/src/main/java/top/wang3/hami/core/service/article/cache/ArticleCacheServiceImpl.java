@@ -59,7 +59,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         String key = getArticleListKey(cateId);
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> getArticleCountCache(cateId))
-                .source((current, size) -> articleRepository.listArticleByPage(page, cateId, null))
+                .source((current, size) -> articleRepository.loadArticleListByPage(page, cateId, null))
                 .loader(() -> this.loadArticleListCache(cateId))
                 .query();
 
@@ -71,7 +71,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> getUserArticleCountCache(userId))
-                .source((current, size) -> articleRepository.listArticleByPage(page, null, userId))
+                .source((current, size) -> articleRepository.loadArticleListByPage(page, null, userId))
                 .loader(() -> loadUserArticleListCache(userId))
                 .query();
     }
@@ -112,7 +112,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     @Override
     public List<Integer> loadArticleListCache(Integer cateId) {
         // 从数据库读取
-        List<Article> articles = articleRepository.listArticleByCateId(cateId);
+        List<Article> articles = articleRepository.loadArticleListByCateId(cateId);
         // fix: zset不能为空
         if (CollectionUtils.isEmpty(articles)) return Collections.emptyList();
         String articleListKey = getArticleListKey(cateId);

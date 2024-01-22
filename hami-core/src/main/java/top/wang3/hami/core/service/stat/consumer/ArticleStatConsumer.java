@@ -11,10 +11,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
+import top.wang3.hami.common.message.RabbitMessage;
 import top.wang3.hami.common.message.email.AlarmEmailMessage;
-import top.wang3.hami.common.message.interact.CollectRabbitMessage;
-import top.wang3.hami.common.message.interact.InteractRabbitMessage;
-import top.wang3.hami.common.message.interact.LikeRabbitMessage;
+import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
@@ -40,7 +39,7 @@ public class ArticleStatConsumer {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
-            id = "StatMessageContainer-1",
+            id = "ArticleStatMessageContainer-1",
             bindings = @QueueBinding(
                     value = @Queue(RabbitConstants.STAT_QUEUE_1),
                     exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
@@ -76,9 +75,41 @@ public class ArticleStatConsumer {
     }
 
     @RabbitListener(
-            id = "StatMessageContainer-2",
+            id = "ArticleStatMessageContainer-2",
             bindings = @QueueBinding(
                     value = @Queue(RabbitConstants.STAT_QUEUE_2),
+                    exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                    key = "comment.*"
+            ),
+            containerFactory = "batchRabbitListenerContainerFactory"
+    )
+    public void handleCommentMessage(List<RabbitMessage> messages) {
+        try {
+            List<ArticleStat> articleStats = messages.stream()
+                    .collect(Collectors.groupingBy(this::getCommentArticleId))
+                    .values()
+                    .stream()
+                    .map(msgs -> {
+                        final ArticleStat articleStat = new ArticleStat();
+                        articleStat.setArticleId(getCommentArticleId(msgs.get(0)));
+                        articleStat.setComments(0);
+                        return msgs.stream().reduce(articleStat, this::handleCommentMessage, (v1, v2) -> v1);
+                    })
+                    .filter(s -> s.getArticleId() != -1 && !Objects.equals(0, s.getComments()))
+                    .toList();
+            articleStatRepository.batchUpdateComments(articleStats);
+        } catch (Exception e) {
+            String msgs = Result.writeValueAsString(messages);
+            log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+            AlarmEmailMessage message = new AlarmEmailMessage("更新文章收藏数据失败", msgs);
+            rabbitMessagePublisher.publishMsg(message);
+        }
+    }
+
+    @RabbitListener(
+            id = "ArticleStatMessageContainer-3",
+            bindings = @QueueBinding(
+                    value = @Queue(RabbitConstants.STAT_QUEUE_3),
                     exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                     key = "*.collect.*"
             ),
@@ -112,22 +143,9 @@ public class ArticleStatConsumer {
     }
 
     @RabbitListener(
-            id = "StatMessageContainer-3",
+            id = "ArticleStatMessageContainer-4",
             bindings = @QueueBinding(
-                    value = @Queue(RabbitConstants.STAT_QUEUE_3),
-                    exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                    key = {"article.delete"}
-            )
-    )
-    public void handleArticleDeletedMessage(ArticleRabbitMessage message) {
-        // 文章删除消息
-        articleStatRepository.deleteArticleStat(message.getArticleId());
-    }
-
-    @RabbitListener(
-            id = "StatMessageContainer-4",
-            bindings = @QueueBinding(
-                    value = @Queue(RabbitConstants.STAT_QUEUE_3),
+                    value = @Queue(RabbitConstants.STAT_QUEUE_4),
                     exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
                     key = {"article.view"}
             ),
@@ -158,6 +176,27 @@ public class ArticleStatConsumer {
 
     private int delta(byte state) {
         return state == 1 ? 1 : -1;
+    }
+
+    private ArticleStat handleCommentMessage(ArticleStat articleStat, RabbitMessage message) {
+        if (message instanceof CommentRabbitMessage || message instanceof ReplyRabbitMessage) {
+            articleStat.setComments(articleStat.getComments() + 1);
+        } else if (message instanceof  CommentDeletedRabbitMessage c) {
+            articleStat.setComments(articleStat.getComments() - c.getDeletedCount());
+        }
+        return articleStat;
+    }
+
+    private Integer getCommentArticleId(RabbitMessage message) {
+        if (message instanceof CommentRabbitMessage c) {
+            return c.getArticleId();
+        } else if (message instanceof ReplyRabbitMessage r) {
+            return r.getArticleId();
+        } else if (message instanceof  CommentDeletedRabbitMessage c) {
+            return c.getArticleId();
+        } else {
+            return -1;
+        }
     }
 
 }

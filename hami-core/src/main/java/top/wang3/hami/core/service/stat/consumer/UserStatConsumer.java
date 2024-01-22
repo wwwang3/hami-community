@@ -36,7 +36,7 @@ public class UserStatConsumer {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
-            id = "StatMessageContainer-3",
+            id = "UserStatMessageContainer-1",
             bindings = {
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
@@ -82,7 +82,7 @@ public class UserStatConsumer {
 
 
     @RabbitListener(
-            id = "UserStatContainer-4",
+            id = "UserStatMessageContainer-2",
             bindings = {
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),

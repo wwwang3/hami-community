@@ -11,7 +11,6 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
-import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.message.interact.FollowRabbitMessage;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.InteractHandler;
@@ -40,7 +39,6 @@ public class FollowServiceImpl implements FollowService {
     private final FollowRepository followRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
     private final CacheService cacheService;
-    private final LockTemplate lockTemplate;
 
     @Override
     public boolean follow(int followingId) {

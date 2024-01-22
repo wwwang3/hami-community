@@ -21,13 +21,11 @@ public interface ArticleRepository extends IService<Article> {
 
     List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId);
 
-    List<Article> listArticleByCateId(Integer cateId);
+    List<Article> loadArticleListByCateId(Integer cateId);
 
-    List<Integer> listArticleByPage(Page<Article> page, Integer cateId, Integer userId);
+    List<Integer> loadArticleListByPage(Page<Article> page, Integer cateId, Integer userId);
 
     String getArticleContentById(Integer articleId);
-
-    List<Article> scanArticle(Page<Article> page);
 
     List<Integer> searchArticle(Page<Article> page, String keyword);
 

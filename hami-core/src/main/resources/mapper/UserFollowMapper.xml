@@ -44,9 +44,9 @@
     </select>
 
     <insert id="batchInsertFollowItem">
-        insert into user_follow (user_id, following, state) values
+        insert into user_follow (user_id, following, state, ctime, mtime) values
         <foreach collection="items" separator="," item="item">
-            (#{item.userId}, #{item.following}, #{item.state})
+            (#{item.userId}, #{item.following}, #{item.state}, #{item.ctime}, #{item.mtime})
         </foreach>
     </insert>
 </mapper>

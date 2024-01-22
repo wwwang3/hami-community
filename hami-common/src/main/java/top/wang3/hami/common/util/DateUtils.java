@@ -2,6 +2,7 @@ package top.wang3.hami.common.util;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 
 public final class DateUtils {
@@ -42,12 +43,45 @@ public final class DateUtils {
                 .toEpochMilli();
     }
 
-    public static String formatDate(Date date) {
-        return formatDate(date.getTime());
+    public static Date randomDate(int startYear, int endYear) {
+        int year = RandomUtils.randomInt(startYear, endYear);
+        int month = RandomUtils.randomInt(1, 12);
+        int day = getDayOfMonth(year, month);
+        int hour = RandomUtils.randomInt(0, 23);
+        int minute = RandomUtils.randomInt(0, 59);
+        int second = RandomUtils.randomInt(0, 59);
+        int mills = RandomUtils.randomInt(0, 999);
+        Calendar instance = Calendar.getInstance();
+        instance.set(Calendar.YEAR, year);
+        instance.set(Calendar.MONTH, month);
+        instance.set(Calendar.DAY_OF_MONTH, day);
+        instance.set(Calendar.HOUR, hour);
+        instance.set(Calendar.MINUTE, minute);
+        instance.set(Calendar.SECOND, second);
+        instance.set(Calendar.MILLISECOND, mills);
+        return instance.getTime();
     }
 
-    public static String formatDateTime(Date date) {
-        return formatDateTime(date.getTime());
+    public static boolean isLoopYear(int year) {
+        return ((year & 3) == 0) && ((year % 100) != 0 || (year % 400) == 0);
+    }
+
+    private static int getDayOfMonth(int year, int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("The month range is [1,12].");
+        } else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+            return 31;
+        } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+            return 30;
+        } else if (isLoopYear(year)) {
+            return 29;
+        } else {
+            return 28;
+        }
+    }
+
+    public static String formatDate(Date date) {
+        return formatDate(date.getTime());
     }
 
     public static String formatDate(long mills) {
@@ -55,6 +89,14 @@ public final class DateUtils {
                 Instant.ofEpochMilli(mills),
                 ZoneId.systemDefault())
         );
+    }
+
+    public static String formatDateTime(Date date) {
+        return formatDateTime(date.getTime());
+    }
+
+    public static String formatDateTime(LocalDateTime dateTime) {
+        return FULL_DATE_FORMATTER.format(dateTime);
     }
 
     public static String formatDateTime(long mills) {

@@ -72,13 +72,23 @@
         order by t1.id desc
     </select>
 
-    <select id="scanArticles" resultMap="BaseResultMap">
+    <select id="scanArticleAsc" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List">
+        <include refid="Full_Column_List">
         </include>
         from article
         where id > #{lastId} and deleted = 0
         order by id
+        limit #{batchSize}
+    </select>
+
+    <select id="scanArticleDesc" resultMap="BaseResultMap">
+        select
+        <include refid="Full_Column_List">
+        </include>
+        from article
+        where id &lt; #{maxId} and deleted = 0
+        order by id DESC
         limit #{batchSize}
     </select>
 
@@ -99,6 +109,6 @@
         <include refid="Base_Column_List">
         </include>
         from article
-        where id = #{id};
+        where id = #{id} and deleted = 0;
     </select>
 </mapper>

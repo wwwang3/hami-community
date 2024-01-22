@@ -1,9 +1,11 @@
 package top.wang3.hami.test;
 
-import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -11,16 +13,15 @@ import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.*;
+import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RandomUtils;
 import top.wang3.hami.core.mapper.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 @SpringBootTest(
@@ -42,9 +43,6 @@ class HamiCommunityApplicationTest {
 
     @Autowired
     ArticleMapper articleMapper;
-
-    @Autowired
-    ArticleTagMapper articleTagMapper;
 
     @Autowired
     ArticleCollectMapper articleCollectMapper;
@@ -82,13 +80,14 @@ class HamiCommunityApplicationTest {
 
     @Test
     @Order(2)
+//    @Disabled
     void generateArticleStat() {
         // 生成article_stat表数据
         log.info("start to gen article-stat");
-        int batchSize = 1000;
+        int batchSize = 1500;
         int lastId = 0;
         while (true) {
-            List<Article> articles = articleMapper.scanArticles(lastId, batchSize);
+            List<Article> articles = articleMapper.scanArticleAsc(lastId, batchSize);
             if (CollectionUtils.isEmpty(articles)) {
                 break;
             }
@@ -99,9 +98,11 @@ class HamiCommunityApplicationTest {
                         // 随机数据算了, 不太好生成
                         ArticleStat stat = new ArticleStat(a.getId(), a.getUserId());
                         stat.setViews(RandomUtils.randomInt(100));
-                        stat.setCollects(RandomUtils.randomInt(10)); // 固定算了
-                        stat.setLikes(RandomUtils.randomInt(20)); // 固定算了
-                        stat.setComments(RandomUtils.randomInt(30)); // 固定算了
+                        stat.setCollects(RandomUtils.randomInt(10));
+                        stat.setLikes(RandomUtils.randomInt(20));
+                        stat.setComments(RandomUtils.randomInt(30));
+                        stat.setCtime(a.getCtime());
+                        stat.setMtime(a.getMtime());
                         return stat;
                     },
                     false
@@ -114,6 +115,7 @@ class HamiCommunityApplicationTest {
 
     @Test
     @Order(3)
+//    @Disabled
     void genUserStat() {
         log.info("start to gen user-stat");
         int batchSize = 1000;
@@ -136,50 +138,13 @@ class HamiCommunityApplicationTest {
     }
 
     @Test
-    @Order(4)
-    @Disabled
-    void updateArticleTag() throws InterruptedException {
-        // 生成tagId
-        // 一个个生成太麻烦了-_-
-        // 跑了31分钟 玩不了一点
-        // 线程开大一点, mysql连接数配置大一点, 速度快很多
-        // 记得先把binlog关了, 不然写了几十g到硬盘(┯_┯)
-        // 速度快了2/3
-        log.info("start to update article-tag");
-        ArrayList<List<Article>> articles = new ArrayList<>(1000);
-        int id = 1;
-        ExecutorService service = Executors.newFixedThreadPool(200);
-        CountDownLatch countDownLatch = new CountDownLatch(1000);
-        for (int i = 0; i < 1000; i++) {
-            ArrayList<Article> list = new ArrayList<>(2000);
-            for (int j = 0; j < 2000; j++) {
-                Article article = new Article();
-                article.setId(id);
-                article.setTagIds(getUniqueTag());
-                list.add(article);
-                id++;
-            }
-            articles.add(list);
-        }
-        for (List<Article> list : articles) {
-            service.execute(() -> {
-                MybatisBatch<Article> mybatisBatch = new MybatisBatch<>(sqlSessionFactory, list);
-                MybatisBatch.Method<Article> method = new MybatisBatch.Method<>(ArticleMapper.class);
-                mybatisBatch.execute(method.updateById());
-                countDownLatch.countDown();
-            });
-        }
-        countDownLatch.await();
-        log.info("finish to update article-tag");
-    }
-
-    @Test
     @Order(5)
-    @Disabled
+//    @Disabled
     void genArticleCollect() {
         log.info("start to gen article-collect");
         ArrayList<ArticleCollect> items = new ArrayList<>(1600);
         // 每个用户随机收藏1-20篇文章
+        Date ctime = new Date(1577808000000L);
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 20);
             List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
@@ -191,6 +156,8 @@ class HamiCommunityApplicationTest {
                         item.setArticleId(id);
                         item.setUserId(userId);
                         item.setState(Constants.ONE);
+                        item.setCtime(ctime);
+                        item.setMtime(DateUtils.randomDate(2020, 2024));
                         return item;
                     },
                     false
@@ -210,11 +177,13 @@ class HamiCommunityApplicationTest {
 
     @Test
     @Order(6)
-    @Disabled
+//    @Disabled
     void genArticleLikeItem() {
         log.info("start to gen article-like-item");
         ArrayList<LikeItem> items = new ArrayList<>(1600);
         // 每个用户随机点赞1-20篇文章
+        // 2020-01-01
+        Date ctime = new Date(1577808000000L);
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 20);
             List<Integer> articleIds = genRandomId(MIN_ARTICLE_ID, MAX_ARTICLE_ID, size);
@@ -227,6 +196,8 @@ class HamiCommunityApplicationTest {
                         item.setItemId(id);
                         item.setItemType(LikeType.ARTICLE.getType());
                         item.setState(Constants.ONE);
+                        item.setCtime(ctime);
+                        item.setMtime(DateUtils.randomDate(2020, 2024));
                         return item;
                     },
                     false
@@ -246,11 +217,12 @@ class HamiCommunityApplicationTest {
 
     @Test
     @Order(7)
-    @Disabled
+//    @Disabled
     void genUserFollowItem() {
         log.info("start to gen user-follow-item");
         ArrayList<UserFollow> items = new ArrayList<>(1600);
         // 每个用户随机关注1-10名用户
+        Date ctime = new Date(1577808000000L);
         for (int i = MIN_USER_ID; i <= MAX_USER_ID; i++) {
             int size = RandomUtils.randomInt(1, 10);
             final int userId = i;
@@ -262,6 +234,8 @@ class HamiCommunityApplicationTest {
                         follow.setUserId(userId);
                         follow.setFollowing(id);
                         follow.setState(Constants.ONE);
+                        follow.setCtime(ctime);
+                        follow.setMtime(DateUtils.randomDate(2020, 2024));
                         return follow;
                     },
                     false
@@ -277,10 +251,6 @@ class HamiCommunityApplicationTest {
             userFollowMapper.batchInsertFollowItem(items);
         }
         log.info("finish to gen user-follow-item");
-    }
-
-    private List<Integer> getUniqueTag() {
-        return genRandomId(1000, 1060, 3);
     }
 
     private List<Integer> genRandomId(int start, int end, int size) {

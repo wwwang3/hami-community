@@ -1,10 +1,10 @@
 package top.wang3.hami.canal.annotation;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.canal.CanalEntryHandler;
@@ -15,7 +15,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 @Slf4j
-@RequiredArgsConstructor
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public class CanalRabbitHandlerAnnotationBeanPostProcessor
         implements BeanPostProcessor {
@@ -23,6 +22,10 @@ public class CanalRabbitHandlerAnnotationBeanPostProcessor
 
     private final CanalEntryHandlerFactory canalEntryHandlerFactory;
 
+    @Lazy
+    public CanalRabbitHandlerAnnotationBeanPostProcessor(CanalEntryHandlerFactory canalEntryHandlerFactory) {
+        this.canalEntryHandlerFactory = canalEntryHandlerFactory;
+    }
 
     @Override
     public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
@@ -40,7 +43,7 @@ public class CanalRabbitHandlerAnnotationBeanPostProcessor
             CanalRabbitHandler canalRabbitHandler = targetClass.getAnnotation(CanalRabbitHandler.class);
             processCanalRabbitHandler(canalRabbitHandler, handler);
         } catch (Exception e) {
-            throw new IllegalArgumentException("can not target object", e);
+            throw new IllegalArgumentException("failed to process canal listener.", e);
         }
         return bean;
     }

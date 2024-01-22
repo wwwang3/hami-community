@@ -6,8 +6,6 @@ public final class RabbitConstants {
 
     public static final String HAMI_TOPIC_EXCHANGE1 = "hami-topic-exchange-1";
 
-    public static final String HAMI_TOPIC_EXCHANGE2 = "hami-topic-exchange-2";
-
     public static final String HAMI_SEARCH_EXCHANGE = "hami-search-exchange";
 
     public static final String HAMI_INTERACT_EXCHANGE = "hami-interact-exchange";
@@ -42,6 +40,8 @@ public final class RabbitConstants {
     public static final String STAT_QUEUE_2 = "stat-queue-2";
     public static final String STAT_QUEUE_3 = "stat-queue-3";
     public static final String STAT_QUEUE_4 = "stat-queue-4";
+
+    public static final String STAT_QUEUE_5 = "stat-queue-5";
 
     public static final String USER_STAT_QUEUE_1 = "user-stat-1";
     public static final String USER_STAT_QUEUE_2 = "user-stat-2";

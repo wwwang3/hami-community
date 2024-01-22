@@ -24,15 +24,9 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<Integer> selectFollowUserArticles(Page<Article> page, @Param("user_id") int loginUserId);
 
-    @Select("""
-                select id from article
-                where id > #{lastId} and deleted = 0
-                order by id
-                limit #{batchSize};
-            """)
-    List<Integer> scanArticleIds(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
+    List<Article> scanArticleAsc(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 
-    List<Article> scanArticles(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
+    List<Article> scanArticleDesc(@Param("maxId") int maxId, @Param("batchSize") int batchSize);
 
     @Select("""
                 select id, content from article

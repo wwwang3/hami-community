@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.HotCounter;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<ArticleStat> scanArticle(Page<ArticleStat> page);
 
-    List<HotCounter> loadHotArticle(Integer cateId, long timestamp);
+    List<HotCounter> loadHotArticle(Integer cateId, LocalDateTime dateTime);
 
     ArticleStat selectArticleStatById(Integer articleId);
 

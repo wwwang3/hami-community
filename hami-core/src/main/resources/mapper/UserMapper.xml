@@ -21,4 +21,15 @@
     user_id, username, avatar, `position`, company, profile, blog, tag, deleted, ctime, 
     mtime
   </sql>
+
+  <select id="scanUserDesc" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List">
+      </include>
+      from user
+      where user_id &lt; #{maxId}
+        and deleted = 0
+      order by user_id DESC
+      limit #{batchSize}
+  </select>
 </mapper>

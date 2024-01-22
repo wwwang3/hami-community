@@ -91,7 +91,7 @@
                  join article_stat t2 on t1.id = t2.article_id
         where t1.category_id = #{categoryId}
           and t1.deleted = 0
-          and t1.ctime >= #{timestamp}
+          and t1.ctime >= #{datetime}
         order by t2.hot_rank desc
         limit 24;
     </select>
@@ -99,7 +99,7 @@
     <select id="selectOverallHotArticle" resultType="top.wang3.hami.common.model.HotCounter">
         select article_id as item_id, hot_rank as hot_index
         from article_stat
-        where ctime >= #{timestamp}
+        where ctime >= #{datetime}
         order by hot_rank desc
         limit 54;
     </select>
@@ -178,9 +178,10 @@
                                   views,
                                   likes,
                                   comments,
-                                  collects) values
+                                  collects, ctime, mtime) values
         <foreach collection="items" separator="," item="item">
-            (#{item.articleId}, #{item.userId}, #{item.views}, #{item.likes}, #{item.comments}, #{item.collects})
+            (#{item.articleId}, #{item.userId}, #{item.views}, #{item.likes},
+            #{item.comments}, #{item.collects}, #{item.ctime}, #{item.mtime})
         </foreach>
     </insert>
 </mapper>

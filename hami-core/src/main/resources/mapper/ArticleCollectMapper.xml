@@ -24,9 +24,9 @@
     </sql>
 
     <insert id="batchInsertArticleCollect">
-        insert into article_collect (user_id, article_id, state) values
+        insert into article_collect (user_id, article_id, state, ctime, mtime) values
         <foreach collection="items" separator="," item="item">
-            (#{item.userId}, #{item.articleId}, #{item.state})
+            (#{item.userId}, #{item.articleId}, #{item.state}, #{item.ctime}, #{item.mtime})
         </foreach>
     </insert>
 </mapper>

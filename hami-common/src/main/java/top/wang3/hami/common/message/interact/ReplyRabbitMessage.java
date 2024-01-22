@@ -35,7 +35,7 @@ public class ReplyRabbitMessage implements RabbitMessage {
 
     @Override
     public String getExchange() {
-        return RabbitConstants.HAMI_INTERACT_EXCHANGE;
+        return RabbitConstants.HAMI_COMMENT_EXCHANGE;
     }
 
     public String getRoute() {

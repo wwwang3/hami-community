@@ -7,7 +7,7 @@ package top.wang3.hami.core.init;
 public enum InitializerEnums {
 
     LOCAL_CACHE,
-    HOT_ARTICLE,
+    RANK_LIST,
     ARTICLE_LIST_CACHE,
     ARTICLE_CACHE,
     USER_CACHE,
