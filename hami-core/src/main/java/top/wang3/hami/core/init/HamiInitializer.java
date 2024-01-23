@@ -10,4 +10,8 @@ public interface HamiInitializer extends Runnable {
         return false;
     }
 
+    default boolean async() {
+        return false;
+    }
+
 }
