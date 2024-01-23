@@ -32,6 +32,11 @@ public class ArticleListInitializer implements HamiInitializer {
     }
 
     @Override
+    public boolean async() {
+        return true;
+    }
+
+    @Override
     public void run() {
         cacheTotal();
         cacheSub();

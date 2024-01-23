@@ -40,6 +40,11 @@ public class RankListInitializer implements HamiInitializer {
     }
 
     @Override
+    public boolean async() {
+        return true;
+    }
+
+    @Override
     public void run() {
         refreshCateHotArticle();
         refreshOverallHotArticle();

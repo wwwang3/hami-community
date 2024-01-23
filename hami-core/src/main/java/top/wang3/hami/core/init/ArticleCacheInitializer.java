@@ -13,7 +13,6 @@ import top.wang3.hami.core.mapper.ArticleMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 @Component
 @Order(3)
@@ -40,18 +39,23 @@ public class ArticleCacheInitializer implements HamiInitializer {
                 1000,
                 articleMapper::scanArticleDesc,
                 articles -> {
-                    // 文章信息
-                    cacheArticleInfo(articles);
                     // 文章内容
                     cacheContent(articles);
+                    // 文章信息
+                    cacheArticleInfo(articles);
                 },
                 Article::getId
         );
     }
 
     private void cacheArticleInfo(List<Article> articles) {
-        Map<String, Article> map = ListMapperHandler.listToMap(articles,
-                item -> RedisConstants.ARTICLE_INFO, Function.identity());
+        Map<String, Article> map = ListMapperHandler.listToMap(
+                articles,
+                item -> RedisConstants.ARTICLE_INFO + item.getId(),
+                item -> {
+                    item.setContent(null);
+                    return item;
+                });
         RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_INFO_EXPIRE, TimeUnit.MILLISECONDS);
     }
 

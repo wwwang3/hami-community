@@ -157,7 +157,7 @@ public class AsyncStopWatch {
         }
 
         public double getTimeSeconds() {
-            return getTime(TimeUnit.MILLISECONDS);
+            return getTime(TimeUnit.SECONDS);
         }
 
         /**

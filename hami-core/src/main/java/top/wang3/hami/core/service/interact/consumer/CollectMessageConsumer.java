@@ -66,7 +66,6 @@ public class CollectMessageConsumer {
         try {
             collectRepository.collectArticle(message.getUserId(), message.getItemId(), message.getState());
         } catch (Exception e) {
-            // todo 消费失败处理
             log.error("message: {}, error_class: {}, error_msg: {}", message, e.getClass(), e.getMessage());
         }
     }

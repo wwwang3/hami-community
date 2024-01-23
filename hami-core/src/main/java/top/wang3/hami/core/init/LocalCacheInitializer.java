@@ -30,6 +30,11 @@ public class LocalCacheInitializer implements HamiInitializer {
         return true;
     }
 
+    @Override
+    public boolean async() {
+        return true;
+    }
+
     @Resource
     CategoryService categoryService;
 

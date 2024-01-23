@@ -78,7 +78,6 @@ public class LikeMessageConsumer {
                     message.getLikeType(), message.getState()
             );
         } catch (Exception e) {
-            // todo 消费失败处理
             // ignore it
             log.error("message: {}, error_class: {}, error_msg: {}", message, e.getClass(), e.getMessage());
         }

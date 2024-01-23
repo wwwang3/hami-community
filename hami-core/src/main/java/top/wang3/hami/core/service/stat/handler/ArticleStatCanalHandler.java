@@ -17,7 +17,6 @@ import top.wang3.hami.core.cache.CacheService;
 @CanalRabbitHandler(value = "article_stat", container = "canal-stat-container-1")
 @Slf4j
 @RequiredArgsConstructor
-//todo 失败重试
 public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
 
     private final CacheService cacheService;

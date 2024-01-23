@@ -74,7 +74,6 @@ public class FollowMessageConsumer {
         try {
             boolean success = followRepository.followUser(message.getUserId(), message.getToUserId(), message.getState());
         } catch (Exception e) {
-            // todo 消费失败处理
             // now ignore it
             log.error("message: {}, error_class: {}, error_msg: {}", message, e.getClass(), e.getMessage());
         }

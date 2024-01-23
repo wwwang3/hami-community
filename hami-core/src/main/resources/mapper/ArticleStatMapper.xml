@@ -178,7 +178,4 @@
             #{item.comments}, #{item.collects}, #{item.ctime}, #{item.mtime})
         </foreach>
     </insert>
-
-    <select id="scanArticleStatDesc" resultMap="BaseResultMap">
-    </select>
 </mapper>

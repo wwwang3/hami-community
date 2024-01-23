@@ -51,15 +51,12 @@ public class CommentLikesConsumer {
                         return msgs.stream().reduce(comment, (item, msg) -> {
                             item.setLikes(item.getLikes() + delta(msg.getState()));
                             return item;
-                        }, (v1, v2) -> {
-                            return v1;
-                        });
+                        }, (v1, v2) -> v1);
                     })
                     .filter(s -> !Objects.equals(0, s.getLikes()))
                     .toList();
             commentRepository.batchUpdateLikes(comments);
         } catch (Exception e) {
-            // todo 消费失败
             log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
         }
     }
