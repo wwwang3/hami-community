@@ -3,6 +3,7 @@ package top.wang3.hami.core;
 import cn.xuyanwu.spring.file.storage.spring.EnableFileStorage;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
@@ -21,6 +22,7 @@ import top.wang3.hami.security.EnableSecurity;
 @EnableScheduling
 @EnableMail
 @EnableCanal
+@EnableCaching
 @EnableSecurity
 @EnableFileStorage
 @EnableConfigurationProperties(HamiProperties.class)

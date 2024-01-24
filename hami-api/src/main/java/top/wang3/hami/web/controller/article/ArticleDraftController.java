@@ -14,32 +14,29 @@ import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 @RestController
-@RequestMapping("/api/v1/article_draft")
+@RequestMapping("/api/v1/draft")
 @RequiredArgsConstructor
 public class ArticleDraftController {
 
     private final ArticleDraftService articleDraftService;
 
-    @GetMapping("/drafts")
-    public Result<PageData<ArticleDraftVo>> getDrafts(@RequestParam("pageNum") long pageNum,
-                                                      @RequestParam("pageSize") long pageSize) {
-        PageParam param = new PageParam(pageNum, pageSize);
+    @PostMapping("/list")
+    public Result<PageData<ArticleDraftVo>> getDrafts(@RequestBody PageParam param) {
         PageData<ArticleDraftVo> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
         return Result.successData(articleDrafts);
     }
 
     @GetMapping("/articles")
-    public Result<PageData<ArticleDraftVo>> getArticles(@RequestParam("pageNum") long pageNum,
-                                                        @RequestParam("pageSize") long pageSize) {
-        PageParam param = new PageParam(pageNum, pageSize);
+    public Result<PageData<ArticleDraftVo>> getArticles(@RequestBody PageParam param) {
         PageData<ArticleDraftVo> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);
     }
 
-    @GetMapping("/get")
-    public Result<ArticleDraftVo> getDraft(@RequestParam("draftId") long draftId) {
+    @GetMapping("/{id}")
+    public Result<ArticleDraftVo> getDraft(@PathVariable("id") Long draftId) {
         ArticleDraftVo draft = articleDraftService.getArticleDraftById(draftId);
-        return Result.successData(draft);
+        return Result.ofNullable(draft)
+                .orElse("草稿不存在");
     }
 
     @PostMapping("/create")

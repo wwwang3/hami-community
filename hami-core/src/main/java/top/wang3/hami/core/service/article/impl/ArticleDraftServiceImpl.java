@@ -68,10 +68,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     public ArticleDraftVo getArticleDraftById(long draftId) {
         int loginUserId = LoginUserContext.getLoginUserId();
         ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
-        if (draft == null) {
-            throw new HamiServiceException("草稿不存在");
-        }
-        log.debug("draft-{}", draft);
+        if (draft == null) return null;
         List<Integer> tagsIds = draft.getTagIds();
         List<Tag> tags = tagService.getTagsByIds(tagsIds);
         return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
@@ -107,6 +104,9 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         int loginUserId = LoginUserContext.getLoginUserId();
         // 获取旧的
         ArticleDraft oldDraft = articleDraftRepository.getDraftById(draft.getId(), loginUserId);
+        if (oldDraft == null) {
+            throw new HamiServiceException("参数错误");
+        }
         draft.setVersion(oldDraft.getVersion());
         boolean success = articleDraftRepository.updateDraft(draft);
         return success ? draft : null;

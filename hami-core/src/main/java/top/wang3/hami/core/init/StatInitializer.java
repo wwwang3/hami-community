@@ -5,6 +5,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.converter.StatConverter;
+import top.wang3.hami.common.dto.stat.ArticleStatDTO;
+import top.wang3.hami.common.dto.stat.UserStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -42,8 +45,11 @@ public class StatInitializer implements HamiInitializer {
                 1000,
                 articleStatMapper::scanArticleStatDesc,
                 data -> {
-                    Map<String, ArticleStat> map = ListMapperHandler.listToMap(data,
-                            stat -> RedisConstants.STAT_TYPE_ARTICLE + stat.getArticleId());
+                    Map<String, ArticleStatDTO> map = ListMapperHandler.listToMap(
+                            data,
+                            stat -> RedisConstants.STAT_TYPE_ARTICLE + stat.getArticleId(),
+                            StatConverter.INSTANCE::toArticleStatDTO
+                    );
                     RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_STAT_EXPIRE, TimeUnit.MILLISECONDS);
                 },
                 ArticleStat::getArticleId
@@ -57,8 +63,11 @@ public class StatInitializer implements HamiInitializer {
                 1000,
                 userStatMapper::scanUserStatDesc,
                 data -> {
-                    Map<String, UserStat> map = ListMapperHandler.listToMap(data,
-                            stat -> RedisConstants.STAT_TYPE_USER + stat.getUserId());
+                    Map<String, UserStatDTO> map = ListMapperHandler.listToMap(
+                            data,
+                            stat -> RedisConstants.STAT_TYPE_USER + stat.getUserId(),
+                            StatConverter.INSTANCE::toUserStatDTO
+                    );
                     RedisClient.cacheMultiObject(map, TimeoutConstants.USER_STAT_EXPIRE, TimeUnit.MILLISECONDS);
                 },
                 UserStat::getUserId

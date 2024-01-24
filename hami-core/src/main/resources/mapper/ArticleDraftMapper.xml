@@ -20,7 +20,7 @@
         <result column="mtime" property="mtime"/>
     </resultMap>
 
-    <resultMap id="ArticleDraftDTOMap" type="top.wang3.hami.common.vo.article.ArticleDraftVo">
+    <resultMap id="ArticleDraftVoMap" type="top.wang3.hami.common.vo.article.ArticleDraftVo">
         <!--@mbg.generated-->
         <!--@Table article_draft-->
         <id column="id" property="id"/>

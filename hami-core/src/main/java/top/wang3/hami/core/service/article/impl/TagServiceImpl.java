@@ -65,6 +65,7 @@ public class TagServiceImpl implements TagService {
         final Map<Integer, Tag> tagMap = self.getTagMap();
         return ListMapperHandler.listTo(tagIds, id -> {
             Tag tag = tagMap.get(id);
+            if (tag == null) return null;
             return new TagDTO(id, tag.getName());
         }, false);
     }

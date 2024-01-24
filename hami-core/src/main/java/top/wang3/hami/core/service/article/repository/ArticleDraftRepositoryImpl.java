@@ -18,6 +18,10 @@ import java.util.List;
 public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, ArticleDraft>
         implements ArticleDraftRepository {
 
+    public static final String[] FIELDS = {"id", "user_id", "article_id", "title", "picture",
+            "summary", "article_tags", "category_id", "`state`", "ctime", "mtime"
+    };
+
     @Override
     public ArticleDraft getDraftById(Long draftId, Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
@@ -29,6 +33,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
     @Override
     public List<ArticleDraft> getDraftsByPage(Page<ArticleDraft> page, Integer userId, byte state) {
         return ChainWrappers.queryChain(getBaseMapper())
+                .select(FIELDS) // no content
                 .eq("user_id", userId)
                 .eq("`state`", state)
                 .orderByDesc("mtime")
@@ -62,7 +67,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
 
     @Override
     public boolean deleteDraftByArticleId(Integer articleId, Integer userId) {
-       return  ChainWrappers.updateChain(getBaseMapper())
+        return ChainWrappers.updateChain(getBaseMapper())
                 .eq("user_id", userId)
                 .eq("article_id", articleId)
                 .remove();

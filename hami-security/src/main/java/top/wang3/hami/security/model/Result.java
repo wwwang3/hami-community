@@ -91,7 +91,6 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
 
     public interface Checker {
         boolean check();
-
     }
 
     public static String writeValueAsString(Object value) {

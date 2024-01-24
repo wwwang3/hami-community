@@ -38,11 +38,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             var authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            //将认证成功的token写入Security上下文
+            // 将认证成功的token写入Security上下文
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             log.debug("authentication success, LoginUser: {}", loginUser);
         }
-        //继续过滤器链
+        // 继续过滤器链
         filterChain.doFilter(request, response);
     }
 }

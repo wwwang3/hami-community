@@ -54,6 +54,11 @@ public class UserVo {
     private Date ctime;
 
     /**
+     * 修改时间
+     */
+    private Date mtime;
+
+    /**
      * 用户数据
      */
     private UserStatDTO stat;

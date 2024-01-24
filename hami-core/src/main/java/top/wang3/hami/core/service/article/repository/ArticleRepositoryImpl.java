@@ -44,7 +44,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public List<Article> listArticleById(Collection<Integer> ids) {
         if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
-        return super.listByIds(ids);
+        return getBaseMapper().selectArticleList(ids);
     }
 
     @Override

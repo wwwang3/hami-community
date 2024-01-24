@@ -111,4 +111,16 @@
         from article
         where id = #{id} and deleted = 0;
     </select>
+
+    <select id="selectArticleList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List">
+        </include>
+        from article
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and deleted = 0
+    </select>
 </mapper>

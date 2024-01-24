@@ -66,6 +66,8 @@ public class ServiceErrorControllerConfig {
                 return Result.error(status.value(), msg);
             } else {
                 String error = attributes.get("error").toString();
+                String path = attributes.get("path").toString();
+                log.warn("resolved Exception, path: {}, error: {}", path, error);
                 return Result.error(error);
             }
         }
@@ -88,9 +90,8 @@ public class ServiceErrorControllerConfig {
             String uri = request.getRequestURI();
             String clazz = e != null ? e.getClass().getCanonicalName() : "";
             String msg = e != null ? e.getMessage() : "";
-            log.warn("resolved exception, path: [{}] error_class:[{}]: error_msg: [{}]", uri,
+            log.warn("resolved exception, path: {} error_class:{}: error_msg: {}", uri,
                     clazz, msg);
-
         }
 
 

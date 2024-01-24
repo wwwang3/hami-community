@@ -1,13 +1,18 @@
 package top.wang3.hami.web.handler;
 
+import jakarta.servlet.ServletException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.security.exception.NotLoginException;
@@ -51,6 +56,27 @@ public class ServiceExceptionHandler {
     public Result<Void> handleSQLException(SQLException e) {
         logError(e, true);
         return Result.error("系统错误");
+    }
+
+    @ExceptionHandler(value = {NoHandlerFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<Void> handleHandlerException(ServletException exception) {
+        // 找不到静态资源
+        return Result.error(exception.getMessage());
+    }
+
+    @ExceptionHandler(value = {NoResourceFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<Void> handleResourceException(NoResourceFoundException exception) {
+        // 找不到静态资源
+        logError(exception);
+        return Result.error(exception.getMessage());
+    }
+
+    @ExceptionHandler(value = {ServletException.class})
+    public Result<Void> handleServletException(ServletException exception) {
+        logError(exception);
+        return Result.error(exception.getMessage());
     }
 
     @ExceptionHandler(value = {Exception.class})

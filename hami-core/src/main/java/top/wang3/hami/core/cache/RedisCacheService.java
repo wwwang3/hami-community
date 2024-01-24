@@ -22,7 +22,7 @@ public class RedisCacheService implements CacheService {
 
     public static final long DEFAULT_EXPIRE = TimeUnit.DAYS.toMillis(1);
 
-    public static final long EMPTY_OBJECT_EXPIRE = TimeUnit.SECONDS.toMillis(10);
+    public static final long EMPTY_OBJECT_EXPIRE = TimeUnit.MINUTES.toMillis(1);
 
     public static final Object EMPTY_OBJECT = NullValue.INSTANCE;
 
@@ -161,7 +161,7 @@ public class RedisCacheService implements CacheService {
                         th.getMessage()
                 );
             } else {
-                log.info("async refresh cache success, keyPrefix: {}", keyPrefix);
+                log.info("async refresh cache success, keyPrefix: {}, ids: {}", keyPrefix, ids);
             }
         });
     }

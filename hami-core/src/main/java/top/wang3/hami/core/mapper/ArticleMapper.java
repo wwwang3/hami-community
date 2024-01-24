@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleCount;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mapper
@@ -15,6 +16,9 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
 
     Article selectArticleById(@Param("id") Integer id);
+
+    List<Article> selectArticleList(@Param("ids") Collection<Integer> ids);
+
 
     List<Integer> searchArticle(Page<Article> page, @Param("keyword") String keyword);
     @Select("""
@@ -39,4 +43,5 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<ArticleCount> selectCateArticleCount();
 
     Long selectTotalArticleCount();
+
 }

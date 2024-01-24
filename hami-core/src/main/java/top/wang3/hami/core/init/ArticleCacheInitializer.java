@@ -60,8 +60,11 @@ public class ArticleCacheInitializer implements HamiInitializer {
     }
 
     private void cacheContent(List<Article> articles) {
-        Map<String, String> map = ListMapperHandler.listToMap(articles,
-                item -> RedisConstants.ARTICLE_CONTENT + item.getId(), Article::getContent);
+        Map<String, String> map = ListMapperHandler.listToMap(
+                articles,
+                item -> RedisConstants.ARTICLE_CONTENT + item.getId(),
+                Article::getContent
+        );
         RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_INFO_EXPIRE, TimeUnit.MILLISECONDS);
     }
 }
