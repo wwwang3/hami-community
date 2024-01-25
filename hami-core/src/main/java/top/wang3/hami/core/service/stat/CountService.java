@@ -20,15 +20,17 @@ public interface CountService {
 
     Map<Integer, ArticleStatDTO> getArticleStatByIds(List<Integer> articleIds);
 
-    Map<Integer, UserStatDTO> getUserStatDTOByUserIds(List<Integer> userIds);
+    Map<Integer, UserStatDTO> getUserStatByIds(List<Integer> userIds);
 
     @NonNull
     Integer getUserArticleCount(Integer userId);
 
     @NonNull
+    @SuppressWarnings("unused")
     Integer getUserFollowingCount(Integer userId);
 
     @NonNull
+    @SuppressWarnings("unused")
     Integer getUserFollowerCount(Integer userId);
 
     Map<String, Integer> getUserYesterdayDataGrowing(Integer userId);

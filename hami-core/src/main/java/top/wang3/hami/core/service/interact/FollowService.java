@@ -7,6 +7,7 @@ import top.wang3.hami.common.model.UserFollow;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public interface FollowService {
 
     boolean follow(int followingId);

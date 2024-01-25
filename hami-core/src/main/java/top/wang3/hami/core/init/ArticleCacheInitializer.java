@@ -32,10 +32,15 @@ public class ArticleCacheInitializer implements HamiInitializer {
         cacheArticle();
     }
 
+    @Override
+    public boolean async() {
+        return true;
+    }
+
     private void cacheArticle() {
         ListMapperHandler.scanDesc(
                 Integer.MAX_VALUE,
-                500,
+                2000,
                 1000,
                 articleMapper::scanArticleDesc,
                 articles -> {
@@ -55,7 +60,8 @@ public class ArticleCacheInitializer implements HamiInitializer {
                 item -> {
                     item.setContent(null);
                     return item;
-                });
+                }
+        );
         RedisClient.cacheMultiObject(map, TimeoutConstants.ARTICLE_INFO_EXPIRE, TimeUnit.MILLISECONDS);
     }
 

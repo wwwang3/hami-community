@@ -14,6 +14,7 @@ import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleCount;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.ZPageHandler;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.mapper.ArticleMapper;
 
 import java.util.Collection;
@@ -30,15 +31,6 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public Article getArticleInfoById(Integer articleId) {
         return getBaseMapper().selectArticleById(articleId);
-    }
-
-    @Override
-    public Long getArticleCount(Integer cateId, Integer userId) {
-        return ChainWrappers.queryChain(getBaseMapper())
-                .select("id")
-                .eq(userId != null, "user_id", userId)
-                .eq(cateId != null, "category_id", cateId)
-                .count();
     }
 
     @Override
@@ -68,6 +60,7 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
+    @CostLog
     public List<Integer> loadArticleListByPage(Page<Article> page, Integer cateId, Integer userId) {
         List<Article> articles = ChainWrappers.queryChain(getBaseMapper())
                 .select("id")

@@ -26,9 +26,7 @@ public class CacheConfig {
                 .expireAfterWrite(30, TimeUnit.DAYS) // 缓存标签和分类数据
                 .initialCapacity(128)
                 .maximumSize(512)
-                .removalListener((k, v, reason) -> {
-                    log.info("##cache k: {} v: {} removed cause: {}", k, v, reason.name());
-                });
+                .removalListener((k, v, reason) -> log.warn("##cache k: {} v: {} removed cause: {}", k, v, reason.name()));
     }
 
     @Bean(Constants.CaffeineCacheManager)

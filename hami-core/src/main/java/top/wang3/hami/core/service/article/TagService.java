@@ -2,7 +2,6 @@ package top.wang3.hami.core.service.article;
 
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
-import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.model.Tag;
 
 import java.util.List;
@@ -16,9 +15,8 @@ public interface TagService {
 
     PageData<Tag> getTagByPage(PageParam pageParam);
 
-    List<TagDTO> getTagDTOsByIds(List<Integer> tagIds);
-
     List<Tag> getTagsByIds(List<Integer> tagIds);
 
     Tag getTagById(Integer id);
+
 }

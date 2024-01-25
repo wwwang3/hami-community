@@ -1,6 +1,5 @@
 package top.wang3.hami.core.service.article;
 
-import top.wang3.hami.common.dto.article.CategoryDTO;
 import top.wang3.hami.common.model.Category;
 
 import java.util.List;
@@ -10,8 +9,8 @@ public interface CategoryService {
 
     List<Category> getAllCategories();
 
-    Map<Integer, Category> getCategroyMap();
+    Map<Integer, Category> getCategoryMap();
 
-    CategoryDTO getCategoryDTOById(Integer id);
+    Category getCategoryById(Integer id);
 
 }

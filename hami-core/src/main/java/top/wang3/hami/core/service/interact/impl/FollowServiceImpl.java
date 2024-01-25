@@ -88,8 +88,7 @@ public class FollowServiceImpl implements FollowService {
         return cacheService.get(
                 key,
                 () -> followRepository.getUserFollowingCount(userId),
-                TimeoutConstants.INTERACT_COUNT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.INTERACT_COUNT_EXPIRE
         );
     }
 
@@ -100,8 +99,7 @@ public class FollowServiceImpl implements FollowService {
         return cacheService.get(
                 key,
                 () -> followRepository.getUserFollowerCount(userId),
-                TimeoutConstants.INTERACT_COUNT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.INTERACT_COUNT_EXPIRE
         );
     }
 

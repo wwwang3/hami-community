@@ -13,8 +13,6 @@ public interface ArticleRepository extends IService<Article> {
 
     Article getArticleInfoById(Integer articleId);
 
-    Long getArticleCount(Integer cateId, Integer userId);
-
     List<Article> listArticleById(Collection<Integer> ids);
 
     List<Article> listUserArticle(int userId);

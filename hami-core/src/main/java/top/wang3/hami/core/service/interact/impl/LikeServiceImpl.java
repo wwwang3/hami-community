@@ -116,8 +116,7 @@ public class LikeServiceImpl implements LikeService {
         return cacheService.get(
                 key,
                 () -> likeRepository.queryUserLikeItemCount(userId, likeType),
-                TimeoutConstants.INTERACT_COUNT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.INTERACT_COUNT_EXPIRE
         );
     }
 

@@ -16,7 +16,6 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 
 @Component
@@ -67,8 +66,7 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
                 cacheService.asyncSetHashCache(
                         key,
                         articleRepository.getArticleCount(),
-                        TimeoutConstants.ARTICLE_COUNT_EXPIRE,
-                        TimeUnit.MILLISECONDS
+                        TimeoutConstants.ARTICLE_COUNT_EXPIRE
                 );
             }
         }
@@ -91,8 +89,7 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
             cacheService.asyncSetHashCache(
                     key,
                     articleRepository.getArticleCount(),
-                    TimeoutConstants.ARTICLE_COUNT_EXPIRE,
-                    TimeUnit.MILLISECONDS
+                    TimeoutConstants.ARTICLE_COUNT_EXPIRE
             );
         }
     }

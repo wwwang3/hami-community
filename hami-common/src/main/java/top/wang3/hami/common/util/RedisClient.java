@@ -578,7 +578,20 @@ public class RedisClient {
         });
     }
 
-    public static <T> void zSetAll(String key, Collection<? extends Tuple> items, long timeout, TimeUnit timeUnit) {
+    /**
+     * 缓存zset
+     * @param key zset-key
+     * @param items zset元素
+     * @param timeout 有效期
+     * @param timeUnit 单位
+     * @param <T> 元素泛型
+     * @throws IllegalArgumentException 当item为空时抛出
+     */
+    public static <T> void zSetAll(String key, Collection<? extends Tuple> items, long timeout, TimeUnit timeUnit)
+            throws IllegalArgumentException{
+        if (CollectionUtils.isEmpty(items)) {
+            throw new IllegalArgumentException("zset 不能为空.");
+        }
         final byte[] rawKey = keyBytes(key);
         List<? extends List<? extends Tuple>> lists = ListMapperHandler.split(items, 1000);
         long millis = timeUnit.toMillis(timeout);

@@ -13,8 +13,6 @@ public interface ArticleCacheService {
 
     long getArticleCountCache(Integer cateId);
 
-    long getUserArticleCountCache(Integer userId);
-
     List<Integer> listArticleIdByPage(Page<Article> page, Integer cateId);
 
     List<Integer> listUserArticleIdByPage(Page<Article> page, Integer userId);

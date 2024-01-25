@@ -10,7 +10,6 @@ import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.TagService;
 
 import java.util.List;
-import java.util.Map;
 
 import static top.wang3.hami.core.init.InitializerEnums.LOCAL_CACHE;
 
@@ -45,8 +44,8 @@ public class LocalCacheInitializer implements HamiInitializer {
     @SuppressWarnings("unused")
     public void run() {
         List<Tag> tags = tagService.getAllTag();
-        Map<Integer, Tag> map = tagService.getTagMap();
         List<Category> categories = categoryService.getAllCategories();
-        Map<Integer, Category> categroyMap = categoryService.getCategroyMap();
+        tags.forEach(tag -> tagService.getTagById(tag.getId()));
+        categories.forEach(category -> categoryService.getCategoryById(category.getId()));
     }
 }

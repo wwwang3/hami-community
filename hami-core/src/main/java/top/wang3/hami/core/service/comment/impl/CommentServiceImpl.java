@@ -108,7 +108,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Comment publishComment(CommentParam param) {
         // 发表评论
-        //todo 敏感词过滤
         return publishComment(param, false);
     }
 

@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 文章收藏服务
- * todo 收藏夹支持
  */
 @Service
 @RequiredArgsConstructor
@@ -122,8 +121,7 @@ public class CollectServiceImpl implements CollectService {
         return cacheService.get(
                 key,
                 () -> collectRepository.getUserCollectCount(userId),
-                TimeoutConstants.INTERACT_COUNT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.INTERACT_COUNT_EXPIRE
         );
     }
 

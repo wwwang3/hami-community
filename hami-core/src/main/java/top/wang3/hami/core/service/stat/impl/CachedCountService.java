@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -35,24 +34,20 @@ public class CachedCountService implements CountService {
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
         final String redisKey = RedisConstants.STAT_TYPE_ARTICLE + articleId;
-        long timeout = TimeoutConstants.ARTICLE_STAT_EXPIRE;
         return cacheService.get(
                 redisKey,
                 () -> articleStatService.getArticleStatId(articleId),
-                timeout,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.ARTICLE_STAT_EXPIRE
         );
     }
 
     @Override
     public UserStatDTO getUserStatDTOById(Integer userId) {
         final String key = RedisConstants.STAT_TYPE_USER + userId;
-        long timeout = TimeoutConstants.USER_STAT_EXPIRE;
         return cacheService.get(
                 key,
                 () -> userStatService.getUserStatDTOById(userId),
-                timeout,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.USER_STAT_EXPIRE
         );
     }
 
@@ -63,20 +58,20 @@ public class CachedCountService implements CountService {
                 RedisConstants.STAT_TYPE_ARTICLE,
                 articleIds,
                 articleStatService::listArticleStatById,
-                TimeoutConstants.ARTICLE_STAT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                ArticleStatDTO::getArticleId,
+                TimeoutConstants.USER_STAT_EXPIRE
         );
         return ListMapperHandler.listToMap(dtos, ArticleStatDTO::getArticleId);
     }
 
     @Override
-    public Map<Integer, UserStatDTO> getUserStatDTOByUserIds(List<Integer> userIds) {
+    public Map<Integer, UserStatDTO> getUserStatByIds(List<Integer> userIds) {
         List<UserStatDTO> dtos = cacheService.multiGetById(
                 RedisConstants.STAT_TYPE_USER,
                 userIds,
                 userStatService::getUserStatDTOByIds,
-                TimeoutConstants.USER_STAT_EXPIRE,
-                TimeUnit.MILLISECONDS
+                UserStatDTO::getUserId,
+                TimeoutConstants.USER_STAT_EXPIRE
         );
         return ListMapperHandler.listToMap(dtos, UserStatDTO::getUserId);
     }

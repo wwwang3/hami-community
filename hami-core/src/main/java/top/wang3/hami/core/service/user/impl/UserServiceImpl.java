@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
     private void buildUserStat(List<Integer> userIds, List<UserVo> userDTOS) {
         // 用户数据
-        Map<Integer, UserStatDTO> stats = countService.getUserStatDTOByUserIds(userIds);
+        Map<Integer, UserStatDTO> stats = countService.getUserStatByIds(userIds);
         ListMapperHandler.doAssemble(userDTOS, UserVo::getUserId, stats, UserVo::setStat);
     }
 

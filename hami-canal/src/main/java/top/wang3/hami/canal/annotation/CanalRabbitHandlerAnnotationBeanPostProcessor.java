@@ -58,7 +58,6 @@ public class CanalRabbitHandlerAnnotationBeanPostProcessor
         String containerId = canalRabbitHandler.container();
         String tableName = canalRabbitHandler.value();
         if (StringUtils.hasText(tableName)) {
-            // todo fix?: 一个表可能不止对应一个实体类
             canalEntryHandlerFactory.addTableClass(tableName, tableClass);
             canalEntryHandlerFactory.addHandlerEntityClass(handlerClass, tableClass);
             canalEntryHandlerFactory.addCanalEntryHandler(tableName, containerId, handler);

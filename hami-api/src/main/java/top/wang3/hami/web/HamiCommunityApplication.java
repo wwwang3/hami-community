@@ -13,6 +13,8 @@ public class HamiCommunityApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(HamiCommunityApplication.class, args);
+        long pid = ProcessHandle.current().pid();
+        log.info("##Hami## PID: {}", pid);
     }
 
 }

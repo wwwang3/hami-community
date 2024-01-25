@@ -41,7 +41,7 @@ public class StatInitializer implements HamiInitializer {
     public void cacheArticleStat() {
         ListMapperHandler.scanDesc(
                 Integer.MAX_VALUE,
-                500,
+                1000,
                 1000,
                 articleStatMapper::scanArticleStatDesc,
                 data -> {

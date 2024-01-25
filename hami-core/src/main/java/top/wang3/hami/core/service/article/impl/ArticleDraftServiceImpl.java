@@ -113,7 +113,6 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     /**
-     * todo 文章审核
      *
      * @param draftId 草稿ID
      * @return ArticleDraft
@@ -210,11 +209,11 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         validator.validate(draft);
         // 校验分类
         // assert cateId != null
-        Map<Integer, Category> categroyMap = categoryService.getCategroyMap();
+        Map<Integer, Category> categroyMap = categoryService.getCategoryMap();
         if (categroyMap.containsKey(draft.getCategoryId())) {
             throw new HamiServiceException("分类不存在");
         }
-        /// 校验标签 若有个tagId不存在抛出错误
+        // 校验标签 若有个tagId不存在抛出错误
         List<Integer> tagIds = draft.getTagIds();
         Map<Integer, Tag> tagsMap = tagService.getTagMap();
         for (Integer tagId : tagIds) {

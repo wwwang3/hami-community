@@ -14,6 +14,7 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
+import top.wang3.hami.core.service.stat.CountService;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
     private final ArticleRepository articleRepository;
     private final CacheService cacheService;
+    private final CountService countService;
 
     @Override
     public long getArticleCountCache(Integer cateId) {
@@ -37,19 +39,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
                 key,
                 hKey,
                 articleRepository::getArticleCount,
-                TimeoutConstants.ARTICLE_COUNT_EXPIRE,
-                TimeUnit.MILLISECONDS
-        );
-    }
-
-    @Override
-    public long getUserArticleCountCache(Integer userId) {
-        String key = RedisConstants.USER_ARTICLE_COUNT + userId;
-        return cacheService.get(
-                key,
-                () -> articleRepository.getArticleCount(null, userId),
-                TimeoutConstants.USER_ARTICLE_LIST_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.ARTICLE_COUNT_EXPIRE
         );
     }
 
@@ -70,7 +60,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         // 从缓存中获取用户Id
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
-                .countSupplier(() -> getUserArticleCountCache(userId))
+                .countSupplier(() -> countService.getUserArticleCount(userId).longValue())
                 .source((current, size) -> articleRepository.loadArticleListByPage(page, null, userId))
                 .loader(() -> loadUserArticleListCache(userId))
                 .query();
@@ -83,8 +73,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
                 RedisConstants.ARTICLE_INFO,
                 articleIds,
                 articleRepository::listArticleById,
-                TimeoutConstants.ARTICLE_INFO_EXPIRE,
-                TimeUnit.MILLISECONDS
+                Article::getId,
+                TimeoutConstants.ARTICLE_INFO_EXPIRE
         );
     }
 
@@ -94,8 +84,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return cacheService.get(
                 RedisConstants.ARTICLE_INFO + articleId,
                 () -> articleRepository.getArticleInfoById(articleId),
-                TimeoutConstants.ARTICLE_INFO_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.ARTICLE_INFO_EXPIRE
         );
     }
 
@@ -104,8 +93,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return cacheService.get(
                 RedisConstants.ARTICLE_CONTENT + articleId,
                 () -> articleRepository.getArticleContentById(articleId),
-                TimeoutConstants.ARTICLE_INFO_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.ARTICLE_INFO_EXPIRE
         );
     }
 

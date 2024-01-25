@@ -12,8 +12,6 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticlePageParam;
-import top.wang3.hami.common.dto.article.CategoryDTO;
-import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.article.UserArticleParam;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
@@ -21,11 +19,12 @@ import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.Category;
+import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.common.vo.user.UserVo;
-import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.article.CategoryService;
@@ -66,7 +65,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final ThreadPoolTaskExecutor executor;
 
 
-    @CostLog
     @Override
     public PageData<ArticleVo> listNewestArticles(ArticlePageParam param) {
         Integer cateId = param.getCateId();
@@ -82,7 +80,6 @@ public class ArticleServiceImpl implements ArticleService {
                 .build();
     }
 
-    @CostLog
     @Override
     public PageData<ArticleVo> listUserArticles(UserArticleParam param) {
         //获取用户文章
@@ -99,7 +96,6 @@ public class ArticleServiceImpl implements ArticleService {
                 .build();
     }
 
-    @CostLog
     @Override
     public PageData<ArticleVo> listFollowUserArticles(PageParam param) {
         //获取关注用户的最新文章
@@ -189,23 +185,24 @@ public class ArticleServiceImpl implements ArticleService {
 
     public void buildCategory(List<? extends ArticleVo> dtos) {
         for (ArticleVo vo : dtos) {
-            CategoryDTO categoryDTO = categoryService.getCategoryDTOById(vo.getArticleInfo().getCategoryId());
-            vo.setCategory(categoryDTO);
+            Integer cateId = vo.getArticleInfo().getCategoryId();
+            Category category = categoryService.getCategoryById(cateId);
+            vo.setCategory(category);
         }
     }
 
-    public void buildArticleTags(List<? extends ArticleVo> dtos) {
-        for (ArticleVo dto : dtos) {
-            Article info = dto.getArticleInfo();
+    public void buildArticleTags(List<? extends ArticleVo> vos) {
+        for (ArticleVo vo : vos) {
+            Article info = vo.getArticleInfo();
             List<Integer> ids = info.getTagIds();
-            List<TagDTO> tags = tagService.getTagDTOsByIds(ids);
-            dto.setTags(tags);
+            List<Tag> tags = tagService.getTagsByIds(ids);
+            vo.setTags(tags);
         }
     }
 
-    public void buildArticleStat(List<ArticleVo> dtos, List<Integer> articleIds) {
+    public void buildArticleStat(List<ArticleVo> vos, List<Integer> articleIds) {
         Map<Integer, ArticleStatDTO> stats = countService.getArticleStatByIds(articleIds);
-        ListMapperHandler.doAssemble(dtos, ArticleVo::getId, stats, ArticleVo::setStat);
+        ListMapperHandler.doAssemble(vos, ArticleVo::getId, stats, ArticleVo::setStat);
     }
 
     public void buildArticleAuthor(List<ArticleVo> dtos, List<Integer> userIds) {

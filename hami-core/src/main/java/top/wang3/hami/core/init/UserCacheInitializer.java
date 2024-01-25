@@ -33,6 +33,11 @@ public class UserCacheInitializer implements HamiInitializer {
         cacheUser();
     }
 
+    @Override
+    public boolean async() {
+        return true;
+    }
+
     private void cacheUser() {
         ListMapperHandler.scanDesc(
                 Integer.MAX_VALUE,

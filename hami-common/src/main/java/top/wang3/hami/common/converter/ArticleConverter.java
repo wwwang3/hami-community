@@ -5,10 +5,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
-import top.wang3.hami.common.dto.article.CategoryDTO;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
-import top.wang3.hami.common.model.Category;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
@@ -43,10 +41,6 @@ public interface ArticleConverter {
 
 
     ArticleDraftVo toDraftDTO(ArticleDraft draft, List<Tag> tags);
-
-    @Mapping(target = "categoryId", source = "id")
-    @Mapping(target = "categoryName", source = "name")
-    CategoryDTO toCategoryDTO(Category category);
 
 
     default ArticleVo toArticleVo(Article articleInfo) {

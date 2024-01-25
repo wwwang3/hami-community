@@ -9,7 +9,6 @@ import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +23,7 @@ public class UserCacheServiceImpl implements UserCacheService {
         return cacheService.get(
                 key,
                 () -> userRepository.getUserById(userId),
-                TimeoutConstants.USER_INFO_EXPIRE,
-                TimeUnit.MILLISECONDS
+                TimeoutConstants.USER_INFO_EXPIRE
         );
     }
 
@@ -35,8 +33,8 @@ public class UserCacheServiceImpl implements UserCacheService {
                 RedisConstants.USER_INFO,
                 userIds,
                 userRepository::listUserById,
-                TimeoutConstants.USER_INFO_EXPIRE,
-                TimeUnit.MILLISECONDS
+                User::getUserId,
+                TimeoutConstants.USER_INFO_EXPIRE
         );
     }
 }

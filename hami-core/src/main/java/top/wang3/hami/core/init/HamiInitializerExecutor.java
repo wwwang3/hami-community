@@ -10,6 +10,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.util.AsyncStopWatch;
 import top.wang3.hami.core.HamiProperties;
@@ -64,7 +65,7 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
 
     private void processInitializingTask(AsyncStopWatch watch) {
         for (HamiInitializer initializer : initializers) {
-            if (!canRun(initializer)) {
+            if (!enabled(initializer)) {
                 continue;
             }
             if (latch != null && initializer.async()) {
@@ -109,11 +110,11 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
                 });
     }
 
-    private boolean canRun(HamiInitializer initializer) {
+    private boolean enabled(@NonNull HamiInitializer initializer) {
         return initializer.alwaysExecute() || (enabledInitializers.contains(initializer.getName()));
     }
 
-    void prettyPrint(AsyncStopWatch watch) {
+    void prettyPrint(@NonNull AsyncStopWatch watch) {
         long nanos = watch.getTotalTimeNanos();
         long minutes = nanos / 1_000_000_000 / 60;
         long seconds = nanos / 1_000_000_000 % 60;
@@ -130,7 +131,7 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
         int size = 0;
         if (initializers != null && taskExecutor != null) {
             for (HamiInitializer initializer : initializers) {
-                if (initializer.async()) {
+                if (initializer.async() && enabled(initializer)) {
                     size++;
                 }
             }

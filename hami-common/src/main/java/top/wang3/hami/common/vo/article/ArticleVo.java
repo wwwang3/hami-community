@@ -2,10 +2,10 @@ package top.wang3.hami.common.vo.article;
 
 
 import lombok.Data;
-import top.wang3.hami.common.dto.article.CategoryDTO;
-import top.wang3.hami.common.dto.article.TagDTO;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.Category;
+import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.List;
@@ -30,12 +30,12 @@ public class ArticleVo {
     /**
      * 分类
      */
-    private CategoryDTO category;
+    private Category category;
 
     /**
      * 文章标签
      */
-    private List<TagDTO> tags;
+    private List<Tag> tags;
 
     /**
      * 文章数据
