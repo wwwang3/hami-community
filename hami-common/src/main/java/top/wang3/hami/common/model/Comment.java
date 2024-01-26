@@ -10,7 +10,7 @@ import top.wang3.hami.common.dto.IpInfo;
 import java.util.Date;
 
 /**
- * 评论表
+ * 评论基本信息
  */
 @Data
 @AllArgsConstructor

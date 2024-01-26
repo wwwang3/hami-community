@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * IP
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,10 +18,12 @@ public class IpInfo {
      * IPv4地址
      */
     private String ip;
+
     /**
      * 国家
      */
     private String country;
+
     /**
      * 省
      */
@@ -27,10 +32,12 @@ public class IpInfo {
      * 城市
      */
     private String city;
+
     /**
      * 区域
      */
     private String area;
+
     /**
      * 运营商
      */

@@ -58,7 +58,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         List<ArticleDraft> drafts = articleDraftRepository.getDraftsByPage(page, loginUserId, state);
         List<ArticleDraftVo> dtos = buildDrafts(drafts);
         return PageData.<ArticleDraftVo>builder()
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .total(page.getTotal())
                 .data(dtos)
                 .build();

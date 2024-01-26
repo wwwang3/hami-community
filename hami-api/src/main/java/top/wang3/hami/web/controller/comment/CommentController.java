@@ -13,6 +13,9 @@ import top.wang3.hami.common.vo.comment.CommentVo;
 import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.security.model.Result;
 
+/**
+ * comment
+ */
 @RestController
 @RequestMapping("/api/v1/comment")
 @RequiredArgsConstructor
@@ -20,6 +23,11 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    /**
+     * 分页查询评论
+     * @param param {@link CommentPageParam}
+     * @return {@link PageData<CommentVo>}
+     */
     @PostMapping("/query_list")
     public Result<PageData<CommentVo>> listComment(@RequestBody
                                                     @Valid CommentPageParam param) {
@@ -27,6 +35,11 @@ public class CommentController {
         return Result.successData(data);
     }
 
+    /**
+     * 分页查询回复
+     * @param param {@link CommentPageParam}
+     * @return {@link PageData<CommentVo>}
+     */
     @PostMapping("/reply/query_list")
     public Result<PageData<CommentVo>> listReply(@RequestBody
                                                   @Validated(value = CommentPageParam.Reply.class)
@@ -35,6 +48,11 @@ public class CommentController {
         return Result.successData(data);
     }
 
+    /**
+     * 发表评论
+     * @param param {@link CommentParam}
+     * @return {@link Comment}
+     */
     @PostMapping("/submit")
     public Result<Comment> publishComment(@RequestBody @Valid CommentParam param) {
         Comment comment = commentService.publishComment(param);
@@ -42,6 +60,11 @@ public class CommentController {
                 .orElse("发表失败");
     }
 
+    /**
+     * 发表回复
+     * @param param {@link CommentParam}
+     * @return {@link Comment}
+     */
     @PostMapping("/reply/submit")
     public Result<Comment> publishReply(@RequestBody
                                         @Validated(value = CommentParam.Reply.class) CommentParam param) {
@@ -50,6 +73,11 @@ public class CommentController {
                 .orElse("回复失败");
     }
 
+    /**
+     * 删除评论
+     * @param id 评论Id
+     * @return {@link Void}
+     */
     @PostMapping("/delete")
     public Result<Void> deleteComment(@RequestParam("id") Integer id) {
         boolean success = commentService.deleteComment(id);

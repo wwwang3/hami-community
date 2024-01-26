@@ -13,6 +13,9 @@ import top.wang3.hami.security.model.Result;
 
 import java.util.List;
 
+/**
+ * search
+ */
 @RestController
 @RequestMapping("/api/v1/search")
 @RequiredArgsConstructor
@@ -21,6 +24,11 @@ public class SearchController {
 
     private final SearchService searchService;
 
+    /**
+     * 文章搜索
+     * @param param {@link SearchParam}
+     * @return {@link PageData<ArticleVo>}
+     */
     @PostMapping("/query_list")
     public Result<PageData<ArticleVo>> searchArticle(@RequestBody @Valid SearchParam param) {
         if (!StringUtils.hasText(param.getKeyword())) {
@@ -30,6 +38,10 @@ public class SearchController {
         return Result.successData(data);
     }
 
+    /**
+     * 热搜列表
+     * @return 热搜关键字列表 {@link List<String>}
+     */
     @GetMapping("/hot")
     public Result<List<String>> getHotSearch() {
         List<String> hots = searchService.getHotSearch();

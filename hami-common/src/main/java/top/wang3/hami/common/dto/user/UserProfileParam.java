@@ -3,6 +3,9 @@ package top.wang3.hami.common.dto.user;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+/**
+ * 更新用户个人资料请求参数
+ */
 @Data
 public class UserProfileParam {
 

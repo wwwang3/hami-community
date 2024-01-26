@@ -19,9 +19,9 @@ public interface CommentConverter {
     @Mapping(target = "reply", ignore = true)
     @Mapping(target = "liked", ignore = true)
     @Mapping(target = "replyUser", ignore = true)
-    CommentVo toCommentDTO(Comment comment);
+    CommentVo toCommentVo(Comment comment);
 
-    List<CommentVo> toCommentDTOList(List<Comment> comments);
+    List<CommentVo> toCommentVoList(List<Comment> comments);
 
     default Comment toComment(CommentParam param) {
         Comment comment = new Comment();

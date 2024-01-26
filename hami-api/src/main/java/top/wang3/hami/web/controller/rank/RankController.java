@@ -12,6 +12,11 @@ import top.wang3.hami.security.model.Result;
 
 import java.util.List;
 
+
+/**
+ * rank
+ * 排行榜
+ */
 @RestController
 @RequestMapping("/api/v1/rank")
 @RequiredArgsConstructor
@@ -19,13 +24,22 @@ public class RankController {
 
     private final RankListService rankListService;
 
+    /**
+     * 获取热门文章
+     * @param categoryId 分类Id
+     * @return {@link List<HotArticle>}
+     */
     @GetMapping("/hot/article")
-    public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cateId", required = false)
+    public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cate_id", required = false)
                                                     Integer categoryId) {
         List<HotArticle> articles = rankListService.listHotArticle(categoryId);
         return Result.successData(articles);
     }
 
+    /**
+     * 获取作者排行榜
+     * @return {@link List<HotAuthor>}
+     */
     @GetMapping("/hot/author")
     public Result<List<HotAuthor>> listHotAuthor() {
         List<HotAuthor> articles = rankListService.listHotAuthor();

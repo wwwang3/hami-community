@@ -11,6 +11,9 @@ import top.wang3.hami.security.model.Result;
 
 import java.util.List;
 
+/**
+ * article
+ */
 @RestController
 @RequestMapping("/api/v1/category")
 @Slf4j
@@ -22,6 +25,10 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    /**
+     * 获取所有分类
+     * @return {@link List<Category>}
+     */
     @GetMapping("/all")
     public Result<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();

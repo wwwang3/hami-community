@@ -3,7 +3,7 @@ package top.wang3.hami.core.service.article;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticlePageParam;
-import top.wang3.hami.common.dto.article.UserArticleParam;
+import top.wang3.hami.common.dto.article.UserPageParam;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.vo.article.ArticleVo;
 
@@ -24,7 +24,7 @@ public interface ArticleService {
      * @param param 分页番薯
      * @return PageData
      */
-    PageData<ArticleVo> listUserArticles(UserArticleParam param);
+    PageData<ArticleVo> listUserArticles(UserPageParam param);
 
     /**
      * 分页获取某个用户关注的作者的文章

@@ -2,6 +2,7 @@ package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 文章草稿表
+ * 文章草稿基本信息
  */
 @Data
 @AllArgsConstructor
@@ -24,7 +25,7 @@ import java.util.List;
 public class ArticleDraft {
 
     /**
-     * 主键ID,草稿ID
+     * 草稿ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -73,6 +74,7 @@ public class ArticleDraft {
      */
     @TableField(value = "article_tags", typeHandler = JacksonTypeHandler.class)
     @Size(min = 1, max = 3, message = "请选择至少一个标签")
+    @JsonProperty("tag_ids")
     private List<Integer> tagIds;
 
     /**
@@ -80,6 +82,7 @@ public class ArticleDraft {
      */
     @TableField(value = "category_id")
     @NotNull(message = "请选择一个分类")
+    @JsonProperty("category_id")
     private Integer categoryId;
 
     /**

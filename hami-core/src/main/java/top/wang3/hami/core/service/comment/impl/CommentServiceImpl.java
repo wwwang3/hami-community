@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
         Integer sort = commentPageParam.getSort();
         // 获取文章评论
         List<Comment> comments = commentRepository.listComment(page, articleId, sort);
-        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentVoList(comments);
         // 获取五条回复
         buildIndexReply(vos);
         // 用户信息
@@ -66,7 +66,7 @@ public class CommentServiceImpl implements CommentService {
         // 是否点赞评论
         buildHasLiked(vos);
         return PageData.<CommentVo>builder()
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .total(page.getTotal())
                 .data(vos)
                 .build();
@@ -83,14 +83,14 @@ public class CommentServiceImpl implements CommentService {
         }
         Page<Comment> page = commentPageParam.toPage();
         List<Comment> comments = commentRepository.listReply(page, articleId, rootId);
-        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentDTOList(comments);
+        List<CommentVo> vos = CommentConverter.INSTANCE.toCommentVoList(comments);
         List<Integer> userIds = getUserId(vos);
         // 用户信息
         buildUserInfo(userIds, vos);
         // 是否点赞
         buildHasLiked(vos);
         return PageData.<CommentVo>builder()
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .total(page.getTotal())
                 .data(vos)
                 .build();
@@ -101,7 +101,7 @@ public class CommentServiceImpl implements CommentService {
         Reply reply = commentRepository.listIndexReply(articleId, rootId);
         ReplyVo dto = new ReplyVo();
         dto.setTotal(reply.getTotal());
-        dto.setList(CommentConverter.INSTANCE.toCommentDTOList(reply.getComments()));
+        dto.setList(CommentConverter.INSTANCE.toCommentVoList(reply.getComments()));
         return dto;
     }
 

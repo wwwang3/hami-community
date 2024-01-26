@@ -54,7 +54,7 @@ public class ReadingRecordServiceImpl implements ReadingRecordService {
         buildReadingRecord(dtos, keyword);
         return PageData.<ReadingRecordVo>builder()
                 .total(page.getTotal())
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .data(dtos)
                 .build();
     }

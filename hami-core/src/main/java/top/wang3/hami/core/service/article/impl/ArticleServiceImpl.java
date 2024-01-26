@@ -12,7 +12,7 @@ import top.wang3.hami.common.converter.ArticleConverter;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticlePageParam;
-import top.wang3.hami.common.dto.article.UserArticleParam;
+import top.wang3.hami.common.dto.article.UserPageParam;
 import top.wang3.hami.common.dto.builder.ArticleOptionsBuilder;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
@@ -75,13 +75,13 @@ public class ArticleServiceImpl implements ArticleService {
         List<ArticleVo> articleVos = this.listArticleVoById(articleIds, new ArticleOptionsBuilder());
         return PageData.<ArticleVo>builder()
                 .total(page.getTotal())
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .data(articleVos)
                 .build();
     }
 
     @Override
-    public PageData<ArticleVo> listUserArticles(UserArticleParam param) {
+    public PageData<ArticleVo> listUserArticles(UserPageParam param) {
         //获取用户文章
         int userId = param.getUserId();
         Page<Article> page = param.toPage(false);
@@ -92,7 +92,7 @@ public class ArticleServiceImpl implements ArticleService {
         return PageData.<ArticleVo>builder()
                 .total(page.getTotal())
                 .data(dtos)
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .build();
     }
 
@@ -106,7 +106,7 @@ public class ArticleServiceImpl implements ArticleService {
         // 获取vo
         List<ArticleVo> dtos = this.listArticleVoById(articleIds, null);
         return PageData.<ArticleVo>builder()
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .data(dtos)
                 .total(page.getTotal())
                 .build();

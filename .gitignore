@@ -39,3 +39,5 @@ hami/data/**
 /**/src/main/resources/application.yml
 
 /hami/logs/**
+
+*.apifox-helper.properties

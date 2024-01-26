@@ -9,6 +9,14 @@ import top.wang3.hami.common.HamiFactory;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ *
+ * @param code 响应码
+ * @param msg 响应消息
+ * @param data 响应数据
+ * @param checker 检查器
+ * @param <T> 响应数据泛型
+ */
 public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checker) {
 
     public static final ObjectMapper MAPPER = HamiFactory.MAPPER;

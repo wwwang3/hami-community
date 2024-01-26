@@ -14,6 +14,9 @@ import top.wang3.hami.security.model.Result;
 
 import java.util.List;
 
+/**
+ * article
+ */
 @RestController
 @RequestMapping("/api/v1/tag")
 @Slf4j
@@ -25,16 +28,28 @@ public class TagController {
         this.tagService = tagService;
     }
 
+    /**
+     * 获取所有标签
+     *
+     * @return {@link List<Tag>}
+     */
     @GetMapping("/all")
     public Result<List<Tag>> getAllTags() {
         List<Tag> tags = tagService.getAllTag();
         return Result.successData(tags);
     }
 
+    /**
+     * 分页获取标签
+     *
+     * @param current 当前页数
+     * @param size    每页大小
+     * @return {@link PageData<Tag>}
+     */
     @GetMapping("/query_list")
-    public Result<PageData<Tag>> getTagsByPage(@RequestParam("pageNum") long pageNum,
-                                               @RequestParam("pageSize") long pageSize) {
-        PageData<Tag> tags = tagService.getTagByPage(new PageParam(pageNum, pageSize));
+    public Result<PageData<Tag>> getTagsByPage(@RequestParam("current") long current,
+                                               @RequestParam("size") long size) {
+        PageData<Tag> tags = tagService.getTagByPage(new PageParam(current, size));
         return Result.successData(tags);
     }
 

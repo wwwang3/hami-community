@@ -7,11 +7,21 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * 子评论
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReplyVo {
 
+    /**
+     * 子评论总数
+     */
     private long total;
+
+    /**
+     * 子评论列表
+     */
     private List<CommentVo> list;
 }

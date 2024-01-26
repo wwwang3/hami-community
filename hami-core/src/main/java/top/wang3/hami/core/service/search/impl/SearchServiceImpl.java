@@ -43,7 +43,7 @@ public class SearchServiceImpl implements SearchService {
         highlightKeyword(articles, keyword);
         return PageData.<ArticleVo>builder()
                 .total(page.getTotal())
-                .pageNum(page.getCurrent())
+                .current(page.getCurrent())
                 .data(articles)
                 .build();
     }

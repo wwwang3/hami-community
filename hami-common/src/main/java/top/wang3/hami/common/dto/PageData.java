@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
+/**
+ * 分页数据响应
+ * @param <T> 返回数据泛型
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +22,7 @@ public class PageData<T> {
     /**
      * 当前页数
      */
-    private long pageNum;
+    private long current;
 
     /**
      * 元素总数
@@ -39,7 +43,6 @@ public class PageData<T> {
     public static <T> PageData<T> empty() {
         return new PageData<>();
     }
-
 
 
 }

@@ -6,7 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.article.UserArticleParam;
+import top.wang3.hami.common.dto.article.UserPageParam;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeItemParam;
 import top.wang3.hami.common.dto.interact.LikeType;
@@ -27,6 +27,7 @@ import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 import java.util.List;
 
 /**
+ * interact
  * 用户交互 关注 点赞 收藏 评论
  */
 @RestController
@@ -41,24 +42,37 @@ public class UserInteractController {
     private final UserService userService;
 
 
-
+    /**
+     * 用户关注
+     * @param following_id 关注的用户ID
+     * @return 空
+     */
     @PostMapping("/follow")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
-        return Result.ofTrue(followService.follow(followingId))
+    public Result<Void> doFollow(@RequestParam("following_id") int following_id) {
+        return Result.ofTrue(followService.follow(following_id))
                 .orElse("操作失败");
     }
 
+    /**
+     * 取消关注
+     * @param followingId 关注的用户ID
+     * @return 空
+     */
     @PostMapping("/follow/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
+    public Result<Void> unFollow(@RequestParam("following_id") int followingId) {
         return Result.ofTrue(followService.unFollow(followingId))
                 .orElse("操作失败");
     }
 
-
+    /**
+     * 点赞
+     * @param param {@link LikeItemParam}
+     * @return 空
+     */
     @PostMapping("/like")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
@@ -68,6 +82,11 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
+    /**
+     * 取消点赞
+     * @param param {@link LikeItemParam}
+     * @return 空
+     */
     @PostMapping("/like/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
@@ -77,15 +96,25 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
+    /**
+     * 文章收藏
+     * @param articleId 文章Id
+     * @return 空
+     */
     @PostMapping("/collect")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> collect(@RequestParam("articleId") int articleId) {
+    public Result<Void> collect(@RequestParam("article_id") int articleId) {
         return Result
                 .ofTrue(collectService.doCollect(articleId))
                 .orElse("操作失败");
     }
 
+    /**
+     * 取消文章收藏
+     * @param articleId 文章Id
+     * @return 空
+     */
     @PostMapping("/collect/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
@@ -95,60 +124,79 @@ public class UserInteractController {
                 .orElse("操作失败");
     }
 
-
+    /**
+     * 分页查询用户收藏文章列表
+     * @param param {@link UserPageParam}
+     * @return {@link PageData<ArticleVo>}
+     */
     @PostMapping("/collect/query_list")
     public Result<PageData<ArticleVo>> getUserCollectArticles(@RequestBody @Valid
-                                                               UserArticleParam param) {
+                                                              UserPageParam param) {
         Page<ArticleCollect> page = param.toPage();
         List<Integer> articleIds = collectService.listUserCollects(page, param.getUserId());
         List<ArticleVo> data = articleService.listArticleVoById(articleIds, null);
         PageData<ArticleVo> pageData = PageData.<ArticleVo>builder()
-                .pageNum(param.getPageNum())
+                .current(param.getCurrent())
                 .total(page.getTotal())
                 .data(data)
                 .build();
         return Result.successData(pageData);
     }
 
+    /**
+     * 分页查询用户点赞文章列表
+     * @param param {@link UserPageParam}
+     * @return {@link PageData<ArticleVo>}
+     */
     @PostMapping("/like/query_list")
     public Result<PageData<ArticleVo>> getUserLikeArticles(@RequestBody @Valid
-                                                               UserArticleParam param) {
+                                                           UserPageParam param) {
         Page<LikeItem> page = param.toPage();
         List<Integer> articleIds = likeService.listUserLikeArticles(page, param.getUserId());
         List<ArticleVo> data = articleService.listArticleVoById(articleIds, null);
         PageData<ArticleVo> pageData = PageData.<ArticleVo>builder()
-                .pageNum(param.getPageNum())
+                .current(param.getCurrent())
                 .total(page.getTotal())
                 .data(data)
                 .build();
         return Result.successData(pageData);
     }
 
+    /**
+     * 分页查询用户关注列表
+     * @param param {@link UserPageParam}
+     * @return {@link PageData<UserVo>}
+     */
     @PostMapping("/follow/following_list")
     public Result<PageData<UserVo>> getUserFollowings(@RequestBody @Valid
-                                                               UserArticleParam param) {
+                                                      UserPageParam param) {
         Page<UserFollow> page = param.toPage();
         List<Integer> followings = followService.listUserFollowings(page, param.getUserId());
         List<UserVo> data = userService.listAuthorById(followings, UserOptionsBuilder.justInfo());
         data.forEach(d -> d.setFollowed(true));
         PageData<UserVo> pageData = PageData.<UserVo>builder()
-                .pageNum(param.getPageNum())
+                .current(param.getCurrent())
                 .total(page.getTotal())
                 .data(data)
                 .build();
         return Result.successData(pageData);
     }
 
+    /**
+     * 分页查询用户粉丝列表
+     * @param param {@link UserPageParam}
+     * @return {@link PageData<UserVo>}
+     */
     @PostMapping("/follow/follower_list")
     public Result<PageData<UserVo>> getUserFollowers(@RequestBody @Valid
-                                                               UserArticleParam param) {
+                                                     UserPageParam param) {
         Page<UserFollow> page = param.toPage();
         List<Integer> followers = followService.listUserFollowers(page, param.getUserId());
         UserOptionsBuilder builder = new UserOptionsBuilder()
                 .noStat();
         List<UserVo> data = userService.listAuthorById(followers, builder);
         PageData<UserVo> pageData = PageData.<UserVo>builder()
-                .pageNum(param.getPageNum())
+                .current(param.getCurrent())
                 .total(page.getTotal())
                 .data(data)
                 .build();
