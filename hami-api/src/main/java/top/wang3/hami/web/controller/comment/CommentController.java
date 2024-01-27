@@ -12,6 +12,7 @@ import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.vo.comment.CommentVo;
 import top.wang3.hami.core.service.comment.CommentService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 /**
  * comment
@@ -24,10 +25,11 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * 分页查询评论
+     * 查询评论
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
+    @Public
     @PostMapping("/query_list")
     public Result<PageData<CommentVo>> listComment(@RequestBody
                                                     @Valid CommentPageParam param) {
@@ -36,10 +38,11 @@ public class CommentController {
     }
 
     /**
-     * 分页查询回复
+     * 查询回复
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
+    @Public
     @PostMapping("/reply/query_list")
     public Result<PageData<CommentVo>> listReply(@RequestBody
                                                   @Validated(value = CommentPageParam.Reply.class)

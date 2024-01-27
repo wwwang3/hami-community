@@ -20,6 +20,7 @@ import java.util.Map;
 /**
  * 认证后置处理器, 处理登录成功, 失败, 退出登录
  */
+@SuppressWarnings("all")
 @Slf4j
 public class DefaultAuthenticationPostHandler implements AuthenticationPostHandler {
 
@@ -54,7 +55,7 @@ public class DefaultAuthenticationPostHandler implements AuthenticationPostHandl
             result = Result.error(403, ae.getMessage());
         } else if (e instanceof InsufficientAuthenticationException ie) {
             // 凭证不足, 访问了需要登录的接口但token校验失败
-            result = Result.error("token无效或过期");
+            result = Result.error(401, "token无效或过期");
         } else if (e instanceof AuthenticationException ae) {
             // 其他Authentication异常
             result = Result.error(401, ae.getMessage());

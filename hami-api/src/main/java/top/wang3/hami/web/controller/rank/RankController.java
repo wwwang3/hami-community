@@ -9,6 +9,7 @@ import top.wang3.hami.common.vo.article.HotArticle;
 import top.wang3.hami.common.vo.user.HotAuthor;
 import top.wang3.hami.core.service.rank.RankListService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 import java.util.List;
 
@@ -26,20 +27,24 @@ public class RankController {
 
     /**
      * 获取热门文章
+     *
      * @param categoryId 分类Id
      * @return {@link List<HotArticle>}
      */
+    @Public
     @GetMapping("/hot/article")
     public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cate_id", required = false)
-                                                    Integer categoryId) {
+                                                   Integer categoryId) {
         List<HotArticle> articles = rankListService.listHotArticle(categoryId);
         return Result.successData(articles);
     }
 
     /**
      * 获取作者排行榜
+     *
      * @return {@link List<HotAuthor>}
      */
+    @Public
     @GetMapping("/hot/author")
     public Result<List<HotAuthor>> listHotAuthor() {
         List<HotAuthor> articles = rankListService.listHotAuthor();

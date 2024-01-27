@@ -11,6 +11,7 @@ import top.wang3.hami.common.dto.article.UserPageParam;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 /**
  * article
@@ -23,10 +24,11 @@ public class ArticleController {
     private final ArticleService articleService;
 
     /**
-     * 分页查询最新文章
+     * 查询最新文章
      *
      * @return {@link PageData<ArticleVo>}
      */
+    @Public
     @PostMapping("/list/recommend")
     public Result<PageData<ArticleVo>> listRecommendArticles(@RequestBody @Valid ArticlePageParam param) {
         PageData<ArticleVo> data = articleService.listNewestArticles(param);
@@ -52,6 +54,7 @@ public class ArticleController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
+    @Public
     @PostMapping("/user/query_list")
     public Result<PageData<ArticleVo>> listUserArticles(@RequestBody @Valid UserPageParam param) {
         PageData<ArticleVo> data = articleService.listUserArticles(param);
@@ -64,6 +67,7 @@ public class ArticleController {
      * @param articleId 文章Id
      * @return {@link ArticleVo}
      */
+    @Public
     @GetMapping("/detail")
     public Result<ArticleVo> getArticleContentById(@RequestParam("article_id") int articleId) {
         return Result.ofNullable(articleService.getArticleContentById(articleId))

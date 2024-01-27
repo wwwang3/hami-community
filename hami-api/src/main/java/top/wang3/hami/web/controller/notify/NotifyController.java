@@ -49,6 +49,7 @@ public class NotifyController {
 
     /**
      * 查询关注消息
+     *
      * @param param {@link PageParam}
      * @return {@link PageData<NotifyMsgVo>}
      */
@@ -60,6 +61,7 @@ public class NotifyController {
 
     /**
      * 查询系统消息
+     *
      * @param param {@link PageParam}
      * @return {@link PageData<NotifyMsgVo>}
      */
@@ -71,6 +73,7 @@ public class NotifyController {
 
     /**
      * 查询未读消息数量
+     *
      * @return 每个消息类型未读的数量
      */
     @GetMapping("/count")
@@ -81,6 +84,7 @@ public class NotifyController {
 
     /**
      * 删除消息
+     *
      * @param msgId 消息ID
      * @return 空
      */

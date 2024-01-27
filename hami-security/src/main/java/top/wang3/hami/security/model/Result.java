@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 /**
  *
- * @param code 响应码
+ * @param code 响应码 {@link StatusCode}
  * @param msg 响应消息
  * @param data 响应数据
  * @param checker 检查器
@@ -107,6 +107,45 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
         } catch (JsonProcessingException e) {
             // ignore it
             return null;
+        }
+    }
+
+    public enum StatusCode {
+
+        /**
+         * 成功
+         */
+        SUCCESS(200),
+
+        /**
+         * 请求异常
+         */
+        BAD_REQUEST(400),
+
+        /**
+         * 身份认证失败
+         */
+        UNAUTHORIZED(401),
+
+        /**
+         * 禁止访问
+         */
+        FORBIDDEN(403),
+
+        /**
+         * Not Found
+         */
+        NOT_FOUND(404),
+
+        /**
+         * Internal Server Error
+         */
+        SYSTEM_ERROR(500);
+
+        final int code;
+
+        StatusCode(int code) {
+            this.code = code;
         }
     }
 }

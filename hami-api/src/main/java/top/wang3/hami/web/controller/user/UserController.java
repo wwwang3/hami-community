@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import top.wang3.hami.common.vo.user.UserVo;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 /**
  * user
@@ -24,9 +25,11 @@ public class UserController {
 
     /**
      * 获取作者信息
+     *
      * @param id 用户Id
      * @return {@link UserVo}
      */
+    @Public
     @GetMapping("/info/{id}")
     public Result<UserVo> getAuthorInfo(@PathVariable(name = "id") Integer id) {
         UserVo user = userService.getAuthorInfoById(id);

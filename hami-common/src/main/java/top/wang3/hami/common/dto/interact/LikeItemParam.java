@@ -2,6 +2,7 @@ package top.wang3.hami.common.dto.interact;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -14,12 +15,14 @@ public class LikeItemParam {
      * 点赞的实体Id
      */
     @JsonProperty("item_id")
+    @NotNull
     private int itemId;
 
     /**
      * 实体类型
-     * @see top.wang3.hami.common.dto.notify.NotifyType
+     * @see top.wang3.hami.common.dto.interact.LikeType
      */
     @JsonProperty("item_type")
+    @NotNull
     private byte itemType;
 }

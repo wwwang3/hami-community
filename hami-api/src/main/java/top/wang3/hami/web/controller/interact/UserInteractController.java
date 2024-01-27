@@ -23,6 +23,7 @@ import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
+import top.wang3.hami.web.annotation.Public;
 
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class UserInteractController {
 
     /**
      * 用户关注
+     *
      * @param following_id 关注的用户ID
      * @return 空
      */
@@ -57,6 +59,7 @@ public class UserInteractController {
 
     /**
      * 取消关注
+     *
      * @param followingId 关注的用户ID
      * @return 空
      */
@@ -70,6 +73,7 @@ public class UserInteractController {
 
     /**
      * 点赞
+     *
      * @param param {@link LikeItemParam}
      * @return 空
      */
@@ -84,13 +88,14 @@ public class UserInteractController {
 
     /**
      * 取消点赞
+     *
      * @param param {@link LikeItemParam}
      * @return 空
      */
     @PostMapping("/like/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> cancelLike(@RequestBody LikeItemParam param) {
+    public Result<Void> cancelLike(@RequestBody @Valid LikeItemParam param) {
         return Result
                 .ofTrue(likeService.cancelLike(param.getItemId(), resolveLikerType(param.getItemType())))
                 .orElse("操作失败");
@@ -98,6 +103,7 @@ public class UserInteractController {
 
     /**
      * 文章收藏
+     *
      * @param articleId 文章Id
      * @return 空
      */
@@ -112,23 +118,26 @@ public class UserInteractController {
 
     /**
      * 取消文章收藏
+     *
      * @param articleId 文章Id
      * @return 空
      */
     @PostMapping("/collect/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> cancelCollect(@RequestParam("articleId") int articleId) {
+    public Result<Void> cancelCollect(@RequestParam("article_id") int articleId) {
         return Result
                 .ofTrue(collectService.cancelCollect(articleId))
                 .orElse("操作失败");
     }
 
     /**
-     * 分页查询用户收藏文章列表
+     * 查询用户收藏文章列表
+     *
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
+    @Public
     @PostMapping("/collect/query_list")
     public Result<PageData<ArticleVo>> getUserCollectArticles(@RequestBody @Valid
                                                               UserPageParam param) {
@@ -144,10 +153,12 @@ public class UserInteractController {
     }
 
     /**
-     * 分页查询用户点赞文章列表
+     * 查询用户点赞文章列表
+     *
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
+    @Public
     @PostMapping("/like/query_list")
     public Result<PageData<ArticleVo>> getUserLikeArticles(@RequestBody @Valid
                                                            UserPageParam param) {
@@ -163,10 +174,12 @@ public class UserInteractController {
     }
 
     /**
-     * 分页查询用户关注列表
+     * 查询用户关注列表
+     *
      * @param param {@link UserPageParam}
      * @return {@link PageData<UserVo>}
      */
+    @Public
     @PostMapping("/follow/following_list")
     public Result<PageData<UserVo>> getUserFollowings(@RequestBody @Valid
                                                       UserPageParam param) {
@@ -183,10 +196,12 @@ public class UserInteractController {
     }
 
     /**
-     * 分页查询用户粉丝列表
+     * 查询用户粉丝列表
+     *
      * @param param {@link UserPageParam}
      * @return {@link PageData<UserVo>}
      */
+    @Public
     @PostMapping("/follow/follower_list")
     public Result<PageData<UserVo>> getUserFollowers(@RequestBody @Valid
                                                      UserPageParam param) {

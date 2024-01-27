@@ -31,6 +31,7 @@ public class AccountController {
 
     /**
      * 获取当前登录用户信息
+     *
      * @return {@link LoginProfile}
      */
     @GetMapping("/me")
@@ -41,6 +42,7 @@ public class AccountController {
 
     /**
      * 获取账户信息
+     *
      * @return {@link AccountInfo}
      */
     @GetMapping("/info")
@@ -51,20 +53,22 @@ public class AccountController {
 
     /**
      * 更新个人资料
-     * @param userProfileParam {@link UserProfileParam}
+     *
+     * @param param {@link UserProfileParam}
      * @return 空
      */
     @PostMapping("/update")
     public Result<Void> updateUserProfile(@RequestBody @Valid
-                                          UserProfileParam userProfileParam) {
-        boolean success = accountService.updateProfile(userProfileParam);
+                                          UserProfileParam param) {
+        boolean success = accountService.updateProfile(param);
         return Result.successIfTrue(success, "操作失败");
     }
 
     /**
      * 获取登录记录
+     *
      * @param current 当前页数
-     * @param size 元素个数
+     * @param size    元素个数
      * @return {@link PageData<LoginRecord>}
      */
     @GetMapping("/login/log")

@@ -11,6 +11,7 @@ import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.core.service.article.TagService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class TagController {
      *
      * @return {@link List<Tag>}
      */
+    @Public
     @GetMapping("/all")
     public Result<List<Tag>> getAllTags() {
         List<Tag> tags = tagService.getAllTag();
@@ -40,12 +42,13 @@ public class TagController {
     }
 
     /**
-     * 分页获取标签
+     * 获取标签
      *
      * @param current 当前页数
      * @param size    每页大小
      * @return {@link PageData<Tag>}
      */
+    @Public
     @GetMapping("/query_list")
     public Result<PageData<Tag>> getTagsByPage(@RequestParam("current") long current,
                                                @RequestParam("size") long size) {

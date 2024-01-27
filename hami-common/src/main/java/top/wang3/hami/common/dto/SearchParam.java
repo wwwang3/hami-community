@@ -1,9 +1,9 @@
 package top.wang3.hami.common.dto;
 
 
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.validator.constraints.Length;
 
 
 /**
@@ -16,7 +16,7 @@ public class SearchParam extends PageParam {
     /**
      * 关键字
      */
-    @Length(max = 32, message = "关键字长度为1-32", groups = Article.class)
+    @Pattern(regexp = "^\\d{2,32}$", message = "关键字长度为2-32")
     private String keyword;
 
     /**
@@ -25,7 +25,4 @@ public class SearchParam extends PageParam {
      */
     private String type;
 
-    public interface Article {
-
-    }
 }

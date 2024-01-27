@@ -1,6 +1,7 @@
 package top.wang3.hami.web.controller.article;
 
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.constant.Constants;
@@ -24,25 +25,25 @@ public class ArticleDraftController {
     private final ArticleDraftService articleDraftService;
 
     /**
-     * 分页获取未发布文章草稿
+     * 获取未发布文章草稿
      *
      * @param param {@link PageParam}
      * @return {@link PageData<ArticleDraftVo>}
      */
     @PostMapping("/list")
-    public Result<PageData<ArticleDraftVo>> getDrafts(@RequestBody PageParam param) {
+    public Result<PageData<ArticleDraftVo>> getDrafts(@RequestBody @Valid PageParam param) {
         PageData<ArticleDraftVo> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
         return Result.successData(articleDrafts);
     }
 
     /**
-     * 分页获取发布文章草稿
+     * 获取发布文章草稿
      *
      * @param param {@link PageParam}
      * @return {@link PageData<ArticleDraftVo>}
      */
     @GetMapping("/articles")
-    public Result<PageData<ArticleDraftVo>> getArticles(@RequestBody PageParam param) {
+    public Result<PageData<ArticleDraftVo>> getArticles(@RequestBody @Valid PageParam param) {
         PageData<ArticleDraftVo> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);
     }

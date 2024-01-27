@@ -17,7 +17,7 @@ import java.util.Map;
  * 用户数据变化
  */
 @RestController
-@RequestMapping("/api/v1/stat")
+@RequestMapping("/api/v1/interact")
 @RequiredArgsConstructor
 public class UserStatController {
 
@@ -25,7 +25,7 @@ public class UserStatController {
 
     /**
      * 用户昨日数据变化
-     * @return {@link DataGrowing}
+     * @response {@link DataGrowing}
      */
     @GetMapping("/data_growing")
     public Result<Map<String, Integer>> dataGrowing() {

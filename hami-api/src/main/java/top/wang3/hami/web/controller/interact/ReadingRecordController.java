@@ -23,13 +23,14 @@ public class ReadingRecordController {
     private final ReadingRecordService readingRecordService;
 
     /**
-     * 分页获取阅读记录
+     * 获取阅读记录
+     *
      * @param param {@link SearchParam}
      * @return {@link PageData<ReadingRecordVo>}
      */
     @PostMapping("/reading_record/query_list")
     public Result<PageData<ReadingRecordVo>> listReadingRecord(@RequestBody
-                                                                @Valid SearchParam param) {
+                                                               @Valid SearchParam param) {
         PageData<ReadingRecordVo> pageData = readingRecordService
                 .listReadingRecords(param);
         return Result.ofNullable(pageData)
@@ -38,6 +39,7 @@ public class ReadingRecordController {
 
     /**
      * 删除阅读记录
+     *
      * @param id 阅读记录ID
      * @return 空
      */
@@ -50,6 +52,7 @@ public class ReadingRecordController {
 
     /**
      * 清空历史记录
+     *
      * @return 空
      */
     @PostMapping("/reading_record/clear")

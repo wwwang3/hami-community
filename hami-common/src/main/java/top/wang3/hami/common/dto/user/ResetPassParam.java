@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 /**
  * 重置密码请求参数
@@ -26,7 +25,7 @@ public class ResetPassParam {
     /**
      * 验证码
      */
-    @Length(min = 6, max = 6)
+    @Pattern(regexp = "\\d{6}")
     private String captcha;
 
     /**

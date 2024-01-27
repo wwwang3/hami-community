@@ -10,6 +10,7 @@ import top.wang3.hami.common.dto.SearchParam;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.service.search.SearchService;
 import top.wang3.hami.security.model.Result;
+import top.wang3.hami.web.annotation.Public;
 
 import java.util.List;
 
@@ -26,9 +27,11 @@ public class SearchController {
 
     /**
      * 文章搜索
+     *
      * @param param {@link SearchParam}
      * @return {@link PageData<ArticleVo>}
      */
+    @Public
     @PostMapping("/query_list")
     public Result<PageData<ArticleVo>> searchArticle(@RequestBody @Valid SearchParam param) {
         if (!StringUtils.hasText(param.getKeyword())) {
@@ -40,9 +43,11 @@ public class SearchController {
 
     /**
      * 热搜列表
+     *
      * @return 热搜关键字列表 {@link List<String>}
      */
     @GetMapping("/hot")
+    @Public
     public Result<List<String>> getHotSearch() {
         List<String> hots = searchService.getHotSearch();
         return Result.successData(hots);

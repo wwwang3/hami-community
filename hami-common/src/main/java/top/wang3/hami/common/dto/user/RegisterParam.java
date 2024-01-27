@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
 /**
  * 注册请求参数
@@ -32,7 +31,7 @@ public class RegisterParam {
     /**
      * 邮箱验证码
      */
-    @Length(min = 6, max = 6)
+    @Pattern(regexp = "\\d{6}")
     private String captcha;
 
     /**
