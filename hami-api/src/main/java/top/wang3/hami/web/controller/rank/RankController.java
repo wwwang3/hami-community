@@ -33,7 +33,7 @@ public class RankController {
      */
     @Public
     @GetMapping("/hot/article")
-    public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cate_id", required = false)
+    public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cateId", required = false)
                                                    Integer categoryId) {
         List<HotArticle> articles = rankListService.listHotArticle(categoryId);
         return Result.successData(articles);

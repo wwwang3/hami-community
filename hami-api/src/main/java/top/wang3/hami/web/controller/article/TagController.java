@@ -1,11 +1,9 @@
 package top.wang3.hami.web.controller.article;
 
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.model.Tag;
@@ -44,15 +42,13 @@ public class TagController {
     /**
      * 获取标签
      *
-     * @param current 当前页数
-     * @param size    每页大小
+     * @param param {@link PageParam}
      * @return {@link PageData<Tag>}
      */
     @Public
-    @GetMapping("/query_list")
-    public Result<PageData<Tag>> getTagsByPage(@RequestParam("current") long current,
-                                               @RequestParam("size") long size) {
-        PageData<Tag> tags = tagService.getTagByPage(new PageParam(current, size));
+    @PostMapping("/query_list")
+    public Result<PageData<Tag>> getTagsByPage(@RequestBody @Valid PageParam param) {
+        PageData<Tag> tags = tagService.getTagByPage(param);
         return Result.successData(tags);
     }
 

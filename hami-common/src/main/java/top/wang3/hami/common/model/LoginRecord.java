@@ -3,7 +3,6 @@ package top.wang3.hami.common.model;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,14 +29,12 @@ public class LoginRecord {
      * 用户ID
      */
     @TableField(value = "user_id")
-    @JsonProperty("user_id")
     private Integer userId;
 
     /**
      * 登录的IP地址信息
      */
     @TableField(value = "ip_info", typeHandler = JacksonTypeHandler.class)
-    @JsonProperty("ip_info")
     private IpInfo ipInfo;
 
     @TableField(value = "deleted")
@@ -49,7 +46,6 @@ public class LoginRecord {
      * 登录时间
      */
     @TableField(value = "login_time")
-    @JsonProperty("login_time")
     private Date loginTime;
 
 }

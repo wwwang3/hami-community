@@ -89,7 +89,7 @@ public class NotifyController {
      * @return 空
      */
     @PostMapping("/delete")
-    public Result<Void> deleteNotify(@RequestParam("msg_id") Integer msgId) {
+    public Result<Void> deleteNotify(@RequestParam("msgId") Integer msgId) {
         boolean deleted = notifyMsgService.deleteNotify(msgId);
         return Result.ofTrue(deleted)
                 .orElse("删除失败");

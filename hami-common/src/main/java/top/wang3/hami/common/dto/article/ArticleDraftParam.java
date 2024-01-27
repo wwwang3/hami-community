@@ -1,7 +1,6 @@
 package top.wang3.hami.common.dto.article;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -47,7 +46,6 @@ public class ArticleDraftParam {
      * 分类ID
      */
     @NotNull
-    @JsonProperty("category_id")
     private Integer categoryId;
 
     /**
@@ -55,7 +53,6 @@ public class ArticleDraftParam {
      */
     @NotEmpty
     @Size(min = 1, max = 3)
-    @JsonProperty("tag_ids")
     private List<Integer> tagIds;
 
 

@@ -1,7 +1,6 @@
 package top.wang3.hami.common.vo.notify;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import top.wang3.hami.common.dto.notify.Info;
 
@@ -42,13 +41,11 @@ public class NotifyMsgVo {
     /**
      * 该通知关联的信息, 一般为触发消息通知的元素的信息, 如文章信息, 评论信息
      */
-    @JsonProperty("related_info")
     private Info relatedInfo;
 
     /**
      * 通知内容
      */
-    @JsonProperty("item_info")
     private Info itemInfo;
 
 }

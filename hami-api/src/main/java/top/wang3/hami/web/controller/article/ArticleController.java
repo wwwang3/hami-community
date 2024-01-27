@@ -68,8 +68,8 @@ public class ArticleController {
      * @return {@link ArticleVo}
      */
     @Public
-    @GetMapping("/detail")
-    public Result<ArticleVo> getArticleContentById(@RequestParam("article_id") int articleId) {
+    @GetMapping("/detail/{id}")
+    public Result<ArticleVo> getArticleContentById(@PathVariable("id") int articleId) {
         return Result.ofNullable(articleService.getArticleContentById(articleId))
                 .orElse("文章不存在");
     }

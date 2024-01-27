@@ -1,7 +1,6 @@
 package top.wang3.hami.common.dto.article;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,6 +23,5 @@ public class UserPageParam extends PageParam {
      */
     @Min(value = 1)
     @NotNull
-    @JsonProperty("user_id")
     private int userId;
 }

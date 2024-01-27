@@ -1,7 +1,6 @@
 package top.wang3.hami.common.dto.comment;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -23,18 +22,17 @@ public class CommentPageParam extends PageParam {
      */
     @NotNull
     @Min(value = 1)
-    @JsonProperty("article_id")
     private Integer articleId;
 
     /**
      * 根评论Id
      */
     @NotNull(groups = Reply.class)
-    @JsonProperty("root_Id")
     private Integer rootId;
 
     /**
      * 排序字段 0-时间 1-点赞数
+     * @default 1
      */
     @Min(value = 0)
     @Max(value = 1)

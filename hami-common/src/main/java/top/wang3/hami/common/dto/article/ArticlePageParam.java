@@ -1,6 +1,5 @@
 package top.wang3.hami.common.dto.article;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -18,17 +17,18 @@ public class ArticlePageParam extends PageParam {
 
     /**
      * 分类ID
+     *
+     * @default 10000
      */
     @Min(value = 10000)
     @Max(value = 10007)
-    @JsonProperty("cate_id")
     private Integer cateId;
 
     /**
      * 标签Id
+     *
      * @future 根据标签查询文章
      */
-    @JsonProperty("tag_id")
     private Integer tagId;
 
 }

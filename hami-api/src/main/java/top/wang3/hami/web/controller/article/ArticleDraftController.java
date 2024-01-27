@@ -91,8 +91,8 @@ public class ArticleDraftController {
      * 发表文章
      *
      * @param draftId 草稿ID
-     * @description 返回数据包含文章Id
      * @return {@link ArticleDraft}
+     * @description 返回数据包含文章Id
      */
     @PostMapping("/publish")
     public Result<ArticleDraft> publishArticle(@RequestParam("draft_id") Long draftId) {
@@ -104,10 +104,10 @@ public class ArticleDraftController {
      * 删除草稿
      *
      * @param draftId 草稿Id
-     * @return {@link Void}
+     * @return 空
      */
     @PostMapping("/delete/draft")
-    public Result<Void> deleteDraft(@RequestParam("draft_id") long draftId) {
+    public Result<Void> deleteDraft(@RequestParam("draftId") long draftId) {
         boolean success = articleDraftService.deleteDraft(draftId);
         return Result.successIfTrue(success);
     }
@@ -116,7 +116,7 @@ public class ArticleDraftController {
      * 删除文章
      *
      * @param articleId 文章Id
-     * @return {@link Void}
+     * @return 空
      */
     @PostMapping("/delete/article")
     public Result<Void> deleteArticle(@RequestParam("articleId") int articleId) {

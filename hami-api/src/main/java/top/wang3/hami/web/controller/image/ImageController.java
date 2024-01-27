@@ -21,8 +21,9 @@ public class ImageController {
 
     /**
      * 图像上传
+     *
      * @param image 图像文件
-     * @param type 图片关联的类型 1-文章图片 2-用户头像
+     * @param type  图片关联的类型 1-文章图片 2-用户头像
      * @return 图像访问地址
      */
     @PostMapping("/upload")

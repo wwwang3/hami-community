@@ -2,7 +2,6 @@ package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -74,7 +73,6 @@ public class ArticleDraft {
      */
     @TableField(value = "article_tags", typeHandler = JacksonTypeHandler.class)
     @Size(min = 1, max = 3, message = "请选择至少一个标签")
-    @JsonProperty("tag_ids")
     private List<Integer> tagIds;
 
     /**
@@ -82,7 +80,6 @@ public class ArticleDraft {
      */
     @TableField(value = "category_id")
     @NotNull(message = "请选择一个分类")
-    @JsonProperty("category_id")
     private Integer categoryId;
 
     /**

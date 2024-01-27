@@ -46,14 +46,14 @@ public class UserInteractController {
     /**
      * 用户关注
      *
-     * @param following_id 关注的用户ID
+     * @param followingId 关注的用户ID
      * @return 空
      */
     @PostMapping("/follow")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> doFollow(@RequestParam("following_id") int following_id) {
-        return Result.ofTrue(followService.follow(following_id))
+    public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
+        return Result.ofTrue(followService.follow(followingId))
                 .orElse("操作失败");
     }
 
@@ -66,7 +66,7 @@ public class UserInteractController {
     @PostMapping("/follow/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> unFollow(@RequestParam("following_id") int followingId) {
+    public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
         return Result.ofTrue(followService.unFollow(followingId))
                 .orElse("操作失败");
     }
@@ -110,7 +110,7 @@ public class UserInteractController {
     @PostMapping("/collect")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> collect(@RequestParam("article_id") int articleId) {
+    public Result<Void> collect(@RequestParam("articleId") int articleId) {
         return Result
                 .ofTrue(collectService.doCollect(articleId))
                 .orElse("操作失败");
@@ -125,7 +125,7 @@ public class UserInteractController {
     @PostMapping("/collect/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> cancelCollect(@RequestParam("article_id") int articleId) {
+    public Result<Void> cancelCollect(@RequestParam("articleId") int articleId) {
         return Result
                 .ofTrue(collectService.cancelCollect(articleId))
                 .orElse("操作失败");

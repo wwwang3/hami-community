@@ -2,7 +2,6 @@ package top.wang3.hami.common.dto;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,6 @@ public class PageParam {
      * 当前页数
      */
     @Min(value = 1)
-    @JsonProperty("current")
     private long current;
 
     /**
@@ -29,7 +27,6 @@ public class PageParam {
      */
     @Min(value = 5)
     @Max(value = 20)
-    @JsonProperty("size")
     private long size;
 
     public <T> Page<T> toPage() {

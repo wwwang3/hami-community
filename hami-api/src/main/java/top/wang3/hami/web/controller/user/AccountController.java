@@ -67,14 +67,12 @@ public class AccountController {
     /**
      * 获取登录记录
      *
-     * @param current 当前页数
-     * @param size    元素个数
+     * @param param {@link PageParam}
      * @return {@link PageData<LoginRecord>}
      */
-    @GetMapping("/login/log")
-    public Result<PageData<LoginRecord>> getLoginRecords(@RequestParam("current") long current,
-                                                         @RequestParam("size") long size) {
-        PageData<LoginRecord> records = loginRecordService.listLoginRecordByPage(new PageParam(current, size));
+    @PostMapping("/login/log")
+    public Result<PageData<LoginRecord>> getLoginRecords(@RequestBody @Valid PageParam param) {
+        PageData<LoginRecord> records = loginRecordService.listLoginRecordByPage(param);
         return Result.successData(records);
     }
 

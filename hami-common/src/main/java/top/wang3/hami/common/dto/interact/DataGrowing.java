@@ -13,7 +13,6 @@ public class DataGrowing {
     /**
      * 用户ID
      */
-    @JsonProperty("user_id")
     private Integer userId;
 
     /**

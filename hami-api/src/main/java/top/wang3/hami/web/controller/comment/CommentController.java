@@ -26,33 +26,36 @@ public class CommentController {
 
     /**
      * 查询评论
+     *
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
     @Public
     @PostMapping("/query_list")
     public Result<PageData<CommentVo>> listComment(@RequestBody
-                                                    @Valid CommentPageParam param) {
+                                                   @Valid CommentPageParam param) {
         PageData<CommentVo> data = commentService.listComment(param);
         return Result.successData(data);
     }
 
     /**
      * 查询回复
+     *
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
     @Public
     @PostMapping("/reply/query_list")
     public Result<PageData<CommentVo>> listReply(@RequestBody
-                                                  @Validated(value = CommentPageParam.Reply.class)
-                                                  CommentPageParam param) {
+                                                 @Validated(value = CommentPageParam.Reply.class)
+                                                 CommentPageParam param) {
         PageData<CommentVo> data = commentService.listReply(param);
         return Result.successData(data);
     }
 
     /**
      * 发表评论
+     *
      * @param param {@link CommentParam}
      * @return {@link Comment}
      */
@@ -65,6 +68,7 @@ public class CommentController {
 
     /**
      * 发表回复
+     *
      * @param param {@link CommentParam}
      * @return {@link Comment}
      */
@@ -78,6 +82,7 @@ public class CommentController {
 
     /**
      * 删除评论
+     *
      * @param id 评论Id
      * @return {@link Void}
      */

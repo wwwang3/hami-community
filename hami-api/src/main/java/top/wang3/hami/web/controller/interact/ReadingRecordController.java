@@ -44,7 +44,7 @@ public class ReadingRecordController {
      * @return 空
      */
     @PostMapping("/reading_record/delete")
-    public Result<Void> deleteReadingRecord(@RequestParam("record_id") Integer id) {
+    public Result<Void> deleteReadingRecord(@RequestParam("recordId") Integer id) {
         boolean deleted = readingRecordService.deleteRecord(id);
         return Result.ofTrue(deleted)
                 .orElse("操作失败");
