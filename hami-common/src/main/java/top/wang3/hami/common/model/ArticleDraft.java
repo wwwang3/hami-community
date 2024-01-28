@@ -71,7 +71,7 @@ public class ArticleDraft {
     /**
      * 文章标签
      */
-    @TableField(value = "article_tags", typeHandler = JacksonTypeHandler.class)
+    @TableField(value = "tag_ids", typeHandler = JacksonTypeHandler.class)
     @Size(min = 1, max = 3, message = "请选择至少一个标签")
     private List<Integer> tagIds;
 

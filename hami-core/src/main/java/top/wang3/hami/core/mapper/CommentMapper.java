@@ -11,10 +11,6 @@ import java.util.List;
 @Mapper
 public interface CommentMapper extends BaseMapper<Comment> {
 
-    @Select("""
-        select count(id) from comment where id = #{commentId} and deleted = 0;
-    """)
-    boolean isCommentExist(Integer commentId);
 
     @Select("""
         select user_id from comment where id = #{id} and deleted = 0;

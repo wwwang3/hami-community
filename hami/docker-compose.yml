@@ -14,7 +14,7 @@ services:
   mysql:
     container_name: mysql
     build:
-      context: ./mysql
+      context: build/mysql
       dockerfile: Dockerfile
     networks:
       hami_net:
@@ -31,7 +31,7 @@ services:
   redis:
     container_name: redis
     build:
-      context: ./redis
+      context: build/redis
       dockerfile: Dockerfile
     networks:
       hami_net:
@@ -47,7 +47,7 @@ services:
   rabbitmq:
     container_name: rabbitmq
     build:
-      context: ./rabbitmq
+      context: build/rabbitmq
       dockerfile: Dockerfile
     networks:
       hami_net:
@@ -64,7 +64,7 @@ services:
   canal:
     container_name: canal
     build:
-      context: ./canal
+      context: build/canal
       dockerfile: Dockerfile
     privileged: true
     depends_on:

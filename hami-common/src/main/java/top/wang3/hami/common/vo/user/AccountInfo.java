@@ -14,6 +14,11 @@ public class AccountInfo {
     private Integer id;
 
     /**
+     * 账户名
+     */
+    private String account;
+
+    /**
      * 邮箱
      */
     private String email;

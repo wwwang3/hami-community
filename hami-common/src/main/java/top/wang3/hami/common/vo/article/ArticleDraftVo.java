@@ -20,14 +20,24 @@ public class ArticleDraftVo {
     private Long id;
 
     /**
+     * 用户ID
+     */
+    private Integer userId;
+
+    /**
      * 文章ID, 没有发表时为空
      */
     private Integer articleId;
 
     /**
-     * 用户ID
+     * 分类ID
      */
-    private Integer userId;
+    private Integer categoryId;
+
+    /**
+     * 文章标签
+     */
+    private List<Tag> tags;
 
     /**
      * 标题
@@ -48,16 +58,6 @@ public class ArticleDraftVo {
      * 文章内容
      */
     private String content;
-
-    /**
-     * 文章标签
-     */
-    private List<Tag> tags;
-
-    /**
-     * 分类ID
-     */
-    private Integer categoryId;
 
     /**
      * 草稿状态 0-未发表 1-已发表

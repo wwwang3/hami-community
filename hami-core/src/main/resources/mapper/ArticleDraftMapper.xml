@@ -7,12 +7,13 @@
         <id column="id" property="id"/>
         <result column="article_id" property="articleId"/>
         <result column="user_id" property="userId"/>
-        <result column="title" property="title"/>
-        <result column="picture" property="picture"/>
-        <result column="content" property="content"/>
-        <result column="article_tags" property="tagIds"
-                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="category_id" property="categoryId"/>
+        <result column="tag_ids" property="tagIds"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="content" property="content"/>
+        <result column="picture" property="picture"/>
         <result column="state" property="state"/>
         <result column="version" property="version"/>
         <result column="deleted" property="deleted"/>

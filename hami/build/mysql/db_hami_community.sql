@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account`
 (
     `id`       int                                                           NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-    `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '用户名',
+    `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '用户名',
     `email`    varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '邮箱',
     `role`     varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT 'user' COMMENT '角色',
     `password` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '密码',
@@ -63,11 +63,11 @@ CREATE TABLE `article`
     `id`          int                                                            NOT NULL AUTO_INCREMENT COMMENT '文章id',
     `user_id`     int                                                            NOT NULL COMMENT '作者id',
     `category_id` int                                                            NOT NULL COMMENT '分类id',
-    `tag_ids`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '文章标签列表',
-    `title`       varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '文章标题',
-    `summary`     varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章简介',
+    `tag_ids`     varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '文章标签列表',
+    `title`       varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '文章标题',
+    `summary`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章简介',
     `content`     text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci          NOT NULL COMMENT '文章内容',
-    `picture`     varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT 'https://static-oss.wang3.top/hami-images/64f3e6a6e5c79555236b492e.jpg' COMMENT '文章封面',
+    `picture`     varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '文章封面',
     `deleted`     tinyint                                                        NOT NULL DEFAULT 0 COMMENT '是否删除 0-未删除 1-已删除',
     `ctime`       timestamp(3)                                                   NOT NULL DEFAULT (now(3)) COMMENT '创建时间',
     `mtime`       timestamp(3)                                                   NOT NULL DEFAULT (now(3)) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
@@ -118,12 +118,12 @@ CREATE TABLE `article_draft`
     `id`           bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID,草稿ID',
     `user_id`      int                                                           NOT NULL COMMENT '用户ID',
     `article_id`   int                                                           NULL     DEFAULT NULL COMMENT '文章ID',
-    `title`        varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '标题',
-    `picture`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '文章图片地址',
-    `summary`      varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '文章简介',
-    `content`      text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章内容',
-    `article_tags` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章标签',
     `category_id`  int                                                           NULL     DEFAULT NULL COMMENT '分类ID',
+    `tag_ids` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章标签',
+    `title`        varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '标题',
+    `summary`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '文章简介',
+    `content`      text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章内容',
+    `picture`      varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '文章图片地址',
     `state`        tinyint                                                       NOT NULL DEFAULT 0 COMMENT '草稿状态 0-未发表 1-已发表',
     `version`      bigint                                                        NOT NULL DEFAULT 0 COMMENT '版本号',
     `deleted`      tinyint                                                       NOT NULL DEFAULT 0 COMMENT '是否删除 0-未删除 1-删除',
@@ -153,13 +153,14 @@ CREATE TABLE `article_stat`
     `likes`      int                                                                                  NOT NULL DEFAULT 0 COMMENT '点赞数',
     `comments`   int                                                                                  NOT NULL DEFAULT 0 COMMENT '评论数',
     `collects`   int                                                                                  NOT NULL DEFAULT 0 COMMENT '收藏数',
+    `deleted`    tinyint                                                                              NOT NULL DEFAULT 0 COMMENT '是否删除 0-未删除 1-删除',
     `ctime`      timestamp(3)                                                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     `mtime`      timestamp(3)                                                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     `hot_rank`   decimal(10, 3) GENERATED ALWAYS AS ((
-        (((`likes` * 10.331) + (`comments` * 2.16)) + (`collects` * 3.2)) + (`views` * 0.33))) STORED NOT NULL,
+        (((`likes` * 2.326) + (`comments` * 1.162)) + (`collects` * 6.673)) + (`views` * 0.33))) STORED NOT NULL,
     PRIMARY KEY (`article_id`) USING BTREE,
-    INDEX `idx_user_id` (`user_id` ASC) USING BTREE,
-    INDEX `idx_hot_index` (`ctime` ASC, `hot_rank` DESC) USING BTREE
+    INDEX `idx_user_id` (`user_id` ASC, `deleted` ASC) USING BTREE,
+    INDEX `idx_hot_index` (`deleted` ASC, `ctime` ASC, `hot_rank` ASC) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '文章数据记录表'
@@ -217,13 +218,12 @@ CREATE TABLE `comment`
     `id`          int                                                           NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `article_id`  int                                                           NOT NULL DEFAULT 0 COMMENT '文章ID',
     `user_id`     int                                                           NOT NULL DEFAULT 0 COMMENT '用户ID',
-    `is_author`   bit(1)                                                        NOT NULL COMMENT '是否是作者评论',
-    `ip_info`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论时的IP信息',
-    `content`     varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论内容',
-    `content_img` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论图片',
     `root_id`     int                                                           NOT NULL DEFAULT 0 COMMENT '顶级评论ID 0-表示是根评论',
     `parent_id`   int                                                           NOT NULL DEFAULT 0 COMMENT '父评论ID',
     `reply_to`    int                                                           NOT NULL DEFAULT 0 COMMENT '回复的用户ID',
+    `ip_info`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论时的IP信息',
+    `content`     varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论内容',
+    `content_img` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论图片',
     `likes`       int                                                           NOT NULL DEFAULT 0 COMMENT '点赞数',
     `deleted`     tinyint                                                       NOT NULL DEFAULT 0 COMMENT '是否删除',
     `ctime`       timestamp(3)                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
@@ -259,7 +259,7 @@ CREATE TABLE `file_detail`
     `platform`          varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci  NULL DEFAULT NULL COMMENT '存储平台',
     `object_id`         varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci  NULL DEFAULT NULL COMMENT '文件所属对象id',
     `object_type`       varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci  NULL DEFAULT NULL COMMENT '文件所属对象类型，例如用户头像，评价图片',
-    `create_time`       datetime                                                      NULL DEFAULT NULL COMMENT '创建时间',
+    `create_time`       datetime(3)                                                      NULL DEFAULT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
@@ -310,7 +310,7 @@ CREATE TABLE `notify_msg`
     `mtime`      timestamp(3)                                                   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '最后更新时间',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `uk_notify_msg` (`item_id` ASC, `sender` ASC, `receiver` ASC, `type` ASC) USING BTREE,
-    INDEX `idx_receiver_type` (`receiver` ASC, `type` ASC, `ctime` ASC) USING BTREE
+    INDEX `idx_receiver_type` (`receiver` ASC, `state` ASC , `type` ASC, `ctime` ASC) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '消息通知列表'
@@ -331,7 +331,7 @@ CREATE TABLE `reading_record`
     `article_id`   int          NOT NULL COMMENT '文章ID',
     `reading_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '阅读时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `idx_reading_time` (`user_id` ASC, `reading_time` DESC) USING BTREE,
+    UNIQUE INDEX `idx_reading_time` (`user_id` ASC, `reading_time` ASC) USING BTREE,
     INDEX `uk_user_article_id` (`user_id` ASC, `article_id` ASC) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
@@ -465,7 +465,7 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
     `user_id`  int                                                           NOT NULL COMMENT '用户账号ID',
-    `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '用户名',
+    `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '用户名',
     `avatar`   varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像',
     `position` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '职位',
     `company`  varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '公司',
@@ -475,8 +475,7 @@ CREATE TABLE `user`
     `deleted`  tinyint                                                       NOT NULL DEFAULT 0 COMMENT '是否删除 0-未删除 1-删除',
     `ctime`    timestamp(3)                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     `mtime`    timestamp(3)                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-    PRIMARY KEY (`user_id`) USING BTREE,
-    UNIQUE INDEX `uk_username` (`username` ASC) USING BTREE
+    PRIMARY KEY (`user_id`) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户信息表'
@@ -527,11 +526,12 @@ CREATE TABLE `user_stat`
     `total_comments`   int                                                                    NOT NULL DEFAULT 0 COMMENT '收到的总评论数',
     `total_collects`   int                                                                    NOT NULL DEFAULT 0 COMMENT '文章被总收藏数',
     `total_followers`  int                                                                    NOT NULL DEFAULT 0 COMMENT '总粉丝数',
+    `deleted`          int                                                                    NOT NULL DEFAULT 0 COMMENT '是否删除 0-未删除 1-删除',
     `hot_index`        decimal(10, 3) GENERATED ALWAYS AS ((
-        (((((`total_articles` * 0.46) + (`total_views` * 0.012)) + (`total_likes` * 4)) + (`total_collects` * 3)) +
-         (`total_comments` * 0.33)) + (`total_followers` * 1.32))) STORED COMMENT 'hot_index' NOT NULL,
+        (((((`total_articles` * 0.416) + (`total_views` * 0.112)) + (`total_likes` * 1.823)) + (`total_collects` * 3.643)) +
+         (`total_comments` * 0.336)) + (`total_followers` * 1.322))) STORED COMMENT 'hot_index' NOT NULL,
     PRIMARY KEY (`user_id`) USING BTREE,
-    INDEX `idx_hot_index` (`hot_index` DESC, `user_id` ASC) USING BTREE
+    INDEX `idx_hot_index` (`deleted` ASC , `hot_index` ASC, `user_id` ASC) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci

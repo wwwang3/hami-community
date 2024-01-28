@@ -18,7 +18,7 @@ import java.util.Date;
 @TableName(value = "`comment`", autoResultMap = true)
 public class Comment {
     /**
-     * 主键ID
+     * 评论ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -34,6 +34,24 @@ public class Comment {
      */
     @TableField(value = "user_id")
     private Integer userId;
+
+    /**
+     * 顶级评论ID 0-表示是根评论
+     */
+    @TableField(value = "root_id")
+    private Integer rootId;
+
+    /**
+     * 父评论ID
+     */
+    @TableField(value = "parent_id")
+    private Integer parentId;
+
+    /**
+     * 回复的用户ID
+     */
+    @TableField(value = "reply_to")
+    private Integer replyTo;
 
     /**
      * 评论时的IP信息
@@ -54,24 +72,8 @@ public class Comment {
     private String contentImg;
 
     /**
-     * 顶级评论ID 0-表示是根评论
+     * 点赞数
      */
-    @TableField(value = "root_id")
-    private Integer rootId;
-
-    /**
-     * 父评论ID
-     */
-    @TableField(value = "parent_id")
-    private Integer parentId;
-
-    /**
-     * 回复的用户ID
-     */
-    @TableField(value = "reply_to")
-    private Integer replyTo;
-
-
     @TableField(value = "likes")
     private Integer likes = 0;
 
