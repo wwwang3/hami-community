@@ -31,7 +31,6 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     boolean updateCollects(int articleId, int delta);
 
-
     boolean increaseCollects(int articleId, int count);
 
     boolean increaseComments(int articleId, int count);
@@ -53,6 +52,7 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
     Long batchUpdateLikes(List<ArticleStat> articleStats);
 
     @Transactional(rollbackFor = Exception.class)
+    @CanIgnoreReturnValue
     Long batchUpdateComments(List<ArticleStat> articleStats);
 
     @Transactional(rollbackFor = Exception.class)

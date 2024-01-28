@@ -19,8 +19,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<Article> selectArticleList(@Param("ids") Collection<Integer> ids);
 
-
     List<Integer> searchArticle(Page<Article> page, @Param("keyword") String keyword);
+
     @Select("""
                 select user_id from article where id = #{articleId};
             """)

@@ -69,7 +69,7 @@
         where t2.user_id = #{user_id}
           and t2.`state` = 1
           and t1.deleted = 0
-        order by t1.id desc
+        order by t1.ctime desc
     </select>
 
     <select id="scanArticleAsc" resultMap="BaseResultMap">

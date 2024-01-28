@@ -54,8 +54,5 @@ public class ArticleRabbitMessage implements RabbitMessage {
         }
 
 
-        public String getRoute() {
-            return route;
-        }
     }
 }

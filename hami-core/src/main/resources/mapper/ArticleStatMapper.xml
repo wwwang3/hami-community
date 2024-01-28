@@ -10,6 +10,7 @@
         <result column="likes" property="likes"/>
         <result column="comments" property="comments"/>
         <result column="collects" property="collects"/>
+        <result column="deleted" property="deleted" />
         <result column="ctime" property="ctime"/>
         <result column="mtime" property="mtime"/>
     </resultMap>
@@ -93,7 +94,7 @@
     <select id="selectOverallHotArticle" resultType="top.wang3.hami.common.model.HotCounter">
         select article_id as item_id, hot_rank as hot_index
         from article_stat
-        where ctime >= #{datetime}
+        where deleted = 0 and ctime >= #{datetime}
         order by hot_rank desc
         limit 54;
     </select>

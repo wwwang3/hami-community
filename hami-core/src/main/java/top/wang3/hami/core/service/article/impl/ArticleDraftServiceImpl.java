@@ -102,7 +102,6 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     /**
-     *
      * @param draftId 草稿ID
      * @return ArticleDraft
      */
@@ -116,20 +115,21 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         checkDraft(draft);
         // 文章
         Article article = ArticleConverter.INSTANCE.toArticle(draft);
+        ArticleRabbitMessage message = new ArticleRabbitMessage(
+                null,
+                article.getId(),
+                article.getUserId()
+        );
+        message.setCateId(article.getCategoryId());
         Boolean success = transactionTemplate.execute(status -> {
             if (article.getId() == null && handleInsert(article, draft, loginUserId)) {
                 // 插入文章, 成功发布文章发表消息
-                ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.PUBLISH,
-                        article.getId(), article.getUserId());
-                message.setCateId(article.getCategoryId());
-                rabbitMessagePublisher.publishMsg(message);
+                message.setArticleId(article.getId());
+                message.setType(ArticleRabbitMessage.Type.PUBLISH);
                 return true;
-            } else if (article.getId() != null && handleUpdate(article)){
+            } else if (article.getId() != null && handleUpdate(article)) {
                 // 更新文章, 成功发布文章更新消息
-                ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.UPDATE,
-                        article.getId(), article.getUserId());
-                rabbitMessagePublisher.publishMsg(message);
-                message.setCateId(article.getCategoryId());
+                message.setType(ArticleRabbitMessage.Type.UPDATE);
                 return true;
             } else {
                 // 插入或者更新失败
@@ -137,7 +137,11 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
                 return false;
             }
         });
-        return Boolean.TRUE.equals(success) ? draft : null;
+        if (Boolean.TRUE.equals(success)) {
+            rabbitMessagePublisher.publishMsg(message);
+            return draft;
+        }
+        return null;
     }
 
     @Override
@@ -171,8 +175,9 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
     }
 
     private boolean handleInsert(Article article, ArticleDraft draft, Integer loginUserId) {
-        // 插入, 已经有文章标签ID了
+        // 插入, 文章ID会回显
         boolean success = articleRepository.saveArticle(article);
+        // 设置草稿中的文章ID
         draft.setArticleId(article.getId());
         draft.setState(Constants.ONE);
         final Integer articleId = article.getId();

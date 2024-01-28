@@ -7,8 +7,6 @@ import org.mapstruct.factory.Mappers;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleDraft;
-import top.wang3.hami.common.model.Tag;
-import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.common.vo.article.ArticleVo;
 
 import java.util.ArrayList;
@@ -38,9 +36,6 @@ public interface ArticleConverter {
     @Mapping(target = "mtime", ignore = true)
     @Mapping(target = "ctime", ignore = true)
     Article toArticle(ArticleDraft draft);
-
-
-    ArticleDraftVo toDraftDTO(ArticleDraft draft, List<Tag> tags);
 
 
     default ArticleVo toArticleVo(Article articleInfo) {

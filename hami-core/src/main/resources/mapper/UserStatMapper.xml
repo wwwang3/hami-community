@@ -96,6 +96,7 @@
     <select id="selectAuthorRankList" resultType="top.wang3.hami.common.model.HotCounter">
         select user_id as item_id, hot_index
         from user_stat
+        where deleted = 0
         order by hot_index
         limit 64;
     </select>
