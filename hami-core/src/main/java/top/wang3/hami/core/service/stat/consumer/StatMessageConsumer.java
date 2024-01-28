@@ -37,6 +37,7 @@ public class StatMessageConsumer {
     @RabbitHandler
     public void handleArticleDeleteMessage(ArticleRabbitMessage message) {
         try {
+            // 删除文章数据
             articleStatRepository.removeById(message.getArticleId());
         } catch (Exception e) {
             log.error("delete article-stat failed, id: {}, error_class: {}, error_msg: {} ",
@@ -47,6 +48,7 @@ public class StatMessageConsumer {
     @RabbitHandler
     public void handleUserDeleteMessage(UserRabbitMessage message) {
         try {
+            // 删除用户数据
             userStatRepository.removeById(message.getUserId());
         } catch (Exception e) {
             log.error("delete article-stat failed, id: {}, error_class: {}, error_msg: {} ",

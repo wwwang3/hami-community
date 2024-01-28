@@ -40,6 +40,11 @@ public class PageData<T> {
         return new PageData<>(page.getCurrent(), page.getTotal(), page.getRecords());
     }
 
+    public static <T> PageData<T> build(Page<?> page, Collection<T> dataList) {
+        if (page == null) return PageData.empty();
+        return new PageData<>(page.getCurrent(), page.getTotal(), dataList);
+    }
+
     public static <T> PageData<T> empty() {
         return new PageData<>();
     }

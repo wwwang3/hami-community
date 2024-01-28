@@ -14,9 +14,7 @@ import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.model.*;
-import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.Predicates;
-import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.ArticleStatMapper;
@@ -52,26 +50,17 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
 
     @Override
-    public PageData<ArticleDraftVo> listDraftByPage(PageParam param, byte state) {
+    public PageData<ArticleDraft> listDraftByPage(PageParam param, byte state) {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<ArticleDraft> page = param.toPage();
         List<ArticleDraft> drafts = articleDraftRepository.getDraftsByPage(page, loginUserId, state);
-        List<ArticleDraftVo> dtos = buildDrafts(drafts);
-        return PageData.<ArticleDraftVo>builder()
-                .current(page.getCurrent())
-                .total(page.getTotal())
-                .data(dtos)
-                .build();
+        return PageData.build(page, drafts);
     }
 
     @Override
-    public ArticleDraftVo getArticleDraftById(long draftId) {
+    public ArticleDraft getArticleDraftById(long draftId) {
         int loginUserId = LoginUserContext.getLoginUserId();
-        ArticleDraft draft = articleDraftRepository.getDraftById(draftId, loginUserId);
-        if (draft == null) return null;
-        List<Integer> tagsIds = draft.getTagIds();
-        List<Tag> tags = tagService.getTagsByIds(tagsIds);
-        return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
+        return articleDraftRepository.getDraftById(draftId, loginUserId);
     }
 
     /**
@@ -223,11 +212,4 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         }
     }
 
-    private List<ArticleDraftVo> buildDrafts(List<ArticleDraft> drafts) {
-        return ListMapperHandler.listTo(drafts, draft -> {
-            List<Integer> tagsIds = draft.getTagIds();
-            List<Tag> tags = tagService.getTagsByIds(tagsIds);
-            return ArticleConverter.INSTANCE.toDraftDTO(draft, tags);
-        }, false);
-    }
 }

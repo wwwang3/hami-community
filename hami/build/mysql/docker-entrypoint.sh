@@ -379,8 +379,12 @@ _mysql_want_help() {
 _change_permission() {
   local permission;
   permission=$(stat -c "%a" "/etc/my.cnf")
+
+
+
+  mysql_note "/etc/my.cnf permission $permission"
   if [ "$permission" -ne 655 ] && ! [ "$(id -u)" = "0" ]; then
-    echo "not permission to chmod"
+    mysql_note "not permission to chmod"
   fi
 
   if [ "$permission" -ne 655 ] && [ "$(id -u)" = "0" ]; then

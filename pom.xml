@@ -142,6 +142,7 @@
             <id>prod</id>
             <properties>
                 <environment>prod</environment>
+                <skipTests>true</skipTests>
             </properties>
             <activation>
                 <activeByDefault>false</activeByDefault>

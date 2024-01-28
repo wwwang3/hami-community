@@ -9,7 +9,6 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
-import top.wang3.hami.common.vo.article.ArticleDraftVo;
 import top.wang3.hami.core.service.article.ArticleDraftService;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
@@ -28,11 +27,11 @@ public class ArticleDraftController {
      * 获取未发布文章草稿
      *
      * @param param {@link PageParam}
-     * @return {@link PageData<ArticleDraftVo>}
+     * @return {@link PageData<ArticleDraft>}
      */
     @PostMapping("/list")
-    public Result<PageData<ArticleDraftVo>> getDrafts(@RequestBody @Valid PageParam param) {
-        PageData<ArticleDraftVo> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
+    public Result<PageData<ArticleDraft>> getDrafts(@RequestBody @Valid PageParam param) {
+        PageData<ArticleDraft> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
         return Result.successData(articleDrafts);
     }
 
@@ -40,11 +39,11 @@ public class ArticleDraftController {
      * 获取发布文章草稿
      *
      * @param param {@link PageParam}
-     * @return {@link PageData<ArticleDraftVo>}
+     * @return {@link PageData<ArticleDraft>}
      */
     @GetMapping("/articles")
-    public Result<PageData<ArticleDraftVo>> getArticles(@RequestBody @Valid PageParam param) {
-        PageData<ArticleDraftVo> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
+    public Result<PageData<ArticleDraft>> getArticles(@RequestBody @Valid PageParam param) {
+        PageData<ArticleDraft> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);
     }
 
@@ -52,11 +51,11 @@ public class ArticleDraftController {
      * 根据Id获取草稿
      *
      * @param draftId 草稿Id
-     * @return {@link ArticleDraftVo}
+     * @return {@link ArticleDraft}
      */
     @GetMapping("/{id}")
-    public Result<ArticleDraftVo> getDraft(@PathVariable("id") Long draftId) {
-        ArticleDraftVo draft = articleDraftService.getArticleDraftById(draftId);
+    public Result<ArticleDraft> getDraft(@PathVariable("id") Long draftId) {
+        ArticleDraft draft = articleDraftService.getArticleDraftById(draftId);
         return Result.ofNullable(draft)
                 .orElse("草稿不存在");
     }
@@ -95,7 +94,7 @@ public class ArticleDraftController {
      * @description 返回数据包含文章Id
      */
     @PostMapping("/publish")
-    public Result<ArticleDraft> publishArticle(@RequestParam("draft_id") Long draftId) {
+    public Result<ArticleDraft> publishArticle(@RequestParam("draftId") Long draftId) {
         ArticleDraft draft = articleDraftService.publishArticle(draftId);
         return Result.successIfNonNull(draft);
     }

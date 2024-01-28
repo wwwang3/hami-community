@@ -28,7 +28,14 @@ public class UserStatHandler implements CanalEntryHandler<UserStat> {
 
     @Override
     public void processUpdate(UserStat before, UserStat after) {
-        setCache(after);
+        // 更新 (删除缓存感觉更好)
+        Byte oldState = before.getDeleted();
+        Byte newState = after.getDeleted();
+        if (isLogicDelete(oldState, newState)) {
+            processDelete(after);
+        } else {
+            setCache(after);
+        }
     }
 
     @Override

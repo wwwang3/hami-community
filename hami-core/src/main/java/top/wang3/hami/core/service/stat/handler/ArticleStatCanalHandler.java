@@ -33,7 +33,13 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
     @Override
     public void processUpdate(ArticleStat before, ArticleStat after) {
         // 更新 (删除缓存感觉更好)
-        setCache(after);
+        Byte oldState = before.getDeleted();
+        Byte newState = after.getDeleted();
+        if (isLogicDelete(oldState, newState)) {
+            processDelete(after);
+        } else {
+            setCache(after);
+        }
         log.debug("update to Redis success: before: {}, after: {}", before, after);
     }
 
