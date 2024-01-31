@@ -41,7 +41,7 @@ public class UserStatConsumer {
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
                             exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                            key = {"article.view", "article.publish", "article.delete"}
+                            key = {"article.view", "article.publish"}
                     ),
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_2),
@@ -59,6 +59,7 @@ public class UserStatConsumer {
     )
     public void handleFollowingMessage(List<Object> messages) {
         try {
+            // 不包含文章删除消息
             List<UserStat> userStats = messages.stream()
                     .collect(Collectors.groupingBy(this::getUserId))
                     .values()

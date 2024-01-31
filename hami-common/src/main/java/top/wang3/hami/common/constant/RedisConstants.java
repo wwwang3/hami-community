@@ -3,6 +3,7 @@ package top.wang3.hami.common.constant;
 /**
  * Redis key-prefix常量
  */
+@SuppressWarnings("unused")
 public final class RedisConstants {
 
     /**
@@ -75,6 +76,8 @@ public final class RedisConstants {
 
     public static final String ARTICLE_INFO = "#article:info:";
     public static final String USER_INFO = "#user:info:";
+
+    public static final String ACCOUNT_INFO = "#account:info:";
 
     public static final String ARTICLE_CONTENT = "#article:content:";
 

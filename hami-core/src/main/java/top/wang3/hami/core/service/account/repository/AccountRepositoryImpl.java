@@ -19,6 +19,11 @@ public class AccountRepositoryImpl extends ServiceImpl<AccountMapper, Account>
     }
 
     @Override
+    public Integer getAccountId(String account) {
+        return getBaseMapper().selectAccountId(account);
+    }
+
+    @Override
     public Account getAccountInfo(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("id", userId)

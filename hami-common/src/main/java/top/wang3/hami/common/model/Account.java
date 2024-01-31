@@ -1,6 +1,7 @@
 package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -58,6 +59,7 @@ public class Account {
      */
     @TableField(value = "deleted")
     @TableLogic
+    @JsonIgnore
     private Byte deleted;
 
     /**

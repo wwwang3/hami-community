@@ -7,6 +7,8 @@ public interface AccountRepository extends IService<Account> {
 
     Account getAccountByEmailOrUsername(String account);
 
+    Integer getAccountId(String account);
+
     Account getAccountInfo(Integer userId);
 
     boolean updatePassword(String email, String old, String newPassword);

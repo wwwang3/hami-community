@@ -7,18 +7,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.RedisConstants;
+import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.converter.AccountConverter;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.captcha.CaptchaType;
 import top.wang3.hami.common.dto.user.RegisterParam;
 import top.wang3.hami.common.dto.user.ResetPassParam;
 import top.wang3.hami.common.dto.user.UserProfileParam;
+import top.wang3.hami.common.message.AccountRabbitMessage;
+import top.wang3.hami.common.message.EntityMessageType;
 import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.common.util.Predicates;
 import top.wang3.hami.common.vo.user.AccountInfo;
+import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.HamiServiceException;
@@ -40,6 +45,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final UserStatRepository userStatRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
+    private final CacheService cacheService;
 
     @Resource
     PasswordEncoder passwordEncoder;
@@ -52,7 +58,33 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getAccountByEmailOrUsername(String account) {
-        return accountRepository.getAccountByEmailOrUsername(account);
+        Integer accountId = accountRepository.getAccountId(account);
+        if (accountId == null) return null;
+        return getAccountById(accountId);
+    }
+
+    @Override
+    public AccountInfo getAccountInfo() {
+        int userId = LoginUserContext.getLoginUserId();
+        Account account = getAccountById(userId);
+        return AccountConverter.INSTANCE.toAccountInfo(account);
+    }
+
+    private Integer getAccountId(String account) {
+        return cacheService.get(
+                "account:id:" + account,
+                () -> accountRepository.getAccountId(account),
+                TimeoutConstants.DEFAULT_EXPIRE
+        );
+    }
+
+    private Account getAccountById(Integer id) {
+        String key = RedisConstants.ACCOUNT_INFO + id;
+        return cacheService.get(
+                key,
+                () -> accountRepository.getAccountInfo(id),
+                TimeoutConstants.ACCOUNT_INFO_EXPIRE
+        );
     }
 
     @Override
@@ -75,7 +107,7 @@ public class AccountServiceImpl implements AccountService {
         }
         // 加密密码
         String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        Account account = new Account(username, email, "user", encryptedPassword, Constants.ONE);
+        Account account = new Account(username, email, "author", encryptedPassword, Constants.ONE);
         Boolean success = transactionTemplate.execute(status -> Predicates.check(accountRepository.save(account))
                 .then(() -> {
                     // 插入用户表
@@ -94,8 +126,10 @@ public class AccountServiceImpl implements AccountService {
                 .get()
         );
         if (Boolean.TRUE.equals(success)) {
-            UserRabbitMessage message = new UserRabbitMessage(UserRabbitMessage.Type.USER_CREATE, account.getId());
-            rabbitMessagePublisher.publishMsg(message);
+            AccountRabbitMessage accountRabbitMessage = new AccountRabbitMessage(account.getId(), EntityMessageType.CREATE);
+            UserRabbitMessage userRabbitMessage = new UserRabbitMessage(UserRabbitMessage.Type.USER_CREATE, account.getId());
+            rabbitMessagePublisher.publishMsg(accountRabbitMessage);
+            rabbitMessagePublisher.publishMsg(userRabbitMessage);
             return true;
         }
         return false;
@@ -121,12 +155,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean checkUsername(String username) {
-        return accountRepository.checkUsername(username);
+        return accountRepository.getAccountId(username) != null;
     }
 
     @Override
     public boolean checkEmail(String email) {
-        return accountRepository.checkEmail(email);
+        return accountRepository.getAccountId(email) != null;
     }
 
     @Override
@@ -144,14 +178,6 @@ public class AccountServiceImpl implements AccountService {
         return false;
     }
 
-    @Override
-    public AccountInfo getAccountInfo() {
-        int userId = LoginUserContext.getLoginUserId();
-        Account info = accountRepository.getAccountInfo(userId);
-        return AccountConverter.INSTANCE.toAccountInfo(info);
-    }
-
-
     private boolean resetPassword(ResetPassParam param, CaptchaType type) {
         final String email = param.getEmail();
         boolean verify = captchaService.verify(type, email, param.getCaptcha());
@@ -166,7 +192,13 @@ public class AccountServiceImpl implements AccountService {
         Account account = getAccountByEmailOrUsername(email);
         String old = account.getPassword();
         String encryptedPassword = passwordEncoder.encode(param.getPassword());
-        return accountRepository.updatePassword(email, old, encryptedPassword);
+        boolean success = accountRepository.updatePassword(email, old, encryptedPassword);
+        if (success) {
+            AccountRabbitMessage accountRabbitMessage = new AccountRabbitMessage(account.getId(), EntityMessageType.UPDATE);
+            rabbitMessagePublisher.publishMsg(accountRabbitMessage);
+            return true;
+        }
+        return false;
     }
 
 }

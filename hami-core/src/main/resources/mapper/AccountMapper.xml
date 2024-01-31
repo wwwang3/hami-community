@@ -24,4 +24,21 @@
     UNION
     SELECT * from account WHERE email = #{account} AND deleted = 0
   </select>
+
+  <select id="selectAccountId" resultType="java.lang.Integer">
+    SELECT id from account WHERE username = #{account} AND deleted = 0
+    UNION
+    SELECT id from account WHERE email = #{account} AND deleted = 0
+  </select>
+
+  <select id="scanAccountDesc" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List">
+      </include>
+      from account
+      where id &lt; #{maxId}
+        and deleted = 0
+      order by id DESC
+      limit #{batchSize}
+  </select>
 </mapper>

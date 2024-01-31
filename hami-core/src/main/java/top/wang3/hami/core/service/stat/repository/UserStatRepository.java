@@ -9,7 +9,7 @@ import top.wang3.hami.common.model.UserStat;
 import java.util.List;
 
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface UserStatRepository extends IService<UserStat> {
 
     List<UserStat> scanUserStat(Page<UserStat> page);
@@ -19,6 +19,8 @@ public interface UserStatRepository extends IService<UserStat> {
     List<UserStat> selectUserStatByIds(List<Integer> userIds);
 
     List<HotCounter> loadAuthorRankList();
+
+    boolean updateUserStat(UserStat stat);
 
     boolean updateArticles(Integer userId, int delta);
 

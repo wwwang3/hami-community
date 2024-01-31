@@ -12,6 +12,9 @@ public enum InitializerEnums {
     ARTICLE_CACHE,
     USER_CACHE,
     STAT_CACHE,
+
+    ACCOUNT_CACHE,
+
     INTERACT_LIST_CACHE,
 
 }

@@ -19,6 +19,8 @@ public class TimeoutConstants {
 
     public static final long USER_STAT_EXPIRE = TimeUnit.DAYS.toMillis(2);
 
+    public static final long ACCOUNT_INFO_EXPIRE = DEFAULT_EXPIRE;
+
     public static final long USER_INFO_EXPIRE = TimeUnit.DAYS.toMillis(6);
 
     public static final long ARTICLE_INFO_EXPIRE = TimeUnit.DAYS.toMillis(8);

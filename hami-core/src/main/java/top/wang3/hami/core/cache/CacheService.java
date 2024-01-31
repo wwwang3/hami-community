@@ -8,8 +8,23 @@ import java.util.function.Supplier;
 @SuppressWarnings("unused")
 public interface CacheService {
 
+    /**
+     * 获取缓存对象, 默认一天过期时间
+     * @param key 对象key
+     * @param loader 从db加载缓存的方法
+     * @return 缓存对象
+     * @param <T> 返回对象泛型
+     */
     <T> T get(String key, Supplier<T> loader);
 
+    /**
+     * 获取缓存对象
+     * @param key 对象key
+     * @param loader 从db加载缓存的方法
+     * @param millis 缓存过期时间
+     * @return 缓存对象
+     * @param <T> 返回对象泛型
+     */
     <T> T get(String key, Supplier<T> loader, long millis);
 
     <T> T getMapValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis);
