@@ -3,6 +3,7 @@ package top.wang3.hami.web.controller.article;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
@@ -10,8 +11,8 @@ import top.wang3.hami.common.dto.article.ArticlePageParam;
 import top.wang3.hami.common.dto.article.UserPageParam;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.core.service.article.ArticleService;
+import top.wang3.hami.security.annotation.Api;
 import top.wang3.hami.security.model.Result;
-import top.wang3.hami.web.annotation.Public;
 
 /**
  * article
@@ -28,8 +29,9 @@ public class ArticleController {
      *
      * @return {@link PageData<ArticleVo>}
      */
-    @Public
+    @Api
     @PostMapping("/list/recommend")
+    @PreAuthorize(value = "hasRole")
     public Result<PageData<ArticleVo>> listRecommendArticles(@RequestBody @Valid ArticlePageParam param) {
         PageData<ArticleVo> data = articleService.listNewestArticles(param);
         return Result.ofNullable(data)
@@ -54,7 +56,7 @@ public class ArticleController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
-    @Public
+    @Api
     @PostMapping("/user/query_list")
     public Result<PageData<ArticleVo>> listUserArticles(@RequestBody @Valid UserPageParam param) {
         PageData<ArticleVo> data = articleService.listUserArticles(param);
@@ -67,7 +69,7 @@ public class ArticleController {
      * @param articleId 文章Id
      * @return {@link ArticleVo}
      */
-    @Public
+    @Api
     @GetMapping("/detail/{id}")
     public Result<ArticleVo> getArticleContentById(@PathVariable("id") int articleId) {
         return Result.ofNullable(articleService.getArticleContentById(articleId))

@@ -1,4 +1,4 @@
-package top.wang3.hami.security;
+package top.wang3.hami.security.annotation;
 
 import org.springframework.context.annotation.Import;
 import top.wang3.hami.security.config.WebSecurityConfig;

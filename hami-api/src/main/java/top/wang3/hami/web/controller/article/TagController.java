@@ -8,8 +8,8 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.model.Tag;
 import top.wang3.hami.core.service.article.TagService;
+import top.wang3.hami.security.annotation.Api;
 import top.wang3.hami.security.model.Result;
-import top.wang3.hami.web.annotation.Public;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class TagController {
      *
      * @return {@link List<Tag>}
      */
-    @Public
+    @Api
     @GetMapping("/all")
     public Result<List<Tag>> getAllTags() {
         List<Tag> tags = tagService.getAllTag();
@@ -45,7 +45,7 @@ public class TagController {
      * @param param {@link PageParam}
      * @return {@link PageData<Tag>}
      */
-    @Public
+    @Api
     @PostMapping("/query_list")
     public Result<PageData<Tag>> getTagsByPage(@RequestBody @Valid PageParam param) {
         PageData<Tag> tags = tagService.getTagByPage(param);

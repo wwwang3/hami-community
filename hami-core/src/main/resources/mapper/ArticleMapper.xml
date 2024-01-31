@@ -51,15 +51,12 @@
     </sql>
 
     <select id="searchArticle" resultType="java.lang.Integer">
-        select id
+        SELECT id
         from article
-        where deleted = 0
-          and (
-                    title like concat('%', #{keyword}, '%')
-                or
-                    summary like concat('%', #{keyword}, '%')
-            )
-        order by ctime desc
+        WHERE deleted = 0
+          AND ctime >= #{dateTime}
+          AND (title LIKE concat('%', #{keyword}, '%') or summary LIKE concat('%', #{keyword}, '%'))
+        ORDER BY ctime DESC
     </select>
 
     <select id="selectFollowUserArticles" resultType="java.lang.Integer">

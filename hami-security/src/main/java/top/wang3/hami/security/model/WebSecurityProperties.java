@@ -4,6 +4,7 @@ package top.wang3.hami.security.model;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import top.wang3.hami.security.annotation.ApiInfo;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 import java.util.List;
@@ -54,13 +55,21 @@ public class WebSecurityProperties {
 
     /**
      * 不需要登录访问的接口
+     * @deprecated use {@link WebSecurityProperties#apiInfos}
      */
+    @Deprecated
     private String[] allowedApis;
 
     /**
      * 允许跨域的站点
      */
     private List<String> allowedOrigins;
+
+    /**
+     * api访问配置, 这里得配置patterns
+     */
+    @NestedConfigurationProperty
+    private List<ApiInfo> apiInfos;
 
     /**
      * 全局限流过滤器配置

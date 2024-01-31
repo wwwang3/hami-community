@@ -13,8 +13,8 @@ import top.wang3.hami.common.dto.user.RegisterParam;
 import top.wang3.hami.common.dto.user.ResetPassParam;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.captcha.CaptchaService;
+import top.wang3.hami.security.annotation.Api;
 import top.wang3.hami.security.model.Result;
-import top.wang3.hami.web.annotation.Public;
 
 
 /**
@@ -37,7 +37,7 @@ public class AuthController {
      * @param type  类型 0,1,2
      * @return 空
      */
-    @Public
+    @Api
     @GetMapping("/captcha")
     public Result<Void> sendCaptcha(@RequestParam("email") @NotBlank @Email String email,
                                     @RequestParam("type") @Pattern(regexp = "([012])") String type) {
@@ -53,7 +53,7 @@ public class AuthController {
      * @param param {@link RegisterParam}
      * @return 空
      */
-    @Public
+    @Api
     @PostMapping("/register")
     public Result<Void> register(@RequestBody @Valid
                                  RegisterParam param) {
@@ -80,7 +80,7 @@ public class AuthController {
      * @param param {@link ResetPassParam}
      * @return 空
      */
-    @Public
+    @Api
     @PostMapping("/reset-pass")
     public Result<Void> resetPassword(@RequestBody @Valid ResetPassParam param) {
         return Result.ofTrue(accountService.resetPassword(param))

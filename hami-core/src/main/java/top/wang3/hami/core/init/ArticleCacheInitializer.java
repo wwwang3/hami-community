@@ -40,7 +40,7 @@ public class ArticleCacheInitializer implements HamiInitializer {
     private void cacheArticle() {
         ListMapperHandler.scanDesc(
                 Integer.MAX_VALUE,
-                2000,
+                1000,
                 1000,
                 articleMapper::scanArticleDesc,
                 articles -> {

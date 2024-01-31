@@ -7,10 +7,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -19,11 +21,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import top.wang3.hami.security.filter.RequestLogFilter;
-import top.wang3.hami.security.filter.TokenAuthenticationFilter;
+import top.wang3.hami.security.configurers.AuthorizeConfigurer;
+import top.wang3.hami.security.configurers.GlobalRateLimitFilterConfigurer;
+import top.wang3.hami.security.configurers.TokenAuthenticationConfigurer;
+import top.wang3.hami.security.configurers.ToolFiltersConfigurer;
+import top.wang3.hami.security.context.TtlSecurityContextHolderStrategy;
 import top.wang3.hami.security.handler.AuthenticationEventHandler;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
 import top.wang3.hami.security.handler.DefaultAuthenticationPostHandler;
@@ -34,7 +38,8 @@ import top.wang3.hami.security.service.TokenService;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(WebSecurityProperties.class)
 @EnableWebSecurity
-@Import(value = {JwtTokenServiceConfig.class, FilterBeanConfig.class, RateLimitConfig.class})
+@Import(value = {JwtTokenServiceConfig.class})
+@ComponentScan(basePackages = {"top.wang3.hami.security.annotation.provider", "top.wang3.hami.security.ratelimit"})
 @Slf4j
 public class WebSecurityConfig {
 
@@ -47,7 +52,7 @@ public class WebSecurityConfig {
 
     @PostConstruct
     private void setSecurityStrategy() {
-        SecurityContextHolder.setStrategyName("top.wang3.hami.security.context.TtlSecurityContextHolderStrategy");
+        SecurityContextHolder.setStrategyName(TtlSecurityContextHolderStrategy.class.getName());
         log.debug("security-strategy: {}", SecurityContextHolder.getContextHolderStrategy().getClass().getSimpleName());
     }
 
@@ -75,24 +80,18 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   TokenService tokenService,
-                                                   AuthenticationPostHandler handler) throws Exception {
-        log.debug("token-service: {}", tokenService.getClass().getSimpleName());
-        TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter(tokenService, properties.getTokenName());
-        RequestLogFilter requestLogFilter = new RequestLogFilter();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationPostHandler handler) throws Exception {
         return http
-                .authorizeHttpRequests(auth -> {
-                    // 接口访问配置
-                    String[] apis = properties.getAllowedApis();
-                    if (apis != null) {
-                        auth.requestMatchers(apis).permitAll();
-                    }
-                    auth.requestMatchers("/error").permitAll();
-                    auth.requestMatchers("/favicon.ico").permitAll();
-                    auth.anyRequest().authenticated();
+                // 自定义接口访问配置
+                .with(AuthorizeConfigurer.create(), Customizer.withDefaults())
+                .authorizeHttpRequests(conf -> {
+                    // 默认接口访问配置
+                    conf.requestMatchers("/error").permitAll();
+                    conf.requestMatchers("/favicon.ico").permitAll();
+                    conf.anyRequest().authenticated();
                 })
-                .csrf(CsrfConfigurer::disable) // csrf配置
+                // csrf配置
+                .csrf(CsrfConfigurer::disable)
                 .cors(conf -> {
                     // 跨域配置
                     CorsConfiguration cors = new CorsConfiguration();
@@ -105,26 +104,52 @@ public class WebSecurityConfig {
                     source.registerCorsConfiguration("/**", cors);
                     conf.configurationSource(source);
                 })
-                .exceptionHandling(conf -> conf
-                        .accessDeniedHandler(handler::handleError)
-                        .authenticationEntryPoint(handler::handleError)
-                )
-                .formLogin(conf -> conf
+                .exceptionHandling(conf -> {
+                    // 异常处理
+                    conf.accessDeniedHandler(handler::handleError);
+                    conf.authenticationEntryPoint(handler::handleError);
+                })
+                .formLogin(conf -> {
+                    // 表单登录
+                    // @formatter:off
+                    conf
                         .usernameParameter(properties.getUsernameParameter())
                         .passwordParameter(properties.getPasswordParameter())
                         .loginProcessingUrl(properties.getFormLoginApi())
                         .permitAll()
                         .successHandler(handler::handleLoginSuccess)
-                        .failureHandler(handler::handleError)
-                )
-                .logout(conf -> conf
+                        .failureHandler(handler::handleError);
+                })
+                .logout(conf -> {
+                    // 退出登录
+                    // @formatter:off
+                    conf
                         .logoutUrl(properties.getLogoutApi())
-                        .logoutSuccessHandler(handler::handleLogoutSuccess)
-                )
-                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(requestLogFilter, TokenAuthenticationFilter.class)
+                        .logoutSuccessHandler(handler::handleLogoutSuccess);
+                })
+                // Token认证器
+                .with(TokenAuthenticationConfigurer.create(), this::applyTokenConfig)
+                // 全局IP限流
+                .with(GlobalRateLimitFilterConfigurer.create(), this::applyRateLimitConfig)
+                // 请求ID, 请求日志, IPContext
+                .with(new ToolFiltersConfigurer(), ToolFiltersConfigurer.withDefaults())
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
+    }
+
+    private void applyTokenConfig(TokenAuthenticationConfigurer configurer) {
+        configurer.tokenName(properties.getTokenName());
+    }
+
+    private void applyRateLimitConfig(GlobalRateLimitFilterConfigurer conf) {
+        if (!properties.getRateLimit().isEnable()) {
+            conf.disable();
+            return;
+        }
+        // @formatter:off
+        conf.rate(properties.getRateLimit().getRate())
+            .capacity(properties.getRateLimit().getCapacity())
+            .algorithm(properties.getRateLimit().getAlgorithm());
     }
 
 }

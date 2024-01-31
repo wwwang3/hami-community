@@ -27,14 +27,20 @@ import java.io.IOException;
 /**
  * 全局IP限流过滤器
  */
+@SuppressWarnings("all")
 @Slf4j
-@Setter
 public class RateLimitFilter extends OncePerRequestFilter {
 
+    @Setter
     private RateLimit.Algorithm algorithm;
-    private int rate;
-    private int capacity;
 
+    @Setter
+    private double rate;
+
+    @Setter
+    private double capacity;
+
+    @Setter
     private RateLimiter rateLimiter;
 
     RequestMappingHandlerMapping requestMappingHandlerMapping;
@@ -42,7 +48,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        RateMeta rateMeta = new RateMeta(capacity, rate, capacity / rate);
+        RateMeta rateMeta = new RateMeta(capacity, rate, ((long) capacity / (long) rate));
         KeyMeta keyMeta = new KeyMeta();
         keyMeta.setIp(IpContext.getIpDefaultUnknown());
         HandlerMethod handlerMethod = getHandlerMethod(request);
@@ -68,7 +74,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
            }
            return null;
        } catch (Exception e) {
-           log.debug(e.getMessage());
+           log.warn("get handler-method throw an exception: error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
            return null;
        }
    }
@@ -81,7 +87,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         requestMappingHandlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
+        rateLimiter = applicationContext.getBean(RateLimiter.class);
     }
 
-
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        if (rateLimiter == null) {
+            throw new IllegalArgumentException("rateLimiter cannot be null");
+        }
+    }
 }

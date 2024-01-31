@@ -94,7 +94,7 @@ public class JwtTokenService implements TokenService {
         //jwt黑名单机制，无法做到清除全部登录态，除非使用白名单机制，在服务器保存token，这样又回到token-session模型了
         //违背了jwt的初衷，黑名单机制其实违背了
         HttpServletRequest request = LoginUserContext.getRequest();
-        String token = getToken(request, properties.getTokenName());
+        String token = retrieveToken(request, properties.getTokenName());
         invalidate(token);
     }
 

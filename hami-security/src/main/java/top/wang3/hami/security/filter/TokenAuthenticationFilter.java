@@ -17,6 +17,7 @@ import java.io.IOException;
 /**
  * token认证过滤器
  */
+@SuppressWarnings("all")
 @Slf4j
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -32,7 +33,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = tokenService.getToken(request, tokenName);
+        String token = tokenService.retrieveToken(request, tokenName);
         LoginUser loginUser = tokenService.resolveToken(token);
         if (loginUser != null) {
             var authenticationToken =

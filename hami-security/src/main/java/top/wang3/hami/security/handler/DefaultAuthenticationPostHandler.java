@@ -70,7 +70,7 @@ public class DefaultAuthenticationPostHandler implements AuthenticationPostHandl
             throws IOException, ServletException {
         // LogoutFilter在TokenAuthenticationFilter之前
         // 退出登录, 调用invalidate方法使token失效
-        String token = tokenService.getToken(request, properties.getTokenName());
+        String token = tokenService.retrieveToken(request, properties.getTokenName());
         // 使token失效
         if (tokenService.invalidate(token)) {
             // 删除cookie

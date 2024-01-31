@@ -38,6 +38,7 @@ public class SearchServiceImpl implements SearchService {
         String keyword = param.getKeyword();
         rabbitMessagePublisher.publishMsg(new SearchRabbitMessage(keyword));
         Page<Article> page = param.toPage();
+        // 6个月内的文章
         List<Integer> ids = articleRepository.searchArticle(page, keyword);
         List<ArticleVo> articles = articleService.listArticleVoById(ids, new ArticleOptionsBuilder());
         highlightKeyword(articles, keyword);

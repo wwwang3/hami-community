@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import top.wang3.hami.canal.annotation.EnableCanal;
 import top.wang3.hami.common.HamiCommonConfig;
 import top.wang3.hami.mail.EnableMail;
-import top.wang3.hami.security.EnableSecurity;
+import top.wang3.hami.security.annotation.EnableSecurity;
 
 
 @MapperScan(basePackages = "top.wang3.hami.core.mapper")

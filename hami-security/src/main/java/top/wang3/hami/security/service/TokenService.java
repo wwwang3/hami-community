@@ -28,7 +28,7 @@ public interface TokenService {
      * @param tokenName token名称
      * @return token, 没有则返回kon
      */
-    default String getToken(HttpServletRequest request, String tokenName) {
+    default String retrieveToken(HttpServletRequest request, String tokenName) {
         Assert.notNull(tokenName, "tokenName can not be null");
         if (request == null) return null;
         //从请求中获取
@@ -54,6 +54,7 @@ public interface TokenService {
 
     /**
      * 踢出当前用户, 清除用户的全部登录态
+     * 默认jwt实现无法做到全部清除, 只能清除当前的token
      */
     void kickout();
 }
