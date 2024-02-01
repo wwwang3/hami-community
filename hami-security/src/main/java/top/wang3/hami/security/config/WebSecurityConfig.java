@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import top.wang3.hami.security.configurers.AuthorizeConfigurer;
+import top.wang3.hami.security.configurers.AuthorizeConfigurerCustomizer;
 import top.wang3.hami.security.configurers.GlobalRateLimitFilterConfigurer;
 import top.wang3.hami.security.configurers.TokenAuthenticationConfigurer;
 import top.wang3.hami.security.configurers.ToolFiltersConfigurer;
@@ -83,13 +83,14 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationPostHandler handler) throws Exception {
         return http
                 // 自定义接口访问配置
-                .with(AuthorizeConfigurer.create(), Customizer.withDefaults())
+                .authorizeHttpRequests(AuthorizeConfigurerCustomizer.build(http))
                 .authorizeHttpRequests(conf -> {
                     // 默认接口访问配置
                     conf.requestMatchers("/error").permitAll();
                     conf.requestMatchers("/favicon.ico").permitAll();
                     conf.anyRequest().authenticated();
                 })
+                .anonymous(AnonymousConfigurer::disable)
                 // csrf配置
                 .csrf(CsrfConfigurer::disable)
                 .cors(conf -> {
@@ -129,10 +130,10 @@ public class WebSecurityConfig {
                 })
                 // Token认证器
                 .with(TokenAuthenticationConfigurer.create(), this::applyTokenConfig)
-                // 全局IP限流
-                .with(GlobalRateLimitFilterConfigurer.create(), this::applyRateLimitConfig)
                 // 请求ID, 请求日志, IPContext
                 .with(new ToolFiltersConfigurer(), ToolFiltersConfigurer.withDefaults())
+                // 全局IP限流
+                .with(GlobalRateLimitFilterConfigurer.create(), this::applyRateLimitConfig)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }

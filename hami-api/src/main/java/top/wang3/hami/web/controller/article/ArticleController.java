@@ -3,7 +3,6 @@ package top.wang3.hami.web.controller.article;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
@@ -31,7 +30,6 @@ public class ArticleController {
      */
     @Api
     @PostMapping("/list/recommend")
-    @PreAuthorize(value = "hasRole")
     public Result<PageData<ArticleVo>> listRecommendArticles(@RequestBody @Valid ArticlePageParam param) {
         PageData<ArticleVo> data = articleService.listNewestArticles(param);
         return Result.ofNullable(data)

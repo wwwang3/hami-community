@@ -23,7 +23,7 @@ public class AccountCacheInitializer implements HamiInitializer {
 
     @Override
     public InitializerEnums getName() {
-        return null;
+        return InitializerEnums.ACCOUNT_CACHE;
     }
 
     @Override
