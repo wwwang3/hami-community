@@ -70,4 +70,5 @@ public final class RabbitConstants {
     public static final String FOLLOW_QUEUE_3 = "follow-queue-3";
     public static final String FOLLOW_QUEUE_4 = "follow-queue-4";
     public static final String FOLLOW_QUEUE_5 = "follow-queue-5";
+    public static final String HAMI_ACCOUNT_EXCHANGE = "hami-account-exchange";
 }

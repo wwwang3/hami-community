@@ -11,7 +11,7 @@ import top.wang3.hami.common.dto.comment.CommentParam;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.vo.comment.CommentVo;
 import top.wang3.hami.core.service.comment.CommentService;
-import top.wang3.hami.security.annotation.Api;
+import top.wang3.hami.security.annotation.PublicApi;
 import top.wang3.hami.security.model.Result;
 
 /**
@@ -30,7 +30,7 @@ public class CommentController {
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/query_list")
     public Result<PageData<CommentVo>> listComment(@RequestBody
                                                    @Valid CommentPageParam param) {
@@ -44,7 +44,7 @@ public class CommentController {
      * @param param {@link CommentPageParam}
      * @return {@link PageData<CommentVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/reply/query_list")
     public Result<PageData<CommentVo>> listReply(@RequestBody
                                                  @Validated(value = CommentPageParam.Reply.class)
@@ -84,7 +84,7 @@ public class CommentController {
      * 删除评论
      *
      * @param id 评论Id
-     * @return {@link Void}
+     * @return 空
      */
     @PostMapping("/delete")
     public Result<Void> deleteComment(@RequestParam("id") Integer id) {

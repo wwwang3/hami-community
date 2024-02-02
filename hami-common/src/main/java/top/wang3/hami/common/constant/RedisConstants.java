@@ -3,23 +3,7 @@ package top.wang3.hami.common.constant;
 /**
  * Redis key-prefix常量
  */
-@SuppressWarnings("unused")
 public final class RedisConstants {
-
-    /**
-     * 注册邮箱验证码
-     */
-    public static final String REGISTER_CAPTCHA = "captcha:register:";
-
-    /**
-     * 忘记密码邮箱验证码
-     */
-    public static final String RESET_PASS_CAPTCHA = "captcha:reset:pass:";
-
-    /**
-     * 更新密码邮箱验证码
-     */
-    public static final String UPDATE_PASS_CAPTCHA = "captcha:update:pass:";
 
     /**
      * 用户点赞数(我点赞的文章/评论数)
@@ -41,11 +25,6 @@ public final class RedisConstants {
      */
     public static final String USER_COLLECT_COUNT = "user:collect:count:";
 
-    /**
-     * 用户文章数量
-     */
-    public static final String USER_ARTICLE_COUNT = "user:article:count:";
-
     public static final String USER_FOLLOWING_LIST = "user:following:list:";
 
     public static final String USER_FOLLOWER_LIST = "user:follower:list:";
@@ -62,11 +41,11 @@ public final class RedisConstants {
     /**
      * 文章总数和分类文章数
      */
-    public static final String ARTICLE_COUNT_KEY = "article:count:map";
+    public static final String ARTICLE_COUNT_HASH = "article:count:map";
 
-    public static final String TOTAL_ARTICLE_COUNT = "total";
+    public static final String TOTAL_ARTICLE_COUNT_HKEY = "total";
 
-    public static final String CATE_ARTICLE_COUNT = "cate:";
+    public static final String CATE_ARTICLE_COUNT_HKEY = "cate:";
 
     public static final String OVERALL_HOT_ARTICLE = "rank:article:overall";
 

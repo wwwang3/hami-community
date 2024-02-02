@@ -45,7 +45,7 @@ public class AccountCacheInitializer implements HamiInitializer {
                 accountMapper::scanAccountDesc,
                 accounts -> {
                     Map<String, Account> map = ListMapperHandler.listToMap(accounts,
-                            item -> RedisConstants.USER_INFO + item.getId());
+                            item -> RedisConstants.ACCOUNT_INFO + item.getId());
                     RedisClient.cacheMultiObject(map, TimeoutConstants.ACCOUNT_INFO_EXPIRE, TimeUnit.MILLISECONDS);
                 },
                 Account::getId

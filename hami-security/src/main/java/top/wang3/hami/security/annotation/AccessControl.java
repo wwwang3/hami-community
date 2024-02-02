@@ -53,7 +53,6 @@ public enum AccessControl {
      */
     ANY_AUTHORITY((r, s, a) -> r.requestMatchers(s.httpMethod, s.patterns).hasAnyAuthority(s.authorities)),
 
-
     /**
      * 有认证成功的authentication
      */

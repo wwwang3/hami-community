@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import top.wang3.hami.common.vo.article.HotArticle;
 import top.wang3.hami.common.vo.user.HotAuthor;
 import top.wang3.hami.core.service.rank.RankListService;
-import top.wang3.hami.security.annotation.Api;
+import top.wang3.hami.security.annotation.PublicApi;
 import top.wang3.hami.security.model.Result;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class RankController {
      * @param categoryId 分类Id
      * @return {@link List<HotArticle>}
      */
-    @Api
+    @PublicApi
     @GetMapping("/hot/article")
     public Result<List<HotArticle>> listHotArticle(@RequestParam(value = "cateId", required = false)
                                                    Integer categoryId) {
@@ -44,7 +44,7 @@ public class RankController {
      *
      * @return {@link List<HotAuthor>}
      */
-    @Api
+    @PublicApi
     @GetMapping("/hot/author")
     public Result<List<HotAuthor>> listHotAuthor() {
         List<HotAuthor> articles = rankListService.listHotAuthor();

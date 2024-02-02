@@ -21,7 +21,7 @@ import top.wang3.hami.core.service.interact.CollectService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.LikeService;
 import top.wang3.hami.core.service.user.UserService;
-import top.wang3.hami.security.annotation.Api;
+import top.wang3.hami.security.annotation.PublicApi;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
@@ -137,7 +137,7 @@ public class UserInteractController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/collect/query_list")
     public Result<PageData<ArticleVo>> getUserCollectArticles(@RequestBody @Valid
                                                               UserPageParam param) {
@@ -158,7 +158,7 @@ public class UserInteractController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<ArticleVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/like/query_list")
     public Result<PageData<ArticleVo>> getUserLikeArticles(@RequestBody @Valid
                                                            UserPageParam param) {
@@ -179,7 +179,7 @@ public class UserInteractController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<UserVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/follow/following_list")
     public Result<PageData<UserVo>> getUserFollowings(@RequestBody @Valid
                                                       UserPageParam param) {
@@ -201,7 +201,7 @@ public class UserInteractController {
      * @param param {@link UserPageParam}
      * @return {@link PageData<UserVo>}
      */
-    @Api
+    @PublicApi
     @PostMapping("/follow/follower_list")
     public Result<PageData<UserVo>> getUserFollowers(@RequestBody @Valid
                                                      UserPageParam param) {

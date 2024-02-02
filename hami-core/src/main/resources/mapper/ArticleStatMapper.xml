@@ -40,6 +40,7 @@
         likes,
         comments,
         collects,
+        deleted,
         ctime,
         mtime
     </sql>

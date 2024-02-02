@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.wang3.hami.common.model.Category;
 import top.wang3.hami.core.service.article.CategoryService;
-import top.wang3.hami.security.annotation.Api;
+import top.wang3.hami.security.annotation.PublicApi;
 import top.wang3.hami.security.model.Result;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class CategoryController {
      *
      * @return {@link List<Category>}
      */
-    @Api
+    @PublicApi
     @GetMapping("/all")
     public Result<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();

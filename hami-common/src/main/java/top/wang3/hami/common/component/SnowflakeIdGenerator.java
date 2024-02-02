@@ -1,9 +1,6 @@
 package top.wang3.hami.common.component;
 
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class SnowflakeIdGenerator {
 
     private static final long START_TIMESTAMP = 1691087910202L;

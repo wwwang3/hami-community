@@ -32,9 +32,9 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
     @Override
     public long getArticleCountCache(Integer cateId) {
-        String key = RedisConstants.ARTICLE_COUNT_KEY;
-        String hKey = (cateId == null) ? RedisConstants.TOTAL_ARTICLE_COUNT :
-                RedisConstants.CATE_ARTICLE_COUNT + cateId;
+        String key = RedisConstants.ARTICLE_COUNT_HASH;
+        String hKey = (cateId == null) ? RedisConstants.TOTAL_ARTICLE_COUNT_HKEY :
+                RedisConstants.CATE_ARTICLE_COUNT_HKEY + cateId;
         return cacheService.getMapValue(
                 key,
                 hKey,

@@ -3,6 +3,7 @@ package top.wang3.hami.common.message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import top.wang3.hami.common.constant.RabbitConstants;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class AccountRabbitMessage implements RabbitMessage {
 
     @Override
     public String getExchange() {
-        return "hami-account-exchange";
+        return RabbitConstants.HAMI_ACCOUNT_EXCHANGE;
     }
 
     @Override

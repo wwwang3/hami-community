@@ -4,6 +4,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
+import top.wang3.hami.common.component.SnowflakeIdGenerator;
 import top.wang3.hami.security.filter.IpContextFilter;
 import top.wang3.hami.security.filter.RequestIDFilter;
 import top.wang3.hami.security.filter.RequestLogFilter;
@@ -18,6 +19,7 @@ public class ToolFiltersConfigurer extends AbstractHttpConfigurer<ToolFiltersCon
     public void configure(HttpSecurity builder) {
         IpContextFilter ipContextFilter = new IpContextFilter();
         RequestIDFilter requestIDFilter = new RequestIDFilter();
+        requestIDFilter.setGenerator(new SnowflakeIdGenerator());
         RequestLogFilter requestLogFilter = new RequestLogFilter();
         builder.addFilterBefore(ipContextFilter, WebAsyncManagerIntegrationFilter.class);
         if (enableRequestID) {

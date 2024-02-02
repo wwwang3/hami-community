@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "hami.init", value = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "hami.init", value = "enable", matchIfMissing = true)
 @Slf4j
 public class HamiInitializerExecutor implements ApplicationRunner, InitializingBean {
 
@@ -34,8 +34,7 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
 
     @Autowired
     public void setEnabledInitializers(HamiProperties hamiProperties) {
-        enabledInitializers = hamiProperties
-                .getInit().getList();
+        enabledInitializers = hamiProperties.getInit() == null ? null : hamiProperties.getInit().getList();
     }
 
     @Autowired(required = false)
@@ -111,7 +110,7 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
     }
 
     private boolean enabled(@NonNull HamiInitializer initializer) {
-        return initializer.alwaysExecute() || (enabledInitializers.contains(initializer.getName()));
+        return initializer.alwaysExecute() || (enabledInitializers != null && enabledInitializers.contains(initializer.getName()));
     }
 
     void prettyPrint(@NonNull AsyncStopWatch watch) {

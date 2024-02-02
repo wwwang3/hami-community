@@ -1,5 +1,6 @@
 package top.wang3.hami.security.configurers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class AuthorizeConfigurerCustomizer {
 
     private List<ApiInfoProvider> providers;
@@ -38,14 +40,18 @@ public class AuthorizeConfigurerCustomizer {
         return registry -> {
             if (!CollectionUtils.isEmpty(providers)) {
                 // 接口访问配置
+                int size = 0;
                 for (ApiInfoProvider provider : providers) {
                     List<ApiInfo> apiList = provider.getApis();
                     if (!CollectionUtils.isEmpty(apiList)) {
+                        size += apiList.size();
                         for (ApiInfo info : apiList) {
                             info.getAccessControl().apply(registry, info, context);
+                            log.debug("resoled api-access-control: {}", info);
                         }
                     }
                 }
+                log.debug("增加 {} 个接口访问配置.", size);
             }
         };
     }

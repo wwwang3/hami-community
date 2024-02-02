@@ -53,9 +53,9 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
             processDelete(after);
         } else if (!Objects.equals(oldCateId, nowCateId)) {
             // 修改了分类
-            final String key = RedisConstants.ARTICLE_COUNT_KEY;
-            final String oldCate = RedisConstants.CATE_ARTICLE_COUNT + oldCateId;
-            final String nowCate = RedisConstants.CATE_ARTICLE_COUNT + nowCateId;
+            final String key = RedisConstants.ARTICLE_COUNT_HASH;
+            final String oldCate = RedisConstants.CATE_ARTICLE_COUNT_HKEY + oldCateId;
+            final String nowCate = RedisConstants.CATE_ARTICLE_COUNT_HKEY + nowCateId;
             Long result = RedisClient.executeScript(
                     update_script,
                     List.of(key, oldCate, nowCate),
@@ -79,9 +79,9 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
     }
 
     private void handleInsertOrDelete(Article article, long delta) {
-        final String key = RedisConstants.ARTICLE_COUNT_KEY;
-        final String totalHKey = RedisConstants.TOTAL_ARTICLE_COUNT;
-        final String cateHKey = RedisConstants.CATE_ARTICLE_COUNT + article.getCategoryId();
+        final String key = RedisConstants.ARTICLE_COUNT_HASH;
+        final String totalHKey = RedisConstants.TOTAL_ARTICLE_COUNT_HKEY;
+        final String cateHKey = RedisConstants.CATE_ARTICLE_COUNT_HKEY + article.getCategoryId();
         Long result = RedisClient.executeScript(insert_script, List.of(key, totalHKey, cateHKey),
                 List.of(TimeoutConstants.ARTICLE_COUNT_EXPIRE, delta));
         if (result == null || result == 0) {

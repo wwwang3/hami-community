@@ -14,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -90,7 +89,6 @@ public class WebSecurityConfig {
                     conf.requestMatchers("/favicon.ico").permitAll();
                     conf.anyRequest().authenticated();
                 })
-                .anonymous(AnonymousConfigurer::disable)
                 // csrf配置
                 .csrf(CsrfConfigurer::disable)
                 .cors(conf -> {

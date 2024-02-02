@@ -1,12 +1,10 @@
 package top.wang3.hami.security.annotation;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.http.HttpMethod;
 
-@Setter
-@Getter
+@Data
 public class ApiInfo {
 
     AccessControl accessControl;

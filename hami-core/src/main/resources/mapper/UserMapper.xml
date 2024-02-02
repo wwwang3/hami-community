@@ -18,8 +18,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    user_id, username, avatar, `position`, company, profile, blog, tag, deleted, ctime, 
-    mtime
+    user_id, username, avatar, `position`, company, profile, blog, tag, deleted, ctime, mtime
   </sql>
 
   <select id="scanUserDesc" resultMap="BaseResultMap">
