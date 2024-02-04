@@ -86,7 +86,7 @@ public class ZPageHandler {
             }
             // zset没有, 可能缓存过期或者超过了最大zset存储的数量
             long max = RedisClient.zCard(key);
-            if (current * size > max && max != 0) {
+            if (max != 0 && current * size > max) {
                 // 超过最大元素数量
                 // 回源DB
                 return source == null ? Collections.emptyList() : source.apply(current, size);

@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.account.consumer;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
@@ -16,11 +17,15 @@ import top.wang3.hami.common.util.RedisClient;
         ),
 })
 @Component
+@Slf4j
 public class AccountMessageConsumer {
 
     @RabbitHandler
     public void handleAccountMessage(AccountRabbitMessage message) {
         RedisClient.deleteObject(RedisConstants.ACCOUNT_INFO + message.getId());
+        if (log.isDebugEnabled()) {
+            log.debug("delete account cache success, id: {}", message.getId());
+        }
     }
 
 }

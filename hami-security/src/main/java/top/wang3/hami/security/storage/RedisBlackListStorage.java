@@ -23,7 +23,7 @@ public class RedisBlackListStorage implements BlacklistStorage {
     @Override
     public boolean add(String jwtId, long expireAt) {
         long remain = expireAt - System.currentTimeMillis();
-        //已经过期了
+        // 已经过期了
         if (remain <= 0) return true;
         redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + jwtId, Constants.EMPTY_STRING,
                 remain, TimeUnit.MILLISECONDS);

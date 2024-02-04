@@ -28,7 +28,7 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
     }
 
     public void onMessage(Message message, Channel channel) throws Exception {
-        log.info("container: {} received message", containerId);
+        log.info("canal-container: {}, received a message", containerId);
         long start = System.currentTimeMillis();
         if (isEmptyMessage(message)) {
             return;
@@ -61,6 +61,9 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
             // 顺序消费
             for (CanalEntryHandler<?> handler : handlers) {
                 handle(handler, entity);
+                if (log.isDebugEnabled()) {
+                    log.debug("canal-handler: {} handle message success.", handler.getClass().getSimpleName());
+                }
             }
         }
     }

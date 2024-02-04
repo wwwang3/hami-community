@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.user.comsumer;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
@@ -18,12 +19,16 @@ import top.wang3.hami.common.util.RedisClient;
 }, concurrency = "2")
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserMessageConsumer {
 
     @RabbitHandler
     public void handleMessage(UserRabbitMessage message) {
         String key = RedisConstants.USER_INFO + message.getUserId();
         RedisClient.deleteObject(key);
+        if (log.isDebugEnabled()) {
+            log.info("delete user-cache success, user_id: {}", message.getUserId());
+        }
     }
 
 }

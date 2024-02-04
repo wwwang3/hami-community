@@ -11,7 +11,6 @@ import java.util.List;
 
 public interface ArticleService {
 
-
     /**
      * 分页获取最新文章
      * @param param 分页参数

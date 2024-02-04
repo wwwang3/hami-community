@@ -13,7 +13,7 @@ public class TimeoutConstants {
 
     public static final long ARTICLE_LIST_EXPIRE = TimeUnit.DAYS.toMillis(20);
 
-    public static final long USER_ARTICLE_LIST_EXPIRE = TimeUnit.HOURS.toHours(24);
+    public static final long USER_ARTICLE_LIST_EXPIRE = TimeUnit.HOURS.toMillis(3);
 
     public static final long ARTICLE_STAT_EXPIRE = TimeUnit.DAYS.toMillis(4);
 

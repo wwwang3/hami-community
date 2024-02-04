@@ -7,10 +7,10 @@ import top.wang3.hami.common.model.NotifyMsg;
 @Getter
 public class NotifyMsgBuilder {
 
-    private Integer sender; //消息发送者 (用户)
-    private Integer receiver; //消息接收者
     private Integer relatedId = 0; //关联的ID 文章ID或者评论ID
     private Integer itemId; //触发消息的ID 文章ID或者评论ID
+    private Integer sender; //消息发送者 (用户)
+    private Integer receiver; //消息接收者
     private NotifyType type; //消息类型
     private String detail = ""; //内容
 

@@ -20,6 +20,7 @@ import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.user.UserService;
 import top.wang3.hami.core.service.user.cache.UserCacheService;
 import top.wang3.hami.security.context.LoginUserContext;
+import top.wang3.hami.security.model.LoginUser;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,10 +39,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginProfile getLoginProfile() {
-        int loginUserId = LoginUserContext.getLoginUserId();
-        User user = userCacheService.getUserCache(loginUserId);
-        LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user);
-        buildLoginUserStat(loginProfile, loginUserId);
+        LoginUser loginUser = LoginUserContext.getLoginUser();
+        User user = userCacheService.getUserCache(loginUser.getId());
+        LoginProfile loginProfile = UserConverter.INSTANCE.toLoginProfile(user, loginUser.getUsername());
+        loginProfile.setAccount(loginUser.getUsername());
+        buildLoginUserStat(loginProfile, loginUser.getId());
         return loginProfile;
     }
 

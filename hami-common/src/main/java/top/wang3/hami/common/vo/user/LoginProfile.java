@@ -18,7 +18,12 @@ public class LoginProfile {
     private Integer userId;
 
     /**
-     * 用户名
+     * 账户名
+     */
+    private String account;
+
+    /**
+     * 用户名(昵称)
      */
     private String username;
 

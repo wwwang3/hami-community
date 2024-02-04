@@ -95,6 +95,10 @@ public final class DateUtils {
         return formatDateTime(date.getTime());
     }
 
+    public static String  formatDate(LocalDate date) {
+        return NORMAL_DATE_FORMATTER.format(date);
+    }
+
     public static String formatDateTime(LocalDateTime dateTime) {
         return FULL_DATE_FORMATTER.format(dateTime);
     }

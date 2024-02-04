@@ -1,6 +1,7 @@
 package top.wang3.hami.security.context;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,33 +22,41 @@ public class LoginUserContext {
     /**
      * 获取SecurityContext中的LoginUser, 未登录时为空
      * @return LoginUser
+     * @throws NotLoginException 未登录时时抛出
      */
-    public static LoginUser getLoginUser() {
+    @NonNull
+    public static LoginUser getLoginUser() throws NotLoginException {
+        return getOptLoginUser()
+                .orElseThrow(NotLoginException::new);
+    }
+
+    public static Optional<LoginUser> getOptLoginUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        if (authentication == null) return null;
-        //fix: 匿名登录时, 获取的principal不是LoginUser而是anonymousUser
+        if (authentication == null) return Optional.empty();
+        // fix: 匿名登录时, 获取的principal不是LoginUser而是anonymousUser
         Object principal = authentication.getPrincipal();
         if (principal instanceof LoginUser user) {
-            return user;
+            return Optional.of(user);
         }
-        return null;
+        return Optional.empty();
     }
 
     public static int getLoginUserId() throws NotLoginException {
-        LoginUser loginUser = getLoginUser();
-        if (loginUser == null) throw new NotLoginException("未登录");
-        return loginUser.getId();
+        return getOptLoginUser()
+                .map(LoginUser::getId)
+                .orElseThrow(NotLoginException::new);
     }
 
     public static Integer getLoginUserIdDefaultNull() {
-        LoginUser loginUser = getLoginUser();
-        return loginUser == null ? null : loginUser.getId();
+        return getOptLoginUser()
+                .map(LoginUser::getId)
+                .orElse(null);
     }
 
     public static Optional<Integer> getOptLoginUserId() {
-        LoginUser loginUser = getLoginUser();
-        return Optional.ofNullable(loginUser == null ? null : loginUser.getId());
+        return getOptLoginUser()
+                .map(LoginUser::getId);
     }
 
     public static IpInfo getIpInfo() {

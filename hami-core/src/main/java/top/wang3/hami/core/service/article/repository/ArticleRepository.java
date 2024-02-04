@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.wang3.hami.common.model.Article;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,8 @@ public interface ArticleRepository extends IService<Article> {
     List<Integer> searchArticle(Page<Article> page, String keyword);
 
     List<Integer> searchArticle(Page<Article> page, String keyword, LocalDateTime dateTime);
+
+    List<Integer> searchArticle(Page<Article> page, String keyword, LocalDate localDate);
 
     Integer getArticleAuthor(Integer articleId);
 

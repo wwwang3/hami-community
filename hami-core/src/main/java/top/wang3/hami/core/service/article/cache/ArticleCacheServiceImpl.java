@@ -57,7 +57,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
     @Override
     public List<Integer> listUserArticleIdByPage(Page<Article> page, Integer userId) {
-        // 从缓存中获取用户Id
+        // 从缓存中获取文章ID
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
                 .countSupplier(() -> countService.getUserArticleCount(userId).longValue())

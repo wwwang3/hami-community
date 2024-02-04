@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.account.impl;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -55,6 +56,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Resource
     TokenService tokenService;
+
+    @Value("${hami.mode:prod}")
+    private String mode;
 
     @Override
     public Account getAccountByEmailOrUsername(String account) {
@@ -115,8 +119,14 @@ public class AccountServiceImpl implements AccountService {
                     if (account.getId() <= 1000) {
                         user.setTag("内测用户");
                     }
+                    if ("test".equals(mode)) {
+                        return userRepository.updateUser(account.getId(), user);
+                    }
                     return userRepository.save(user);
                 }).then(() -> {
+                    if ("test".equals(mode)) {
+                        return true;
+                    }
                     // 插入数据表, 异步插入感觉也行, 反正没几个访问量
                     UserStat stat = new UserStat();
                     stat.setUserId(account.getId());

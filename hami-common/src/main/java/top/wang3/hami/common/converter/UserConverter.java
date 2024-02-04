@@ -17,12 +17,20 @@ public interface UserConverter {
 
     UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
 
+    @Mapping(target = "account", ignore = true)
     @Mapping(target = "stat", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "followings", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "collects", ignore = true)
     LoginProfile toLoginProfile(User user);
+
+    @Mapping(target = "stat", ignore = true)
+    @Mapping(target = "likes", ignore = true)
+    @Mapping(target = "followings", ignore = true)
+    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "collects", ignore = true)
+    LoginProfile toLoginProfile(User user, String account);
 
     default List<UserVo> toUserVoList(List<User> users) {
         if (users == null || users.isEmpty()) {

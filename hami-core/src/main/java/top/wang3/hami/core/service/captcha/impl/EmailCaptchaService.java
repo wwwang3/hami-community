@@ -27,6 +27,9 @@ public class EmailCaptchaService implements CaptchaService {
     public void sendCaptcha(CaptchaType type, String item, int length, long expire) {
         //发送验证码
         String value = RandomUtils.randomIntStr(length);
+        if (log.isDebugEnabled()) {
+            log.debug("email-captcha: {}", value);
+        }
         //将验证码存储在Redis
         String captchaKey = buildKey(type, item);
         //保存在redis

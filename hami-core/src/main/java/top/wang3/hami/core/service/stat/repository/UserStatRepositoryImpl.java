@@ -32,6 +32,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     public UserStat selectUserStatById(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(FIELDS)
+                .eq("user_id", userId)
                 .one();
     }
 
@@ -52,11 +53,11 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     public boolean updateUserStat(UserStat stat) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .eq("user_id", stat.getUserId())
-                .set(stat.getTotalArticles() != null, "set total_articles = total_articles + ({0})", stat.getTotalArticles())
-                .set(stat.getTotalLikes() != null, "set total_likes = total_likes + ({0})", stat.getTotalLikes())
-                .set(stat.getTotalComments() != null, "set total_comments = total_comments + ({0})", stat.getTotalComments())
-                .set(stat.getTotalCollects() != null, "set total_collects = total_collects + ({0})", stat.getTotalCollects())
-                .set(stat.getTotalViews() != null, "set total_views = total_views + ({0})", stat.getTotalViews())
+                .set(stat.getTotalArticles() != null, "total_articles = total_articles + ({0})", stat.getTotalArticles())
+                .set(stat.getTotalLikes() != null, "total_likes = total_likes + ({0})", stat.getTotalLikes())
+                .set(stat.getTotalComments() != null, "total_comments = total_comments + ({0})", stat.getTotalComments())
+                .set(stat.getTotalCollects() != null, "total_collects = total_collects + ({0})", stat.getTotalCollects())
+                .set(stat.getTotalViews() != null, "total_views = total_views + ({0})", stat.getTotalViews())
                 .update();
     }
 

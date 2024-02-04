@@ -18,6 +18,7 @@ import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.mapper.ArticleMapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,14 +86,20 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Override
     public List<Integer> searchArticle(Page<Article> page, String keyword) {
-        // 默认6个月
-        return searchArticle(page, keyword, LocalDateTime.now().minusMonths(6));
+        // 默认3个月
+        return searchArticle(page, keyword, LocalDate.now().minusMonths(3));
     }
 
     @Override
     public List<Integer> searchArticle(Page<Article> page, String keyword, LocalDateTime dateTime) {
         if (!StringUtils.hasText(keyword)) return Collections.emptyList();
         return getBaseMapper().searchArticle(page, keyword, DateUtils.formatDateTime(dateTime));
+    }
+
+    @Override
+    public List<Integer> searchArticle(Page<Article> page, String keyword, LocalDate localDate) {
+        if (!StringUtils.hasText(keyword)) return Collections.emptyList();
+        return getBaseMapper().searchArticle(page, keyword, DateUtils.formatDate(localDate));
     }
 
     @Override

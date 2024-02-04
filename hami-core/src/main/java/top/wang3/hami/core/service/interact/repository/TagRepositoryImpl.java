@@ -20,6 +20,7 @@ public class TagRepositoryImpl extends ServiceImpl<TagMapper, Tag>
     public List<Tag> getAllTags() {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select("id", "name")
+                .orderByAsc("id")
                 .list();
     }
 
