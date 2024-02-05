@@ -81,6 +81,9 @@ public class RedisCacheService implements CacheService {
         // data, 当不存在key时对应index为空
         // 返回的是ArrayList
         List<R> dataList = RedisClient.getMultiCacheObject(keys);
+        if (dataList == null || dataList.isEmpty()) {
+            return Collections.emptyList();
+        }
         // 为空的Id
         ArrayList<T> nullIds = new ArrayList<>();
         //记录ID对应的索引
@@ -117,7 +120,7 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
-    public void expiredThenExecute(String key, Runnable runnable, long millis) {
+    public void expiredThenExecute(String key, long millis, Runnable runnable) {
         // 刷新过期时间, 刷新失败则执行runnable
         if (!RedisClient.pExpire(key, millis)) {
             lockTemplate.execute(key, () -> {

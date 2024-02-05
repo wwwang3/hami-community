@@ -20,7 +20,7 @@ public class RefreshRankTaskService {
     private final MailMessageHandler handler;
 
     @Async
-    @Scheduled(cron = "33 33 2 * * ? ")
+    @Scheduled(cron = "12 12 12 * * ?")
     public void refreshHotArticles() {
         try {
             long start = System.currentTimeMillis();
@@ -35,7 +35,7 @@ public class RefreshRankTaskService {
     }
 
     @Async
-    @Scheduled(cron = "33 36 2 * * ? ")
+    @Scheduled(cron = "13 13 13 * * ?")
     public void refreshOverallHotArticles() {
         try {
             long start = System.currentTimeMillis();
@@ -50,7 +50,7 @@ public class RefreshRankTaskService {
     }
 
     @Async
-    @Scheduled(cron = "33 40 2 * * ? ")
+    @Scheduled(cron = "11 11 1 * * ?")
     public void refreshAuthorRankList() {
         try {
             long start = System.currentTimeMillis();

@@ -11,12 +11,10 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @SuppressWarnings(value = {"rawtypes", "unchecked"})
@@ -54,7 +52,7 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, Appl
     }
 
     @Override
-    public List<CanalEntryHandler<?>> getContainerHandler(String containerId, String tableName) {
+    public List<CanalEntryHandler<?>> getContainerHandlers(String containerId, String tableName) {
         String key = containerId + "-" + tableName;
         return containeredHandlerMap.get(key);
     }
@@ -92,13 +90,17 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, Appl
     }
 
     private void addToTableClassFiledMap(String tableName, Class<?> tableClass) {
-        Field[] fields = tableClass.getDeclaredFields();
         if (tableFiledMap.containsKey(tableName)) {
             return;
         }
-        Map<String, Field> map = Arrays.stream(fields)
-                .collect(Collectors.toMap(this::getColumnName, Function.identity()));
-        tableFiledMap.put(tableName, map);
+        Field[] fields = tableClass.getDeclaredFields();
+        Map<String, Field> fieldMap = new HashMap<>();
+        for (Field field : fields) {
+            String columnName = this.getColumnName(field);
+            fieldMap.put(columnName, field);
+            fieldMap.put(field.getName(), field);
+        }
+        tableFiledMap.put(tableName, fieldMap);
     }
 
     private boolean addToCommonHandlerMap(String tableName, CanalEntryHandler<?> handler) {
@@ -123,12 +125,12 @@ public class SimpleCanalHandlerFactory implements CanalEntryHandlerFactory, Appl
         if (tableField != null) {
             return resolveName(tableField.value());
         }
-        //驼峰转下划线
+        // 驼峰转下划线
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName());
     }
 
     private String resolveName(String name) {
-        //兼容反引号
+        // 兼容反引号
         if (name.charAt(0) == '`' && name.charAt(name.length() -1) == '`') {
             return name.substring(1, name.length() - 1);
         }

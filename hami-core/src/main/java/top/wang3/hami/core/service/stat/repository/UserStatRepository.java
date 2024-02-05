@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.stat.repository;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.model.UserStat;
 
@@ -25,6 +26,7 @@ public interface UserStatRepository extends IService<UserStat> {
     boolean updateArticles(Integer userId, int delta);
 
     @CanIgnoreReturnValue
+    @Transactional(rollbackFor = Exception.class)
     Long batchUpdateUserStats(List<UserStat> userStats);
 
     boolean updateFollowings(Integer userId, int delta);

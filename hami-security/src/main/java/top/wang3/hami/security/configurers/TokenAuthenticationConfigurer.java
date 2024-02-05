@@ -3,7 +3,8 @@ package top.wang3.hami.security.configurers;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.util.StringUtils;
 import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 import top.wang3.hami.security.service.TokenService;
 
@@ -21,15 +22,19 @@ public class TokenAuthenticationConfigurer
     }
 
     private void initDefaultTokenFilter(HttpSecurity http) {
-        this.tokenName = "access_token";
-        this.tokenService = http.getSharedObject(ApplicationContext.class).getBean(TokenService.class);
+        if (!StringUtils.hasText(this.tokenName)) {
+            this.tokenName = "access_token";
+        }
+        if (this.tokenService == null) {
+            this.tokenService = http.getSharedObject(ApplicationContext.class).getBean(TokenService.class);
+        }
     }
 
     @Override
     public void configure(HttpSecurity http) {
         TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(tokenService, tokenName);
         // 添加token过滤器
-        http.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class);
     }
 
     public TokenAuthenticationConfigurer tokenService(TokenService tokenService) {

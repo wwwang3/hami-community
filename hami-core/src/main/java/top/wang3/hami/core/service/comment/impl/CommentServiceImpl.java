@@ -53,7 +53,6 @@ public class CommentServiceImpl implements CommentService {
     public PageData<CommentVo> listComment(CommentPageParam commentPageParam) {
         Page<Comment> page = commentPageParam.toPage();
         Integer articleId = commentPageParam.getArticleId();
-        Assert.isTrue(articleId != null && articleId > 0, "invalid article_id");
         Integer sort = commentPageParam.getSort();
         // 获取文章评论
         List<Comment> comments = commentRepository.listComment(page, articleId, sort);

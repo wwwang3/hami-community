@@ -33,6 +33,8 @@ public interface ArticleRepository extends IService<Article> {
 
     List<Integer> searchArticle(Page<Article> page, String keyword, LocalDate localDate);
 
+    List<Integer> searchArticleByFulltextIndex(Page<Article> page, String keyword);
+
     Integer getArticleAuthor(Integer articleId);
 
     Map<String, Long> getArticleCount();

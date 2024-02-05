@@ -15,6 +15,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
@@ -55,7 +56,9 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
             // 注册endpoint
             processEndpoint(endpoint, container);
             registrar.registerEndpoint(endpoint);
-            log.info("process endpoint success, container-id: {}", endpoint.getId());
+            if (log.isDebugEnabled()) {
+                log.debug("process endpoint success, container-id: {}", endpoint.getId());
+            }
         }
     }
 
@@ -95,8 +98,10 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
         );
         String beanName = exchange + "." + queueName + ++bindingSize;
         ((ConfigurableBeanFactory) beanFactory).registerSingleton(beanName, binding);
-        log.info("register binding to exchange [{}] success: queue: {}, routing: {}",
-                exchange, queueName, route);
+        if (log.isDebugEnabled()) {
+            log.debug("register binding to exchange [{}] success: queue: {}, routing: {}",
+                    exchange, queueName, route);
+        }
     }
 
     private void registerExchange(String exchange, String exchangeType) {
@@ -104,7 +109,9 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
         Exchange ex = exchangeBuilder.durable(true)
                 .build();
         ((ConfigurableBeanFactory) this.beanFactory).registerSingleton(exchange, ex);
-        log.info("register canal exchange: {} success", ex.getName());
+        if (log.isDebugEnabled()) {
+            log.info("register canal exchange: {} success", ex.getName());
+        }
     }
 
     private String buildRoutingKey(String schema, String tableName, String routingKey) {
@@ -115,7 +122,7 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
     }
 

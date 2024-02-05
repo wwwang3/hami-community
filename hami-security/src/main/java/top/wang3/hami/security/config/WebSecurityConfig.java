@@ -129,7 +129,7 @@ public class WebSecurityConfig {
                 // Token认证器
                 .with(TokenAuthenticationConfigurer.create(), this::applyTokenConfig)
                 // 请求ID, 请求日志, IPContext
-                .with(new ToolFiltersConfigurer(), ToolFiltersConfigurer.withDefaults())
+                .with(ToolFiltersConfigurer.create(), ToolFiltersConfigurer.withDefaults())
                 // 全局IP限流
                 .with(GlobalRateLimitFilterConfigurer.create(), this::applyRateLimitConfig)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

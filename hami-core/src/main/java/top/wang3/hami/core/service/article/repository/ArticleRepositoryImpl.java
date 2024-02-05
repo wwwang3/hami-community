@@ -103,6 +103,12 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
+    public List<Integer> searchArticleByFulltextIndex(Page<Article> page, String keyword) {
+        // mysql fulltext index
+        return getBaseMapper().searchArticleByFulltextIndex(page, keyword);
+    }
+
+    @Override
     public List<Integer> listFollowUserArticles(Page<Article> page, int loginUserId) {
         return getBaseMapper().selectFollowUserArticles(page, loginUserId);
     }

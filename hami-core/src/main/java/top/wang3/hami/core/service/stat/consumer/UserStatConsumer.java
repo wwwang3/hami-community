@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
+import top.wang3.hami.common.message.RabbitMessage;
 import top.wang3.hami.common.message.email.AlarmEmailMessage;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.model.UserStat;
@@ -19,6 +20,7 @@ import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 import top.wang3.hami.security.model.Result;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,11 +55,11 @@ public class UserStatConsumer {
                             exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
                             key = {"comment.*"}
                     )
-
             },
-            containerFactory= "batchRabbitListenerContainerFactory"
+            containerFactory = "batchRabbitListenerContainerFactory",
+            messageConverter = "rabbitMQJacksonConverter"
     )
-    public void handleFollowingMessage(List<Object> messages) {
+    public void handleStatMessage(List<RabbitMessage> messages) {
         try {
             // 不包含文章删除消息
             List<UserStat> userStats = messages.stream()
@@ -72,11 +74,18 @@ public class UserStatConsumer {
                     })
                     .filter(stat -> stat.getUserId() != -1)
                     .toList();
-            userStatRepository.batchUpdateUserStats(userStats);
+            if (!userStats.isEmpty()){
+                userStatRepository.batchUpdateUserStats(userStats);
+            }
         } catch (Exception e) {
             log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
-            String msgs = Result.writeValueAsString(messages);
-            AlarmEmailMessage message = new AlarmEmailMessage("用户关注数据更新失败", msgs);
+            Map<String, Object> data = Map.of(
+                    "error_class", e.getClass().getSimpleName(),
+                    "error_msg", e.getMessage(),
+                    "message", messages
+            );
+            String msgs = Result.writeValueAsString(data);
+            AlarmEmailMessage message = new AlarmEmailMessage("用户数据更新失败", msgs);
             rabbitMessagePublisher.publishMsg(message);
         }
     }
@@ -91,10 +100,11 @@ public class UserStatConsumer {
                             key = "*.follow.*"
                     ),
             },
-            containerFactory= "batchRabbitListenerContainerFactory"
+            containerFactory = "batchRabbitListenerContainerFactory"
     )
     public void handleFollowMessage(List<FollowRabbitMessage> messages) {
         try {
+            // 更新总用户的总关注数
             List<UserStat> stats = messages.stream()
                     .collect(Collectors.groupingBy(FollowRabbitMessage::getUserId))
                     .values()
@@ -121,7 +131,8 @@ public class UserStatConsumer {
 
     /**
      * shabi写法
-     * @param stat stat
+     *
+     * @param stat   stat
      * @param object object
      * @return stat
      */
@@ -162,8 +173,8 @@ public class UserStatConsumer {
             return c.getAuthorId();
         } else if (o instanceof ReplyRabbitMessage d) {
             return d.getAuthorId();
-        } else if (o instanceof CommentDeletedRabbitMessage f) {
-            return f.getAuthorId();
+        } else if (o instanceof CommentDeletedRabbitMessage e) {
+            return e.getAuthorId();
         }
         return -1;
     }

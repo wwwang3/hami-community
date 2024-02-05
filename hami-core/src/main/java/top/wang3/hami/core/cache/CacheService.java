@@ -68,10 +68,10 @@ public interface CacheService {
     /**
      * 刷新过期时间, 刷新失败则<b>加锁<b/>执行runnable
      * @param key key
-     * @param runnable runnable
      * @param millis 过期时间, 单位毫秒
+     * @param runnable 刷新失败执行的方法
      */
-    void expiredThenExecute(String key, Runnable runnable, long millis);
+    void expiredThenExecute(String key, long millis, Runnable runnable);
 
     <T> void asyncSetCache(String key, T data, long millis);
 

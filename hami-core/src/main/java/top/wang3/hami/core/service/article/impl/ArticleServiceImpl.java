@@ -132,9 +132,9 @@ public class ArticleServiceImpl implements ArticleService {
         String content = articleCacheService.getArticleContentCache(articleId);
         ArticleVo vo = ArticleConverter.INSTANCE.toArticleVo(info, content);
         // build category, tag, author, interact
-        List<ArticleVo> dtos = List.of(vo);
-        this.buildCategory(dtos);
-        this.buildArticleTags(dtos);
+        List<ArticleVo> vos = List.of(vo);
+        this.buildCategory(vos);
+        this.buildArticleTags(vos);
         // 作者信息, 包含用户数据
         UserVo author = userService.getAuthorInfoById(vo.getUserId());
         vo.setAuthor(author);
@@ -161,7 +161,7 @@ public class ArticleServiceImpl implements ArticleService {
         // 发布消息
         ArticleRabbitMessage message = new ArticleRabbitMessage(ArticleRabbitMessage.Type.VIEW,
                 articleId, authorId, LoginUserContext.getLoginUserIdDefaultNull());
-        rabbitMessagePublisher.publishMsg(message);
+        rabbitMessagePublisher.publishMsgSync(message);
     }
 
     public void buildArticleVos(List<ArticleVo> articleVos,

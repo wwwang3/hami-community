@@ -31,7 +31,7 @@ public class CommentPageParam extends PageParam {
     private Integer rootId;
 
     /**
-     * 排序字段 0-时间 1-点赞数
+     * 排序字段 0-点赞数 1-时间
      * @default 1
      */
     @Min(value = 0)

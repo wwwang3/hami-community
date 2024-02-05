@@ -19,14 +19,12 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.common.util.ZPageHandler;
 import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.repository.FollowRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -49,6 +47,11 @@ public class FollowServiceImpl implements FollowService {
                 .ofAction(key, followingId)
                 .millis(TimeoutConstants.FOLLOWING_LIST_EXPIRE)
                 .loader(() -> loadUserFollowings(loginUserId))
+                .preCheck(id -> {
+                    if (Objects.equals(loginUserId, id)) {
+                        throw new HamiServiceException("自己不能关注自己~");
+                    }
+                })
                 .postAct(() -> {
                     FollowRabbitMessage message = new FollowRabbitMessage(
                             loginUserId,
@@ -116,7 +119,7 @@ public class FollowServiceImpl implements FollowService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.FOLLOWING_LIST_EXPIRE;
-        cacheService.expiredThenExecute(key, () -> loadUserFollowings(userId), timeout);
+        cacheService.expiredThenExecute(key, timeout, () -> loadUserFollowings(userId));
         return RedisClient.zMContains(key, followingIds);
     }
 
@@ -184,7 +187,7 @@ public class FollowServiceImpl implements FollowService {
         }
         Collection<Tuple> tuples = ListMapperHandler.listToTuple(
                 followers,
-                UserFollow::getFollowing,
+                UserFollow::getUserId,
                 item -> item.getMtime().getTime()
         );
         RedisClient.zSetAll(

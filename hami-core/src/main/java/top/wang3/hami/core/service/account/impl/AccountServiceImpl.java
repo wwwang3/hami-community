@@ -30,7 +30,7 @@ import top.wang3.hami.core.exception.CaptchaServiceException;
 import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.service.account.AccountService;
 import top.wang3.hami.core.service.account.repository.AccountRepository;
-import top.wang3.hami.core.service.captcha.impl.EmailCaptchaService;
+import top.wang3.hami.core.service.captcha.CaptchaService;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 import top.wang3.hami.core.service.user.repository.UserRepository;
 import top.wang3.hami.security.context.LoginUserContext;
@@ -41,7 +41,7 @@ import top.wang3.hami.security.service.TokenService;
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
-    private final EmailCaptchaService captchaService;
+    private final CaptchaService captchaService;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final UserStatRepository userStatRepository;

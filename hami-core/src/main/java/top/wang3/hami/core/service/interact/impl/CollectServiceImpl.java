@@ -110,7 +110,7 @@ public class CollectServiceImpl implements CollectService {
             return Collections.emptyMap();
         }
         long timeout = TimeoutConstants.COLLECT_LIST_EXPIRE;
-        cacheService.expiredThenExecute(key, () -> loadUserCollects(userId), timeout);
+        cacheService.expiredThenExecute(key, timeout, () -> loadUserCollects(userId));
         return RedisClient.zMContains(key, itemIds);
     }
 

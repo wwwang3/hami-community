@@ -45,7 +45,7 @@
             </trim>
             <trim prefix="total_comments = total_comments + case" suffix="end,">
                 <foreach collection="stats" item="item" index="index">
-                    <if test="item.totalComments != null != null and item.totalComments != 0">
+                    <if test="item.totalComments != null and item.totalComments != 0">
                         when user_id = #{item.userId} then #{item.totalComments}
                     </if>
                 </foreach>

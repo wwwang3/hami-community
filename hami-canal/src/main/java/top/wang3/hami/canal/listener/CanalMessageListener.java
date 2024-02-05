@@ -82,7 +82,7 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
     }
 
     private List<CanalEntryHandler<?>> findHandler(String containerId, String tableName) {
-        List<CanalEntryHandler<?>> containerHandler = factory.getContainerHandler(containerId, tableName);
+        List<CanalEntryHandler<?>> containerHandler = factory.getContainerHandlers(containerId, tableName);
         if (containerHandler == null  || containerHandler.isEmpty()) {
             return factory.getHandler(tableName);
         }

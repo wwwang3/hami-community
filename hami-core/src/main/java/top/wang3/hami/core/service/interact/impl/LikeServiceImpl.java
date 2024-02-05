@@ -9,7 +9,6 @@ import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.dto.interact.LikeType;
-import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.message.interact.LikeRabbitMessage;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.*;
@@ -38,7 +37,6 @@ public class LikeServiceImpl implements LikeService {
     private final CommentRepository commentRepository;
     private final RabbitMessagePublisher rabbitMessagePublisher;
     private final CacheService cacheService;
-    private final LockTemplate lockTemplate;
 
     @Override
     public boolean doLike(Integer itemId, LikeType likeType) {
@@ -51,7 +49,7 @@ public class LikeServiceImpl implements LikeService {
                 .build("点赞")
                 .ofAction(key, itemId)
                 .millis(TimeoutConstants.LIKE_LIST_EXPIRE)
-                .loader(() -> loadLikeList(loginUserId, likeType))
+                .loader(() -> loadUserLikeItem(loginUserId, likeType))
                 .postAct(() -> {
                     // 执行成功的后置处理器. 发送MQ消息异步写入DB
                     LikeRabbitMessage message = new LikeRabbitMessage(
@@ -93,11 +91,6 @@ public class LikeServiceImpl implements LikeService {
         return RedisConstants.USER_LIKE_LIST + likeType.getType() + ":" + userId;
     }
 
-    private void loadLikeList(int loginUserId, LikeType likeType) {
-        String key = buildKey(loginUserId, likeType);
-        lockTemplate.execute(key, () -> loadUserLikeItem(loginUserId, likeType));
-    }
-
     private Integer getItemUser(Integer itemId, LikeType likeType) {
         Integer itemUser = null;
         if (LikeType.ARTICLE.equals(likeType)) {
@@ -111,7 +104,7 @@ public class LikeServiceImpl implements LikeService {
     @CostLog
     @Override
     public Long getUserLikeCount(Integer userId, LikeType likeType) {
-        //获取用户点赞的实体数 (我赞过)
+        // 获取用户点赞的实体数 (我赞过)
         String key = RedisConstants.USER_LIKE_COUNT + likeType.getType() + ":" + userId;
         return cacheService.get(
                 key,
@@ -150,15 +143,7 @@ public class LikeServiceImpl implements LikeService {
             return Collections.emptyMap();
         }
         long timeout = TimeUnit.HOURS.toMillis(RandomUtils.randomLong(1, 100));
-        boolean success = RedisClient.pExpire(key, timeout);
-        if (!success) {
-            synchronized (key.intern()) {
-                success = RedisClient.pExpire(key, timeout);
-                if (!success) {
-                    loadUserLikeItem(userId, likeType);
-                }
-            }
-        }
+        cacheService.expiredThenExecute(key, timeout, () -> loadUserLikeItem(userId, likeType));
         return RedisClient.zMContains(key, itemIds);
     }
 

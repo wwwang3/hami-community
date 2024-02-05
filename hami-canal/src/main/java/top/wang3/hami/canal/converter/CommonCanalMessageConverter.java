@@ -46,6 +46,9 @@ public class CommonCanalMessageConverter implements CanalMessageConverter {
                     continue;
                 }
                 CanalEntry.EventType eventType = rowChange.getEventType();
+                if (!isSupportedType(eventType)) {
+                    continue;
+                }
                 List<CanalEntity<T>> entities = map.computeIfAbsent(tableName, k -> new ArrayList<>());
                 processRowDataList(tableName, rowDatasList, entities, eventType);
             }
@@ -99,7 +102,7 @@ public class CommonCanalMessageConverter implements CanalMessageConverter {
     }
 
     private <T> T getEntity(List<CanalEntry.Column> columns, Class<T> tableClass, Map<String, Field> tableField)
-            throws JsonProcessingException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+            throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         T instance = tableClass.getDeclaredConstructor().newInstance();
         for (CanalEntry.Column column : columns) {
             String name = column.getName();
@@ -110,6 +113,11 @@ public class CommonCanalMessageConverter implements CanalMessageConverter {
             }
         }
         return instance;
+    }
+
+    private boolean isSupportedType(CanalEntry.EventType type) {
+        // only insert update delete supported
+        return type != null && type.ordinal() <= 2;
     }
 
 }

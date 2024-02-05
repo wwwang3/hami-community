@@ -59,6 +59,12 @@
         ORDER BY ctime DESC
     </select>
 
+    <select id="searchArticleByFulltextIndex" resultType="Integer">
+        SELECT id FROM article WHERE MATCH(title) against(#{keyword} IN NATURAL LANGUAGE MODE)
+        UNION
+        SELECT id FROM article WHERE MATCH(summary) against(#{keyword} IN NATURAL LANGUAGE MODE)
+    </select>
+
     <select id="selectFollowUserArticles" resultType="java.lang.Integer">
         select t1.id
         from article t1

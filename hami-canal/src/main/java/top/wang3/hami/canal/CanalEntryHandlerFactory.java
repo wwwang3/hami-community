@@ -24,7 +24,7 @@ public interface CanalEntryHandlerFactory {
      * @param containerId 容器ID
      * @return List<CanalEntryHandler<?>>
      */
-    List<CanalEntryHandler<?>> getContainerHandler(String containerId, String tableName);
+    List<CanalEntryHandler<?>> getContainerHandlers(String containerId, String tableName);
 
     /**
      * 根据表名获取未指定Container-id的CanalEntryHandler

@@ -3,12 +3,12 @@ package top.wang3.hami.security.configurers;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import top.wang3.hami.common.component.SnowflakeIdGenerator;
 import top.wang3.hami.security.filter.IpContextFilter;
 import top.wang3.hami.security.filter.RequestIDFilter;
 import top.wang3.hami.security.filter.RequestLogFilter;
-import top.wang3.hami.security.filter.TokenAuthenticationFilter;
 
 @SuppressWarnings("UnusedReturnValue")
 public class ToolFiltersConfigurer extends AbstractHttpConfigurer<ToolFiltersConfigurer, HttpSecurity> {
@@ -26,7 +26,7 @@ public class ToolFiltersConfigurer extends AbstractHttpConfigurer<ToolFiltersCon
             builder.addFilterAfter(requestIDFilter, IpContextFilter.class);
         }
         if (enableRequestLog) {
-            builder.addFilterAfter(requestLogFilter, TokenAuthenticationFilter.class);
+            builder.addFilterBefore(requestLogFilter, LogoutFilter.class);
         }
     }
 
@@ -38,6 +38,10 @@ public class ToolFiltersConfigurer extends AbstractHttpConfigurer<ToolFiltersCon
     public ToolFiltersConfigurer enableRequestLog(boolean enable) {
         enableRequestLog = enable;
         return this;
+    }
+
+    public static ToolFiltersConfigurer create() {
+        return new ToolFiltersConfigurer();
     }
 
     public static Customizer<ToolFiltersConfigurer> withDefaults() {

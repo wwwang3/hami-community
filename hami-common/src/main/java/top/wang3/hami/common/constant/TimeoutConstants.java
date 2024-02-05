@@ -25,14 +25,14 @@ public class TimeoutConstants {
 
     public static final long ARTICLE_INFO_EXPIRE = TimeUnit.DAYS.toMillis(8);
 
-    public static final long FOLLOWER_LIST_EXPIRE = TimeUnit.DAYS.toMillis(7);
+    public static final long FOLLOWER_LIST_EXPIRE = TimeUnit.DAYS.toMillis(2);
 
-    public static final long FOLLOWING_LIST_EXPIRE = TimeUnit.DAYS.toMillis(8);
+    public static final long FOLLOWING_LIST_EXPIRE = TimeUnit.DAYS.toMillis(2);
 
-    public static final long COLLECT_LIST_EXPIRE = TimeUnit.DAYS.toMillis(9);
+    public static final long COLLECT_LIST_EXPIRE = TimeUnit.DAYS.toMillis(2);
 
-    public static final long LIKE_LIST_EXPIRE = TimeUnit.DAYS.toMillis(10);
+    public static final long LIKE_LIST_EXPIRE = TimeUnit.DAYS.toMillis(2);
 
-    public static final long INTERACT_COUNT_EXPIRE = TimeUnit.DAYS.toMillis(10);
+    public static final long INTERACT_COUNT_EXPIRE = TimeUnit.DAYS.toMillis(4);
 
 }
