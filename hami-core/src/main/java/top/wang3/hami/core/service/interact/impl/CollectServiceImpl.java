@@ -115,7 +115,7 @@ public class CollectServiceImpl implements CollectService {
     }
 
     @Override
-    public Long getUserCollectCount(Integer userId) {
+    public Integer getUserCollectCount(Integer userId) {
         //获取用户点赞的实体数 (我赞过)
         String key = RedisConstants.USER_COLLECT_COUNT + userId;
         return cacheService.get(

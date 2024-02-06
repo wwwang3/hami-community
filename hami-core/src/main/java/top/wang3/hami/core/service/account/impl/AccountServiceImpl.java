@@ -18,7 +18,7 @@ import top.wang3.hami.common.dto.user.ResetPassParam;
 import top.wang3.hami.common.dto.user.UserProfileParam;
 import top.wang3.hami.common.message.AccountRabbitMessage;
 import top.wang3.hami.common.message.EntityMessageType;
-import top.wang3.hami.common.message.UserRabbitMessage;
+import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.common.model.Account;
 import top.wang3.hami.common.model.User;
 import top.wang3.hami.common.model.UserStat;

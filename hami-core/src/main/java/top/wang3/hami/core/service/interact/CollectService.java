@@ -17,7 +17,7 @@ public interface CollectService {
 
     Map<Integer, Boolean> hasCollected(Integer userId, List<Integer> itemIds);
 
-    Long getUserCollectCount(Integer userId);
+    Integer getUserCollectCount(Integer userId);
 
     List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 

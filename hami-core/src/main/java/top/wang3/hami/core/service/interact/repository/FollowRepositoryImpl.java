@@ -21,19 +21,19 @@ public class FollowRepositoryImpl extends ServiceImpl<UserFollowMapper, UserFoll
         implements FollowRepository {
 
     @Override
-    public Long getUserFollowingCount(Integer userId) {
+    public Integer getUserFollowingCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
     @Override
-    public Long getUserFollowerCount(Integer userId) {
+    public Integer getUserFollowerCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("following", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
     @Override

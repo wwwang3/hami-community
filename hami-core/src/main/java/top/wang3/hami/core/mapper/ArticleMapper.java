@@ -45,6 +45,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     List<ArticleCount> selectCateArticleCount();
 
-    Long selectTotalArticleCount();
+    Integer selectTotalArticleCount();
 
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.model.LikeItem;
@@ -97,6 +98,7 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteLikeItem(Integer itemId, LikeType likeType) {
         var wrapper = Wrappers.update(new LikeItem())
                 .set("state", 0)
@@ -130,12 +132,12 @@ public class LikerRepositoryImpl extends ServiceImpl<LikeMapper, LikeItem>
 
     @NonNull
     @Override
-    public Long queryUserLikeItemCount(Integer userId, LikeType likeType) {
+    public Integer queryUserLikeItemCount(Integer userId, LikeType likeType) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("item_type", likeType.getType())
                 .eq("liker_id", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
     @Override

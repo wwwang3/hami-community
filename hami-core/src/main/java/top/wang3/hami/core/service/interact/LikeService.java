@@ -13,7 +13,7 @@ public interface LikeService {
 
     boolean cancelLike(Integer itemId, LikeType likeType);
 
-    Long getUserLikeCount(Integer userId, LikeType likeType);
+    Integer getUserLikeCount(Integer userId, LikeType likeType);
 
     List<Integer> listUserLikeArticles(Page<LikeItem> page, Integer userId);
 

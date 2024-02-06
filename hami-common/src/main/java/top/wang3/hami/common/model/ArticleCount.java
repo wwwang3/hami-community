@@ -7,5 +7,5 @@ import lombok.Data;
 public class ArticleCount {
 
     private String cateId;
-    private Long total;
+    private Integer total;
 }

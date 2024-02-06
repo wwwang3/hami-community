@@ -18,7 +18,6 @@ public interface LikeRepository extends IService<LikeItem> {
 
     boolean doLike(Integer likerId, Integer itemId, LikeType likeType);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean cancelLike(Integer likerId, Integer itemId, LikeType likeType);
 
     @Transactional(rollbackFor = Exception.class)
@@ -36,7 +35,7 @@ public interface LikeRepository extends IService<LikeItem> {
      * @return 用户点赞的实体数
      */
     @NonNull
-    Long queryUserLikeItemCount(Integer userId, LikeType type);
+    Integer queryUserLikeItemCount(Integer userId, LikeType type);
 
     boolean hasLiked(Integer userId, Integer itemId, LikeType type);
 

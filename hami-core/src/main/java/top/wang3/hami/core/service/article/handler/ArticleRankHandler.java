@@ -13,7 +13,7 @@ import top.wang3.hami.common.util.RedisClient;
 @CanalRabbitHandler(value = "article", container = "canal-article-container-2")
 @RequiredArgsConstructor
 @Slf4j
-public class ArticleRankCanalHandler implements CanalEntryHandler<Article> {
+public class ArticleRankHandler implements CanalEntryHandler<Article> {
 
     @Override
     public void processInsert(Article entity) {
@@ -22,7 +22,6 @@ public class ArticleRankCanalHandler implements CanalEntryHandler<Article> {
 
     @Override
     public void processUpdate(Article before, Article after) {
-        //ignore it
         if (isLogicDelete(before.getDeleted(), after.getDeleted())) {
             processDelete(after);
         }

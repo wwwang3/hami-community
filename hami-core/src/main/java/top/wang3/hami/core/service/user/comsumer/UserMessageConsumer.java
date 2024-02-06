@@ -7,7 +7,7 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.constant.RedisConstants;
-import top.wang3.hami.common.message.UserRabbitMessage;
+import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
 
 @RabbitListener(bindings = {

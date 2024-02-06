@@ -39,13 +39,13 @@ public class ArticleStatConsumer {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
-            id = "ArticleStatMessageContainer-1",
+            id = "ArticleStatMsgContainer-1",
             bindings = @QueueBinding(
                     value = @Queue(RabbitConstants.STAT_QUEUE_1),
                     exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                     key = "*.like.1.*"
             ),
-            containerFactory = "batchRabbitListenerContainerFactory"
+            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleLikeMessage(List<LikeRabbitMessage> messages) {
         try {
@@ -81,7 +81,7 @@ public class ArticleStatConsumer {
                     exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
                     key = "comment.*"
             ),
-            containerFactory = "batchRabbitListenerContainerFactory"
+            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleCommentMessage(List<RabbitMessage> messages) {
         try {
@@ -149,7 +149,7 @@ public class ArticleStatConsumer {
                     exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
                     key = {"article.view"}
             ),
-            containerFactory = "batchRabbitListenerContainerFactory"
+            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleArticleViewMessage(List<ArticleRabbitMessage> messages) {
         try {

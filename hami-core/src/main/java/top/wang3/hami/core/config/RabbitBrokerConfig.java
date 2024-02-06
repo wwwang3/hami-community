@@ -8,20 +8,21 @@ import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import top.wang3.hami.common.constant.RabbitConstants;
 
 @Configuration
 public class RabbitBrokerConfig {
 
-    @Bean("batchRabbitListenerContainerFactory")
+    @Bean(RabbitConstants.BATCH_LISTENER_FACTORY)
     public SimpleRabbitListenerContainerFactory batchRabbitListenerContainerFactory(SimpleRabbitListenerContainerFactoryConfigurer configurer,
                                                                             ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         configurer.configure(containerFactory, connectionFactory);
-        containerFactory.setBatchSize(50);
+        containerFactory.setBatchSize(20);
         containerFactory.setBatchListener(true);
         containerFactory.setConsumerBatchEnabled(true);
         containerFactory.setConnectionFactory(connectionFactory);
-        containerFactory.setReceiveTimeout(200L); // 每次收到消息前最多阻塞等待的时长 200 * 50 = 10s 最多10s才写入
+        containerFactory.setReceiveTimeout(500L); // 每次收到消息前最多阻塞等待的时长 20 * 500 = 10s 最多10s才写入
         return containerFactory;
     }
 

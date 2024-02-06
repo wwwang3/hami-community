@@ -13,7 +13,9 @@ import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.model.*;
+import top.wang3.hami.common.model.Article;
+import top.wang3.hami.common.model.ArticleDraft;
+import top.wang3.hami.common.model.ArticleStat;
 import top.wang3.hami.common.util.Predicates;
 import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.exception.HamiServiceException;
@@ -26,7 +28,6 @@ import top.wang3.hami.core.service.article.repository.ArticleRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -196,6 +197,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
 
     private boolean handleUpdate(Article article) {
         // 直接更新即可, 不要在更新标签啦
+        article.setUserId(null);
         return articleRepository.updateArticle(article);
     }
 
@@ -203,15 +205,13 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         validator.validate(draft);
         // 校验分类
         // assert cateId != null
-        Map<Integer, Category> categroyMap = categoryService.getCategoryMap();
-        if (categroyMap.containsKey(draft.getCategoryId())) {
+        if (categoryService.getCategoryById(draft.getCategoryId()) == null) {
             throw new HamiServiceException("分类不存在");
         }
         // 校验标签 若有个tagId不存在抛出错误
         List<Integer> tagIds = draft.getTagIds();
-        Map<Integer, Tag> tagsMap = tagService.getTagMap();
         for (Integer tagId : tagIds) {
-            if (!tagsMap.containsKey(tagId)) {
+            if (tagId == null || tagService.getTagById(tagId) == null) {
                 throw new HamiServiceException("标签不存在");
             }
         }

@@ -29,6 +29,13 @@
     <update id="batchUpdateUserStat" parameterType="java.util.List">
         update user_stat
         <trim prefix="set" suffixOverrides=",">
+            <trim prefix="total_articles = total_articles + case" suffix="end,">
+                <foreach collection="stats" item="item" index="index">
+                    <if test="item.totalArticles != null and item.totalArticles != 0">
+                        when user_id = #{item.userId} then #{item.totalArticles}
+                    </if>
+                </foreach>
+            </trim>
             <trim prefix="total_views = total_views + case" suffix="end,">
                 <foreach collection="stats" item="item" index="index">
                     <if test="item.totalViews != null and item.totalViews != 0">
@@ -57,7 +64,7 @@
                     </if>
                 </foreach>
             </trim>
-            <trim prefix="total_followings = likes + case" suffix="end,">
+            <trim prefix="total_followings = total_followings + case" suffix="end,">
                 <foreach collection="stats" item="item" index="index">
                     <if test="item.totalFollowings != null and item.totalFollowings != 0">
                         when user_id = #{item.userId} then #{item.totalFollowings}

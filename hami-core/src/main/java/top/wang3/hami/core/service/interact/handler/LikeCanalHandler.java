@@ -8,7 +8,6 @@ import top.wang3.hami.canal.annotation.CanalRabbitHandler;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.model.LikeItem;
 import top.wang3.hami.common.util.RedisClient;
-import top.wang3.hami.core.service.interact.LikeService;
 
 
 @Component
@@ -16,9 +15,6 @@ import top.wang3.hami.core.service.interact.LikeService;
 @RequiredArgsConstructor
 @Slf4j
 public class LikeCanalHandler implements CanalEntryHandler<LikeItem> {
-
-    private final LikeService likeService;
-
 
     @Override
     public void processInsert(LikeItem entity) {

@@ -119,11 +119,11 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     @Override
-    public Map<String, Long> getArticleCount() {
+    public Map<String, Integer> getArticleCount() {
         List<ArticleCount> cateArticleCount = getBaseMapper().selectCateArticleCount();
-        long total = cateArticleCount.stream().mapToLong(ArticleCount::getTotal).sum();
+        int total = cateArticleCount.stream().mapToInt(ArticleCount::getTotal).sum();
 //        Long totalArticleCount = getBaseMapper().selectTotalArticleCount();
-        Map<String, Long> map = ListMapperHandler.listToMap(
+        Map<String, Integer> map = ListMapperHandler.listToMap(
                 cateArticleCount,
                 item -> RedisConstants.CATE_ARTICLE_COUNT_HKEY + item.getCateId(),
                 ArticleCount::getTotal

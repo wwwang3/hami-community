@@ -69,7 +69,7 @@ public class LikeServiceImpl implements LikeService {
         int loginUserId = LoginUserContext.getLoginUserId();
         String key = buildKey(loginUserId, likeType);
         return InteractHandler
-                .build("取消点赞")
+                .build("点赞")
                 .ofCancelAction(key, itemId)
                 .millis(TimeoutConstants.LIKE_LIST_EXPIRE)
                 .loader(() -> loadUserLikeItem(loginUserId, likeType))
@@ -103,7 +103,7 @@ public class LikeServiceImpl implements LikeService {
 
     @CostLog
     @Override
-    public Long getUserLikeCount(Integer userId, LikeType likeType) {
+    public Integer getUserLikeCount(Integer userId, LikeType likeType) {
         // 获取用户点赞的实体数 (我赞过)
         String key = RedisConstants.USER_LIKE_COUNT + likeType.getType() + ":" + userId;
         return cacheService.get(

@@ -1,6 +1,7 @@
 package top.wang3.hami.core.service.account.consumer;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Component;
@@ -9,15 +10,18 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.message.AccountRabbitMessage;
 import top.wang3.hami.common.util.RedisClient;
 
-@RabbitListener(bindings = {
-        @QueueBinding(
-                value = @Queue("hami-account-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_ACCOUNT_EXCHANGE, type = "topic"),
-                key = {"account.*"}
-        ),
-})
+@RabbitListener(
+        id = "AccountMsgContainer-1",
+        bindings = {
+                @QueueBinding(
+                        value = @Queue("hami-account-queue-1"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_ACCOUNT_EXCHANGE, type = "topic"),
+                        key = {"account.*"}
+                )
+        })
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AccountMessageConsumer {
 
     @RabbitHandler

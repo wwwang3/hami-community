@@ -39,7 +39,9 @@ public class DefaultAuthenticationPostHandler implements AuthenticationPostHandl
         if (properties.getCookie().isEnable()) {
             writeCookie(response, token, loginUser);
         }
-        log.debug("login success: {}", loginUser);
+        if (log.isDebugEnabled()) {
+            log.debug("login success: {}", loginUser);
+        }
         // 响应结果
         Map<String, String> map = Map.of("tokenName", tokenName, "tokenValue", token);
         Result<Map<String, String>> result = Result.successData(map);

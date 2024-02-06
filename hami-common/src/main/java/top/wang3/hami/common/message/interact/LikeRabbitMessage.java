@@ -12,10 +12,6 @@ import top.wang3.hami.common.dto.interact.LikeType;
 @NoArgsConstructor
 public class LikeRabbitMessage extends InteractRabbitMessage {
 
-    public LikeRabbitMessage(LikeType likeType) {
-        this.likeType = likeType;
-    }
-
     public LikeRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId, LikeType likeType) {
         super(userId, toUserId, state, itemId);
         this.likeType = likeType;

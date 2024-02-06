@@ -10,8 +10,8 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.NotifyRabbitReadMessage;
-import top.wang3.hami.common.message.UserRabbitMessage;
 import top.wang3.hami.common.message.interact.*;
+import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.common.model.NotifyMsg;
 import top.wang3.hami.core.component.InteractConsumer;
@@ -22,18 +22,22 @@ import top.wang3.hami.security.model.Result;
 import java.util.List;
 import java.util.Objects;
 
-@RabbitListener(bindings = {
-        @QueueBinding(
-                value = @Queue("hami-notify-queue-1"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
-                key = {"do.follow", "do.like.*.*", "do.collect", "comment.*", "notify.read"}
-        ),
-        @QueueBinding(
-                value = @Queue("hami-notify-queue-2"),
-                exchange = @Exchange(value = RabbitConstants.HAMI_USER_EXCHANGE, type = "topic"),
-                key = {"user.create"}
-        )
-}, concurrency = "4")
+@RabbitListener(
+        id = "NotifyMsgContainer",
+        bindings = {
+                @QueueBinding(
+                        value = @Queue("hami-notify-queue-1"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
+                        key = {"do.follow.*", "do.like.*.*", "do.collect.*", "comment.*", "notify.read"}
+                ),
+                @QueueBinding(
+                        value = @Queue("hami-notify-queue-2"),
+                        exchange = @Exchange(value = RabbitConstants.HAMI_USER_EXCHANGE, type = "topic"),
+                        key = {"user.create"}
+                )
+        },
+        concurrency = "4"
+)
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -51,7 +55,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
         try {
             //点赞一般需要判断取消后再次点赞的, 数据库加了索引不管了
             if (Constants.ZERO.equals(message.getState())
-                    || isSelf(message.getUserId(), message.getToUserId())) {
+                || isSelf(message.getUserId(), message.getToUserId())) {
                 return;
             }
             if (LikeType.ARTICLE.equals(message.getLikeType())) {
@@ -133,10 +137,10 @@ public class NotifyMsgConsumer implements InteractConsumer {
         try {
             int itemUser = message.getToUserId();
             if (Constants.ZERO.equals(message.getState())
-                    || isSelf(message.getUserId(), itemUser)) {
+                || isSelf(message.getUserId(), itemUser)) {
                 return;
             }
-            //收藏消息 xx收藏了你的文章
+            // 收藏消息 xx收藏了你的文章
             int articleId = message.getItemId();
             NotifyMsg msg = NotifyMsgBuilder
                     .buildCollectMsg(message.getUserId(), itemUser, articleId);
@@ -152,7 +156,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
             if (Constants.ZERO.equals(message.getState())) {
                 return;
             }
-            //xx 关注了你
+            // xx 关注了你
             NotifyMsg msg = NotifyMsgBuilder
                     .buildFollowMsg(message.getUserId(), message.getToUserId());
             save(msg);

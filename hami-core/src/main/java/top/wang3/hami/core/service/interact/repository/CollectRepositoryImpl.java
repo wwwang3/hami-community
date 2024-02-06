@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.ArticleCollect;
 import top.wang3.hami.common.util.ListMapperHandler;
@@ -92,6 +93,7 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteCollectItem(Integer articleId) {
         var wrapper = Wrappers.update(new ArticleCollect())
                 .set("state", 0)
@@ -110,11 +112,11 @@ public class CollectRepositoryImpl extends ServiceImpl<ArticleCollectMapper, Art
     }
 
     @Override
-    public Long getUserCollectCount(Integer userId) {
+    public Integer getUserCollectCount(Integer userId) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .eq("user_id", userId)
                 .eq("`state`", Constants.ONE)
-                .count();
+                .count().intValue();
     }
 
     @Override

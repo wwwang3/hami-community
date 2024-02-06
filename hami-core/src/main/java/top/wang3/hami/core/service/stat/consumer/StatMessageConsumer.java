@@ -7,12 +7,12 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
-import top.wang3.hami.common.message.UserRabbitMessage;
+import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
 @RabbitListener(
-        id = "StatMessageConsumer",
+        id = "StatMsgConsumer",
         bindings = {
                 @QueueBinding(
                         value = @Queue(RabbitConstants.STAT_QUEUE_5),

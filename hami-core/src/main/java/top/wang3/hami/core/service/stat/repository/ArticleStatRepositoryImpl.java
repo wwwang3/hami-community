@@ -124,8 +124,8 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
                 .update();
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean decreaseComments(int articleId, int count) {
         return ChainWrappers.updateChain(getBaseMapper())
                 .setSql("comments = comments - {0}", count)
@@ -133,8 +133,8 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
                 .update();
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateViews(Collection<ArticleStat> stats) {
         super.updateBatchById(stats);
     }
@@ -146,21 +146,25 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateLikes(List<ArticleStat> articleStats) {
         return getBaseMapper().batchUpdateLikes(articleStats);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateComments(List<ArticleStat> articleStats) {
         return getBaseMapper().batchUpdateComments(articleStats);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateCollects(List<ArticleStat> articleStats) {
         return getBaseMapper().batchUpdateCollects(articleStats);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateViews(List<ArticleStat> articleStats) {
         return getBaseMapper().batchUpdateViews(articleStats);
     }

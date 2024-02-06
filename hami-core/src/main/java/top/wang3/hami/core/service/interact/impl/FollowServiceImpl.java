@@ -68,7 +68,7 @@ public class FollowServiceImpl implements FollowService {
         final int loginUserId = LoginUserContext.getLoginUserId();
         String key = RedisConstants.USER_FOLLOWING_LIST + loginUserId;
         return InteractHandler
-                .<Integer>build("取消关注")
+                .<Integer>build("关注")
                 .ofCancelAction(key, followingId)
                 .millis(TimeoutConstants.FOLLOWER_LIST_EXPIRE)
                 .loader(() -> loadUserFollowings(loginUserId))
@@ -86,7 +86,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @NonNull
-    public Long getUserFollowingCount(Integer userId) {
+    public Integer getUserFollowingCount(Integer userId) {
         String key = RedisConstants.USER_FOLLOWING_COUNT + userId;
         return cacheService.get(
                 key,
@@ -97,7 +97,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @NonNull
-    public Long getUserFollowerCount(Integer userId) {
+    public Integer getUserFollowerCount(Integer userId) {
         String key = RedisConstants.USER_FOLLOWER_COUNT + userId;
         return cacheService.get(
                 key,

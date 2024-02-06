@@ -31,14 +31,4 @@ public class ArticleStatServiceImpl implements ArticleStatService {
         return StatConverter.INSTANCE.toArticleStatDTOS(stats);
     }
 
-    @Override
-    public boolean increaseComments(int articleId, int count) {
-        return articleStatRepository.increaseComments(articleId, count);
-    }
-
-
-    @Override
-    public boolean decreaseComments(int articleId, int count) {
-        return articleStatRepository.decreaseComments(articleId, count);
-    }
 }

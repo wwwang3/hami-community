@@ -31,7 +31,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     private final CountService countService;
 
     @Override
-    public long getArticleCountCache(Integer cateId) {
+    public int getArticleCountCache(Integer cateId) {
         String key = RedisConstants.ARTICLE_COUNT_HASH;
         String hKey = (cateId == null) ? RedisConstants.TOTAL_ARTICLE_COUNT_HKEY :
                 RedisConstants.CATE_ARTICLE_COUNT_HKEY + cateId;
@@ -60,7 +60,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         // 从缓存中获取文章ID
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         return ZPageHandler.<Integer>of(key, page)
-                .countSupplier(() -> countService.getUserArticleCount(userId).longValue())
+                .countSupplier(() -> countService.getUserArticleCount(userId))
                 .source((current, size) -> articleRepository.loadArticleListByPage(page, null, userId))
                 .loader(() -> loadUserArticleListCache(userId))
                 .query();

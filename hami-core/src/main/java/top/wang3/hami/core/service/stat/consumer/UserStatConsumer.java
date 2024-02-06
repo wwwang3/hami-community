@@ -38,7 +38,7 @@ public class UserStatConsumer {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
-            id = "UserStatMessageContainer-1",
+            id = "UserStatMsgContainer-1",
             bindings = {
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
@@ -56,8 +56,7 @@ public class UserStatConsumer {
                             key = {"comment.*"}
                     )
             },
-            containerFactory = "batchRabbitListenerContainerFactory",
-            messageConverter = "rabbitMQJacksonConverter"
+            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleStatMessage(List<RabbitMessage> messages) {
         try {
@@ -92,7 +91,7 @@ public class UserStatConsumer {
 
 
     @RabbitListener(
-            id = "UserStatMessageContainer-2",
+            id = "UserStatMsgContainer-2",
             bindings = {
                     @QueueBinding(
                             value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),
@@ -100,7 +99,7 @@ public class UserStatConsumer {
                             key = "*.follow.*"
                     ),
             },
-            containerFactory = "batchRabbitListenerContainerFactory"
+            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleFollowMessage(List<FollowRabbitMessage> messages) {
         try {

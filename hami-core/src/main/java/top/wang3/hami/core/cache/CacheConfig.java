@@ -34,7 +34,7 @@ public class CacheConfig {
     public CacheManager caffeineCacheManager(Caffeine<Object, Object> caffeine) {
         CaffeineCacheManager manager = new CaffeineCacheManager(Constants.CAFFEINE_CACHE_NAME);
         manager.setCaffeine(caffeine);
-        manager.setAllowNullValues(false);
+        manager.setAllowNullValues(true);
         return manager;
     }
 }

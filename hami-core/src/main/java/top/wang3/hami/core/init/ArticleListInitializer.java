@@ -38,6 +38,7 @@ public class ArticleListInitializer implements HamiInitializer {
     }
 
     private void cacheTotal() {
+        articleCacheService.getArticleCountCache(null);
         articleCacheService.loadArticleListCache(null);
     }
 

@@ -6,12 +6,19 @@
     <!--@Table login_record-->
     <id column="id" property="id" />
     <result column="user_id" property="userId" />
-    <result column="ip_info" property="ipInfo" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
     <result column="login_time" property="loginTime" />
     <result column="deleted" property="deleted" />
+    <result column="ip_info" property="ipInfo" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, ip_info, login_time, deleted
+    id, user_id, login_time, deleted, ip_info
   </sql>
+
+  <insert id="batchInsertRecords">
+    insert into login_record (user_id, login_time, ip_info) values
+    <foreach collection="records" separator="," item="item">
+      (#{item.userId}, #{item.loginTime}, #{item.ipInfo,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler})
+    </foreach>
+  </insert>
 </mapper>

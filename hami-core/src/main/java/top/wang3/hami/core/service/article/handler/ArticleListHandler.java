@@ -45,6 +45,7 @@ public class ArticleListHandler implements CanalEntryHandler<Article> {
                 List.of(key),
                 List.of(id, ctime, timeout, ZPageHandler.DEFAULT_MAX_SIZE)
         );
+        log.info("article inserted, add to redis-article-list, article: {}", entity);
         if (result == null || result == 0) {
             // 缓存过期
             lockTemplate.execute(RedisConstants.ARTICLE_LIST, () -> {

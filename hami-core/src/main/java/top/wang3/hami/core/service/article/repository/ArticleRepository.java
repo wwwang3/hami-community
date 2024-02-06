@@ -37,7 +37,7 @@ public interface ArticleRepository extends IService<Article> {
 
     Integer getArticleAuthor(Integer articleId);
 
-    Map<String, Long> getArticleCount();
+    Map<String, Integer> getArticleCount();
 
     boolean saveArticle(Article article);
 

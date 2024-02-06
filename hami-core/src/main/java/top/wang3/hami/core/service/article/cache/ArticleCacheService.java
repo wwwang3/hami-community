@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ArticleCacheService {
 
-    long getArticleCountCache(Integer cateId);
+    int getArticleCountCache(Integer cateId);
 
     List<Integer> listArticleIdByPage(Page<Article> page, Integer cateId);
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.model.HotCounter;
 import top.wang3.hami.common.model.UserStat;
 import top.wang3.hami.core.mapper.UserStatMapper;
@@ -70,6 +71,7 @@ public class UserStatRepositoryImpl extends ServiceImpl<UserStatMapper, UserStat
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateUserStats(List<UserStat> userStats) {
         return getBaseMapper().batchUpdateUserStat(userStats);
     }

@@ -16,7 +16,7 @@ import java.util.List;
 
 @Component
 @RabbitListener(
-        id = "SearchMessageContainer",
+        id = "SearchMsgContainer",
         bindings = @QueueBinding(
                 value = @Queue(value = "hami-search-queue-1"),
                 exchange = @Exchange(value = RabbitConstants.HAMI_SEARCH_EXCHANGE, type = ExchangeTypes.TOPIC),

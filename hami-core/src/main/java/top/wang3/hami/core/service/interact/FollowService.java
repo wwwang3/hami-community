@@ -16,19 +16,21 @@ public interface FollowService {
 
     /**
      * 获取用户关注数
+     *
      * @param userId 用户ID
      * @return 用户关注数
      */
     @NonNull
-    Long getUserFollowingCount(Integer userId);
+    Integer getUserFollowingCount(Integer userId);
 
     /**
      * 获取用户粉丝数
+     *
      * @param userId 用户ID
      * @return 用户粉丝数
      */
     @NonNull
-    Long getUserFollowerCount(Integer userId);
+    Integer getUserFollowerCount(Integer userId);
 
     boolean hasFollowed(Integer userId, Integer followingId);
 

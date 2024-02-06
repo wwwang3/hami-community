@@ -54,7 +54,7 @@ public class ZPageHandler {
         // 是否倒序查询
         boolean reversed = true;
         //总数查询方法
-        Supplier<Long> countSupplier;
+        Supplier<Integer> countSupplier;
 
         // 超过zset存储的最大数量, 回源查询方法
         BiFunction<Long, Long, List<T>> source;
@@ -66,7 +66,7 @@ public class ZPageHandler {
 
 
         public List<T> query() {
-            Long count = countSupplier.get();
+            Integer count = countSupplier.get();
             // count为0直接走人
             if (count == null || count == 0) {
                 // empty
@@ -138,7 +138,7 @@ public class ZPageHandler {
             return this;
         }
 
-        public ZPage<T> countSupplier(Supplier<Long> supplier) {
+        public ZPage<T> countSupplier(Supplier<Integer> supplier) {
             this.countSupplier = supplier;
             return this;
         }

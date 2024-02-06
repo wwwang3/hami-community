@@ -14,11 +14,11 @@ import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.component.InteractConsumer;
 import top.wang3.hami.core.service.article.repository.ArticleRepository;
 
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RabbitListener(
-        id = "DataGrowingMessageContainer-1",
+        id = "DataGrowingMsgContainer-1",
         bindings = {
                 @QueueBinding(
                         value = @Queue(value = "hami-data-growing-queue-1"),
@@ -121,8 +121,7 @@ public class DataGrowingConsumer implements InteractConsumer {
         long expire = RedisClient.getExpire(key);
         if (expire == -1) {
             // 没有设置就设置, 48小时,
-            long mills = DateUtils.plusHours(new Date(), 48);
-            RedisClient.pExpire(key, mills);
+            RedisClient.pExpire(key, TimeUnit.HOURS.toMillis(48));
         }
     }
 }

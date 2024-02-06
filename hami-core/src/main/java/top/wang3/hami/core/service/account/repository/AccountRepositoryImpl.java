@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
 import top.wang3.hami.common.model.Account;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.mapper.AccountMapper;
 
 
@@ -19,6 +20,7 @@ public class AccountRepositoryImpl extends ServiceImpl<AccountMapper, Account>
     }
 
     @Override
+    @CostLog
     public Integer getAccountId(String account) {
         return getBaseMapper().selectAccountId(account);
     }

@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.article.handler;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.canal.CanalEntryHandler;
@@ -17,6 +18,7 @@ import java.util.List;
 @Component
 @CanalRabbitHandler(value = "article", container = "canal-article-container-2")
 @RequiredArgsConstructor
+@Slf4j
 public class UserArticleListHandler implements CanalEntryHandler<Article> {
 
 
@@ -35,6 +37,7 @@ public class UserArticleListHandler implements CanalEntryHandler<Article> {
         String key = RedisConstants.USER_ARTICLE_LIST + userId;
         long timeout = TimeoutConstants.USER_ARTICLE_LIST_EXPIRE;
         long ctime = entity.getCtime().getTime();
+        log.info("article inserted, add to redis-user-article-list, article: {}", entity);
         RedisClient.executeScript(
                 insert_article_script,
                 List.of(key),

@@ -35,11 +35,6 @@ public class RankListInitializer implements HamiInitializer {
     }
 
     @Override
-    public boolean alwaysExecute() {
-        return true;
-    }
-
-    @Override
     public boolean async() {
         return true;
     }

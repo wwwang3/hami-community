@@ -6,12 +6,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.model.Category;
-import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.core.service.article.CategoryService;
 import top.wang3.hami.core.service.article.repository.CategoryRepository;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -23,11 +21,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getAllCategories() {
         return categoryRepository.getAllCategories();
-    }
-
-    @Override
-    public Map<Integer, Category> getCategoryMap() {
-        return ListMapperHandler.listToMap(getAllCategories(), Category::getId);
     }
 
     @Override

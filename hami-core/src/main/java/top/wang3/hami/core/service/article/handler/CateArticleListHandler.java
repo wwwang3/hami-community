@@ -2,6 +2,7 @@ package top.wang3.hami.core.service.article.handler;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.canal.CanalEntryHandler;
@@ -21,6 +22,7 @@ import java.util.Objects;
 @Component
 @CanalRabbitHandler(value = "article", container = "canal-article-container-2")
 @RequiredArgsConstructor
+@Slf4j
 public class CateArticleListHandler implements CanalEntryHandler<Article> {
 
     private final ArticleCacheService articleCacheService;
@@ -45,6 +47,7 @@ public class CateArticleListHandler implements CanalEntryHandler<Article> {
                 List.of(key),
                 List.of(id, entity.getCtime().getTime(), timeout, ZPageHandler.DEFAULT_MAX_SIZE)
         );
+        log.info("article inserted, add to redis-cate-article-list, article: {}", entity);
         if (result == null || result == 0) {
             // 缓存过期
             lockTemplate.execute(RedisConstants.ARTICLE_LIST, () -> {

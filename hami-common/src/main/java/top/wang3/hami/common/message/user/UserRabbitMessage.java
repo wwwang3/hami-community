@@ -1,10 +1,11 @@
-package top.wang3.hami.common.message;
+package top.wang3.hami.common.message.user;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import top.wang3.hami.common.constant.RabbitConstants;
+import top.wang3.hami.common.message.RabbitMessage;
 
 @Data
 @AllArgsConstructor

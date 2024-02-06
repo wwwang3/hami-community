@@ -10,49 +10,17 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.interact.CollectRabbitMessage;
 import top.wang3.hami.core.service.interact.repository.CollectRepository;
 
-
-@RabbitListeners(value = {
-        @RabbitListener(
-                id = "CollectMessageContainer-1",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.COLLECT_QUEUE_1),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*.1"
-                )
-        ),
-        @RabbitListener(
-                id = "CollectMessageContainer-2",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.COLLECT_QUEUE_2),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*.2"
-                )
-        ),
-        @RabbitListener(
-                id = "CollectMessageContainer-3",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.COLLECT_QUEUE_3),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*.3"
-                )
-        ),
-        @RabbitListener(
-                id = "CollectMessageContainer-4",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.COLLECT_QUEUE_4),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*.4"
-                )
-        ),
-        @RabbitListener(
-                id = "CollectMessageContainer-5",
-                bindings = @QueueBinding(
-                        value = @Queue(RabbitConstants.COLLECT_QUEUE_5),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                        key = "*.collect.*.5"
-                )
+/**
+ * 一个容器算了
+ */
+@RabbitListener(
+        id = "CollectMsgContainer-1",
+        bindings = @QueueBinding(
+                value = @Queue(RabbitConstants.COLLECT_QUEUE_1),
+                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                key = "*.collect.*"
         )
-})
+)
 @Component
 @RequiredArgsConstructor
 @Slf4j

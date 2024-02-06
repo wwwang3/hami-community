@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 
 @RabbitListeners(value = {
         @RabbitListener(
-                id = "CommentMessageContainer-2",
+                id = "CommentMsgContainer-2",
                 bindings = @QueueBinding(
                         value = @Queue(RabbitConstants.COMMENT_QUEUE_1),
                         exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                         key = "*.like.2.*"
                 ),
-                containerFactory = "batchRabbitListenerContainerFactory"
+                containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
         ),
 })
 @Component

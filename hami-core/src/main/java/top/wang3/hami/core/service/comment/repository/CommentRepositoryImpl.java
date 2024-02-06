@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import top.wang3.hami.common.dto.comment.Reply;
 import top.wang3.hami.common.model.Comment;
 import top.wang3.hami.core.mapper.CommentMapper;
@@ -75,6 +76,7 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long batchUpdateLikes(List<Comment> comments) {
         return getBaseMapper().batchUpdateLikes(comments);
     }

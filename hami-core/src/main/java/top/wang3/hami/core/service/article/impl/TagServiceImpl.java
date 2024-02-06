@@ -14,7 +14,6 @@ import top.wang3.hami.core.service.interact.repository.TagRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,12 +26,6 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> getAllTag() {
         return tagRepository.getAllTags();
-    }
-
-    @Override
-    public Map<Integer, Tag> getTagMap() {
-        List<Tag> tags = tagRepository.getAllTags();
-        return ListMapperHandler.listToMap(tags, Tag::getId);
     }
 
     @Override

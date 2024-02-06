@@ -27,8 +27,11 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
         this.canalMessageConverter = canalMessageConverter;
     }
 
-    public void onMessage(Message message, Channel channel) throws Exception {
-        log.info("canal-container: {}, received a message", containerId);
+    @SuppressWarnings("all")
+    public void onMessage(Message message, Channel channel) {
+        if (log.isDebugEnabled()) {
+            log.debug("canal-container: {}, received a message", containerId);
+        }
         long start = System.currentTimeMillis();
         if (isEmptyMessage(message)) {
             return;
@@ -40,8 +43,11 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
             for (Map.Entry<String, List<CanalEntity<Object>>> entry : entitiesMap.entrySet()) {
                 String key = entry.getKey();
                 List<CanalEntity<Object>> entities = entry.getValue();
+                if (entities.isEmpty()) {
+                    continue;
+                }
                 List<CanalEntryHandler<?>> handlers = findHandler(containerId, key);
-                if (CollectionUtils.isEmpty(handlers) || entities.isEmpty()) {
+                if (CollectionUtils.isEmpty(handlers)) {
                     log.warn("no handler found for table: {}", key);
                     continue;
                 }
@@ -49,10 +55,16 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
                 processEntity(entities, handlers);
             }
             long end = System.currentTimeMillis();
-            log.info("container: [{}] handle {} message, cost: {}ms", containerId, size, end - start);
+            if (log.isDebugEnabled()) {
+                log.debug("container: [{}] handle {} message, cost: {}ms", containerId, size, end - start);
+            }
         } catch (Exception e) {
-            log.error("handle message failed, container-id: error_class: {}, error_msg: {}, entitiesMap: {}",
-                    e.getClass(), e.getMessage(), entitiesMap);
+            e.printStackTrace();
+            log.error(
+                    "handle message failed, container-id: {}, error_class: {}, error_msg: {}, entitiesMap: {}",
+                    containerId, e.getClass(),
+                    e.getMessage(), entitiesMap
+            );
         }
     }
 
@@ -83,7 +95,7 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
 
     private List<CanalEntryHandler<?>> findHandler(String containerId, String tableName) {
         List<CanalEntryHandler<?>> containerHandler = factory.getContainerHandlers(containerId, tableName);
-        if (containerHandler == null  || containerHandler.isEmpty()) {
+        if (containerHandler == null || containerHandler.isEmpty()) {
             return factory.getHandler(tableName);
         }
         return containerHandler;

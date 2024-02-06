@@ -26,7 +26,7 @@ public class ArticleMessageConsumer {
             @QueueBinding(
                     value = @Queue("hami-article-queue-1"),
                     exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = "topic"),
-                    key = {"article.update", "article.delete"}
+                    key = {"article.publish", "article.update", "article.delete"}
             ),
     }, concurrency = "2")
     public void handleArticleMessage(ArticleRabbitMessage message) {

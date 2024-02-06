@@ -26,7 +26,7 @@ public interface CollectRepository extends IService<ArticleCollect> {
     @Transactional(rollbackFor = Exception.class)
     int deleteCollectItem(Integer articleId);
 
-    Long getUserCollectCount(Integer userId);
+    Integer getUserCollectCount(Integer userId);
 
     List<ArticleCollect> listUserCollects(Integer userId);
 

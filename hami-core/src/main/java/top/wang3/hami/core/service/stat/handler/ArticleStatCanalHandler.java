@@ -27,7 +27,9 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
         // 在文章数据表插入了一条数据
         // 写入Redis
         setCache(entity);
-        log.debug("insert to Redis success: {}", entity);
+        if (log.isDebugEnabled()) {
+            log.debug("insert to Redis success: {}", entity);
+        }
     }
 
     @Override
@@ -40,14 +42,18 @@ public class ArticleStatCanalHandler implements CanalEntryHandler<ArticleStat> {
         } else {
             setCache(after);
         }
-        log.debug("update to Redis success: before: {}, after: {}", before, after);
+        if (log.isDebugEnabled()) {
+            log.debug("update to Redis success: before: {}, after: {}", before, after);
+        }
     }
 
     @Override
     public void processDelete(ArticleStat deletedEntity) {
         Integer articleId = deletedEntity.getArticleId();
         RedisClient.deleteObject(RedisConstants.STAT_TYPE_ARTICLE + articleId);
-        log.debug("update to Redis success: deleted: {}", deletedEntity);
+        if (log.isDebugEnabled()) {
+            log.debug("update to Redis success, deleted: {}", deletedEntity);
+        }
     }
 
     private void setCache(ArticleStat stat) {
