@@ -65,6 +65,8 @@ public interface CacheService {
      */
     boolean expireAndIncrBy(String key, int delta, long millis);
 
+    boolean expireAndHIncrBy(String key, String hkey, int delta, long mills);
+
     /**
      * 刷新过期时间, 刷新失败则<b>加锁<b/>执行runnable
      * @param key key

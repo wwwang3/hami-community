@@ -39,7 +39,7 @@ public class FollowMessageConsumer {
     public void handleMessage(FollowRabbitMessage message) {
         if (message == null || message.getToUserId() == null) return;
         try {
-            boolean success = followRepository.followUser(message.getUserId(), message.getToUserId(), message.getState());
+            followRepository.followUser(message.getUserId(), message.getToUserId(), message.getState());
         } catch (Exception e) {
             // now ignore it
             log.error("message: {}, error_class: {}, error_msg: {}", message, e.getClass(), e.getMessage());

@@ -38,6 +38,16 @@ public final class RedisConstants {
     public static final String ARTICLE_LIST = "article:list:total";
     public static final String CATE_ARTICLE_LIST = "cate:article:list:";
 
+    public static final String USER_INTERACT_COUNT_HASH = "interact:count:hash:";
+
+    public static final String LIKE_INTERACT_HKEY = "like:";
+
+    public static final String LIKE_ARTICLE_INTERACT_HKEY = LIKE_INTERACT_HKEY + Constants.LIKE_TYPE_ARTICLE;
+
+    public static final String COLLECT_INTERACT_HKEY = "collect";
+    public static final String FOLLOW_INTERACT_HKEY = "follow";
+    public static final String FOLLOWER_INTERACT_HKEY = "follower";
+
     /**
      * 文章总数和分类文章数
      */

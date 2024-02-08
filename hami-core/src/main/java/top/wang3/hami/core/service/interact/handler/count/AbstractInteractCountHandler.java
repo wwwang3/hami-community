@@ -14,16 +14,13 @@ public abstract class AbstractInteractCountHandler<T> implements CanalEntryHandl
 
     public abstract String buildKey(T entity);
 
+    public abstract String buildHkey(T entity);
+
     public abstract boolean isInsert(T before, T after);
 
     protected void loadCount(T entity) {
 
     }
-
-    protected long getExpireMills() {
-        return TimeoutConstants.INTERACT_COUNT_EXPIRE;
-    }
-
 
     @Override
     public void processInsert(T entity) {
@@ -46,12 +43,11 @@ public abstract class AbstractInteractCountHandler<T> implements CanalEntryHandl
 
 
     protected void execute(T entity, int delta) {
-        final String key = buildKey(entity);
-        final long timeout = getExpireMills();
-        boolean success = cacheService.expireAndIncrBy(
-                key,
+        boolean success = cacheService.expireAndHIncrBy(
+                buildKey(entity),
+                buildHkey(entity),
                 delta,
-                timeout
+                TimeoutConstants.INTERACT_COUNT_EXPIRE
         );
         if (!success) {
             // 缓存过期

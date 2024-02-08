@@ -3,7 +3,9 @@ package top.wang3.hami.web.controller.interact;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.article.UserPageParam;
@@ -34,6 +36,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/interact")
 @RequiredArgsConstructor
+@Validated
 public class UserInteractController {
 
     private final FollowService followService;
@@ -52,7 +55,7 @@ public class UserInteractController {
     @PostMapping("/follow")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> doFollow(@RequestParam("followingId") int followingId) {
+    public Result<Void> doFollow(@RequestParam("followingId") @Min(value = 1) int followingId) {
         return Result.ofTrue(followService.follow(followingId))
                 .orElse("操作失败");
     }
@@ -66,7 +69,7 @@ public class UserInteractController {
     @PostMapping("/follow/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> unFollow(@RequestParam("followingId") int followingId) {
+    public Result<Void> unFollow(@RequestParam("followingId") @Min(value = 1) int followingId) {
         return Result.ofTrue(followService.unFollow(followingId))
                 .orElse("操作失败");
     }
@@ -110,7 +113,7 @@ public class UserInteractController {
     @PostMapping("/collect")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> collect(@RequestParam("articleId") int articleId) {
+    public Result<Void> collect(@RequestParam("articleId") @Min(value = 1) int articleId) {
         return Result
                 .ofTrue(collectService.doCollect(articleId))
                 .orElse("操作失败");
@@ -125,7 +128,7 @@ public class UserInteractController {
     @PostMapping("/collect/cancel")
     @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
             algorithm = RateLimit.Algorithm.FIXED_WINDOW)
-    public Result<Void> cancelCollect(@RequestParam("articleId") int articleId) {
+    public Result<Void> cancelCollect(@RequestParam("articleId") @Min(value = 1) int articleId) {
         return Result
                 .ofTrue(collectService.cancelCollect(articleId))
                 .orElse("操作失败");

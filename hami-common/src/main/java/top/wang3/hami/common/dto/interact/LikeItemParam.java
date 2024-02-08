@@ -1,6 +1,7 @@
 package top.wang3.hami.common.dto.interact;
 
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class LikeItemParam {
      * 点赞的实体Id
      */
     @NotNull
+    @Min(value = 1)
     private int itemId;
 
     /**

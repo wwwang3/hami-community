@@ -120,6 +120,15 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
+    public boolean expireAndHIncrBy(String key, String hkey, int delta, long mills) {
+        if (RedisClient.pExpire(key, mills) && RedisClient.getCacheMapValue(key, hkey) != null) {
+            RedisClient.hIncr(key, hkey, delta);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void expiredThenExecute(String key, long millis, Runnable runnable) {
         // 刷新过期时间, 刷新失败则执行runnable
         if (!RedisClient.pExpire(key, millis)) {

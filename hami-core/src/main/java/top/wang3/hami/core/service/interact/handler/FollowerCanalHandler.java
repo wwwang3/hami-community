@@ -27,7 +27,7 @@ public class FollowerCanalHandler implements CanalEntryHandler<UserFollow> {
 
     @Override
     public void processInsert(UserFollow entity) {
-        // 被关注用户的粉丝列表, 这里已经是MySQL插入插入成功后的数据
+        // 被关注用户的粉丝列表, 这里已经是MySQL插入成功后的数据
         Integer following = entity.getFollowing();
         String follower_list_key = RedisConstants.USER_FOLLOWER_LIST + following;
         // 被关注用户的粉丝列表元素+1

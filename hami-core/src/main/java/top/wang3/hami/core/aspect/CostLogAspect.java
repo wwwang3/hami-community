@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class CostLogAspect {
 
     @Pointcut(value = "@annotation(top.wang3.hami.core.annotation.CostLog)")
-    public void costAspectPoint() {
+    public void costLogAspectPoint() {
 
     }
 
-    @Around(value = "costAspectPoint()")
+    @Around(value = "costLogAspectPoint()")
     public Object printLog(ProceedingJoinPoint point) throws Throwable {
         long start = System.currentTimeMillis();
         String methodName = point.getSignature().getName();
@@ -27,7 +27,7 @@ public class CostLogAspect {
             return point.proceed();
         } finally {
             long end = System.currentTimeMillis();
-            log.info("[{}]#[{}] execute cost: {}ms", className, methodName, end - start);
+            log.info("[{}#{}] execute cost: {}ms", className, methodName, end - start);
         }
     }
 }

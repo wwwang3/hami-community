@@ -100,7 +100,7 @@ public class ListMapperHandler {
             byte[] value = RedisClient.valueBytes(member);
             Double score = scoreMapper.apply(item).doubleValue();
             return new DefaultTuple(value, score);
-        });
+        }, false);
     }
 
     /**
@@ -146,7 +146,7 @@ public class ListMapperHandler {
         return listToSet(data, item -> {
             R member = memberMapper.apply(item);
             Double score = scoreMapper.apply(item);
-            return new DefaultTypedTuple<R>(member, score);
+            return new DefaultTypedTuple<>(member, score);
         });
     }
 

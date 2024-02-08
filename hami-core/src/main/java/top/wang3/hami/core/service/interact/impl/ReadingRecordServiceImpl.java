@@ -15,7 +15,6 @@ import top.wang3.hami.common.model.ReadingRecord;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.vo.article.ArticleVo;
 import top.wang3.hami.common.vo.article.ReadingRecordVo;
-import top.wang3.hami.core.component.RabbitMessagePublisher;
 import top.wang3.hami.core.service.article.ArticleService;
 import top.wang3.hami.core.service.interact.ReadingRecordService;
 import top.wang3.hami.core.service.interact.repository.ReadingRecordRepository;
@@ -30,14 +29,12 @@ import static top.wang3.hami.common.constant.Constants.Hi_PRE_TAG;
 
 
 @Service
-@SuppressWarnings("unused")
 @Slf4j
 @RequiredArgsConstructor
 public class ReadingRecordServiceImpl implements ReadingRecordService {
 
     private final ReadingRecordRepository readingRecordRepository;
     private final ArticleService articleService;
-    private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @Override
     public PageData<ReadingRecordVo> listReadingRecords(SearchParam param) {

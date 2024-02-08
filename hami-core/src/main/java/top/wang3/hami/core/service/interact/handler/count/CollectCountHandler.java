@@ -24,12 +24,17 @@ public class CollectCountHandler extends AbstractInteractCountHandler<ArticleCol
 
     @Override
     public String buildKey(ArticleCollect entity) {
-        return RedisConstants.USER_COLLECT_COUNT + entity.getUserId();
+        return RedisConstants.USER_INTERACT_COUNT_HASH + entity.getUserId();
+    }
+
+    @Override
+    public String buildHkey(ArticleCollect entity) {
+        return RedisConstants.COLLECT_INTERACT_HKEY;
     }
 
     @Override
     public boolean isInsert(ArticleCollect before, ArticleCollect after) {
-        return Constants.ONE.equals(after.getState()) && Constants.ZERO.equals(before.getState());
+        return Constants.ZERO.equals(before.getState()) && Constants.ONE.equals(after.getState());
     }
 
     @Override

@@ -25,7 +25,12 @@ public class LikeCountHandler extends AbstractInteractCountHandler<LikeItem> {
 
     @Override
     public String buildKey(LikeItem entity) {
-        return RedisConstants.USER_LIKE_COUNT + entity.getItemType() + ":" + entity.getLikerId();
+        return RedisConstants.USER_INTERACT_COUNT_HASH + entity.getLikerId();
+    }
+
+    @Override
+    public String buildHkey(LikeItem entity) {
+        return RedisConstants.LIKE_INTERACT_HKEY + entity.getItemType();
     }
 
     @Override

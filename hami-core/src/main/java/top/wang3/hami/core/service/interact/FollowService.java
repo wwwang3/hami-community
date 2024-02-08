@@ -7,7 +7,6 @@ import top.wang3.hami.common.model.UserFollow;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public interface FollowService {
 
     boolean follow(int followingId);
@@ -30,21 +29,20 @@ public interface FollowService {
      * @return 用户粉丝数
      */
     @NonNull
+    @SuppressWarnings("UnusedReturnValue")
     Integer getUserFollowerCount(Integer userId);
 
     boolean hasFollowed(Integer userId, Integer followingId);
 
     Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds);
 
-    Map<Integer, Long> listUserFollowingCount(List<Integer> userIds);
-
-    Map<Integer, Long> listUserFollowerCount(List<Integer> userIds);
-
     List<Integer> listUserFollowings(Page<UserFollow> page, int userId);
 
     List<Integer> listUserFollowers(Page<UserFollow> page, int userId);
 
+    @SuppressWarnings("UnusedReturnValue")
     List<Integer> loadUserFollowings(Integer userId);
 
+    @SuppressWarnings("UnusedReturnValue")
     List<Integer> loadUserFollowers(Integer userId);
 }

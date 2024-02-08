@@ -102,8 +102,12 @@ public class UserServiceImpl implements UserService {
         }
         Map<Integer, Boolean> followed = followService.hasFollowed(loginUserId, userIds);
         if (followed.isEmpty()) return;
-        ListMapperHandler.doAssemble(userDTOS, UserVo::getUserId, followed,
-                UserVo::setFollowed);
+        ListMapperHandler.doAssemble(
+                userDTOS,
+                UserVo::getUserId,
+                followed,
+                UserVo::setFollowed
+        );
     }
 
     private void buildFollowState(UserVo userDTO) {
@@ -117,10 +121,10 @@ public class UserServiceImpl implements UserService {
         UserStatDTO stat = countService.getUserStatDTOById(loginUserId);
         loginProfile.setStat(stat);
         // 获取登录用户点赞的文章数
-        Integer likes = likeService.getUserLikeCount(loginUserId, LikeType.ARTICLE).intValue();
+        Integer likes = likeService.getUserLikeCount(loginUserId, LikeType.ARTICLE);
         loginProfile.setLikes(likes);
         // 获取登录用户收藏的文章数
-        Integer collects = collectService.getUserCollectCount(loginUserId).intValue();
+        Integer collects = collectService.getUserCollectCount(loginUserId);
         loginProfile.setCollects(collects);
         // 获取登录用户关注的用户数和粉丝数
         loginProfile.setFollowers(stat.getTotalFollowers());

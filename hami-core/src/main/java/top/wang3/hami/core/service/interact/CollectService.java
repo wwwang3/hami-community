@@ -21,5 +21,7 @@ public interface CollectService {
 
     List<Integer> listUserCollects(Page<ArticleCollect> page, Integer userId);
 
+    @SuppressWarnings("UnusedReturnValue")
     List<Integer> loadUserCollects(Integer userId);
+    
 }

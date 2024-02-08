@@ -46,6 +46,10 @@ public class InteractHandler {
             this.opt = StringUtils.hasText(opt) ? opt : "操作";
         }
 
+        public AbstractInteract<T> of(String key, T member, boolean state) {
+            return state ? ofAction(key, member) : ofCancelAction(key, member);
+        }
+
         public AbstractInteract<T> ofAction(String key, T member) {
            return ofAction(key, member, System.currentTimeMillis());
         }

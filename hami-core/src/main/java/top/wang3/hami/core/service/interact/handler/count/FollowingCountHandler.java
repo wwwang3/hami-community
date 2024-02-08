@@ -23,7 +23,12 @@ public class FollowingCountHandler extends AbstractInteractCountHandler<UserFoll
 
     @Override
     public String buildKey(UserFollow entity) {
-        return RedisConstants.USER_FOLLOWING_COUNT + entity.getUserId();
+        return RedisConstants.USER_INTERACT_COUNT_HASH + entity.getUserId();
+    }
+
+    @Override
+    public String buildHkey(UserFollow entity) {
+        return RedisConstants.FOLLOW_INTERACT_HKEY;
     }
 
     @Override

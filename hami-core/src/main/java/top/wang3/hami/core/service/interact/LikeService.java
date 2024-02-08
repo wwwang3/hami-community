@@ -21,5 +21,6 @@ public interface LikeService {
 
     Map<Integer, Boolean> hasLiked(Integer userId, List<Integer> itemIds, LikeType likeType);
 
+    @SuppressWarnings("UnusedReturnValue")
     List<Integer> loadUserLikeItem(Integer userId, LikeType likeType);
 }

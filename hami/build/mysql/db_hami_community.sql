@@ -331,8 +331,8 @@ CREATE TABLE `reading_record`
     `article_id`   int          NOT NULL COMMENT '文章ID',
     `reading_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '阅读时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `idx_reading_time` (`user_id` ASC, `reading_time` ASC) USING BTREE,
-    INDEX `uk_user_article_id` (`user_id` ASC, `article_id` ASC) USING BTREE
+    INDEX `idx_reading_time` (`user_id` ASC, `reading_time` ASC) USING BTREE,
+    UNIQUE INDEX `uk_user_article_id` (`user_id` ASC, `article_id` ASC) USING BTREE
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT = '阅读记录表'

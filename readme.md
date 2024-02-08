@@ -186,3 +186,16 @@ xx.like.{user_id % 5}
 ### 用户数据
 
 接收文章，点赞，评论，收藏，关注等消息
+
+### 用户行为
+
+包括点赞，评论，收藏，关注等行为，需要查询点赞记录，收藏列表，我的关注，粉丝等以及
+
+```tex
+user:interact:hash
+- like:type:count
+- collect:count
+- follow:count
+- follower:count
+```
+
