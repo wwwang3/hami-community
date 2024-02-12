@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import top.wang3.hami.common.dto.IpInfo;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 评论基本信息
@@ -68,8 +69,8 @@ public class Comment {
     /**
      * 评论图片
      */
-    @TableField(value = "content_img")
-    private String contentImg;
+    @TableField(value = "pictures", typeHandler = JacksonTypeHandler.class)
+    private List<String> pictures;
 
     /**
      * 点赞数

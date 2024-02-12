@@ -112,7 +112,7 @@ public class DefaultUserInteractService implements UserInteractService {
     public boolean followAction(int userId, int followingId, boolean state) {
         String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         return InteractHandler
-                .<Integer>build("点赞")
+                .<Integer>build("关注")
                 .of(key, followingId, state)
                 .millis(TimeoutConstants.FOLLOWING_LIST_EXPIRE)
                 .loader(() -> loadFollowList(userId))
@@ -320,7 +320,7 @@ public class DefaultUserInteractService implements UserInteractService {
 
     private Integer getInteractCount(int userId, String interactKey) {
         final String hash = RedisConstants.USER_INTERACT_COUNT_HASH + userId;
-        return cacheService.getMapValue(
+        return cacheService.getHashValue(
                 hash,
                 interactKey,
                 () -> loadInteractCount(userId),

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 发表评论参数
  */
@@ -38,7 +40,7 @@ public class CommentParam {
     @NotNull
     private String content;
 
-    private String contentImg;
+    private List<String> pictures;
 
     /**
      * 发表评论时, 指定的groups

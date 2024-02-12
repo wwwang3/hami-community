@@ -1,6 +1,5 @@
 package top.wang3.hami.core.service.article.impl;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,11 +29,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public PageData<Tag> getTagByPage(PageParam pageParam) {
-        Page<Tag> page = pageParam.toPage();
         List<Tag> tags = tagRepository.getAllTags();
-        List<Tag> records = ListMapperHandler.subList(tags, page.getCurrent(), page.getSize());
-        page.setRecords(records);
-        return PageData.build(page);
+        List<Tag> records = ListMapperHandler.subList(tags, pageParam.getCurrent(), pageParam.getSize());
+        return new PageData<>(pageParam.getCurrent(), tags.size(), records);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
 
     public static final String[] fields = {
             "id", "article_id", "user_id", "ip_info",
-            "content", "content_img", "root_id", "likes",
+            "content", "pictures", "root_id", "likes",
             "parent_id", "reply_to", "ctime"
     };
 

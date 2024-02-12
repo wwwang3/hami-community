@@ -1,8 +1,10 @@
 package top.wang3.hami.core.cache;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.support.NullValue;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -10,25 +12,37 @@ import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class RedisCacheService implements CacheService {
 
     public static final long DEFAULT_EXPIRE = TimeUnit.DAYS.toMillis(1);
 
-    public static final long EMPTY_OBJECT_EXPIRE = TimeUnit.MINUTES.toMillis(1);
+    public static final long EMPTY_OBJECT_EXPIRE = TimeUnit.SECONDS.toMillis(20);
 
     public static final Object EMPTY_OBJECT = NullValue.INSTANCE;
+
+    public final byte[] EMPTY_OBJECT_BYTE;
 
     private final LockTemplate lockTemplate;
 
     private final ThreadPoolTaskExecutor executor;
+
+    @SuppressWarnings("all")
+    public RedisCacheService(LockTemplate lockTemplate, ThreadPoolTaskExecutor executor,
+                             @Qualifier("redisTemplate") RedisTemplate template) {
+        this.lockTemplate = lockTemplate;
+        this.executor = executor;
+        EMPTY_OBJECT_BYTE = template.getValueSerializer().serialize(EMPTY_OBJECT);
+    }
 
     @Override
     public <T> T get(String key, Supplier<T> loader) {
@@ -45,7 +59,7 @@ public class RedisCacheService implements CacheService {
     }
 
     @Override
-    public <T> T getMapValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis) {
+    public <T> T getHashValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis) {
         T data = RedisClient.getCacheMapValue(key, hKey);
         return data != null ? data : syncGetMapValue(key, hKey, loader, millis);
     }
@@ -86,28 +100,23 @@ public class RedisCacheService implements CacheService {
         }
         // 为空的Id
         ArrayList<T> nullIds = new ArrayList<>();
-        //记录ID对应的索引
-        HashMap<T, Integer> indexMap = new HashMap<>();
+        ArrayList<R> rs = new ArrayList<>(dataList.size());
         ListMapperHandler.forEach(ids, (id, index) -> {
             R data = dataList.get(index);
             if (data == null) {
                 nullIds.add(id);
-                indexMap.put(id, index);
             } else {
                 // 可能缓存的是NullValue
-                dataList.set(index, resolveValue(data));
+                rs.add(resolveValue(data));
             }
         });
         if (!nullIds.isEmpty() && loader != null) {
             List<R> applied = loader.apply(nullIds);
-            for (R r : applied) {
-                Integer index = indexMap.get(idMapper.apply(r));
-                dataList.set(index, r);
-            }
+            rs.addAll(applied);
             // 异步写入缓存
-            asyncSetCacheAbsent(keyPrefix, nullIds, applied, millis);
+            asyncSetCacheAbsent(keyPrefix, applied, idMapper, millis);
         }
-        return dataList;
+        return rs;
     }
 
     @Override
@@ -156,6 +165,42 @@ public class RedisCacheService implements CacheService {
                         log.info("async refresh cache success, key: {}, data: {}", key, data);
                     }
                 });
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T, R> void asyncSetCacheAbsent(String keyPrefix, List<R> applied, Function<R, T> idMapper, long millis) {
+        // 异步写入
+        executor.submitCompletable(() -> {
+            RedisClient.getTemplate()
+                    .executePipelined((RedisCallback<Object>) connection -> {
+                        // 不存在才写入, 因为这里的数据可能已经和db不一致了
+                        // 这里极端情况下会出现写了旧的, 写不了新的, 但好像不影响
+                        // 比如 a线程读取[a], b线程读取[b], b既然读到了[b], 说明db更新, 一般会有删除缓存的操作,
+                        // 除非a写入缓存的操作时间 > db更新时间+ b写入缓存时间+db更新后删除缓存的时间
+                        for (R item : applied) {
+                            byte[] keyBytes = RedisClient.keyBytes(keyPrefix + idMapper.apply(item));
+                            if (item != null) {
+                                byte[] valueBytes = RedisClient.valueBytes(item);
+                                connection.stringCommands().pSetEx(keyBytes, millis, valueBytes);
+                            } else {
+                                connection.stringCommands().pSetEx(keyBytes, EMPTY_OBJECT_EXPIRE, EMPTY_OBJECT_BYTE);
+                            }
+                        }
+                        return null;
+                    });
+        }).whenComplete((rs, th) -> {
+            if (th != null) {
+                log.error(
+                        "async refresh cache failed, items: {}, error_class: {}, error_msg: {}",
+                        applied,
+                        th.getClass().getName(),
+                        th.getMessage()
+                );
+            } else {
+                log.info("async refresh cache success, items: {}", applied);
+            }
+        });
     }
 
     @Override
@@ -233,11 +278,12 @@ public class RedisCacheService implements CacheService {
 
     /**
      * 同步获取并刷新缓存
-     * @param key key
+     *
+     * @param key    key
      * @param loader loader
      * @param millis millis
+     * @param <T>    data泛型
      * @return data
-     * @param <T> data泛型
      */
     private <T> T syncGet(String key, Supplier<T> loader, long millis) {
         // 应该替换为分布式锁

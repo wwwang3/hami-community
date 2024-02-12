@@ -13,7 +13,7 @@
         <result column="ip_info" property="ipInfo"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="content" property="content"/>
-        <result column="content_img" property="contentImg"/>
+        <result column="pictures" property="pictures" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="deleted" property="deleted"/>
         <result column="ctime" property="ctime"/>
         <result column="mtime" property="mtime"/>
@@ -28,7 +28,7 @@
         reply_to,
         ip_info,
         content,
-        content_img,
+        pictures,
         deleted,
         ctime,
         mtime

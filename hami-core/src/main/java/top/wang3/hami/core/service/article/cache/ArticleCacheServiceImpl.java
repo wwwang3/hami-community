@@ -35,7 +35,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         String key = RedisConstants.ARTICLE_COUNT_HASH;
         String hKey = (cateId == null) ? RedisConstants.TOTAL_ARTICLE_COUNT_HKEY :
                 RedisConstants.CATE_ARTICLE_COUNT_HKEY + cateId;
-        return cacheService.getMapValue(
+        return cacheService.getHashValue(
                 key,
                 hKey,
                 articleRepository::getArticleCount,

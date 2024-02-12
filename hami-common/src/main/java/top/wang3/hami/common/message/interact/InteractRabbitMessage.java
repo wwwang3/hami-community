@@ -7,16 +7,6 @@ import top.wang3.hami.common.message.RabbitMessage;
 
 @Data
 public abstract class InteractRabbitMessage implements RabbitMessage {
-    public InteractRabbitMessage() {
-
-    }
-
-    public InteractRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId) {
-        this.userId = userId;
-        this.toUserId = toUserId;
-        this.state = state;
-        this.itemId = itemId;
-    }
 
     /**
      * 行为: 点赞, 收藏, 关注
@@ -46,5 +36,16 @@ public abstract class InteractRabbitMessage implements RabbitMessage {
 
     public String getPrefix() {
         return Constants.ONE.equals(state) ? "do." : "cancel.";
+    }
+
+    public InteractRabbitMessage() {
+
+    }
+
+    public InteractRabbitMessage(int userId, Integer toUserId, byte state, Integer itemId) {
+        this.userId = userId;
+        this.toUserId = toUserId;
+        this.state = state;
+        this.itemId = itemId;
     }
 }

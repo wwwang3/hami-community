@@ -20,7 +20,7 @@ import top.wang3.hami.core.service.interact.repository.LikeRepository;
 @RabbitListener(
         id = "LikeMsgContainer",
         bindings = @QueueBinding(
-                value = @Queue(RabbitConstants.LIKE_QUEUE_5),
+                value = @Queue(RabbitConstants.LIKE_QUEUE_1),
                 exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
                 key = "*.like.*.*"
         )

@@ -10,6 +10,7 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
 import top.wang3.hami.common.model.UserFollow;
 import top.wang3.hami.common.util.RedisClient;
+import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.cache.CacheService;
 import top.wang3.hami.core.service.interact.FollowService;
 import top.wang3.hami.core.service.interact.UserInteractService;
@@ -60,12 +61,14 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
+    @CostLog
     public boolean hasFollowed(Integer userId, Integer followingId) {
         Map<Integer, Boolean> followed = hasFollowed(userId, List.of(followingId));
         return followed.getOrDefault(followingId, false);
     }
 
     @Override
+    @CostLog
     public Map<Integer, Boolean> hasFollowed(Integer userId, List<Integer> followingIds) {
         String key = RedisConstants.USER_FOLLOWING_LIST + userId;
         if (getUserFollowingCount(userId) == 0) {

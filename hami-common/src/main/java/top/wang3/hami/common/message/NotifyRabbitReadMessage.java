@@ -14,8 +14,7 @@ import java.util.List;
 public class NotifyRabbitReadMessage implements RabbitMessage {
 
     private Integer receiver;
-
-    private List<Integer> types;
+    private List<Integer> msgIds;
 
     @Override
     public String getExchange() {

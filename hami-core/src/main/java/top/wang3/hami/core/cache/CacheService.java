@@ -27,7 +27,7 @@ public interface CacheService {
      */
     <T> T get(String key, Supplier<T> loader, long millis);
 
-    <T> T getMapValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis);
+    <T> T getHashValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis);
 
     /**
      *
@@ -77,6 +77,17 @@ public interface CacheService {
 
     <T> void asyncSetCache(String key, T data, long millis);
 
+    <T, R> void asyncSetCacheAbsent(String keyPrefix, List<R> applied, Function<R, T> idMapper, long millis);
+
+    /**
+     * 异步写入缓存, 必须确保ids和applied元素对应上
+     * @param keyPrefix
+     * @param ids
+     * @param applied
+     * @param millis
+     * @param <T>
+     * @param <R>
+     */
     <T, R> void asyncSetCacheAbsent(String keyPrefix, List<T> ids, List<R> applied, long millis);
 
     <T> void asyncSetHashCache(String key, Map<String, T> hash, long millis);

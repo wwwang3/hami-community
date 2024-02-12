@@ -30,7 +30,7 @@ public class ArticleDraftController {
      * @return {@link PageData<ArticleDraft>}
      */
     @PostMapping("/list")
-    public Result<PageData<ArticleDraft>> getDrafts(@RequestBody @Valid PageParam param) {
+    public Result<PageData<ArticleDraft>> listDraft(@RequestBody @Valid PageParam param) {
         PageData<ArticleDraft> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
         return Result.successData(articleDrafts);
     }
@@ -41,8 +41,8 @@ public class ArticleDraftController {
      * @param param {@link PageParam}
      * @return {@link PageData<ArticleDraft>}
      */
-    @GetMapping("/articles")
-    public Result<PageData<ArticleDraft>> getArticles(@RequestBody @Valid PageParam param) {
+    @GetMapping("/article/list")
+    public Result<PageData<ArticleDraft>> listArticle(@RequestBody @Valid PageParam param) {
         PageData<ArticleDraft> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);
     }
@@ -53,7 +53,7 @@ public class ArticleDraftController {
      * @param draftId 草稿Id
      * @return {@link ArticleDraft}
      */
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public Result<ArticleDraft> getDraft(@PathVariable("id") Long draftId) {
         ArticleDraft draft = articleDraftService.getArticleDraftById(draftId);
         return Result.ofNullable(draft)
@@ -105,7 +105,7 @@ public class ArticleDraftController {
      * @param draftId 草稿Id
      * @return 空
      */
-    @PostMapping("/delete/draft")
+    @PostMapping("/delete")
     public Result<Void> deleteDraft(@RequestParam("draftId") long draftId) {
         boolean success = articleDraftService.deleteDraft(draftId);
         return Result.successIfTrue(success);
@@ -117,7 +117,7 @@ public class ArticleDraftController {
      * @param articleId 文章Id
      * @return 空
      */
-    @PostMapping("/delete/article")
+    @PostMapping("/article/delete")
     public Result<Void> deleteArticle(@RequestParam("articleId") int articleId) {
         boolean success = articleDraftService.deleteArticle(articleId);
         return Result.successIfTrue(success);

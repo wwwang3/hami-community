@@ -17,7 +17,7 @@ public class HotAuthor {
     /**
      * 用户ID
      */
-    private Integer userId;
+    private Integer authorId;
 
     /**
      * 热度值
@@ -27,5 +27,5 @@ public class HotAuthor {
     /**
      * 用户信息
      */
-    private UserVo user;
+    private UserVo author;
 }

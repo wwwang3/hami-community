@@ -25,7 +25,7 @@ public interface NotifyMsgRepository extends IService<NotifyMsg> {
     boolean saveNotifyMsg(NotifyMsg msg);
 
     @CanIgnoreReturnValue
-    int updateNotifyState(Integer receiver, List<Integer> types);
+    int updateNotifyState(Integer receiver, List<Integer> msgIds);
 
     boolean deleteNotifyMsg(Integer msgId, int loginUserId);
 

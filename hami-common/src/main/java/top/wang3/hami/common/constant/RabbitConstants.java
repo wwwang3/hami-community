@@ -61,11 +61,11 @@ public final class RabbitConstants {
     public static final String LIKE_QUEUE_5 = "like-queue-5";
 
 
-    public static final String COLLECT_QUEUE_1 = "like-queue-1";
-    public static final String COLLECT_QUEUE_2 = "like-queue-2";
-    public static final String COLLECT_QUEUE_3 = "like-queue-3";
-    public static final String COLLECT_QUEUE_4 = "like-queue-4";
-    public static final String COLLECT_QUEUE_5 = "like-queue-5";
+    public static final String COLLECT_QUEUE_1 = "collect-queue-1";
+    public static final String COLLECT_QUEUE_2 = "collect-queue-2";
+    public static final String COLLECT_QUEUE_3 = "collect-queue-3";
+    public static final String COLLECT_QUEUE_4 = "collect-queue-4";
+    public static final String COLLECT_QUEUE_5 = "collect-queue-5";
 
     public static final String FOLLOW_QUEUE_1 = "follow-queue-1";
     public static final String FOLLOW_QUEUE_2 = "follow-queue-2";

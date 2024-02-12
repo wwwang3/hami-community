@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Info {
 
     /**
-     * 关联元素的ID
+     * 关联的对象ID
      */
     private Integer id;
 

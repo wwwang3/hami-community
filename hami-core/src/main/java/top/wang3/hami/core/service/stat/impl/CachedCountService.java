@@ -17,7 +17,7 @@ import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.stat.UserStatService;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,7 +105,7 @@ public class CachedCountService implements CountService {
 
     @Override
     public Map<String, Integer> getUserYesterdayDataGrowing(Integer userId) {
-        long yesterday = DateUtils.minusHours(new Date(), 24);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
         String date = DateUtils.formatDate(yesterday);
         String key = RedisConstants.DATA_GROWING + date + ":" + userId;
         return RedisClient.hMGetAll(key);

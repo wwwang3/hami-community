@@ -59,7 +59,7 @@ public class RankListServiceImpl implements RankListService {
         ArrayList<Integer> ids = new ArrayList<>(typedTuples.size());
         List<HotAuthor> authors = ListMapperHandler.listTo(typedTuples, item -> {
             HotAuthor author = new HotAuthor();
-            author.setUserId(item.getValue());
+            author.setAuthorId(item.getValue());
             author.setHotIndex(item.getScore());
             ids.add(item.getValue());
             return author;
@@ -67,10 +67,10 @@ public class RankListServiceImpl implements RankListService {
         List<UserVo> vos = userService.listAuthorById(ids, new UserOptionsBuilder().noStat());
         ListMapperHandler.doAssemble(
                 authors,
-                HotAuthor::getUserId,
+                HotAuthor::getAuthorId,
                 vos,
                 UserVo::getUserId,
-                HotAuthor::setUser
+                HotAuthor::setAuthor
         );
         return authors;
     }

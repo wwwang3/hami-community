@@ -2,7 +2,9 @@ package top.wang3.hami.core.service.notify.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.notify.Info;
@@ -16,6 +18,7 @@ import top.wang3.hami.core.service.notify.NotifyMsgService;
 import top.wang3.hami.core.service.notify.repository.NotifyMsgRepository;
 import top.wang3.hami.security.context.LoginUserContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +29,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
     private final NotifyMsgRepository notifyMsgRepository;
     private final FollowService followService;
     private final RabbitMessagePublisher rabbitMessagePublisher;
+    private final TaskExecutor taskExecutor;
 
     @Override
     public PageData<NotifyMsgVo> listCommentNotify(PageParam param) {
@@ -33,7 +37,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listCommentNotify(page, loginUserId);
-        publishMessage(page, List.of(1, 2));
+        publishMessage(page);
         return PageData.build(page);
     }
 
@@ -43,7 +47,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listLoveNotify(page, loginUserId);
-        publishMessage(page, List.of(3, 4, 5));
+        publishMessage(page);
         return PageData.build(page);
     }
 
@@ -60,7 +64,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
             Info sender = item.getSender();
             sender.setFollowed(followed.get(sender.getId()));
         });
-        publishMessage(page, List.of(6));
+        publishMessage(page);
         return PageData.build(page);
     }
 
@@ -70,7 +74,7 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         int loginUserId = LoginUserContext.getLoginUserId();
         Page<NotifyMsgVo> page = param.toPage();
         page = notifyMsgRepository.listSystemNotifyMsg(page, loginUserId);
-        publishMessage(page, List.of(0));
+        publishMessage(page);
         return PageData.build(page);
     }
 
@@ -87,10 +91,21 @@ public class NotifyMsgServiceImpl implements NotifyMsgService {
         return notifyMsgRepository.deleteNotifyMsg(msgId, LoginUserContext.getLoginUserId());
     }
 
-    public void publishMessage(Page<?> page, List<Integer> types) {
+    public void publishMessage(Page<NotifyMsgVo> page) {
         if (page != null && page.getTotal() > 0) {
-            NotifyRabbitReadMessage message = new NotifyRabbitReadMessage(LoginUserContext.getLoginUserId(), types);
-            rabbitMessagePublisher.publishMsg(message);
+            taskExecutor.execute(() -> {
+                List<NotifyMsgVo> records = page.getRecords();
+                ArrayList<Integer> needsUpdate = new ArrayList<>((int) page.getSize());
+                for (NotifyMsgVo record : records) {
+                    if (record.getState() == Constants.ZERO) {
+                        needsUpdate.add(record.getId());
+                    }
+                }
+                if (!needsUpdate.isEmpty()) {
+                    NotifyRabbitReadMessage message = new NotifyRabbitReadMessage(LoginUserContext.getLoginUserId(), needsUpdate);
+                    rabbitMessagePublisher.publishMsgSync(message);
+                }
+            });
         }
     }
 }

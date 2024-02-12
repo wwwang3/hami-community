@@ -26,7 +26,7 @@ public interface CommentConverter {
     default Comment toComment(CommentParam param) {
         Comment comment = new Comment();
         comment.setContent(param.getContent());
-        comment.setContentImg(param.getContentImg());
+        comment.setPictures(param.getPictures());
         comment.setArticleId(param.getArticleId());
         comment.setReplyTo(null);
         comment.setRootId(0);

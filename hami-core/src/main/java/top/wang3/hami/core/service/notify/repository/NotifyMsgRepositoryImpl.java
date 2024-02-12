@@ -54,10 +54,10 @@ public class NotifyMsgRepositoryImpl extends ServiceImpl<NotifyMsgMapper, Notify
     }
 
     @Override
-    public int updateNotifyState(Integer receiver, List<Integer> types) {
+    public int updateNotifyState(Integer receiver, List<Integer> msgIds) {
         UpdateWrapper<NotifyMsg> wrapper = Wrappers.update(new NotifyMsg())
                 .eq("receiver", receiver)
-                .in("type", types)
+                .in("id", msgIds)
                 .set("`state`", 1);
         return getBaseMapper().update(null, wrapper);
     }

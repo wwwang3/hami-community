@@ -7,6 +7,7 @@ import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.common.vo.user.UserVo;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 评论
@@ -44,7 +45,7 @@ public class CommentVo {
     /**
      * 评论图片
      */
-    private String contentImg;
+    private List<String> pictures;
 
     /**
      * 根评论ID

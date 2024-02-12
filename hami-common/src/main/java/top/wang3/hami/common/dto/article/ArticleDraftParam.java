@@ -20,15 +20,23 @@ public class ArticleDraftParam {
     private Long id;
 
     /**
+     * 分类ID
+     */
+    @NotNull
+    private Integer categoryId;
+
+    /**
+     * 文章标签
+     */
+    @NotEmpty
+    @Size(min = 1, max = 3)
+    private List<Integer> tagIds;
+
+    /**
      * 标题
      */
     @Size(min = 1, max = 128)
     private String title;
-
-    /**
-     * 文章图片地址
-     */
-    private String picture;
 
     /**
      * 简介
@@ -43,17 +51,8 @@ public class ArticleDraftParam {
     private String content;
 
     /**
-     * 分类ID
+     * 文章图片地址
      */
-    @NotNull
-    private Integer categoryId;
-
-    /**
-     * 文章标签
-     */
-    @NotEmpty
-    @Size(min = 1, max = 3)
-    private List<Integer> tagIds;
-
+    private String picture;
 
 }

@@ -27,8 +27,8 @@ public interface NotifyMsgMapper extends BaseMapper<NotifyMsg> {
 
     @Update(
             value = """
-                        INSERT INTO notify_msg (item_id, related_id, sender, receiver, detail, type)
-                        VALUES(#{itemId}, #{relatedId}, #{sender}, #{receiver}, #{detail}, #{type})
+                        INSERT INTO notify_msg (item_id, related_id, sender, receiver, type, detail)
+                        VALUES(#{itemId}, #{relatedId}, #{sender}, #{receiver}, #{type}, #{detail})
                         ON DUPLICATE KEY UPDATE mtime = NOW(3);
                     """
     )

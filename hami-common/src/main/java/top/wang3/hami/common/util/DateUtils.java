@@ -2,14 +2,22 @@ package top.wang3.hami.common.util;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public final class DateUtils {
 
 
-    public static final DateTimeFormatter NORMAL_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter FULL_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final DateTimeFormatter NORMAL_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault()).withZone(ZoneId.systemDefault());
+
+    public static final DateTimeFormatter NORMAL_DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).withZone(ZoneId.systemDefault());
+
+    public static final DateTimeFormatter FULL_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault()).withZone(ZoneId.systemDefault());
 
     public static long offsetMonths(Date date, long offset) {
         return offset < 0 ? minusMonths(date, offset) : plusMonths(date, offset);
@@ -95,11 +103,15 @@ public final class DateUtils {
         return formatDateTime(date.getTime());
     }
 
-    public static String  formatDate(LocalDate date) {
+    public static String formatDate(TemporalAccessor date) {
         return NORMAL_DATE_FORMATTER.format(date);
     }
 
-    public static String formatDateTime(LocalDateTime dateTime) {
+    public static String normalFormatDatetime(TemporalAccessor datetime) {
+        return NORMAL_DATE_TIME_FORMATTER.format(datetime);
+    }
+
+    public static String formatDateTime(TemporalAccessor dateTime) {
         return FULL_DATE_FORMATTER.format(dateTime);
     }
 

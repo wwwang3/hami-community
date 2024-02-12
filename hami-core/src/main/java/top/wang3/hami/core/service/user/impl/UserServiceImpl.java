@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import top.wang3.hami.common.constant.Constants;
 import top.wang3.hami.common.converter.UserConverter;
 import top.wang3.hami.common.dto.builder.UserOptionsBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
@@ -25,6 +26,7 @@ import top.wang3.hami.security.model.LoginUser;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -55,7 +57,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserVo getAuthorInfoById(int userId, UserOptionsBuilder builder) {
         User user = userCacheService.getUserCache(userId);
-        if (user == null) {
+        if (user == null || user.getUserId() == null ||
+            Objects.equals(user.getDeleted(), Constants.DELETED)) {
             return null;
         }
         UserVo vo = UserConverter.INSTANCE.toUserVo(user);

@@ -75,23 +75,23 @@ public class NotifyMsgConsumer implements InteractConsumer {
         Integer sender = message.getUserId();
         NotifyMsg msg = NotifyMsgBuilder
                 .buildArticleLikeMsg(sender, itemUser, message.getItemId());
-        notifyMsgRepository.save(msg);
+        save(msg);
     }
 
     private void handleCommentLike(LikeRabbitMessage message) {
-        //评论点赞 xx赞了你的评论
+        // 评论点赞 xx赞了你的评论
         Integer commentId = message.getItemId();
         int itemUser = message.getToUserId();
         Comment comment = commentRepository.getById(commentId);
         NotifyMsg msg = NotifyMsgBuilder.buildCommentLikerMsg(message.getUserId(),
                 itemUser, commentId, comment.getArticleId(), comment.getContent());
-        notifyMsgRepository.save(msg);
+        save(msg);
     }
 
     @Override
     public void handleCommentMessage(CommentRabbitMessage message) {
         try {
-            //评论文章通知 xx评论了你的文章
+            // 评论文章通知 xx评论了你的文章
             if (isSelf(message.getAuthorId(), message.getUserId())) {
                 return;
             }
@@ -169,8 +169,8 @@ public class NotifyMsgConsumer implements InteractConsumer {
     public void handleNotifyReadMessage(NotifyRabbitReadMessage message) {
         try {
             Integer receiver = message.getReceiver();
-            List<Integer> types = message.getTypes();
-            notifyMsgRepository.updateNotifyState(receiver, types);
+            List<Integer> msgIds = message.getMsgIds();
+            notifyMsgRepository.updateNotifyState(receiver, msgIds);
         } catch (Exception e) {
             logError(e);
         }
