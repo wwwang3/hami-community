@@ -31,18 +31,20 @@ public class FollowerCanalHandler implements CanalEntryHandler<UserFollow> {
         Integer following = entity.getFollowing();
         String follower_list_key = RedisConstants.USER_FOLLOWER_LIST + following;
         // 被关注用户的粉丝列表元素+1
-        InteractHandler
-                .build("粉丝")
-                .ofAction(follower_list_key, entity.getUserId(), entity.getMtime().getTime())
-                .millis(TimeoutConstants.FOLLOWER_LIST_EXPIRE)
-                .loader(() -> followService.loadUserFollowers(following))
-                .postAct(() -> {
-                    // 粉丝列表有长度限制
-                    long size = RedisClient.zCard(follower_list_key);
-                    if (size > ZPageHandler.DEFAULT_MAX_SIZE) {
-                        RedisClient.zPopMin(follower_list_key);
-                    }
-                }).execute();
+        if (RedisClient.pExpire(follower_list_key, TimeoutConstants.FOLLOWER_LIST_EXPIRE)) {
+            InteractHandler
+                    .build("粉丝")
+                    .ofAction(follower_list_key, entity.getUserId(), entity.getMtime().getTime())
+                    .millis(TimeoutConstants.FOLLOWER_LIST_EXPIRE)
+                    .loader(() -> followService.loadUserFollowers(following))
+                    .postAct(() -> {
+                        // 粉丝列表有长度限制
+                        long size = RedisClient.zCard(follower_list_key);
+                        if (size > ZPageHandler.DEFAULT_MAX_SIZE) {
+                            RedisClient.zPopMin(follower_list_key);
+                        }
+                    }).execute();
+        }
     }
 
     @Override

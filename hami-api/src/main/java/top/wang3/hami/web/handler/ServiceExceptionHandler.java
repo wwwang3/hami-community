@@ -35,7 +35,7 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {RateLimitException.class})
     public Result<Void> handleRateLimitException(RateLimitException e) {
-        logError(e, true);
+        logError(e, false);
         return Result
                 .error(403, e.getMessage());
     }

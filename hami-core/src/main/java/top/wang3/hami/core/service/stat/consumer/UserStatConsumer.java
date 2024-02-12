@@ -103,7 +103,7 @@ public class UserStatConsumer {
     )
     public void handleFollowMessage(List<FollowRabbitMessage> messages) {
         try {
-            // 更新总用户的总关注数
+            // 更新用户的总关注数
             List<UserStat> stats = messages.stream()
                     .collect(Collectors.groupingBy(FollowRabbitMessage::getUserId))
                     .values()
@@ -119,7 +119,9 @@ public class UserStatConsumer {
                             return a;
                         }, (v1, v2) -> v1);
                     }).toList();
-            userStatRepository.batchUpdateUserStats(stats);
+            if (!stats.isEmpty()){
+                userStatRepository.batchUpdateUserStats(stats);
+            }
         } catch (Exception e) {
             log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
             String msgs = Result.writeValueAsString(messages);

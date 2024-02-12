@@ -19,7 +19,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
         implements ArticleDraftRepository {
 
     public static final String[] FIELDS = {"id", "user_id", "article_id", "title", "picture",
-            "summary", "article_tags", "category_id", "`state`", "ctime", "mtime"
+            "summary", "tag_ids", "category_id", "`state`", "ctime", "mtime"
     };
 
     @Override

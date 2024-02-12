@@ -41,7 +41,7 @@ public class ArticleDraftController {
      * @param param {@link PageParam}
      * @return {@link PageData<ArticleDraft>}
      */
-    @GetMapping("/article/list")
+    @PostMapping("/article/list")
     public Result<PageData<ArticleDraft>> listArticle(@RequestBody @Valid PageParam param) {
         PageData<ArticleDraft> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
         return Result.successData(drafts);

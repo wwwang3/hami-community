@@ -16,7 +16,7 @@ import top.wang3.hami.security.model.Result;
  * 阅读记录
  */
 @RestController
-@RequestMapping("/api/v1/interact/")
+@RequestMapping("/api/v1/interact")
 @RequiredArgsConstructor
 public class ReadingRecordController {
 
