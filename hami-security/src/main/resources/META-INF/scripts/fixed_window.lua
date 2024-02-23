@@ -6,13 +6,11 @@ local capacity = tonumber(ARGV[2])
 local last_requests = tonumber(redis.call("get", key) or "0")
 local remain_requests = capacity - last_requests;
 if (last_requests == 0) then
+    redis.call("set", key, 1)
     redis.call("expire", key, time_window)
+elseif (remain_requests > 0) then
+    redis.call("incrby", key, 1)
 else
-    if (last_requests + 1) > capacity then
-        return { 0,  remain_requests}
-    end
+    return { 0,  remain_requests }
 end
-redis.call("incrby", key, 1)
 return { 1, remain_requests }
-
-

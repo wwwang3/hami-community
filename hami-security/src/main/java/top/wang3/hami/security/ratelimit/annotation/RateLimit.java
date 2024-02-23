@@ -1,7 +1,6 @@
 package top.wang3.hami.security.ratelimit.annotation;
 
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,6 +75,8 @@ public @interface RateLimit {
          * IP范围限流 key: ip
          */
         IP,
+
+        IP_URI,
 
         /**
          * 登录用户限流, 未登录直接返回, key: methodName + loginUserId
