@@ -42,7 +42,9 @@ public class CustomMailAutoConfiguration {
             applyProperties(config, sender);
             senders.add(new CustomMailSender(config.getKey(), sender));
         });
-        log.debug("load {} mail-services", senders.size());
+        if (log.isDebugEnabled()) {
+            log.debug("load {} mail-service", senders.size());
+        }
         return senders;
     }
 

@@ -4,7 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import top.wang3.hami.security.context.IpContext;
@@ -13,6 +15,7 @@ import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.Result;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,9 +29,12 @@ public class RequestLogFilter extends OncePerRequestFilter {
 
     private final Set<String> ignores = Set.of("/swagger-ui", "/v3/api-docs");
 
+    @Setter
+    private List<RequestMatcher> ignoreLogUrls;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (this.isIgnoreUrl(request.getServletPath())) {
+        if (this.isIgnoreUrl(request)) {
             filterChain.doFilter(request, response);
         } else {
             long startTime = System.currentTimeMillis();
@@ -46,26 +52,11 @@ public class RequestLogFilter extends OncePerRequestFilter {
      * @param url 路径
      * @return 是否忽略
      */
-    private boolean isIgnoreUrl(String url) {
-        for (String ignore : ignores) {
-            if (url.startsWith(ignore)) return true;
+    private boolean isIgnoreUrl(HttpServletRequest request) {
+        for (RequestMatcher ignored : ignoreLogUrls) {
+            if (ignored.matches(request)) return true;
         }
         return false;
-    }
-
-    /**
-     * 请求结束时的日志打印，包含处理耗时以及响应结果
-     *
-     * @param wrapper   用于读取响应结果的包装类
-     * @param startTime 起始时间
-     */
-    public void logRequestEnd(ContentCachingResponseWrapper wrapper, long startTime) {
-        long time = System.currentTimeMillis() - startTime;
-        int status = wrapper.getStatus();
-        byte[] bytes = wrapper.getContentAsByteArray();
-        String content = status != 200 ?
-                status + " 错误" : new String(bytes, 0, Math.min(256, bytes.length));
-        log.info("请求处理耗时: {}ms | 响应结果: {}", time, content);
     }
 
     /**
@@ -89,5 +80,20 @@ public class RequestLogFilter extends OncePerRequestFilter {
                     log.info("请求URL: \"{}\" ({}) | 远程IP地址: {} │ 身份: 未验证 | 请求参数列表: {}", requestURI, method, ip, args);
                 }
         );
+    }
+
+    /**
+     * 请求结束时的日志打印，包含处理耗时以及响应结果
+     *
+     * @param wrapper   用于读取响应结果的包装类
+     * @param startTime 起始时间
+     */
+    public void logRequestEnd(ContentCachingResponseWrapper wrapper, long startTime) {
+        long time = System.currentTimeMillis() - startTime;
+        int status = wrapper.getStatus();
+        byte[] bytes = wrapper.getContentAsByteArray();
+        String content = status != 200 ?
+                status + " 错误" : new String(bytes, 0, Math.min(128, bytes.length));
+        log.info("请求处理耗时: {}ms | 响应结果: {}", time, content);
     }
 }

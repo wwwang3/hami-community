@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import top.wang3.hami.security.ratelimit.algorithm.RateLimiterAlgorithm;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
-import top.wang3.hami.security.ratelimit.annotation.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateLimitModel;
 import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 import top.wang3.hami.security.ratelimit.resolver.RateLimitKeyResolver;
 
@@ -43,7 +43,7 @@ public class RateLimiter implements ApplicationContextAware {
      * @param model model
      * @throws RateLimitException 限流时抛出此异常
      */
-    public void checkLimit(RateLimiterModel model) throws RateLimitException {
+    public void checkLimit(RateLimitModel model) throws RateLimitException {
         try {
             RateLimit.Algorithm algorithm = model.getAlgorithm();
             RateLimit.Scope scope = model.getScope();

@@ -1,5 +1,6 @@
 package top.wang3.hami.security.ratelimit.resolver;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.dto.IpInfo;
 import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
@@ -15,7 +16,7 @@ public class IpKeyResolver implements RateLimitKeyResolver {
     }
 
     @Override
-    public String resolve(KeyMeta keyMeta) {
+    public String resolve(@NonNull KeyMeta keyMeta) {
         String ip = keyMeta.getIp();
         return ip == null ? IpInfo.UNKNOWN_IP : ip;
     }

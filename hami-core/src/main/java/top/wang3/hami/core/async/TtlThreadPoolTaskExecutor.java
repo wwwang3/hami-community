@@ -21,6 +21,14 @@ public class TtlThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
      */
     private static final String ERROR_MESSAGE = "task不能为空";
 
+    private String name;
+
+    @Override
+    public void setBeanName(String name) {
+        super.setBeanName(name);
+        this.name = name;
+    }
+
     @Override
     public void execute(Runnable task) {
         super.execute(Objects.requireNonNull(TtlRunnable.get(task), ERROR_MESSAGE));
@@ -54,7 +62,7 @@ public class TtlThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
     @Override
     public void destroy() {
         super.destroy();
-        log.info("hami-thread-pool shutdown success");
+        log.info("{} shutdown success", this.name);
     }
 
 
@@ -86,8 +94,8 @@ public class TtlThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
                     executor.isTerminating());
             log.error(msg);
             try {
-                //try new thread
-                new Thread(r, "Temporary task executor").start();
+                // try new thread
+                new Thread(r, "Temporary task thread").start();
                 handler.handle(new AlarmEmailMessage("线程池告警信息", msg));
             } catch (Throwable e) {
                 msg = "Failed to start a new Thread, error_class: %s, error_msg: %s".formatted(e.getClass(), e.getMessage());

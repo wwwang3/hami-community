@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import top.wang3.hami.security.annotation.ApiInfo;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
+import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
 import java.util.List;
 
@@ -110,19 +111,25 @@ public class WebSecurityProperties {
 
         boolean enable;
 
-        /**
-         * 限流算法
-         */
-        RateLimit.Algorithm algorithm = RateLimit.Algorithm.SLIDE_WINDOW;
+        @NestedConfigurationProperty
+        List<ApiRateLimitConfig> configs;
+
+    }
+
+    @Data
+    public static class ApiRateLimitConfig {
 
         /**
-         * 请求速率
+         * 匹配限流的url-pattern 支持ant风格, 针对无法写在controller中的方法, 比如SpringSecurity中的login等
          */
-        int rate = 10;
+        String[] patterns;
 
-        /**
-         * 最大容量
-         */
-       int capacity = 200;
+        RateMeta rateMeta;
+
+        RateLimit.Algorithm algorithm;
+
+        RateLimit.Scope scope;
+
+        String blockMsg;
     }
 }

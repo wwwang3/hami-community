@@ -1,6 +1,7 @@
 package top.wang3.hami.security.ratelimit.aspect;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -15,7 +16,7 @@ import top.wang3.hami.security.ratelimit.RateLimitException;
 import top.wang3.hami.security.ratelimit.RateLimiter;
 import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
-import top.wang3.hami.security.ratelimit.annotation.RateLimiterModel;
+import top.wang3.hami.security.ratelimit.annotation.RateLimitModel;
 import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
 import java.lang.reflect.Method;
@@ -39,13 +40,13 @@ public class RateLimiterAspect {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         String className = signature.getDeclaringType().getSimpleName();
-        RateLimiterModel model = buildModel(method, className);
+        RateLimitModel model = buildModel(method, className);
         rateLimiter.checkLimit(model);
     }
 
-    private RateLimiterModel buildModel(Method method, String className)  {
+    private RateLimitModel buildModel(Method method, String className)  {
         RateLimit rateLimit = method.getAnnotation(RateLimit.class);
-        RateMeta rateMeta = new RateMeta(rateLimit.capacity(), rateLimit.rate(), rateLimit.interval());
+        RateMeta rateMeta = new RateMeta(rateLimit.rate(), rateLimit.capacity(), rateLimit.interval());
 
         KeyMeta keyMeta = new KeyMeta();
         keyMeta.setIp(IpContext.getIpDefaultUnknown());
@@ -53,8 +54,10 @@ public class RateLimiterAspect {
         keyMeta.setMethodName(method.getName());
         Integer loginUserId = LoginUserContext.getLoginUserIdDefaultNull();
         keyMeta.setLoginUserId(loginUserId == null ? null : loginUserId.toString());
+        HttpServletRequest request = LoginUserContext.getRequest();
+        keyMeta.setUri(request == null ? null : request.getRequestURI());
 
-        RateLimiterModel model = new RateLimiterModel();
+        RateLimitModel model = new RateLimitModel();
         model.setAlgorithm(rateLimit.algorithm());
         model.setScope(rateLimit.scope());
         model.setRateMeta(rateMeta);

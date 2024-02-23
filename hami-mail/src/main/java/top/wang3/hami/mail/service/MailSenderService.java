@@ -9,6 +9,7 @@ import top.wang3.hami.mail.model.PrepareMimeMessageHelper;
 import java.util.List;
 
 @Slf4j
+@SuppressWarnings("unused")
 public class MailSenderService {
 
     private final MailSenderManager manager;
@@ -41,37 +42,37 @@ public class MailSenderService {
         return helper.create();
     }
 
-    public MailSendResult sendText(String subject, String text, String ...to) {
+    public MailSendResult sendText(String subject, String text, String ...receivers) {
        return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
-                .to(to)
+                .to(receivers)
                 .subject(subject)
                 .text(text)
                 .send();
     }
 
-    public MailSendResult sendHtml(String subject, String html, String ...to) {
+    public MailSendResult sendHtml(String subject, String html, String ...receivers) {
         return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
-                .to(to)
+                .to(receivers)
                 .subject(subject)
                 .html(html)
                 .send();
     }
 
-    public MailSendResult sendText(String subject, String text, List<String> tos) {
+    public MailSendResult sendText(String subject, String text, List<String> receivers) {
         return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
-                .to(tos)
+                .to(receivers)
                 .subject(subject)
                 .text(text)
                 .send();
     }
 
-    public MailSendResult sendHtml(String subject, String text, List<String> tos) {
+    public MailSendResult sendHtml(String subject, String text, List<String> receivers) {
         return new PrepareMimeMessageHelper(manager, manager.getMailSender())
                 .create()
-                .to(tos)
+                .to(receivers)
                 .subject(subject)
                 .text(text)
                 .send();

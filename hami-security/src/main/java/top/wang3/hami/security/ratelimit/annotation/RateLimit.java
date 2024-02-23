@@ -1,7 +1,6 @@
 package top.wang3.hami.security.ratelimit.annotation;
 
 
-import lombok.Getter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,18 +22,18 @@ public @interface RateLimit {
     Algorithm algorithm() default Algorithm.SLIDE_WINDOW;
 
     /**
+     * 请求速率 请求数/s
+     *
+     * @return rate
+     */
+    double rate() default 20;
+
+    /**
      * 最大容量
      *
      * @return capacity
      */
     double capacity() default 200;
-
-    /**
-     * 请求速率
-     *
-     * @return rate
-     */
-    double rate() default 20;
 
     /**
      * 时间间隔 用于固定窗口算法 单位s
@@ -56,56 +55,48 @@ public @interface RateLimit {
      */
     String blockMsg() default "大哥别刷了( ´･･)ﾉ(._.`)";
 
-
-    @Getter
     enum Algorithm {
 
         /**
          * 固定窗口算法
          * capacity / rate == 时间窗口 比如 200 / 20 ==> 10秒内只能有200个请求
          */
-        FIXED_WINDOW("fixed_window"),
+        FIXED_WINDOW,
 
         /**
          * 滑动窗口
          */
-        SLIDE_WINDOW("slide_window");
+        SLIDE_WINDOW
 
-        private final String type;
-
-        Algorithm(String type) {
-            this.type = type;
-        }
     }
 
-    @Getter
     enum Scope {
 
         /**
-         * IP范围限流
+         * IP范围限流 key: ip
          */
-        IP("ip"),
+        IP,
 
         /**
-         * 登录用户限流, 未登录直接返回
+         * 登录用户限流, 未登录直接返回, key: methodName + loginUserId
          */
-        LOGIN_USER("login_user"),
+        LOGIN_USER,
 
         /**
-         * 类+方法名称
+         * key: 类+方法名称
          */
-        METHOD("method"),
+        METHOD,
 
         /**
-         * 全局
+         * 请求URI key: uri or global when uri is null
          */
-        GLOBAL("global");
+        URI,
 
-        private final String desc;
+        /**
+         * 全局 key: GLOBAL
+         */
+        GLOBAL
 
-        Scope(String desc) {
-            this.desc = desc;
-        }
     }
 
 }

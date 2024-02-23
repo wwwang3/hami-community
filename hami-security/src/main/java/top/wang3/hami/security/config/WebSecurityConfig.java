@@ -27,7 +27,11 @@ import top.wang3.hami.security.context.TtlSecurityContextHolderStrategy;
 import top.wang3.hami.security.handler.AuthenticationPostHandler;
 import top.wang3.hami.security.handler.DefaultAuthenticationPostHandler;
 import top.wang3.hami.security.model.WebSecurityProperties;
+import top.wang3.hami.security.ratelimit.annotation.RateLimit;
+import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 import top.wang3.hami.security.service.TokenService;
+
+import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(WebSecurityProperties.class)
@@ -104,17 +108,17 @@ public class WebSecurityConfig {
                 })
                 .logout(conf -> {
                     // 退出登录
-                    // @formatter:off
                     conf
                         .logoutUrl(properties.getLogoutApi())
                         .logoutSuccessHandler(handler::handleLogoutSuccess);
                 })
+                /// 过滤器顺序 IP ==> 请求ID ==> Token ==> 请求日志 ==> 限流
                 // Token认证器
                 .with(TokenAuthenticationConfigurer.create(), this::applyTokenConfig)
-                // 请求ID, 请求日志, IPContext
+                // IPContext, 请求ID, 请求日志
                 .with(ToolFiltersConfigurer.create(), ToolFiltersConfigurer.withDefaults())
                 // 全局IP限流
-                .with(GlobalRateLimitFilterConfigurer.create(), this::applyRateLimitConfig)
+                .with(new GlobalRateLimitFilterConfigurer(http), this::applyRateLimitConfig)
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
@@ -124,14 +128,28 @@ public class WebSecurityConfig {
     }
 
     private void applyRateLimitConfig(GlobalRateLimitFilterConfigurer conf) {
-        if (!properties.getRateLimit().isEnable()) {
+        WebSecurityProperties.RateLimitFilterProperties rateLimit = properties.getRateLimit();
+        if (rateLimit == null) return;
+        if (!rateLimit.isEnable()) {
             conf.disable();
             return;
         }
-        // @formatter:off
-        conf.rate(properties.getRateLimit().getRate())
-            .capacity(properties.getRateLimit().getCapacity())
-            .algorithm(properties.getRateLimit().getAlgorithm());
+        List<WebSecurityProperties.ApiRateLimitConfig> configs = rateLimit.getConfigs();
+        if (configs != null && !configs.isEmpty()) {
+            for (WebSecurityProperties.ApiRateLimitConfig config : configs) {
+                String[] patterns = config.getPatterns();
+                conf.getRegistry()
+                        .requestMatchers(patterns)
+                        .create(config.getAlgorithm(), config.getScope())
+                        .blockMsg(config.getBlockMsg())
+                        .build(config.getRateMeta());
+            }
+        }
+        conf.getRegistry()
+                .anyRequest()
+                .create(RateLimit.Algorithm.SLIDE_WINDOW, RateLimit.Scope.IP)
+                .build(new RateMeta(20, 2000, 100));
+
     }
 
 }

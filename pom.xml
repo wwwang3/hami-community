@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>top.wang3</groupId>
@@ -23,16 +23,17 @@
         <module>hami-test</module>
     </modules>
     <properties>
-        <java.version>17</java.version>
         <boot.version>${project.parent.version}</boot.version>
 		<canal.version>1.1.7</canal.version>
 		<ip2region.version>2.7.0</ip2region.version>
+        <java.version>17</java.version>
 		<jwt.version>0.11.5</jwt.version>
+        <kaptcha.version>2.3.2</kaptcha.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
         <mysql.version>8.0.30</mysql.version>
-        <mybatisplus.version>3.5.4.1</mybatisplus.version>
+        <mybatisplus.version>3.5.5</mybatisplus.version>
         <mybatisboot.version>3.0.3</mybatisboot.version>
 		<redisson.version>3.23.4</redisson.version>
 		<spring.file.version>1.0.3</spring.file.version>
@@ -53,17 +54,6 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatisplus.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.mybatis</groupId>
-                        <artifactId>mybatis-spring</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatisboot.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.xuyanwu</groupId>
@@ -78,7 +68,7 @@
             <dependency>
                 <groupId>com.github.penggle</groupId>
                 <artifactId>kaptcha</artifactId>
-                <version>2.3.2</version>
+                <version>${kaptcha.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -133,10 +123,19 @@
             <id>dev</id>
             <properties>
                 <environment>dev</environment>
+                <skipTests>true</skipTests>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <modules>
+                <module>hami-api</module>
+                <module>hami-common</module>
+                <module>hami-core</module>
+                <module>hami-security</module>
+                <module>hami-mail</module>
+                <module>hami-canal</module>
+            </modules>
         </profile>
         <profile>
             <id>prod</id>
@@ -147,43 +146,15 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
+            <modules>
+                <module>hami-api</module>
+                <module>hami-common</module>
+                <module>hami-core</module>
+                <module>hami-security</module>
+                <module>hami-mail</module>
+                <module>hami-canal</module>
+            </modules>
         </profile>
     </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>build-native</id>
-                        <goals>
-                            <goal>compile-no-fork</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>false</skip>
-                    <imageName>HamiCommunityApplication</imageName>
-                    <mainClass>top.wang3.hami.HamiCommunityApplication</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

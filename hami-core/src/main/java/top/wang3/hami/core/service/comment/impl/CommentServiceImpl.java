@@ -1,10 +1,10 @@
 package top.wang3.hami.core.service.comment.impl;
 
-import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.common.converter.CommentConverter;
 import top.wang3.hami.common.dto.PageData;

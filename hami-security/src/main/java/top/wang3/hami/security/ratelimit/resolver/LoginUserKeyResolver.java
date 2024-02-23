@@ -1,5 +1,6 @@
 package top.wang3.hami.security.ratelimit.resolver;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.security.ratelimit.RateLimitException;
 import top.wang3.hami.security.ratelimit.annotation.KeyMeta;
@@ -14,10 +15,11 @@ public class LoginUserKeyResolver implements RateLimitKeyResolver {
     }
 
     @Override
-    public String resolve(KeyMeta keyMeta) {
-        if (keyMeta.getLoginUserId() == null) {
-            throw new RateLimitException("no login-user id found");
+    public String resolve(@NonNull KeyMeta keyMeta) {
+        String loginUserId = keyMeta.getLoginUserId();
+        if (loginUserId == null) {
+            throw new RateLimitException("no login-user");
         }
-        return keyMeta.getMethodName()+ ":" + keyMeta.getLoginUserId();
+        return keyMeta.getMethodName() + ":" + loginUserId;
     }
 }
