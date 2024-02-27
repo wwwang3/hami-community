@@ -37,27 +37,23 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
 
     @Override
     public List<Comment> listReply(Page<Comment> page, Integer articleId, Integer rootId) {
-        return listReply(page, articleId, rootId, 1);
-    }
-
-    @Override
-    public Reply listIndexReply(Integer articleId, Integer rootId) {
-        //获取第一页
-        Page<Comment> page = new Page<>(1, 5);
-        List<Comment> comments = listReply(page, articleId, rootId, 0);
-        Reply reply = new Reply();
-        reply.setComments(comments);
-        reply.setTotal(page.getTotal());
-        return reply;
-    }
-
-    private List<Comment> listReply(Page<Comment> page, Integer articleId, Integer rootId, int sort) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(fields)
                 .eq("article_id", articleId)
                 .eq("root_id", rootId)
-                .orderByDesc(sort == 0 ? "likes" : "ctime")
+                .orderByAsc("ctime")
                 .list(page);
+    }
+
+    @Override
+    public Reply listIndexReply(Integer articleId, Integer rootId) {
+        // 获取第一页
+        Page<Comment> page = new Page<>(1, 5);
+        List<Comment> comments = listReply(page, articleId, rootId);
+        Reply reply = new Reply();
+        reply.setComments(comments);
+        reply.setTotal(page.getTotal());
+        return reply;
     }
 
     @Override

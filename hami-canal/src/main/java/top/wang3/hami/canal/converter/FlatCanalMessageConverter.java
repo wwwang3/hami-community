@@ -25,6 +25,7 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
 
     @Override
     public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) {
+        // todo fix flat-message未更新字段为空问题
         HashMap<String, List<CanalEntity<T>>> map = new HashMap<>();
         try {
             if (log.isDebugEnabled()) {

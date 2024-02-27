@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
-import top.wang3.hami.canal.converter.CommonCanalMessageConverter;
 import top.wang3.hami.canal.converter.FlatCanalMessageConverter;
+import top.wang3.hami.canal.converter.ProtobufCanalMessageConverter;
 
 @Configuration
 @EnableConfigurationProperties(CanalProperties.class)
@@ -22,7 +22,7 @@ public class CanalConfiguration {
     @Bean("CanalMessageConverter")
     @ConditionalOnProperty(prefix = "hami.canal", name = "flat-message", havingValue = "false", matchIfMissing = true)
     public CanalMessageConverter canalMessageConverter(CanalEntryHandlerFactory factory) {
-        CommonCanalMessageConverter converter = new CommonCanalMessageConverter();
+        ProtobufCanalMessageConverter converter = new ProtobufCanalMessageConverter();
         converter.setCanalEntryHandlerFactory(factory);
         return converter;
     }

@@ -119,7 +119,7 @@ CREATE TABLE `article_draft`
     `user_id`      int                                                           NOT NULL COMMENT '用户ID',
     `article_id`   int                                                           NULL     DEFAULT NULL COMMENT '文章ID',
     `category_id`  int                                                           NULL     DEFAULT NULL COMMENT '分类ID',
-    `tag_ids` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章标签',
+    `tag_ids`      varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章标签',
     `title`        varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '标题',
     `summary`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL     DEFAULT NULL COMMENT '文章简介',
     `content`      text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci         NULL COMMENT '文章内容',
@@ -169,6 +169,24 @@ CREATE TABLE `article_stat`
 -- ----------------------------
 -- Records of article_stat
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for bulletin
+-- ----------------------------
+DROP TABLE IF EXISTS `bulletin`;
+CREATE TABLE `bulletin`  (
+                             `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                             `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '标题',
+                             `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '内容',
+                             `ctime` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+                             `mtime` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+                             `deleted` tinyint NOT NULL COMMENT '是否删除',
+                             PRIMARY KEY (`id`) USING BTREE,
+                             INDEX `idx_ctime`(`deleted` ASC, `ctime` ASC, `id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+
+
 
 -- ----------------------------
 -- Table structure for category

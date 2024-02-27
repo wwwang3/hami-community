@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Setter
-public class CommonCanalMessageConverter implements CanalMessageConverter {
+public class ProtobufCanalMessageConverter implements CanalMessageConverter {
 
     private CanalEntryHandlerFactory canalEntryHandlerFactory;
 

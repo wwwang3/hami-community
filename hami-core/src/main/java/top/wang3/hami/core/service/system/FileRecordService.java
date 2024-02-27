@@ -1,4 +1,4 @@
-package top.wang3.hami.core.service.common;
+package top.wang3.hami.core.service.system;
 
 
 import cn.xuyanwu.spring.file.storage.FileInfo;

@@ -9,6 +9,7 @@ import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.annotation.CanalEntity;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
+import top.wang3.hami.canal.converter.FlatCanalMessageConverter;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
         if (isEmptyMessage(message)) {
             return;
         }
-        Map<String, List<CanalEntity<Object>>> entitiesMap = canalMessageConverter.convertToEntity(message.getBody());
+        Map<String, List<CanalEntity<Object>>> entitiesMap  = deserializeMessage(message);
         if (entitiesMap.isEmpty()) return;
         try {
             int size = 0;
@@ -66,6 +67,17 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
                     e.getMessage(), entitiesMap
             );
         }
+    }
+
+    private Map<String, List<CanalEntity<Object>>> deserializeMessage(Message message) {
+        if (message.getMessageProperties()
+                .getContentType()
+                .equalsIgnoreCase("application/json") && !(canalMessageConverter instanceof FlatCanalMessageConverter)) {
+            throw new IllegalStateException("canal send a flat-message, " +
+                                            "but converter is not FlatMessageConverter, " +
+                                            "Please restart app and set property: hami.canal.flat-message=true");
+        }
+        return canalMessageConverter.convertToEntity(message.getBody());
     }
 
     private void processEntity(List<CanalEntity<Object>> entities, List<CanalEntryHandler<?>> handlers) {

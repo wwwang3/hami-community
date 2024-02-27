@@ -4,12 +4,12 @@ package top.wang3.hami.web.controller.image;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import top.wang3.hami.core.service.common.ImageService;
+import top.wang3.hami.core.service.system.ImageService;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
 /**
- * image
+ * system
  * 图像上传接口
  */
 @RestController

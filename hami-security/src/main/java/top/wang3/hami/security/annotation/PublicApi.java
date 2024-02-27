@@ -10,6 +10,10 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+
+/**
+ * 开放API
+ */
 @Documented
 @Retention(RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -19,9 +23,4 @@ public @interface PublicApi {
     @AliasFor(annotation = Api.class)
     String httpMethod() default "";
 
-    @AliasFor(annotation = Api.class)
-    String[] roles() default {};
-
-    @AliasFor(annotation = Api.class)
-    String[] authorities() default {};
 }
