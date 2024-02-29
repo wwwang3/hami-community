@@ -3,7 +3,6 @@ package top.wang3.hami.core.job;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.message.email.AlarmEmailMessage;
@@ -19,8 +18,7 @@ public class RefreshRankTaskService {
     private final RankListInitializer initializer;
     private final MailMessageHandler handler;
 
-    @Async
-    @Scheduled(cron = "12 12 12 * * ?")
+    @Scheduled(cron = "11 11 1 * * ?")
     public void refreshHotArticles() {
         try {
             long start = System.currentTimeMillis();
@@ -34,8 +32,7 @@ public class RefreshRankTaskService {
         }
     }
 
-    @Async
-    @Scheduled(cron = "13 13 13 * * ?")
+    @Scheduled(cron = "22 22 1 * * ?")
     public void refreshOverallHotArticles() {
         try {
             long start = System.currentTimeMillis();
@@ -49,8 +46,7 @@ public class RefreshRankTaskService {
         }
     }
 
-    @Async
-    @Scheduled(cron = "11 11 1 * * ?")
+    @Scheduled(cron = "33 33 1 * * ?")
     public void refreshAuthorRankList() {
         try {
             long start = System.currentTimeMillis();

@@ -22,7 +22,6 @@ public interface ArticleStatRepository extends IService<ArticleStat> {
 
     List<ArticleStat> selectArticleStatList(List<Integer> articleIds);
 
-    @Transactional(rollbackFor = Exception.class)
     boolean increaseViews(int articleId, int count);
 
     boolean updateLikes(int articleId, int delta);

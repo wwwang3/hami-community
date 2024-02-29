@@ -15,11 +15,9 @@ import top.wang3.hami.core.service.mail.MailMessageHandler;
 @RequiredArgsConstructor
 public class AsyncConfig implements AsyncConfigurer {
 
-    private final MailMessageHandler mailMessageHandler;
-
     @Primary
     @Bean("hami-thread-pool")
-    public ThreadPoolTaskExecutor threadPoolExecutor() {
+    public ThreadPoolTaskExecutor threadPoolExecutor(MailMessageHandler mailMessageHandler) {
         TtlThreadPoolTaskExecutor taskExecutor = new TtlThreadPoolTaskExecutor();
         taskExecutor.setBeanName("hami-thread-pool");
         taskExecutor.setThreadNamePrefix("hami-thread-");

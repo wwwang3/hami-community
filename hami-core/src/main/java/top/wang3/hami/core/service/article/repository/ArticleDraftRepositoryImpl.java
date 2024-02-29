@@ -41,7 +41,7 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
     }
 
     @Override
-    public boolean saveDraft(ArticleDraft draft) {
+    public boolean createDraft(ArticleDraft draft) {
         Assert.notNull(draft, "draft cannot be null");
         return super.save(draft);
     }

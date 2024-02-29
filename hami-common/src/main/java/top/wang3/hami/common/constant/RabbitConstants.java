@@ -2,6 +2,10 @@ package top.wang3.hami.common.constant;
 
 public final class RabbitConstants {
 
+    public static final String XDL_EXCHANGE_ARG = "x-dead-letter-exchange";
+
+    public static final String XDL_ROUTING_KEY_ARG = "x-dead-letter-routing-key";
+
     public static final String BATCH_LISTENER_FACTORY = "batchRabbitListenerContainerFactory";
 
     public static final String HAMI_EMAIL_EXCHANGE = "hami-direct-exchange-1";
@@ -73,4 +77,7 @@ public final class RabbitConstants {
     public static final String FOLLOW_QUEUE_4 = "follow-queue-4";
     public static final String FOLLOW_QUEUE_5 = "follow-queue-5";
     public static final String HAMI_ACCOUNT_EXCHANGE = "hami-account-exchange";
+    public static final String HAMI_DL_EXCHANGE = "hami-dl-exchange-1";
+    public static final String HAMI_DL_QUEUE = "hami-dl-queue-1";
+    public static final String HAMI_DL_ROUTING = "/dead";
 }

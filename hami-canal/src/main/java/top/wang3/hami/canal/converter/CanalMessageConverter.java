@@ -6,7 +6,6 @@ import top.wang3.hami.canal.annotation.CanalEntity;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings(value = {"unchecked", "rawtypes"})
 public interface CanalMessageConverter {
 
     /**
@@ -15,6 +14,6 @@ public interface CanalMessageConverter {
      * @param bytes 数据
      * @return Map<String, List <CanalEntity <T>>>
      */
-    <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes);
+    <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) throws Exception;
 
 }

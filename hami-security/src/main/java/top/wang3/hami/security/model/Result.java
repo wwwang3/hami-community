@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  */
 public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checker) {
 
-    public static final ObjectMapper MAPPER = HamiFactory.MAPPER;
+    public static final ObjectMapper MAPPER = HamiFactory.getObjectMapper();
 
     public Result<T> orElse(Supplier<T> supplier) {
         Objects.requireNonNull(supplier);

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Setter
@@ -24,38 +23,29 @@ public class ProtobufCanalMessageConverter implements CanalMessageConverter {
 
     private CanalEntryHandlerFactory canalEntryHandlerFactory;
 
-    public final Map<Class<?>, Map<String, Field>> ENTRY_CACHE = new ConcurrentHashMap<>(32);
-
-
     @Override
-    public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) {
+    public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) throws Exception {
         Message message = CanalMessageDeserializer.deserializer(bytes);
         List<CanalEntry.Entry> entries = message.getEntries();
         // 根据表名路由, 其实应该不会出现entries中表名不一样的情况
         HashMap<String, List<CanalEntity<T>>> map = new HashMap<>();
-        try {
-            for (CanalEntry.Entry entry : entries) {
-                if (!CanalEntry.EntryType.ROWDATA.equals(entry.getEntryType())) {
-                    continue;
-                }
-                String tableName = entry.getHeader().getTableName();
-                CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
-                List<CanalEntry.RowData> rowDatasList = rowChange.getRowDatasList();
-                if (rowDatasList.isEmpty()) {
-                    // empty
-                    continue;
-                }
-                CanalEntry.EventType eventType = rowChange.getEventType();
-                if (!isSupportedType(eventType)) {
-                    continue;
-                }
-                List<CanalEntity<T>> entities = map.computeIfAbsent(tableName, k -> new ArrayList<>());
-                processRowDataList(tableName, rowDatasList, entities, eventType);
+        for (CanalEntry.Entry entry : entries) {
+            if (!CanalEntry.EntryType.ROWDATA.equals(entry.getEntryType())) {
+                continue;
             }
-        } catch (Exception e) {
-            log.error("deserialize message to entity failed, error_class: {}, error_message: {}",
-                    e.getClass(),
-                    e.getMessage());
+            String tableName = entry.getHeader().getTableName();
+            CanalEntry.RowChange rowChange = CanalEntry.RowChange.parseFrom(entry.getStoreValue());
+            List<CanalEntry.RowData> rowDatasList = rowChange.getRowDatasList();
+            if (rowDatasList.isEmpty()) {
+                // empty
+                continue;
+            }
+            CanalEntry.EventType eventType = rowChange.getEventType();
+            if (!isSupportedType(eventType)) {
+                continue;
+            }
+            List<CanalEntity<T>> entities = map.computeIfAbsent(tableName, k -> new ArrayList<>());
+            processRowDataList(tableName, rowDatasList, entities, eventType);
         }
         return map;
     }
@@ -75,7 +65,7 @@ public class ProtobufCanalMessageConverter implements CanalMessageConverter {
     }
 
     private <T> CanalEntity<T> rowDataToEntity(String tableName, CanalEntry.RowData rowData, CanalEntry.EventType eventType)
-            throws JsonProcessingException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         CanalEntity<T> entity = new CanalEntity<>();
         Class<T> tableClass = canalEntryHandlerFactory.getTableClass(tableName);
         Map<String, Field> tableField = canalEntryHandlerFactory.getTableField(tableName);

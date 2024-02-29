@@ -12,7 +12,7 @@ public interface ArticleDraftRepository extends IService<ArticleDraft> {
 
     List<ArticleDraft> getDraftsByPage(Page<ArticleDraft> page, Integer userId, byte state);
 
-    boolean saveDraft(ArticleDraft draft);
+    boolean createDraft(ArticleDraft draft);
 
     boolean updateDraft(ArticleDraft draft);
 

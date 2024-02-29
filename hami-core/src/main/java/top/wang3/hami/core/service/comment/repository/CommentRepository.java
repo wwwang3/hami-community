@@ -17,6 +17,7 @@ public interface CommentRepository extends IService<Comment> {
 
     Reply listIndexReply(Integer articleId, Integer rootId);
 
+    @Transactional(rollbackFor = Exception.class)
     int deleteComment(Integer id);
 
     Integer getCommentUser(Integer id);

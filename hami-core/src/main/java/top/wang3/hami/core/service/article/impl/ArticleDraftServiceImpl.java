@@ -80,7 +80,7 @@ public class ArticleDraftServiceImpl implements ArticleDraftService {
         int userId = LoginUserContext.getLoginUserId();
         draft.setUserId(userId);
         draft.setState(Constants.ZERO);
-        boolean saved = articleDraftRepository.saveDraft(draft);
+        boolean saved = articleDraftRepository.createDraft(draft);
         return saved ? draft : null;
     }
 

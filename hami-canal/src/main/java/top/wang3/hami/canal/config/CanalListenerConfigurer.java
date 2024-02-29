@@ -3,10 +3,7 @@ package top.wang3.hami.canal.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.ExchangeBuilder;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.beans.BeansException;
@@ -76,7 +73,11 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
         ArrayList<Queue> queues = new ArrayList<>(tables.size());
         for (CanalProperties.Table table : tables) {
             String queueOrBeanName = "canal-" + table.getName() + "-" + ++queueSize;
-            Queue amqpQueue = new Queue(queueOrBeanName, true);
+            Queue amqpQueue = QueueBuilder
+                    .durable(queueOrBeanName)
+                    .deadLetterExchange(canalProperties.getDlExchange()) // dl-exchange
+                    .deadLetterRoutingKey(canalProperties.getDlRoutingKey()) // dl-routing-key
+                    .build();
             // 向容器注册bean, Spring会帮我们声明队列
             ((ConfigurableBeanFactory) beanFactory).registerSingleton(queueOrBeanName, amqpQueue);
             registerBinding(table.getName(), queueOrBeanName, table.getRoutingKey());

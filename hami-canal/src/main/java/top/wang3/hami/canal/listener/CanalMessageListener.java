@@ -1,15 +1,17 @@
 package top.wang3.hami.canal.listener;
 
 import com.rabbitmq.client.Channel;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
+import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.CollectionUtils;
 import top.wang3.hami.canal.CanalEntryHandler;
 import top.wang3.hami.canal.CanalEntryHandlerFactory;
 import top.wang3.hami.canal.annotation.CanalEntity;
 import top.wang3.hami.canal.converter.CanalMessageConverter;
-import top.wang3.hami.canal.converter.FlatCanalMessageConverter;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,8 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
     private final CanalEntryHandlerFactory factory;
     private final CanalMessageConverter canalMessageConverter;
 
+    private boolean isManual;
+
     public CanalMessageListener(String containerId, CanalEntryHandlerFactory factory,
                                 CanalMessageConverter canalMessageConverter) {
         this.containerId = containerId;
@@ -28,17 +32,17 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
         this.canalMessageConverter = canalMessageConverter;
     }
 
-    @SuppressWarnings("all")
-    public void onMessage(Message message, Channel channel) {
+    @Override
+    public void containerAckMode(AcknowledgeMode mode) {
+        isManual = mode.isManual();
+    }
+
+    public void onMessage(Message message, Channel channel) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("canal-container: {}, received a message", containerId);
         }
         long start = System.currentTimeMillis();
-        if (isEmptyMessage(message)) {
-            return;
-        }
         Map<String, List<CanalEntity<Object>>> entitiesMap  = deserializeMessage(message);
-        if (entitiesMap.isEmpty()) return;
         try {
             int size = 0;
             for (Map.Entry<String, List<CanalEntity<Object>>> entry : entitiesMap.entrySet()) {
@@ -59,25 +63,39 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
             if (log.isDebugEnabled()) {
                 log.debug("container: [{}] handle {} message, cost: {}ms", containerId, size, end - start);
             }
+            if (isManual) {
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(
                     "handle message failed, container-id: {}, error_class: {}, error_msg: {}, entitiesMap: {}",
                     containerId, e.getClass(),
                     e.getMessage(), entitiesMap
             );
+            if (isManual) {
+                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public void onMessageBatch(List<Message> messages, Channel channel) {
+        for (Message message : messages) {
+            onMessage(message, channel);
         }
     }
 
     private Map<String, List<CanalEntity<Object>>> deserializeMessage(Message message) {
-        if (message.getMessageProperties()
-                .getContentType()
-                .equalsIgnoreCase("application/json") && !(canalMessageConverter instanceof FlatCanalMessageConverter)) {
-            throw new IllegalStateException("canal send a flat-message, " +
-                                            "but converter is not FlatMessageConverter, " +
-                                            "Please restart app and set property: hami.canal.flat-message=true");
+        try {
+            return canalMessageConverter.convertToEntity(message.getBody());
+        } catch (Exception e) {
+            log.error("CanalMessageConverter serialize message failed. container-id: {}, error_class: {}, error_msg: {}",
+                    containerId, e.getClass().getName(), e.getMessage());
+            throw new MessageConversionException("CanalMessageConverter serialize message failed.", e);
         }
-        return canalMessageConverter.convertToEntity(message.getBody());
     }
 
     private void processEntity(List<CanalEntity<Object>> entities, List<CanalEntryHandler<?>> handlers) {
@@ -99,10 +117,6 @@ public class CanalMessageListener implements ChannelAwareMessageListener {
             case UPDATE -> handler.processUpdate((T) entity.getBefore(), (T) entity.getAfter());
             case DELETE -> handler.processDelete((T) entity.getBefore());
         }
-    }
-
-    private boolean isEmptyMessage(Message message) {
-        return message == null || message.getBody() == null || message.getBody().length == 0;
     }
 
     private List<CanalEntryHandler<?>> findHandler(String containerId, String tableName) {

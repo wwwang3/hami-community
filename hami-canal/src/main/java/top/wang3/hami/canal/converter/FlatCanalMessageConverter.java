@@ -11,10 +11,7 @@ import top.wang3.hami.canal.annotation.CanalEntity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Setter
@@ -24,55 +21,62 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
     private CanalEntryHandlerFactory canalEntryHandlerFactory;
 
     @Override
-    public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) {
-        // todo fix flat-message未更新字段为空问题
+    public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) throws Exception {
         HashMap<String, List<CanalEntity<T>>> map = new HashMap<>();
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("flat-message: {}", new String(bytes));
-            }
-            FlatMessage flatMessage = JSON.parseObject(bytes, FlatMessage.class);
-            List<Map<String, String>> data = flatMessage.getData();
-            // only dml supported
-            if (!flatMessage.getIsDdl() && !data.isEmpty()) {
-                ArrayList<CanalEntity<T>> entities = new ArrayList<>(data.size());
-                processData(flatMessage, entities);
-                map.put(flatMessage.getTable(), entities);
-            }
-        } catch (Exception e) {
-            log.error("deserialize message to entity failed, error_class: {}, error_message: {}",
-                    e.getClass(),
-                    e.getMessage());
+        if (log.isDebugEnabled()) {
+            log.debug("flat-message: {}", new String(bytes));
+        }
+        FlatMessage flatMessage = JSON.parseObject(bytes, FlatMessage.class);
+        List<Map<String, String>> data = flatMessage.getData();
+        // only dml supported
+        if (!flatMessage.getIsDdl() && !data.isEmpty()) {
+            ArrayList<CanalEntity<T>> entities = new ArrayList<>(data.size());
+            processData(flatMessage, entities);
+            map.put(flatMessage.getTable(), entities);
         }
         return map;
     }
 
-    private <T> void processData(FlatMessage flatMessage, ArrayList<CanalEntity<T>> entities) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        List<Map<String, String>> data = flatMessage.getData();
-        List<Map<String, String>> old = flatMessage.getOld();
+    private <T> void processData(FlatMessage flatMessage, ArrayList<CanalEntity<T>> entities)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        List<Map<String, String>> datas = flatMessage.getData();
+        List<Map<String, String>> olds = flatMessage.getOld();
         String type = flatMessage.getType();
         String table = flatMessage.getTable();
         Class<T> tableClass = canalEntryHandlerFactory.getTableClass(table);
-        int length = data.size();
+        int length = datas.size();
         for (int i = 0; i < length; i++) {
             CanalEntity<T> canalEntity = new CanalEntity<>();
             canalEntity.setTableClass(tableClass);
             canalEntity.setTableName(table);
             canalEntity.setType(CanalEntry.EventType.valueOf(type));
+            final Map<String, String> data = datas.get(i);
             switch (type) {
                 case "INSERT" -> {
-                    canalEntity.setAfter(mapToEntity(table, tableClass, data.get(i)));
+                    canalEntity.setAfter(mapToEntity(table, tableClass, data));
                     entities.add(canalEntity);
                 }
                 case "UPDATE" -> {
-                    canalEntity.setBefore(mapToEntity(table, tableClass, old.get(i)));
-                    canalEntity.setAfter(mapToEntity(table, tableClass, data.get(i)));
+                    Map<String, String> old = olds.get(i);
+                    // FlatMessage中old只包含字段值变更的字段，其值为变更前数据
+                    copyUnChangedPropertyToOld(data, old);
+                    canalEntity.setBefore(mapToEntity(table, tableClass, old));
+                    canalEntity.setAfter(mapToEntity(table, tableClass, data));
                     entities.add(canalEntity);
                 }
                 case "DELETE" -> {
-                    canalEntity.setBefore(mapToEntity(table, tableClass, data.get(i)));
+                    canalEntity.setBefore(mapToEntity(table, tableClass, data));
                     entities.add(canalEntity);
                 }
+            }
+        }
+    }
+
+    private void copyUnChangedPropertyToOld(Map<String, String> data, Map<String, String> old) {
+        Set<String> keySet = new HashSet<>(old.keySet());
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            if (!keySet.contains(entry.getKey())) {
+                old.put(entry.getKey(), entry.getValue());
             }
         }
     }

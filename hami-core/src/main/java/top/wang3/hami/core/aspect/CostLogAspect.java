@@ -8,9 +8,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
-@Component
 @Aspect
 @Slf4j
+@Component
 public class CostLogAspect {
 
     @Pointcut(value = "@annotation(top.wang3.hami.core.annotation.CostLog)")

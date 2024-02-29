@@ -28,6 +28,16 @@ public class CanalProperties {
     private String exchangeType;
 
     /**
+     * 死信交换机
+     */
+    private String dlExchange;
+
+    /**
+     * 死信队列路由键
+     */
+    private String dlRoutingKey;
+
+    /**
      * 发送的是否是FlatMessage格式的数据
      */
     private boolean flatMessage = false;

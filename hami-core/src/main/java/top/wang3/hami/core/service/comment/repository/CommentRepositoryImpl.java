@@ -62,6 +62,7 @@ public class CommentRepositoryImpl extends ServiceImpl<CommentMapper, Comment>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteComment(Integer id) {
         UpdateWrapper<Comment> wrapper = Wrappers
                 .update(new Comment())
