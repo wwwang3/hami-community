@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
@@ -17,7 +16,6 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-@RabbitListener(queues = {RabbitConstants.HAMI_DL_QUEUE})
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -25,7 +23,7 @@ public class DeadMessageConsumer {
 
     private final MailMessageHandler mailMessageHandler;
 
-    @RabbitHandler
+    @RabbitListener(queues = {RabbitConstants.HAMI_DL_QUEUE})
     public void handleMessage(Message message) {
         MessageProperties properties = message.getMessageProperties();
         try {

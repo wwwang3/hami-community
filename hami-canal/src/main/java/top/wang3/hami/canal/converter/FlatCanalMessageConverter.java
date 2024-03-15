@@ -11,6 +11,7 @@ import top.wang3.hami.canal.annotation.CanalEntity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Slf4j
@@ -24,7 +25,7 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
     public <T> Map<String, List<CanalEntity<T>>> convertToEntity(byte[] bytes) throws Exception {
         HashMap<String, List<CanalEntity<T>>> map = new HashMap<>();
         if (log.isDebugEnabled()) {
-            log.debug("flat-message: {}", new String(bytes));
+            log.debug("flat-message: {}", new String(bytes, StandardCharsets.UTF_8));
         }
         FlatMessage flatMessage = JSON.parseObject(bytes, FlatMessage.class);
         List<Map<String, String>> data = flatMessage.getData();

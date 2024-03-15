@@ -9,6 +9,7 @@ import top.wang3.hami.security.annotation.ApiInfo;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -89,6 +90,8 @@ public class WebSecurityProperties {
         List<String> allowedMethods = Collections.singletonList(CorsConfiguration.ALL);
         List<String> exposeHeaders = Collections.singletonList(CorsConfiguration.ALL);
         String pattern = "/**";
+        Duration maxAge = Duration.ofMinutes(30);
+        Boolean enable = true;
     }
 
     @Data

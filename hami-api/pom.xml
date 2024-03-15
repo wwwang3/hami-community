@@ -104,6 +104,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <outputDirectory>${project.parent.basedir}/hami/build/app</outputDirectory>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

@@ -11,8 +11,8 @@ volumes:
   redis_data:
   rabbitmq_data:
 services:
-  mysql:
-    container_name: mysql
+  hami_mysql:
+    container_name: hami_mysql
     build:
       context: build/mysql
       dockerfile: Dockerfile
@@ -22,7 +22,7 @@ services:
     ports:
       - "8300:3306"
     volumes:
-      - ./conf/mysql/my.cnf:/etc/my.cnf
+      - ./db/conf/my.cnf:/etc/my.cnf
       - mysql_data:/var/lib/mysql
       - mysql_data:/var/lib/mysql-files
     environment:
@@ -36,8 +36,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-  redis:
-    container_name: redis
+  hami_redis:
+    container_name: hami_redis
     build:
       context: build/redis
       dockerfile: Dockerfile
@@ -47,7 +47,7 @@ services:
     ports:
       - "8301:6379"
     volumes:
-      - ./conf/redis/redis.conf:/etc/redis/redis.conf
+      - ./redis/conf/redis.conf:/etc/redis/redis.conf
       - redis_data:/data
     environment:
       - TZ=Asia/Shanghai
@@ -56,10 +56,9 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 5s
-    labels:
-      org.springframework.boot.ignore: true
-  rabbitmq:
-    container_name: rabbitmq
+      retries: 3
+  hami_rabbitmq:
+    container_name: hami_rabbitmq
     build:
       context: build/rabbitmq
       dockerfile: Dockerfile
@@ -79,22 +78,23 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 3s
-      retries: 5
-  canal:
-    container_name: canal
+      retries: 3
+  hami_canal:
+    container_name: hami_canal
     build:
       context: build/canal
       dockerfile: Dockerfile
     privileged: true
     depends_on:
-      - rabbitmq
+      hami_rabbitmq:
+        condition: service_healthy
     networks:
       hami_net:
         ipv4_address: 192.168.3.14
     volumes:
-      - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example里面的启动日志了
-      - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
-      - ./conf/canal/canal.properties:/home/admin/canal-server/conf/canal.properties
+      - ./canal/logs:/home/admin/canal-server/logs # 挂载日志，主要是example里面的启动日志了
+      - ./canal/conf/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./canal/conf/canal.properties:/home/admin/canal-server/conf/canal.properties
     environment:
       - TZ=Asia/Shanghai
 

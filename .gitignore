@@ -32,13 +32,13 @@ build/
 
 ### VS Code ###
 .vscode/
-hami/data/**
 
 /**/src/main/resources/application-*.yml
 /**/src/main/resources/application-*.yaml
 /**/src/main/resources/application.properties
 /**/src/main/resources/application.yml
 
-/hami/logs/**
+hami/**/logs
+hami/**/data
 
 *.apifox-helper.properties

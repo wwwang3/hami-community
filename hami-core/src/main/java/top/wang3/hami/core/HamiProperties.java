@@ -19,6 +19,11 @@ public class HamiProperties implements InitializingBean {
 
     String version;
 
+    /**
+     * 工作目录
+     */
+    String workDir;
+
     @NestedConfigurationProperty
     Init init;
 

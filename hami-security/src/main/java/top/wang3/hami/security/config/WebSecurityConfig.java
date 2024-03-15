@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,29 +77,12 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(conf -> {
                 // 默认接口访问配置
                 conf.requestMatchers("/error").permitAll();
-                conf.requestMatchers("/favicon.ico").permitAll();
+//                conf.requestMatchers("/favicon.ico").permitAll();
                 conf.anyRequest().authenticated();
             })
             // csrf配置
             .csrf(CsrfConfigurer::disable)
-            .cors(conf -> {
-                // 跨域配置
-                WebSecurityProperties.CorsConfig corsConfig = properties.getCors();
-                List<String> dep = properties.getAllowedOrigins();
-                List<String> allowedOrigins = corsConfig.getAllowedOrigins();
-                CorsConfiguration cors = new CorsConfiguration();
-                cors.setAllowedOrigins(allowedOrigins);
-                if (dep != null && !dep.isEmpty()) {
-                    dep.forEach(cors::addAllowedOrigin);
-                }
-                cors.setAllowCredentials(corsConfig.getAllowCredentials());
-                cors.setAllowedHeaders(corsConfig.getAllowedHeaders());
-                cors.setAllowedMethods(corsConfig.getAllowedMethods());
-                cors.setExposedHeaders(corsConfig.getExposeHeaders());
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration(corsConfig.getPattern(), cors);
-                conf.configurationSource(source);
-            })
+            .cors(this::applyCorsConf)
             .exceptionHandling(conf -> {
                 // 异常处理
                 conf.accessDeniedHandler(handler::handleError);
@@ -130,6 +114,34 @@ public class WebSecurityConfig {
             .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();
     }
+
+    private void applyCorsConf(CorsConfigurer<HttpSecurity> conf) {
+        // 跨域配置
+        WebSecurityProperties.CorsConfig corsConfig = properties.getCors();
+        if (log.isDebugEnabled()) {
+            log.debug("cors-config: {}", corsConfig);
+        }
+        if (!Boolean.TRUE.equals(corsConfig.getEnable())) {
+            conf.disable();
+            return;
+        }
+        List<String> dep = properties.getAllowedOrigins();
+        List<String> allowedOrigins = corsConfig.getAllowedOrigins();
+        CorsConfiguration cors = new CorsConfiguration();
+        cors.setAllowedOrigins(allowedOrigins);
+        if (dep != null && !dep.isEmpty()) {
+            dep.forEach(cors::addAllowedOrigin);
+        }
+        cors.setAllowCredentials(corsConfig.getAllowCredentials());
+        cors.setAllowedHeaders(corsConfig.getAllowedHeaders());
+        cors.setAllowedMethods(corsConfig.getAllowedMethods());
+        cors.setExposedHeaders(corsConfig.getExposeHeaders());
+        cors.setMaxAge(corsConfig.getMaxAge());
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration(corsConfig.getPattern(), cors);
+        conf.configurationSource(source);
+    }
+
 
     private void applyTokenConfig(TokenAuthenticationConfigurer configurer) {
         configurer.tokenName(properties.getTokenName());

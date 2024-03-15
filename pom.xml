@@ -123,6 +123,7 @@
             <id>dev</id>
             <properties>
                 <environment>dev</environment>
+                <app.version>${project.version}</app.version>
                 <skipTests>true</skipTests>
             </properties>
             <activation>
@@ -141,6 +142,7 @@
             <id>prod</id>
             <properties>
                 <environment>prod</environment>
+                <app.version>${project.version}</app.version>
                 <skipTests>true</skipTests>
             </properties>
             <activation>

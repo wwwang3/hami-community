@@ -1,15 +1,12 @@
 package top.wang3.hami.core.lock;
 
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Component;
 import top.wang3.hami.common.lock.LockTemplate;
 import top.wang3.hami.core.exception.HamiServiceException;
 
 import java.util.concurrent.Callable;
 
-@Component
-@ConditionalOnMissingBean
+
 public class LocalLockTemplateSupport implements LockTemplate {
 
     @Override

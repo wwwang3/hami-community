@@ -1,0 +1,128 @@
+version: "3"
+networks:
+  hami_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.3.0/24
+services:
+  app:
+    build:
+      args:
+        - VERSION=0.0.1
+      context: build/app
+      dockerfile: Dockerfile
+    container_name: hami_app
+    depends_on:
+      hami_mysql:
+        condition: service_healthy
+      hami_redis:
+        condition: service_healthy
+      hami_rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.10
+    ports:
+      - "8304:8304"
+    volumes:
+      - ./app:/root/hami
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8304/actuator/health/readiness"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    command:
+      - --hami.email=wang3.top@gmail.com #接受告警消息的邮箱
+      - --hami.security.cookie.domain=hami.wang3.top #cookie写入的域名
+      - --hami.security.cors.allowed-origins[0]=https://hami.wang3.top #cors allowedOrigin配置
+  mysql:
+    container_name: hami_mysql
+    build:
+      context: build/mysql
+      dockerfile: Dockerfile
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.11
+    ports:
+      - "8300:3306"
+    volumes:
+      - ./db/conf/my.cnf:/etc/my.cnf
+      - ./db/data:/var/lib/mysql
+      - ./db/data:/var/lib/mysql-files
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=db_hami_community
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  redis:
+    container_name: hami_redis
+    build:
+      context: build/redis
+      dockerfile: Dockerfile
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.12
+    ports:
+      - "8301:6379"
+    volumes:
+      - ./redis/conf/redis.conf:/etc/redis/redis.conf
+      - ./redis/data:/data
+    environment:
+      - TZ=Asia/Shanghai
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  rabbitmq:
+    container_name: hami_rabbitmq
+    build:
+      context: build/rabbitmq
+      dockerfile: Dockerfile
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.13
+    ports:
+      - "8302:5672"
+      - "8303:15672"
+    volumes:
+      - ./rabbit/data:/var/lib/rabbitmq
+    environment:
+      - TZ=Asia/Shanghai
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=123456
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  canal:
+    container_name: hami_canal
+    build:
+      context: build/canal
+      dockerfile: Dockerfile
+    privileged: true
+    depends_on:
+      hami_rabbitmq:
+        condition: service_healthy
+    networks:
+      hami_net:
+        ipv4_address: 192.168.3.14
+    volumes:
+      - ./canal/logs:/home/admin/canal-server/logs # 挂载日志，主要是example里面的启动日志了
+      - ./canal/conf/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./canal/conf/canal.properties:/home/admin/canal-server/conf/canal.properties
+    environment:
+      - TZ=Asia/Shanghai
+
+
