@@ -32,8 +32,8 @@ public class ArticleCountHandler implements CanalEntryHandler<Article> {
 
     @PostConstruct
     public void init() {
-        insert_script = RedisClient.loadScript("/META-INF/scripts/article_count_insert.lua");
-        update_script = RedisClient.loadScript("/META-INF/scripts/article_count_update.lua");
+        insert_script = RedisClient.loadScript("scripts/article_count_insert.lua");
+        update_script = RedisClient.loadScript("scripts/article_count_update.lua");
     }
 
     @Override

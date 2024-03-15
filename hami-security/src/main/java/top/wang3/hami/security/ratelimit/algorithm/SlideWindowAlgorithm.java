@@ -23,7 +23,7 @@ public class SlideWindowAlgorithm implements RateLimiterAlgorithm {
 
     @PostConstruct
     public void init() {
-        redisScript = RedisClient.loadScript("/META-INF/scripts/slide_window.lua", Long.class);
+        redisScript = RedisClient.loadScript("scripts/slide_window.lua", Long.class);
     }
 
     @Override

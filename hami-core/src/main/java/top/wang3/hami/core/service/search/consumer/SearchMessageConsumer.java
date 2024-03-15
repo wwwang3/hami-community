@@ -30,7 +30,7 @@ public class SearchMessageConsumer {
 
     @PostConstruct
     public void init() {
-        redisScript = RedisClient.loadScript("/META-INF/scripts/hot_search.lua");
+        redisScript = RedisClient.loadScript("scripts/hot_search.lua");
     }
 
     @RabbitHandler

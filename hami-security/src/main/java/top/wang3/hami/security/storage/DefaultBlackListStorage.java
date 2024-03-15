@@ -42,7 +42,7 @@ public class DefaultBlackListStorage implements BlacklistStorage {
             while (iterator.hasNext()) {
                 Map.Entry<String, Long> entry = iterator.next();
                 Long val = entry.getValue();
-                //过期时间小于现在的时间
+                // 过期时间小于现在的时间
                 if (val <= System.currentTimeMillis()) {
                     log.debug("removed expired jwt: {}", entry.getKey());
                     iterator.remove();

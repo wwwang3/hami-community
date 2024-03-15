@@ -29,8 +29,8 @@ public class CacheConfig {
                 .removalListener((k, v, reason) -> log.warn("##cache k: {} v: {} removed cause: {}", k, v, reason.name()));
     }
 
-    @Bean(Constants.CaffeineCacheManager)
     @Primary
+    @Bean(Constants.CaffeineCacheManager)
     public CacheManager caffeineCacheManager(Caffeine<Object, Object> caffeine) {
         CaffeineCacheManager manager = new CaffeineCacheManager(Constants.CAFFEINE_CACHE_NAME);
         manager.setCaffeine(caffeine);

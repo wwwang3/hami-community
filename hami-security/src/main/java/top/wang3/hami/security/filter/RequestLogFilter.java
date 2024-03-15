@@ -15,6 +15,7 @@ import top.wang3.hami.security.model.LoginUser;
 import top.wang3.hami.security.model.Result;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -93,7 +94,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
         int status = wrapper.getStatus();
         byte[] bytes = wrapper.getContentAsByteArray();
         String content = status != 200 ?
-                status + " 错误" : new String(bytes, 0, Math.min(128, bytes.length));
+                status + " 错误" : new String(bytes, 0, Math.min(128, bytes.length), StandardCharsets.UTF_8);
         log.info("请求处理耗时: {}ms | 响应结果: {}", time, content);
     }
 }

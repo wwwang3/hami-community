@@ -13,5 +13,4 @@ public class ApiInfo {
     String[] roles;
     String[] authorities;
 
-
 }

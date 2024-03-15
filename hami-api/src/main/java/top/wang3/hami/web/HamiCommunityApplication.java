@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 import top.wang3.hami.core.HamiCoreConfig;
 
+@Slf4j
 @SpringBootApplication
 @Import(value = {HamiCoreConfig.class})
-@Slf4j
 public class HamiCommunityApplication {
 
     public static void main(String[] args) {

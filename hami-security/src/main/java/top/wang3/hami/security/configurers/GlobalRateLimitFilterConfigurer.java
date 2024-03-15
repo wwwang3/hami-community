@@ -39,28 +39,33 @@ public class GlobalRateLimitFilterConfigurer extends
         rateLimitFilter.afterPropertiesSet();
         http.addFilterAfter(rateLimitFilter, RequestLogFilter.class);
         if (log.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            int i = 0;
-            int size = requestMatcherEntries.size();
-            builder.append('{');
-            for (RequestMatcherEntry<RateLimitModel> entry : requestMatcherEntries) {
-                builder.append("[matcher: ");
-                RequestMatcher matcher = entry.getRequestMatcher();
-                builder.append(matcher.toString());
-                builder.append(", model: ");
-                RateLimitModel rateLimitModel = entry.getEntry();
-                builder.append(rateLimitModel.toString());
-                i++;
-                if (i < size) {
-                    builder.append("], ");
-                } else {
-                    builder.append("]");
-                }
-            }
-            builder.append("}");
+            String msg = buildMsg(requestMatcherEntries);
             log.debug("add {} filter-rate-limit config. \nconfig: {}", requestMatcherEntries.size(),
-                    builder);
+                    msg);
         }
+    }
+
+    private static String buildMsg(List<RequestMatcherEntry<RateLimitModel>> requestMatcherEntries) {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        int size = requestMatcherEntries.size();
+        builder.append('{');
+        for (RequestMatcherEntry<RateLimitModel> entry : requestMatcherEntries) {
+            builder.append("[matcher: ");
+            RequestMatcher matcher = entry.getRequestMatcher();
+            builder.append(matcher.toString());
+            builder.append(", model: ");
+            RateLimitModel rateLimitModel = entry.getEntry();
+            builder.append(rateLimitModel.toString());
+            i++;
+            if (i < size) {
+                builder.append("], ");
+            } else {
+                builder.append("]");
+            }
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
     private ApiRateLimitRegistry addApiRateLimit(List<? extends RequestMatcher> requestMatchers, RateLimitModel rateLimit) {

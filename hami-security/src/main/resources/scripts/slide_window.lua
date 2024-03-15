@@ -23,6 +23,7 @@ if (last_requests < capacity) then
 end
 
 
+-- move window
 redis.call('zremrangebyscore', key, 0, current - window_size)
 redis.call("expire", key, window_size)
 

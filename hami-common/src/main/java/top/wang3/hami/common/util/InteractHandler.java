@@ -30,7 +30,7 @@ public class InteractHandler {
         /**
          * 预检查, 在这判断member是否合法或者该member的请求为重复行为
          */
-        private final List<Consumer<T>> preChecks = new ArrayList<>(4);
+        private final List<Consumer<T>> preChecks = new ArrayList<>(2);
 
         /**
          * 加载缓存

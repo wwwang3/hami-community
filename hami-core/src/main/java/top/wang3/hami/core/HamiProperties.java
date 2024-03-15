@@ -27,9 +27,13 @@ public class HamiProperties implements InitializingBean {
     @NestedConfigurationProperty
     Log log;
 
+    /**
+     * 是否开启CostLog注解切面, 打印方法执行时间日志
+     */
+    Boolean costLog;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         if (!StringUtils.hasText(email) || !EMAIL_REGEX.matcher(email).matches()) {
             throw new IllegalArgumentException("valid email address");
         }

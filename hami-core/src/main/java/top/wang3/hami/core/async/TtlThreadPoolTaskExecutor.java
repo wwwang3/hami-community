@@ -91,7 +91,8 @@ public class TtlThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {
                     executor.getCompletedTaskCount(),
                     executor.isShutdown(),
                     executor.isTerminated(),
-                    executor.isTerminating());
+                    executor.isTerminating()
+            );
             log.error(msg);
             try {
                 // try new thread

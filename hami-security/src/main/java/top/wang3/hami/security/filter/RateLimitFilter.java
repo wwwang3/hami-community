@@ -109,7 +109,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
-        requestMappingHandlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
+        requestMappingHandlerMapping = applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
         rateLimiter = applicationContext.getBean(RateLimiter.class);
     }
 

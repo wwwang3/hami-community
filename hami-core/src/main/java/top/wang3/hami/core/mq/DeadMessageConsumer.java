@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.email.AlarmEmailMessage;
@@ -16,13 +17,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-@RabbitListener(
-        bindings = @QueueBinding(
-                value = @Queue(RabbitConstants.HAMI_DL_QUEUE),
-                exchange = @Exchange(RabbitConstants.HAMI_DL_EXCHANGE),
-                key = {RabbitConstants.HAMI_DL_ROUTING}
-        )
-)
+@RabbitListener(queues = {RabbitConstants.HAMI_DL_QUEUE})
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -34,7 +29,10 @@ public class DeadMessageConsumer {
     public void handleMessage(Message message) {
         MessageProperties properties = message.getMessageProperties();
         try {
-            Map<String, Serializable> data = Map.of("message", message.getBody(), "properties", properties);
+            Map<String, Serializable> data = Map.of(
+                "message", new String(message.getBody(), StandardCharsets.UTF_8),
+                "properties", properties
+            );
             String msg = JSON.toJSONString(data);
             AlarmEmailMessage emailMessage = new AlarmEmailMessage("死信消息", msg);
             mailMessageHandler.handle(emailMessage);

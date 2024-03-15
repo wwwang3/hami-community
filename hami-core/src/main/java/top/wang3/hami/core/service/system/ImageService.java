@@ -19,7 +19,6 @@ public class ImageService {
     @Resource
     FileStorageService fileStorageService;
 
-
     public String upload(MultipartFile file, String type) {
         return upload(file, type, null);
     }

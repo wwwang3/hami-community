@@ -6,11 +6,13 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Slf4j
 @Component
+@ConditionalOnProperty(value = "hami.cost-log", havingValue = "true")
 public class CostLogAspect {
 
     @Pointcut(value = "@annotation(top.wang3.hami.core.annotation.CostLog)")

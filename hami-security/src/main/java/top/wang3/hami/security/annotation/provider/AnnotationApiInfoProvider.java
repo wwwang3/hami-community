@@ -1,5 +1,6 @@
 package top.wang3.hami.security.annotation.provider;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -21,11 +22,11 @@ import java.util.Set;
  */
 @Component
 @Order(2)
-public class AnnotationApiInfoProvider implements ApiInfoProvider{
+public class AnnotationApiInfoProvider implements ApiInfoProvider {
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    public AnnotationApiInfoProvider(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+    public AnnotationApiInfoProvider(@Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
     }
 

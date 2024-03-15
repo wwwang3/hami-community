@@ -1,10 +1,12 @@
 package top.wang3.hami.security.ratelimit.annotation;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class RateMeta {
 
     /**
@@ -22,9 +24,10 @@ public class RateMeta {
      */
     private long interval;
 
-    public RateMeta(double rate, double capacity, long interval) {
+    public RateMeta(double rate, double capacity) {
         this.rate = rate;
         this.capacity = capacity;
-        this.interval = interval;
+        this.interval = (long) ((long) capacity / rate);
     }
+
 }

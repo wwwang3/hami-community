@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @deprecated use {@link AuthorizeConfigurerCustomizer}
  */
-@Deprecated
+@Deprecated(forRemoval = true, since = "0.0.2")
 public class AuthorizeConfigurer extends AbstractHttpConfigurer<AuthorizeConfigurer, HttpSecurity> {
 
     private List<ApiInfoProvider> providers;

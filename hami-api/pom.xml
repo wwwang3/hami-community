@@ -41,6 +41,15 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-docker-compose</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
@@ -57,25 +66,40 @@
 
     <build>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.graalvm.buildtools</groupId>-->
-<!--                <artifactId>native-maven-plugin</artifactId>-->
-<!--                <extensions>true</extensions>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>build-native</id>-->
-<!--                        <goals>-->
-<!--                            <goal>compile-no-fork</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>package</phase>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <skip>false</skip>-->
-<!--                    <imageName>HamiCommunityApplication</imageName>-->
-<!--                    <mainClass>top.wang3.hami.web.HamiCommunityApplication</mainClass>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.graalvm.buildtools</groupId>-->
+            <!--                <artifactId>native-maven-plugin</artifactId>-->
+            <!--                <extensions>true</extensions>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>build-native</id>-->
+            <!--                        <goals>-->
+            <!--                            <goal>compile-no-fork</goal>-->
+            <!--                        </goals>-->
+            <!--                        <phase>package</phase>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <skip>false</skip>-->
+            <!--                    <imageName>HamiCommunityApplication</imageName>-->
+            <!--                    <mainClass>top.wang3.hami.web.HamiCommunityApplication</mainClass>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-jar-plugin</artifactId>-->
+            <!--                <configuration>-->
+            <!--                    <excludes>-->
+            <!--                        &lt;!&ndash; 使用通配符匹配多个文件 &ndash;&gt;-->
+            <!--                        <exclude>src/main/resources/application-*.yml</exclude>-->
+            <!--                    </excludes>-->
+            <!--                    <includes>-->
+            <!--                        <include>src/main/resources/application-${environment}.yml</include>-->
+            <!--                        <include>src/main/resources/application-hami.yml</include>-->
+            <!--                        <include>src/main/resources/application-mail.yml</include>-->
+            <!--                    </includes>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -89,5 +113,27 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/application.yml</include>
+                    <include>**/application.yaml</include>
+                    <include>**/application.properties</include>
+                    <include>**/application-hami.yml</include>
+                    <include>**/application-mail.yml</include>
+                    <include>**/application-${environment}.yml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <excludes>
+                    <exclude>**/application*.yml</exclude>
+                    <exclude>**/application*.yaml</exclude>
+                    <exclude>**/application*.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 </project>

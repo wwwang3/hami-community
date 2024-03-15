@@ -28,6 +28,14 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=db_hami_community
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
   redis:
     container_name: redis
     build:
@@ -44,6 +52,12 @@ services:
     environment:
       - TZ=Asia/Shanghai
     command: ["redis-server", "/etc/redis/redis.conf"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+    labels:
+      org.springframework.boot.ignore: true
   rabbitmq:
     container_name: rabbitmq
     build:
@@ -61,6 +75,11 @@ services:
       - TZ=Asia/Shanghai
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=123456
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
   canal:
     container_name: canal
     build:
@@ -73,7 +92,7 @@ services:
       hami_net:
         ipv4_address: 192.168.3.14
     volumes:
-      - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example 里面 的启动日志了
+      - ./logs/canal:/home/admin/canal-server/logs # 挂载日志，主要是example里面的启动日志了
       - ./conf/canal/instance.properties:/home/admin/canal-server/conf/example/instance.properties
       - ./conf/canal/canal.properties:/home/admin/canal-server/conf/canal.properties
     environment:

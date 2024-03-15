@@ -19,7 +19,7 @@ public class FixedWindowAlgorithm implements RateLimiterAlgorithm {
 
     @PostConstruct
     public void init() {
-        fixedWindowScript = RedisClient.loadScript("/META-INF/scripts/fixed_window.lua", Long.class);
+        fixedWindowScript = RedisClient.loadScript("scripts/fixed_window.lua", Long.class);
     }
 
     @Override

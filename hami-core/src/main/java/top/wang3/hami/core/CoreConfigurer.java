@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
         "top.wang3.hami.core.init",
         "top.wang3.hami.core.job",
         "top.wang3.hami.core.lock",
+        "top.wang3.hami.core.mq",
         "top.wang3.hami.core.service",
 })
 public class CoreConfigurer {

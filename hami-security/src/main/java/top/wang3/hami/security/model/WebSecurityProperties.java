@@ -4,10 +4,12 @@ package top.wang3.hami.security.model;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.web.cors.CorsConfiguration;
 import top.wang3.hami.security.annotation.ApiInfo;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 import top.wang3.hami.security.ratelimit.annotation.RateMeta;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -55,16 +57,17 @@ public class WebSecurityProperties {
     private String logoutApi = "/api/v1/auth/logout";
 
     /**
-     * 不需要登录访问的接口
-     * @deprecated use {@link WebSecurityProperties#apiInfos}
+     * 允许跨域的站点
+     * @deprecated use {@link WebSecurityProperties#cors}
      */
-    @Deprecated
-    private String[] allowedApis;
+    @Deprecated(forRemoval = true, since = "0.0.2")
+    private List<String> allowedOrigins;
 
     /**
-     * 允许跨域的站点
+     * 跨域配置
      */
-    private List<String> allowedOrigins;
+    @NestedConfigurationProperty
+    private CorsConfig cors;
 
     /**
      * api访问配置, 这里得配置patterns
@@ -77,6 +80,16 @@ public class WebSecurityProperties {
      */
     @NestedConfigurationProperty
     private RateLimitFilterProperties rateLimit;
+
+    @Data
+    public static class CorsConfig {
+        List<String> allowedOrigins;
+        Boolean allowCredentials = true;
+        List<String> allowedHeaders = Collections.singletonList(CorsConfiguration.ALL);
+        List<String> allowedMethods = Collections.singletonList(CorsConfiguration.ALL);
+        List<String> exposeHeaders = Collections.singletonList(CorsConfiguration.ALL);
+        String pattern = "/**";
+    }
 
     @Data
     public static class CookieConfig {

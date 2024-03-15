@@ -32,7 +32,7 @@ public class CateArticleListHandler implements CanalEntryHandler<Article> {
 
     @PostConstruct
     public void init() {
-        insert_article_script = RedisClient.loadScript("/META-INF/scripts/insert_article_list.lua");
+        insert_article_script = RedisClient.loadScript("scripts/insert_article_list.lua");
     }
 
 
