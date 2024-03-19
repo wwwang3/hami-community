@@ -66,6 +66,7 @@ public class CanalListenerConfigurer implements RabbitListenerConfigurer,
         endpoint.setCanalMessageConverter(messageConverter);
         // 注册队列
         List<Queue> queues = registerQueue(container.getTables());
+        // 监听的队列
         endpoint.setQueues(queues.toArray(Queue[]::new));
     }
 

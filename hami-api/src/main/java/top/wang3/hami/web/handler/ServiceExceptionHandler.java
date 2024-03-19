@@ -29,6 +29,10 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {CaptchaServiceException.class, HamiServiceException.class, NotLoginException.class})
     public Result<Void> handleCaptchaException(Exception e) {
+        Throwable cause = e.getCause();
+        if (cause != null) {
+            logError(cause);
+        }
         logError(e);
         return Result.error(e.getMessage());
     }
@@ -86,13 +90,13 @@ public class ServiceExceptionHandler {
     }
 
 
-    private void logError(Exception e) {
+    private void logError(Throwable e) {
         logError(e, false);
     }
 
 
     @SuppressWarnings(value = "all")
-    private void logError(Exception e, boolean printTrace) {
+    private void logError(Throwable e, boolean printTrace) {
         log.error("resolved exception: [{}: {}]", e.getClass(), e.getMessage());
         if (printTrace) {
             e.printStackTrace();

@@ -121,6 +121,9 @@ public class ArticleRepositoryImpl extends ServiceImpl<ArticleMapper, Article>
     @Override
     public Map<String, Integer> getArticleCount() {
         List<ArticleCount> cateArticleCount = getBaseMapper().selectCateArticleCount();
+        if (cateArticleCount == null || cateArticleCount.isEmpty()) {
+            return Collections.emptyMap();
+        }
         int total = cateArticleCount.stream().mapToInt(ArticleCount::getTotal).sum();
 //        Long totalArticleCount = getBaseMapper().selectTotalArticleCount();
         Map<String, Integer> map = ListMapperHandler.listToMap(

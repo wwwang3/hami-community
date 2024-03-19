@@ -152,6 +152,7 @@ public class RedisCacheService implements CacheService {
     @Override
     public <T> void asyncSetCache(String key, T data, long millis) {
         // 异步写入缓存
+        final long start = System.currentTimeMillis();
         executor.submitCompletable(() -> refreshCache(key, data, millis))
                 .whenComplete((rs, th) -> {
                     if (th != null) {
@@ -162,7 +163,8 @@ public class RedisCacheService implements CacheService {
                                 th.getMessage()
                         );
                     } else {
-                        log.info("async refresh cache success, key: {}, data: {}", key, data);
+                        long end = System.currentTimeMillis();
+                        log.info("async refresh cache success, cost: {}ms, key: {}, data: {}", key, end - start, data);
                     }
                 });
     }
@@ -170,6 +172,7 @@ public class RedisCacheService implements CacheService {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void asyncSetCacheAbsent(String keyPrefix, List<R> applied, Function<R, T> idMapper, long millis) {
+        final long start = System.currentTimeMillis();
         // 异步写入
         executor.submitCompletable(() -> {
             RedisClient.getTemplate()
@@ -198,13 +201,15 @@ public class RedisCacheService implements CacheService {
                         th.getMessage()
                 );
             } else {
-                log.info("async refresh cache success, items: {}", applied);
+                long end = System.currentTimeMillis();
+                log.info("async refresh cache success, cost: {}ms, items: {}", end - start, applied);
             }
         });
     }
 
     @Override
     public <T, R> void asyncSetCacheAbsent(String keyPrefix, List<T> ids, List<R> applied, long millis) {
+        final long start = System.currentTimeMillis();
         // 异步写入
         executor.submitCompletable(() -> ListMapperHandler.forEach(applied, (item, index) -> {
             String key = keyPrefix + ids.get(index);
@@ -222,7 +227,8 @@ public class RedisCacheService implements CacheService {
                         th.getMessage()
                 );
             } else {
-                log.info("async refresh cache success, items: {}", applied);
+                long end = System.currentTimeMillis();
+                log.info("async refresh cache success, cost: {}ms, items: {}", end - start, applied);
             }
         });
     }

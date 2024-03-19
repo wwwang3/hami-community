@@ -35,7 +35,7 @@ public class HamiProperties implements InitializingBean {
     /**
      * 是否开启CostLog注解切面, 打印方法执行时间日志
      */
-    Boolean costLog;
+    Boolean costLog = true;
 
     @Override
     public void afterPropertiesSet() {
