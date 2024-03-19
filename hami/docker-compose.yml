@@ -33,7 +33,7 @@ services:
       - MYSQL_DATABASE=db_hami_community
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 30s
+      interval: 20s
       timeout: 5s
       retries: 3
   hami_redis:
@@ -76,7 +76,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=123456
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
+      interval: 20s
       timeout: 3s
       retries: 3
   hami_canal:

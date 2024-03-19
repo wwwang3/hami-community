@@ -45,6 +45,9 @@ class HamiCommunityApplicationTest {
     ArticleMapper articleMapper;
 
     @Autowired
+    AccountMapper accountMapper;
+
+    @Autowired
     ArticleCollectMapper articleCollectMapper;
 
     @Autowired
@@ -76,6 +79,30 @@ class HamiCommunityApplicationTest {
         System.out.println(sqlSessionFactory);
         System.out.println(articleMapper);
         System.out.println(articleStatMapper);
+    }
+
+    @Test
+    void genUser() {
+        // 生成article_stat表数据
+        log.info("start to gen users");
+        int batchSize = 1500;
+        int lastId = 0;
+        while (true) {
+            List<Account> accounts = accountMapper.scanAccountAsc(lastId, batchSize);
+            if (CollectionUtils.isEmpty(accounts)) {
+                break;
+            }
+            lastId = accounts.get(accounts.size() - 1).getId();
+            List<User> users = ListMapperHandler.listTo(accounts, account -> {
+                User user = new User();
+                user.setUserId(account.getId());
+                user.setUsername(account.getUsername());
+                return user;
+            });
+            userMapper.batchInsertUser(users);
+            log.info("insert user success");
+        }
+        log.info("finish to gen users");
     }
 
     @Test

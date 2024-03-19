@@ -15,4 +15,6 @@ public interface AccountMapper extends BaseMapper<Account> {
     Integer selectAccountId(@Param("account") String account);
 
     List<Account> scanAccountDesc(@Param("maxId") int maxId, @Param("batchSize") int batchSize);
+
+    List<Account> scanAccountAsc(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 }

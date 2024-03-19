@@ -43,5 +43,5 @@ hami/**/*.key
 hami/**/*.crt
 hami/**/logs
 hami/**/data
-
+test/**
 *.apifox-helper.properties

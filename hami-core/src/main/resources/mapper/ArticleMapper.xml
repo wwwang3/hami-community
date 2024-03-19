@@ -96,9 +96,10 @@
     </select>
 
     <select id="selectCateArticleCount" resultType="top.wang3.hami.common.model.ArticleCount">
-        select category_id as cate_id, count(*) as total from article
-        where category_id >= 10000 and deleted = 0
-        group by category_id
+        SELECT t1.id as cateId, count(t2.category_id) as total
+        from category t1
+                 LEFT JOIN article t2 on t1.id = t2.category_id AND t2.deleted = 0
+        GROUP BY t1.id
     </select>
 
     <select id="selectTotalArticleCount" resultType="java.lang.Integer">

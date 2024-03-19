@@ -2,7 +2,6 @@ package top.wang3.hami.core.cache;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.support.NullValue;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -28,7 +27,7 @@ public class RedisCacheService implements CacheService {
 
     public static final long EMPTY_OBJECT_EXPIRE = TimeUnit.SECONDS.toMillis(20);
 
-    public static final Object EMPTY_OBJECT = NullValue.INSTANCE;
+    public static final Object EMPTY_OBJECT = "";
 
     public final byte[] EMPTY_OBJECT_BYTE;
 
@@ -106,7 +105,7 @@ public class RedisCacheService implements CacheService {
             if (data == null) {
                 nullIds.add(id);
             } else {
-                // 可能缓存的是NullValue
+                // 可能缓存的是EMPTY_OBJECT
                 rs.add(resolveValue(data));
             }
         });
@@ -169,8 +168,8 @@ public class RedisCacheService implements CacheService {
                 });
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public <T, R> void asyncSetCacheAbsent(String keyPrefix, List<R> applied, Function<R, T> idMapper, long millis) {
         final long start = System.currentTimeMillis();
         // 异步写入
@@ -187,6 +186,7 @@ public class RedisCacheService implements CacheService {
                                 byte[] valueBytes = RedisClient.valueBytes(item);
                                 connection.stringCommands().pSetEx(keyBytes, millis, valueBytes);
                             } else {
+                                // empty object
                                 connection.stringCommands().pSetEx(keyBytes, EMPTY_OBJECT_EXPIRE, EMPTY_OBJECT_BYTE);
                             }
                         }
@@ -327,7 +327,6 @@ public class RedisCacheService implements CacheService {
         }
     }
 
-    @SuppressWarnings("unused")
     private <T> void setCacheAbsent(String key, T data, long millis) {
         if (data == null) {
             RedisClient.setCacheObject(key, EMPTY_OBJECT, EMPTY_OBJECT_EXPIRE, TimeUnit.MILLISECONDS);
@@ -337,7 +336,7 @@ public class RedisCacheService implements CacheService {
     }
 
     private <T> T resolveValue(T value) {
-        if (value instanceof NullValue) {
+        if (EMPTY_OBJECT.equals(value)) {
             return null;
         }
         return value;

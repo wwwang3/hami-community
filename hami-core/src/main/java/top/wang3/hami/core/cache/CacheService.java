@@ -1,5 +1,7 @@
 package top.wang3.hami.core.cache;
 
+import org.springframework.lang.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,6 +27,7 @@ public interface CacheService {
      * @return 缓存对象
      * @param <T> 返回对象泛型
      */
+    @Nullable
     <T> T get(String key, Supplier<T> loader, long millis);
 
     <T> T getHashValue(String key, String hKey, Supplier<Map<String, T>> loader, long millis);

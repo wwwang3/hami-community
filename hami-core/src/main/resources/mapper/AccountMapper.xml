@@ -41,4 +41,14 @@
       order by id DESC
       limit #{batchSize}
   </select>
+
+  <select id="scanAccountAsc" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List">
+      </include>
+      from account
+      where id > #{lastId} and deleted = 0
+      order by id
+      limit #{batchSize}
+  </select>
 </mapper>

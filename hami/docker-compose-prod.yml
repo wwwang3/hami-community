@@ -56,7 +56,8 @@ services:
       retries: 3
     command:
       # 所有的配置都可在这里重写
-      - --hami.cost-log=false
+      - --hami.cost-log=true
+      - --hami.mode=test
       - --hami.email=wang3.top@gmail.com # 接受告警消息的邮箱
       - --hami.security.cookie.domain=hami.wang3.top # cookie写入的域名
       - --hami.security.cors.allowed-origins[0]=https://hami.wang3.top # cors allowedOrigin配置

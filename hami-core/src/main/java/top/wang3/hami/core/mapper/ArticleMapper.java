@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.lang.NonNull;
 import top.wang3.hami.common.model.Article;
 import top.wang3.hami.common.model.ArticleCount;
 
@@ -43,6 +44,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             """)
     List<Article> scanArticleContent(@Param("lastId") int lastId, @Param("batchSize") int batchSize);
 
+    @NonNull
     List<ArticleCount> selectCateArticleCount();
 
     Integer selectTotalArticleCount();

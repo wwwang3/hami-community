@@ -31,9 +31,10 @@ public class ServiceExceptionHandler {
     public Result<Void> handleCaptchaException(Exception e) {
         Throwable cause = e.getCause();
         if (cause != null) {
-            logError(cause);
+            logError(cause, true);
+        } else {
+            logError(e);
         }
-        logError(e);
         return Result.error(e.getMessage());
     }
 

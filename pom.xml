@@ -157,6 +157,25 @@
                 <module>hami-canal</module>
             </modules>
         </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <environment>test</environment>
+                <app.version>${project.version}</app.version>
+                <skipTests>true</skipTests>
+            </properties>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>hami-api</module>
+                <module>hami-common</module>
+                <module>hami-core</module>
+                <module>hami-security</module>
+                <module>hami-mail</module>
+                <module>hami-canal</module>
+            </modules>
+        </profile>
     </profiles>
 
 </project>

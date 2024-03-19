@@ -116,18 +116,12 @@ public class AccountServiceImpl implements AccountService {
                 .then(() -> {
                     // 插入用户表
                     User user = new User(account.getId(), account.getUsername());
-                    if (account.getId() <= 1000) {
-                        user.setTag("内测用户");
-                    }
                     if ("test".equals(mode)) {
-                        return userRepository.updateUser(account.getId(), user);
+                        user.setTag("内测用户");
                     }
                     return userRepository.save(user);
                 }).then(() -> {
-                    if ("test".equals(mode)) {
-                        return true;
-                    }
-                    // 插入数据表, 异步插入感觉也行, 反正没几个访问量
+                    // 插入数据表
                     UserStat stat = new UserStat();
                     stat.setUserId(account.getId());
                     return userStatRepository.save(stat);

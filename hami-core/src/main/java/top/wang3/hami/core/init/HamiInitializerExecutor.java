@@ -28,7 +28,6 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
 
     private List<HamiInitializer> initializers;
     private List<InitializerEnums> enabledInitializers;
-
     private TaskExecutor taskExecutor;
     private CountDownLatch latch;
 
@@ -57,12 +56,12 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
             return;
         }
         log.info("start to execute initialization tasks");
-        AsyncStopWatch watch = new AsyncStopWatch("hami-cache-init-task");
-        processInitializingTask(watch);
+        AsyncStopWatch watch = new AsyncStopWatch("hami-init-task");
+        processTask(watch);
         prettyPrint(watch);
     }
 
-    private void processInitializingTask(AsyncStopWatch watch) {
+    private void processTask(AsyncStopWatch watch) {
         for (HamiInitializer initializer : initializers) {
             if (!enabled(initializer)) {
                 continue;
@@ -85,6 +84,7 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
 
     private void handleRun(HamiInitializer initializer, AsyncStopWatch watch) {
         String id = "[task-" + initializer.getName() + "]";
+        log.info("start to run task: {}", id);
         watch.start(id) ;
         initializer.run();
         watch.stop(id);
@@ -93,20 +93,21 @@ public class HamiInitializerExecutor implements ApplicationRunner, InitializingB
     @SuppressWarnings("all")
     private void handleAsyncRun(HamiInitializer initializer, AsyncStopWatch watch) {
         String id = "[task-" + initializer.getName() + "]";
+        log.info("start to run task: {}", id);
         watch.start(id);
         CompletableFuture
-                .runAsync(initializer, taskExecutor)
-                .whenComplete((rs, th) -> {
-                    if (th != null) {
-                        log.info("execute task: {} failed, error_class: {}, error_msg: {}",
-                                id,
-                                th.getClass().getName(),
-                                th.getMessage());
-                        th.printStackTrace();
-                    }
-                    watch.stop(id);
-                    this.latch.countDown();
-                });
+            .runAsync(initializer, taskExecutor)
+            .whenComplete((rs, th) -> {
+                if (th != null) {
+                    log.info("execute task: {} failed, error_class: {}, error_msg: {}",
+                        id,
+                        th.getClass().getName(),
+                        th.getMessage());
+                    th.printStackTrace();
+                }
+                watch.stop(id);
+                this.latch.countDown();
+            });
     }
 
     private boolean enabled(@NonNull HamiInitializer initializer) {

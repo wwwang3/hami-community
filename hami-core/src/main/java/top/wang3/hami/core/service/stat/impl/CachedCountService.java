@@ -59,7 +59,7 @@ public class CachedCountService implements CountService {
                 articleIds,
                 articleStatService::listArticleStatById,
                 ArticleStatDTO::getArticleId,
-                TimeoutConstants.USER_STAT_EXPIRE
+                TimeoutConstants.ARTICLE_STAT_EXPIRE
         );
         return ListMapperHandler.listToMap(dtos, ArticleStatDTO::getArticleId);
     }

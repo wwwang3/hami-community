@@ -22,4 +22,6 @@ public interface UserMapper extends BaseMapper<User> {
     List<Integer> scanUserIds(@Param("lastUserId") int lastUserId, @Param("batchSize") int batchSize);
 
     List<User> scanUserDesc(@Param("maxId") int maxId, @Param("batchSize") int batchSize);
+
+    Long batchInsertUser(@Param("users") List<User> users);
 }

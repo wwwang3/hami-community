@@ -29,9 +29,6 @@ public class HamiProperties implements InitializingBean {
 
     String email;
 
-    @NestedConfigurationProperty
-    Log log;
-
     /**
      * 是否开启CostLog注解切面, 打印方法执行时间日志
      */
@@ -50,9 +47,4 @@ public class HamiProperties implements InitializingBean {
         List<InitializerEnums> list;
     }
 
-    @Data
-    public static class Log {
-        String path;
-        String filename;
-    }
 }
