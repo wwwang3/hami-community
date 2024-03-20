@@ -106,7 +106,7 @@ public record Result<T>(int code, String msg, T data, @JsonIgnore Checker checke
            return MAPPER.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             // ignore it
-            return null;
+            return "";
         }
     }
 

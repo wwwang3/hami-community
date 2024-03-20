@@ -56,20 +56,12 @@ public class ServiceErrorControllerConfig {
         @RequestMapping
         @ResponseBody
         public Result<Void> handleError(HttpServletRequest request, HttpServletResponse response) {
-            Map<String, Object> attributes = getErrorAttributes(request, getErrorAttributeOptions(request));
-            Object e = attributes.get("exception");
-            if (e instanceof Exception ex) {
-                logError(request, ex);
-                String msg = ex.getMessage();
-                var status = getStatus(request);
-                response.setStatus(status.value());
-                return Result.error(status.value(), msg);
-            } else {
-                String error = attributes.get("error").toString();
-                String path = attributes.get("path").toString();
-                log.warn("resolved Exception, path: {}, error: {}", path, error);
-                return Result.error(error);
-            }
+            var attributes = getErrorAttributes(request, getErrorAttributeOptions());
+            var status = getStatus(request);
+            log.error("handle error forward: {}", attributes);
+            response.setStatus(status.value());
+            var msg = attributes.getOrDefault("message", "error");
+            return Result.error(status.value(), msg.toString());
         }
 
         protected Map<String, Object> getErrorAttributes(HttpServletRequest request, ErrorAttributeOptions options) {
@@ -77,23 +69,13 @@ public class ServiceErrorControllerConfig {
             return this.errorAttributes.getErrorAttributes(webRequest, options);
         }
 
-        protected ErrorAttributeOptions getErrorAttributeOptions(HttpServletRequest request) {
+        protected ErrorAttributeOptions getErrorAttributeOptions() {
             ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
             options = options.including(ErrorAttributeOptions.Include.EXCEPTION);
             options = options.including(ErrorAttributeOptions.Include.MESSAGE);
             options = options.including(ErrorAttributeOptions.Include.BINDING_ERRORS);
             return options;
         }
-
-
-        private void logError(HttpServletRequest request, Exception e) {
-            String uri = request.getRequestURI();
-            String clazz = e != null ? e.getClass().getCanonicalName() : "";
-            String msg = e != null ? e.getMessage() : "";
-            log.warn("resolved exception, path: {} error_class:{}: error_msg: {}", uri,
-                    clazz, msg);
-        }
-
 
     }
 }

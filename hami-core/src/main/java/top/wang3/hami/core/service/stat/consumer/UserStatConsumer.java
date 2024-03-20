@@ -38,95 +38,102 @@ public class UserStatConsumer {
     private final RabbitMessagePublisher rabbitMessagePublisher;
 
     @RabbitListener(
-            id = "UserStatMsgContainer-1",
-            bindings = {
-                    @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
-                            exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
-                            key = {"article.view", "article.publish"}
-                    ),
-                    @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_2),
-                            exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                            key = {"*.like.1.*", "*.collect.*", "*.follow.*"}
-                    ),
-                    @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_3),
-                            exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
-                            key = {"comment.*"}
-                    )
-            },
-            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
+        id = "UserStatMsgContainer-1",
+        bindings = {
+            @QueueBinding(
+                value = @Queue(RabbitConstants.USER_STAT_QUEUE_1),
+                exchange = @Exchange(value = RabbitConstants.HAMI_ARTICLE_EXCHANGE, type = ExchangeTypes.TOPIC),
+                key = {"article.view", "article.publish"}
+            ),
+            @QueueBinding(
+                value = @Queue(RabbitConstants.USER_STAT_QUEUE_2),
+                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                key = {"*.like.1.*", "*.collect.*", "*.follow.*"}
+            ),
+            @QueueBinding(
+                value = @Queue(RabbitConstants.USER_STAT_QUEUE_3),
+                exchange = @Exchange(value = RabbitConstants.HAMI_COMMENT_EXCHANGE, type = ExchangeTypes.TOPIC),
+                key = {"comment.*"}
+            )
+        },
+        containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleStatMessage(List<RabbitMessage> messages) {
         try {
             // 不包含文章删除消息
             List<UserStat> userStats = messages.stream()
-                    .collect(Collectors.groupingBy(this::getUserId))
-                    .values()
-                    .stream()
-                    .map(objects -> {
-                        UserStat userStat = new UserStat();
-                        int userId = getUserId(objects.get(0));
-                        userStat.setUserId(userId);
-                        return objects.stream().reduce(userStat, this::handleObject, (v1, v2) -> v1);
-                    })
-                    .filter(stat -> stat.getUserId() != -1)
-                    .toList();
-            if (!userStats.isEmpty()){
+                .collect(Collectors.groupingBy(this::getUserId))
+                .values()
+                .stream()
+                .map(objects -> {
+                    UserStat userStat = new UserStat();
+                    int userId = getUserId(objects.get(0));
+                    userStat.setUserId(userId);
+                    return objects.stream().reduce(userStat, this::handleObject, (v1, v2) -> v1);
+                })
+                .filter(this::shouldContain)
+                .toList();
+            if (!userStats.isEmpty()) {
                 userStatRepository.batchUpdateUserStats(userStats);
             }
         } catch (Exception e) {
             log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
-            Map<String, Object> data = Map.of(
-                    "error_class", e.getClass().getSimpleName(),
-                    "error_msg", e.getMessage(),
-                    "message", messages
+            Map<String, Object> map = Map.of(
+                "error_class", e.getClass().getName(),
+                "error_msg", e.getMessage(),
+                "rabbit_msg", messages
             );
-            String msgs = Result.writeValueAsString(data);
-            AlarmEmailMessage message = new AlarmEmailMessage("用户数据更新失败", msgs);
-            rabbitMessagePublisher.publishMsg(message);
+            String msgs = Result.writeValueAsString(map);
+            AlarmEmailMessage message = new AlarmEmailMessage("更新用户数据失败", msgs);
+            rabbitMessagePublisher.publishMsgSync(message);
         }
     }
 
 
     @RabbitListener(
-            id = "UserStatMsgContainer-2",
-            bindings = {
-                    @QueueBinding(
-                            value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),
-                            exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
-                            key = "*.follow.*"
-                    ),
-            },
-            containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
+        id = "UserStatMsgContainer-2",
+        bindings = {
+            @QueueBinding(
+                value = @Queue(RabbitConstants.USER_STAT_QUEUE_4),
+                exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
+                key = "*.follow.*"
+            ),
+        },
+        containerFactory = RabbitConstants.BATCH_LISTENER_FACTORY
     )
     public void handleFollowMessage(List<FollowRabbitMessage> messages) {
         try {
             // 更新用户的总关注数
             List<UserStat> stats = messages.stream()
-                    .collect(Collectors.groupingBy(FollowRabbitMessage::getUserId))
-                    .values()
-                    .stream()
-                    .map(msgs -> {
-                        UserStat stat = new UserStat();
-                        stat.setUserId(msgs.get(0).getUserId());
-                        return msgs.stream().reduce(stat, (a, b) -> {
-                            a.setTotalFollowings(
-                                    Optional.ofNullable(a.getTotalFollowings()).orElse(0) +
-                                    delta(b.getState())
-                            );
-                            return a;
-                        }, (v1, v2) -> v1);
-                    }).toList();
-            if (!stats.isEmpty()){
+                .collect(Collectors.groupingBy(FollowRabbitMessage::getUserId))
+                .values()
+                .stream()
+                .map(msgs -> {
+                    UserStat stat = new UserStat();
+                    stat.setUserId(msgs.get(0).getUserId());
+                    return msgs.stream().reduce(stat, (a, b) -> {
+                        a.setTotalFollowings(
+                            Optional.ofNullable(a.getTotalFollowings()).orElse(0) +
+                            delta(b.getState())
+                        );
+                        return a;
+                    }, (v1, v2) -> v1);
+                })
+                .filter(this::shouldContain) // 过滤掉为0的
+                .toList();
+            if (!stats.isEmpty()) {
                 userStatRepository.batchUpdateUserStats(stats);
             }
         } catch (Exception e) {
             log.error("error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
-            String msgs = Result.writeValueAsString(messages);
-            AlarmEmailMessage message = new AlarmEmailMessage("用户关注数据更新失败", msgs);
-            rabbitMessagePublisher.publishMsg(message);
+            Map<String, Object> map = Map.of(
+                "error_class", e.getClass().getName(),
+                "error_msg", e.getMessage(),
+                "rabbit_msg", messages
+            );
+            String msgs = Result.writeValueAsString(map);
+            AlarmEmailMessage message = new AlarmEmailMessage("更新用户关注数据失败", msgs);
+            rabbitMessagePublisher.publishMsgSync(message);
         }
     }
 
@@ -156,13 +163,27 @@ public class UserStatConsumer {
             // 评论消息
             stat.setTotalComments(Optional.ofNullable(stat.getTotalComments()).orElse(0) - c.getDeletedCount());
         } else if (object instanceof CollectRabbitMessage d) {
-            // 评论消息
+            // 收藏消息
             stat.setTotalCollects(Optional.ofNullable(stat.getTotalCollects()).orElse(0) + delta(d.getState()));
         } else if (object instanceof FollowRabbitMessage e) {
             // 关注消息
             stat.setTotalFollowers(Optional.ofNullable(stat.getTotalFollowers()).orElse(0) + delta(e.getState()));
         }
         return stat;
+    }
+
+    private boolean shouldContain(UserStat stat) {
+        if (stat == null) return false;
+        Integer userId = stat.getUserId();
+        // @formatter-off
+        return userId != null && userId != 0 &&
+               (check(stat.getTotalViews())
+                || check(stat.getTotalLikes())
+                || check(stat.getTotalComments())
+                || check(stat.getTotalCollects())
+                || check(stat.getTotalArticles())
+                || check(stat.getTotalFollowings())
+                || check(stat.getTotalFollowers()));
     }
 
     private int getUserId(Object o) {
@@ -182,6 +203,10 @@ public class UserStatConsumer {
 
     private int delta(byte state) {
         return state == 1 ? 1 : -1;
+    }
+
+    private boolean check(Integer value) {
+        return value != null && value != 0;
     }
 
 }

@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public LoginUser loadUserByUsername(String username) {
         Account account = accountService.getAccountByEmailOrUsername(username);
-        if (account == null) throw new UsernameNotFoundException("用户名或密码错误");
+        if (account == null) throw new UsernameNotFoundException("用户不存在");
         return LoginUser
                 .withId(account.getId())
                 .username(account.getUsername())

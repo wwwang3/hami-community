@@ -2,6 +2,7 @@ package top.wang3.hami.security.config;
 
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.DispatcherType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -76,8 +77,9 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(AuthorizeConfigurerCustomizer.build(http))
             .authorizeHttpRequests(conf -> {
                 // 默认接口访问配置
-                conf.requestMatchers("/error").permitAll();
-//                conf.requestMatchers("/favicon.ico").permitAll();
+                conf.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
+                // 不允许直接访问
+                conf.requestMatchers("/error").denyAll();
                 conf.anyRequest().authenticated();
             })
             // csrf配置
@@ -94,7 +96,6 @@ public class WebSecurityConfig {
                     .usernameParameter(properties.getUsernameParameter())
                     .passwordParameter(properties.getPasswordParameter())
                     .loginProcessingUrl(properties.getFormLoginApi())
-                    .permitAll()
                     .successHandler(handler::handleLoginSuccess)
                     .failureHandler(handler::handleError);
             })
