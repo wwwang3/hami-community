@@ -43,5 +43,8 @@ hami/**/*.key
 hami/**/*.crt
 hami/**/logs
 hami/**/data
+hami/**/dist
+hami/build/app/*.jar
+hami/**/nginx/html
 test/**
 *.apifox-helper.properties

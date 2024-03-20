@@ -133,10 +133,6 @@ hami:
   cost-log: true
   ## 没啥用其实
   work-dir: hami/app
-  ## 日志目录，可自行更改
-  log:
-    path: ${hami.work-dir}/logs
-    filename: spring
 ```
 
 `application-mail.yml`
@@ -275,9 +271,15 @@ spring:
 
 1. 将前端项目打包好的dist文件夹放入到`hami/build/nginx`目录下
 
-2. 如果有https证书，将证书文件方到`hami/nginx/certs`目录下，没有则忽略
+2. 打包后端，会将输出jar放到`hami/build/app`目录下
 
-3. 修改`hami/build/nginx/hami.conf`
+   ```sh
+   mvn clean && mvn package
+   ```
+
+3. 如果有https证书，将证书文件方到`hami/nginx/certs`目录下，没有则忽略
+
+4. 修改`hami/nginx/conf/hami.conf`
 
    ```nginx
    upstream hami_app_server {
@@ -325,16 +327,17 @@ spring:
            }
    
            location / {
-                   root /data/nginx/html;
-                   try_files $uri $uri/ index.html;
+                   root /data/nginx/html/hami/index.html;
+                   index index.html;
+                   try_files $uri $uri/ /index.html;
            }
    
    }
    ```
 
-4. 修改mysql,redis,canal配置文件, 主要是密码等
+5. 修改mysql,redis,canal配置文件, 主要是密码等
 
-5. 将hami文件夹上传到服务器，使用docker执行hami文件夹下的`docker-compose-prod.yml`
+6. 将hami文件夹上传到服务器，使用docker执行hami文件夹下的`docker-compose-prod.yml`
 
    ```sh
    docker compose -f docker-compose-prod.yml up -d
