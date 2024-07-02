@@ -6,13 +6,17 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.constant.TimeoutConstants;
+import top.wang3.hami.common.converter.StatConverter;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
+import top.wang3.hami.common.model.SiteStat;
 import top.wang3.hami.common.util.DateUtils;
 import top.wang3.hami.common.util.ListMapperHandler;
 import top.wang3.hami.common.util.RedisClient;
 import top.wang3.hami.core.annotation.CostLog;
 import top.wang3.hami.core.cache.CacheService;
+import top.wang3.hami.core.mapper.SiteStatMapper;
+import top.wang3.hami.core.mapper.UserStatMapper;
 import top.wang3.hami.core.service.stat.ArticleStatService;
 import top.wang3.hami.core.service.stat.CountService;
 import top.wang3.hami.core.service.stat.UserStatService;
@@ -30,6 +34,8 @@ public class CachedCountService implements CountService {
     private final ArticleStatService articleStatService;
     private final UserStatService userStatService;
     private final CacheService cacheService;
+    private final UserStatMapper userStatMapper;
+    private final SiteStatMapper siteStatMapper;
 
     @Override
     public ArticleStatDTO getArticleStatById(int articleId) {
@@ -109,5 +115,37 @@ public class CachedCountService implements CountService {
         String date = DateUtils.formatDate(yesterday);
         String key = RedisConstants.DATA_GROWING + date + ":" + userId;
         return RedisClient.hMGetAll(key);
+    }
+
+    @Override
+    public SiteStat getSiteStat() {
+        String key = RedisConstants.SITE_STAT;
+        Map<String, Integer> data = RedisClient.hMGetAll(key);
+        if (data == null || data.get("views") == null) {
+           data = cacheService.refreshHashCacheAbsent(key, this::loadSiteStat, TimeoutConstants.DEFAULT_EXPIRE);
+        }
+        return StatConverter.INSTANCE.maptoSiteStat(data);
+    }
+
+    @Override
+    public Map<String, Integer> loadSiteStat() {
+        SiteStat stat = userStatMapper.selectSiteStat();
+        Integer pv = loadPv();
+        Integer uv = loadUV();
+        stat.setPv(pv);
+        stat.setUv(uv);
+        return StatConverter.INSTANCE.siteStatToMap(stat);
+    }
+
+
+    @Override
+    public Integer loadPv() {
+        SiteStat stat = siteStatMapper.selectById(1);
+        return stat.getPv();
+    }
+
+    @Override
+    public Integer loadUV() {
+        return siteStatMapper.selectById(1).getUv();
     }
 }

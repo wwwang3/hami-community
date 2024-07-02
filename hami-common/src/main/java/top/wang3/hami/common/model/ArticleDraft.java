@@ -2,7 +2,6 @@ package top.wang3.hami.common.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -93,7 +92,6 @@ public class ArticleDraft {
      * 版本号
      */
     @TableField(value = "version")
-    @JsonIgnore
     private Long version;
 
     /**
@@ -101,7 +99,6 @@ public class ArticleDraft {
      */
     @TableField(value = "deleted")
     @TableLogic
-    @JsonIgnore
     private Byte deleted;
 
     /**

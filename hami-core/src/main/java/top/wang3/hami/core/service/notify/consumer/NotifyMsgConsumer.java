@@ -10,6 +10,8 @@ import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.dto.builder.NotifyMsgBuilder;
 import top.wang3.hami.common.dto.interact.LikeType;
 import top.wang3.hami.common.message.NotifyRabbitReadMessage;
+import top.wang3.hami.common.message.ReviewFailedMessage;
+import top.wang3.hami.common.message.ReviewSuccessMessage;
 import top.wang3.hami.common.message.interact.*;
 import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.common.model.Comment;
@@ -23,20 +25,25 @@ import java.util.List;
 import java.util.Objects;
 
 @RabbitListener(
-        id = "NotifyMsgContainer",
-        bindings = {
-                @QueueBinding(
-                        value = @Queue("hami-notify-queue-1"),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
-                        key = {"do.follow.*", "do.like.*.*", "do.collect.*", "comment.*", "notify.read"}
-                ),
-                @QueueBinding(
-                        value = @Queue("hami-notify-queue-2"),
-                        exchange = @Exchange(value = RabbitConstants.HAMI_USER_EXCHANGE, type = "topic"),
-                        key = {"user.create"}
-                )
-        },
-        concurrency = "4"
+    id = "NotifyMsgContainer",
+    bindings = {
+        @QueueBinding(
+            value = @Queue("hami-notify-queue-1"),
+            exchange = @Exchange(value = RabbitConstants.HAMI_INTERACT_EXCHANGE, type = "topic"),
+            key = {"do.follow.*", "do.like.*.*", "do.collect.*", "comment.*", "notify.read"}
+        ),
+        @QueueBinding(
+            value = @Queue("hami-notify-queue-2"),
+            exchange = @Exchange(value = RabbitConstants.HAMI_USER_EXCHANGE, type = "topic"),
+            key = {"user.create"}
+        ),
+        @QueueBinding(
+            value = @Queue("hami-notify-queue-3"),
+            exchange = @Exchange(value = RabbitConstants.HAMI_TOPIC_EXCHANGE1, type = "topic"),
+            key = {"content.review.success", "content.review.failed"}
+        )
+    },
+    concurrency = "4"
 )
 @Component
 @RequiredArgsConstructor
@@ -74,7 +81,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
         int itemUser = message.getToUserId();
         Integer sender = message.getUserId();
         NotifyMsg msg = NotifyMsgBuilder
-                .buildArticleLikeMsg(sender, itemUser, message.getItemId());
+            .buildArticleLikeMsg(sender, itemUser, message.getItemId());
         save(msg);
     }
 
@@ -84,7 +91,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
         int itemUser = message.getToUserId();
         Comment comment = commentRepository.getById(commentId);
         NotifyMsg msg = NotifyMsgBuilder.buildCommentLikerMsg(message.getUserId(),
-                itemUser, commentId, comment.getArticleId(), comment.getContent());
+            itemUser, commentId, comment.getArticleId(), comment.getContent());
         save(msg);
     }
 
@@ -98,7 +105,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
             String[] details = new String[]{message.getDetail()};
             String detail = Result.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder.buildCommentMsg(message.getUserId(), message.getAuthorId(),
-                    message.getCommentId(), message.getArticleId(), detail);
+                message.getCommentId(), message.getArticleId(), detail);
             save(msg);
         } catch (Exception e) {
             logError(e);
@@ -117,11 +124,11 @@ public class NotifyMsgConsumer implements InteractConsumer {
             String[] details = new String[]{comment.getContent(), message.getDetail()};
             String detail = Result.writeValueAsString(details);
             NotifyMsg msg = NotifyMsgBuilder
-                    .buildReplyMsg(
-                            message.getUserId(), message.getReplyTo(),
-                            message.getCommentId(), message.getArticleId(),
-                            detail
-                    );
+                .buildReplyMsg(
+                    message.getUserId(), message.getReplyTo(),
+                    message.getCommentId(), message.getArticleId(),
+                    detail
+                );
             save(msg);
         } catch (Exception e) {
             logError(e);
@@ -143,7 +150,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
             // 收藏消息 xx收藏了你的文章
             int articleId = message.getItemId();
             NotifyMsg msg = NotifyMsgBuilder
-                    .buildCollectMsg(message.getUserId(), itemUser, articleId);
+                .buildCollectMsg(message.getUserId(), itemUser, articleId);
             save(msg);
         } catch (Exception e) {
             logError(e);
@@ -158,7 +165,7 @@ public class NotifyMsgConsumer implements InteractConsumer {
             }
             // xx 关注了你
             NotifyMsg msg = NotifyMsgBuilder
-                    .buildFollowMsg(message.getUserId(), message.getToUserId());
+                .buildFollowMsg(message.getUserId(), message.getToUserId());
             save(msg);
         } catch (Exception e) {
             logError(e);
@@ -185,6 +192,30 @@ public class NotifyMsgConsumer implements InteractConsumer {
         } catch (Exception e) {
             logError(e);
         }
+    }
+
+    @RabbitHandler
+    public void handleReviewSuccessMsg(ReviewSuccessMessage message) {
+        try {
+            log.info(message.toString());
+            String msg = "你的文章<<%s>>审核成功~".formatted(message.title());
+            NotifyMsg systemMsg = NotifyMsgBuilder.buildSystemMsg(message.userId(), message.draftId().intValue(), msg);
+            notifyMsgRepository.saveNotifyMsg(systemMsg);
+        } catch (Exception e) {
+            logError(e);
+        }
+    }
+
+    @RabbitHandler
+    public void handleReviewFailedMsg(ReviewFailedMessage message) {
+       try {
+           log.info(message.toString());
+           String msg = "你的文章<<%s>>审核失败: %s".formatted(message.title(), message.msg());
+           NotifyMsg systemMsg = NotifyMsgBuilder.buildSystemMsg(message.userId(), message.draftId().intValue(), msg);
+           notifyMsgRepository.saveNotifyMsg(systemMsg);
+       } catch (Exception e) {
+           logError(e);
+       }
     }
 
     private void save(NotifyMsg msg) {

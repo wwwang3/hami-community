@@ -7,6 +7,7 @@ public final class RabbitConstants {
     public static final String XDL_ROUTING_KEY_ARG = "x-dead-letter-routing-key";
 
     public static final String BATCH_LISTENER_FACTORY = "batchRabbitListenerContainerFactory";
+    public static final String BATCH_LISTENER_FACTORY2 = "batchRabbitListenerContainerFactory2";
 
     public static final String HAMI_EMAIL_EXCHANGE = "hami-direct-exchange-1";
 
@@ -80,4 +81,5 @@ public final class RabbitConstants {
     public static final String HAMI_DL_EXCHANGE = "hami-dl-exchange-1";
     public static final String HAMI_DL_QUEUE = "hami-dl-queue-1";
     public static final String HAMI_DL_ROUTING = "/dead";
+    public static final String HAMI_SITE_STAT_EXCHANGE = "hami-site-stat-exchange-1";
 }

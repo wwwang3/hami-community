@@ -19,7 +19,7 @@
     id, username, email, `role`, `password`, `state`, deleted, ctime, mtime
   </sql>
 
-  <select id="selectAccountByUsernameOrEmail" resultMap="BaseResultMap">
+  <select   id="selectAccountByUsernameOrEmail" resultMap="BaseResultMap">
     SELECT * from account WHERE username = #{account} AND deleted = 0
     UNION
     SELECT * from account WHERE email = #{account} AND deleted = 0

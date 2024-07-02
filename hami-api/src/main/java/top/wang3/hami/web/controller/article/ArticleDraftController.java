@@ -4,12 +4,12 @@ package top.wang3.hami.web.controller.article;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.dto.ArticleDraftPageParam;
 import top.wang3.hami.common.dto.PageData;
-import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.core.service.article.ArticleDraftService;
+import top.wang3.hami.security.context.LoginUserContext;
 import top.wang3.hami.security.model.Result;
 import top.wang3.hami.security.ratelimit.annotation.RateLimit;
 
@@ -24,27 +24,18 @@ public class ArticleDraftController {
     private final ArticleDraftService articleDraftService;
 
     /**
-     * 获取未发布文章草稿
+     * 获取草稿列表
      *
-     * @param param {@link PageParam}
+     * @param param {@link ArticleDraftPageParam}
      * @return {@link PageData<ArticleDraft>}
      */
     @PostMapping("/list")
-    public Result<PageData<ArticleDraft>> listDraft(@RequestBody @Valid PageParam param) {
-        PageData<ArticleDraft> articleDrafts = articleDraftService.listDraftByPage(param, Constants.ZERO);
-        return Result.successData(articleDrafts);
-    }
-
-    /**
-     * 获取发布文章草稿
-     *
-     * @param param {@link PageParam}
-     * @return {@link PageData<ArticleDraft>}
-     */
-    @PostMapping("/article/list")
-    public Result<PageData<ArticleDraft>> listArticle(@RequestBody @Valid PageParam param) {
-        PageData<ArticleDraft> drafts = articleDraftService.listDraftByPage(param, Constants.ONE);
-        return Result.successData(drafts);
+    public Result<PageData<ArticleDraft>> listDraft(@RequestBody @Valid ArticleDraftPageParam param) {
+        // 获取当前登录用户的
+        int loginUserId = LoginUserContext.getLoginUserId();
+        param.setUserId(loginUserId);
+        PageData<ArticleDraft> data = articleDraftService.listDraft(param);
+        return Result.successData(data);
     }
 
     /**
@@ -81,6 +72,8 @@ public class ArticleDraftController {
      * @return {@link ArticleDraft}
      */
     @PostMapping("/update")
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+        algorithm = RateLimit.Algorithm.FIXED_WINDOW)
     public Result<ArticleDraft> updateDraft(@RequestBody ArticleDraftParam param) {
         ArticleDraft draft = articleDraftService.updateDraft(param);
         return Result.successIfNonNull(draft);
@@ -90,13 +83,14 @@ public class ArticleDraftController {
      * 发表文章
      *
      * @param draftId 草稿ID
-     * @return {@link ArticleDraft}
-     * @description 返回数据包含文章Id
+     * @description 发表文章, 将文章状态更新为审核
      */
     @PostMapping("/publish")
-    public Result<ArticleDraft> publishArticle(@RequestParam("draftId") Long draftId) {
-        ArticleDraft draft = articleDraftService.publishArticle(draftId);
-        return Result.successIfNonNull(draft);
+    @RateLimit(capacity = 100, interval = 86400L, scope = RateLimit.Scope.LOGIN_USER,
+        algorithm = RateLimit.Algorithm.FIXED_WINDOW)
+    public Result<Void> publishOrUpdate(@RequestParam("draftId") Long draftId) {
+        articleDraftService.publishOrUpdate(draftId);
+        return Result.success();
     }
 
     /**
@@ -107,19 +101,19 @@ public class ArticleDraftController {
      */
     @PostMapping("/delete")
     public Result<Void> deleteDraft(@RequestParam("draftId") long draftId) {
-        boolean success = articleDraftService.deleteDraft(draftId);
+        boolean success = articleDraftService.deleteOriginDraft(draftId);
         return Result.successIfTrue(success);
     }
 
     /**
      * 删除文章
      *
-     * @param articleId 文章Id
+     * @param draftId 草稿ID
      * @return 空
      */
     @PostMapping("/article/delete")
-    public Result<Void> deleteArticle(@RequestParam("articleId") int articleId) {
-        boolean success = articleDraftService.deleteArticle(articleId);
+    public Result<Void> deleteArticle(@RequestParam("draftId") long draftId) {
+        boolean success = articleDraftService.deleteArticle(draftId);
         return Result.successIfTrue(success);
     }
 

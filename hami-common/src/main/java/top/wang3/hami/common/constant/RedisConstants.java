@@ -5,6 +5,8 @@ package top.wang3.hami.common.constant;
  */
 public final class RedisConstants {
 
+    public static final String SITE_STAT = "site:stat:map";
+
     /**
      * 用户点赞数(我点赞的文章/评论数)
      */

@@ -691,6 +691,7 @@ public class RedisClient {
 
 
     public static <T> void hIncr(String key, String field, long cnt) {
+        if (cnt == 0) return;
         redisTemplate.execute((RedisCallback) connection -> {
             connection.hashCommands()
                     .hIncrBy(keyBytes(key), hashKeyBytes(field), cnt);

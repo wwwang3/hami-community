@@ -65,8 +65,9 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(value = {NoHandlerFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Result<Void> handleHandlerException(ServletException exception) {
-        // 找不到静态资源
+    public Result<Void> handleHandlerException(NoHandlerFoundException exception) {
+        // 找不到对应的handler
+        logError(exception);
         return Result.error(exception.getMessage());
     }
 
@@ -85,7 +86,7 @@ public class ServiceExceptionHandler {
     }
 
     @ExceptionHandler(value = {Exception.class})
-    public Result<Void> resolveException(Exception e) {
+    public Result<Void> handleException(Exception e) {
         logError(e, true);
         return Result.error(e.getMessage());
     }

@@ -59,7 +59,7 @@ public class FlatCanalMessageConverter implements CanalMessageConverter {
                 }
                 case "UPDATE" -> {
                     Map<String, String> old = olds.get(i);
-                    // FlatMessage中old只包含字段值变更的字段，其值为变更前数据
+                    // FlatMessage中old只包含值变更的字段，其值为变更前数据
                     copyUnChangedPropertyToOld(data, old);
                     canalEntity.setBefore(mapToEntity(table, tableClass, old));
                     canalEntity.setAfter(mapToEntity(table, tableClass, data));

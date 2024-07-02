@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.ChainWrappers;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
-import top.wang3.hami.common.constant.Constants;
+import top.wang3.hami.common.constant.ContentState;
 import top.wang3.hami.common.model.ArticleDraft;
 import top.wang3.hami.core.mapper.ArticleDraftMapper;
 
@@ -31,13 +31,36 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
     }
 
     @Override
-    public List<ArticleDraft> getDraftsByPage(Page<ArticleDraft> page, Integer userId, byte state) {
+    public List<ArticleDraft> getDraftByPage(Page<ArticleDraft> page, Integer userId, byte state) {
         return ChainWrappers.queryChain(getBaseMapper())
                 .select(FIELDS) // no content
                 .eq("user_id", userId)
                 .eq("`state`", state)
                 .orderByDesc("mtime")
                 .list(page);
+    }
+
+    @Override
+    public List<ArticleDraft> getDraftByPage(Page<ArticleDraft> page) {
+        return ChainWrappers.queryChain(getBaseMapper())
+            .orderByDesc("mtime")
+            .list(page);
+    }
+
+    @Override
+    public List<ArticleDraft> getDraftByPage(Page<ArticleDraft> page, byte state) {
+        return ChainWrappers.queryChain(getBaseMapper())
+            .eq("`state`", state)
+            .orderByDesc("mtime")
+            .list(page);
+    }
+
+    @Override
+    public List<ArticleDraft> getDraftByPage(Page<ArticleDraft> page, List<Byte> states) {
+        return ChainWrappers.queryChain(getBaseMapper())
+            .in("`state`", states)
+            .orderByDesc("mtime")
+            .list(page);
     }
 
     @Override
@@ -57,19 +80,29 @@ public class ArticleDraftRepositoryImpl extends ServiceImpl<ArticleDraftMapper, 
     }
 
     @Override
-    public boolean deleteDraftById(Long draftId, Integer userId) {
+    public boolean deleteOriginDraft(long draftId, int userId) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .eq("id", draftId)
-                .eq("user_id", userId)
-                .eq("`state`", Constants.ZERO) //0为草稿
-                .remove();
+            .eq("id", draftId)
+            .eq("user_id", userId)
+            .eq("`state`", ContentState.ORIGIN_DRAFT.value) //0为草稿
+            .remove();
     }
 
     @Override
-    public boolean deleteDraftByArticleId(Integer articleId, Integer userId) {
+    public boolean deleteDraft(long draftId, int userId) {
         return ChainWrappers.updateChain(getBaseMapper())
-                .eq("user_id", userId)
-                .eq("article_id", articleId)
-                .remove();
+            .eq("id", draftId)
+            .eq("user_id", userId)
+            .remove();
+    }
+
+    @Override
+    public boolean updateDraftState(Long draftId, ContentState contentState, Long oldVersion) {
+        return ChainWrappers.updateChain(getBaseMapper())
+            .set("`state`", contentState.value)
+            .setSql( "version = version + 1")
+            .eq("id", draftId)
+            .eq("version", oldVersion)
+            .update();
     }
 }

@@ -8,6 +8,7 @@ import top.wang3.hami.common.constant.RedisConstants;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
 import top.wang3.hami.common.model.ArticleStat;
+import top.wang3.hami.common.model.SiteStat;
 import top.wang3.hami.common.model.UserStat;
 
 import java.util.*;
@@ -69,5 +70,31 @@ public interface StatConverter {
             results.add(userStatToMap(stat));
         }
         return results;
+    }
+
+    default Map<String, Integer> siteStatToMap(SiteStat stat) {
+        LinkedHashMap<String, Integer> map = new LinkedHashMap<>(6);
+        map.put("users", stat.getUsers());
+        map.put("articles", stat.getArticles());
+        map.put("views", stat.getViews());
+        map.put("likes", stat.getLikes());
+        map.put("comments", stat.getComments());
+        map.put("collects", stat.getCollects());
+        map.put("pv", stat.getPv());
+        map.put("uv", stat.getUv());
+        return map;
+    }
+
+    default SiteStat maptoSiteStat(Map<String, Integer> data) {
+        SiteStat stat = new SiteStat();
+        stat.setUsers(data.get("users"));
+        stat.setArticles(data.get("articles"));
+        stat.setViews(data.get("views"));
+        stat.setLikes(data.get("likes"));
+        stat.setComments(data.get("comments"));
+        stat.setCollects(data.get("collects"));
+        stat.setPv(data.get("pv"));
+        stat.setUv(data.get("uv"));
+        return stat;
     }
 }

@@ -5,12 +5,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.stereotype.Component;
 import top.wang3.hami.common.constant.RabbitConstants;
 import top.wang3.hami.common.message.ArticleRabbitMessage;
 import top.wang3.hami.common.message.user.UserRabbitMessage;
 import top.wang3.hami.core.service.stat.repository.ArticleStatRepository;
 import top.wang3.hami.core.service.stat.repository.UserStatRepository;
 
+
+@Component
 @RabbitListener(
         id = "StatMsgConsumer",
         bindings = {

@@ -30,6 +30,19 @@ public class RabbitBrokerConfig {
         return containerFactory;
     }
 
+    @Bean(RabbitConstants.BATCH_LISTENER_FACTORY2)
+    public SimpleRabbitListenerContainerFactory batchRabbitListenerContainerFactory2(SimpleRabbitListenerContainerFactoryConfigurer configurer,
+                                                                                    ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(containerFactory, connectionFactory);
+        containerFactory.setBatchSize(120);
+        containerFactory.setBatchListener(true);
+        containerFactory.setConsumerBatchEnabled(true);
+        containerFactory.setConnectionFactory(connectionFactory);
+        containerFactory.setReceiveTimeout(1000L); // 每次收到消息前最多阻塞等待的时长 最多2分钟写入一次
+        return containerFactory;
+    }
+
     @Bean(HAMI_DL_QUEUE)
     public Queue deadLetterQueue() {
         return QueueBuilder

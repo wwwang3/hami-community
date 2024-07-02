@@ -32,6 +32,13 @@
         <result property="totalCollects" column="total_collects"/>
     </resultMap>
 
+<!--    <resultMap id="SiteStatResultMap" type="top.wang3.hami.common.model.SiteStat">-->
+<!--        <result column="views" property="views"/>-->
+<!--        <result column="likes" property="likes"/>-->
+<!--        <result column="comments" property="comments"/>-->
+<!--        <result column="collects" property="collects"/>-->
+<!--    </resultMap>-->
+
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
         article_id,
@@ -44,6 +51,11 @@
         ctime,
         mtime
     </sql>
+
+<!--    <select id="selectSiteStat" resultMap="SiteStatResultMap">-->
+<!--        SELECT SUM(views) as views, sum(likes) as likes, SUM(comments) as comments, SUM(collects) as collects-->
+<!--        from article_stat-->
+<!--    </select>-->
 
     <select id="scanArticleStatDesc" resultMap="BaseResultMap">
         select

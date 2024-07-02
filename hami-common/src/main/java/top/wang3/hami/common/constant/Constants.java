@@ -7,6 +7,7 @@ public final class Constants {
     public static final String Hi_PRE_TAG = "<em>";
     public static final String Hi_POST_TAG = "</em>";
 
+    public static final Byte THREE =  3;
 
     public static final Byte TWO =  2;
 

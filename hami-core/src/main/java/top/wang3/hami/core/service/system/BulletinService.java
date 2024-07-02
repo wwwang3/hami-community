@@ -10,4 +10,7 @@ public interface BulletinService {
 
     Bulletin getNewstBulletin();
 
+    Bulletin publishBulletin(Bulletin bulletin);
+
+    boolean deleteBulletin(long id);
 }

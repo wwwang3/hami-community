@@ -140,7 +140,6 @@ public class ArticleStatRepositoryImpl extends ServiceImpl<ArticleStatMapper, Ar
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticleStat(Integer articleId) {
         return super.removeById(articleId);
     }

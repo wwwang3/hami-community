@@ -21,9 +21,9 @@ public class AsyncConfig implements AsyncConfigurer {
         TtlThreadPoolTaskExecutor taskExecutor = new TtlThreadPoolTaskExecutor();
         taskExecutor.setBeanName("hami-thread-pool");
         taskExecutor.setThreadNamePrefix("hami-thread-");
-        taskExecutor.setCorePoolSize(8);
+        taskExecutor.setCorePoolSize(32);
         taskExecutor.setMaxPoolSize(256);
-        taskExecutor.setQueueCapacity(1024);
+        taskExecutor.setQueueCapacity(2048);
         taskExecutor.setKeepAliveSeconds(60);
         taskExecutor.setPrestartAllCoreThreads(true);
         taskExecutor.setRejectedExecutionHandler(new TtlThreadPoolTaskExecutor.NewThreadPolicy(mailMessageHandler));

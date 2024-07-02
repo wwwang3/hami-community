@@ -3,6 +3,7 @@ package top.wang3.hami.core.service.stat;
 import org.springframework.lang.NonNull;
 import top.wang3.hami.common.dto.stat.ArticleStatDTO;
 import top.wang3.hami.common.dto.stat.UserStatDTO;
+import top.wang3.hami.common.model.SiteStat;
 
 import java.util.List;
 import java.util.Map;
@@ -35,5 +36,11 @@ public interface CountService {
 
     Map<String, Integer> getUserYesterdayDataGrowing(Integer userId);
 
+    SiteStat getSiteStat();
 
+    Map<String, Integer> loadSiteStat();
+
+    Integer loadPv();
+
+    Integer loadUV();
 }

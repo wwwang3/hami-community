@@ -38,8 +38,8 @@ public class SyncUserStatCanalHandler implements CanalEntryHandler<ArticleStat> 
         UserStat stat = new UserStat();
         stat.setUserId(deletedEntity.getUserId());
         stat.setTotalLikes(deletedEntity.getLikes() * -1);
-        stat.setTotalComments(-deletedEntity.getComments() * -1);
-        stat.setTotalCollects(-deletedEntity.getCollects() * -1);
+        stat.setTotalComments(deletedEntity.getComments() * -1);
+        stat.setTotalCollects(deletedEntity.getCollects() * -1);
         stat.setTotalViews(deletedEntity.getViews() * -1);
         stat.setTotalArticles(-1);
         userStatRepository.updateUserStat(stat);

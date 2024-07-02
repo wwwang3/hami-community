@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.wang3.hami.core.mapper.SiteStatMapper">
+  <resultMap id="BaseResultMap" type="top.wang3.hami.common.model.SiteStat">
+    <!--@mbg.generated-->
+    <!--@Table tb_site_stat-->
+    <id column="id" property="id" />
+    <result column="pv" property="pv" />
+    <result column="uv" property="uv" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, pv, uv
+  </sql>
+</mapper>

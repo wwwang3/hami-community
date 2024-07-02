@@ -89,7 +89,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
            }
            return null;
        } catch (Exception e) {
-           log.warn("get handler-method throw an exception: error_class: {}, error_msg: {}", e.getClass(), e.getMessage());
+           log.warn("uri: {}, get handler-method throw an exception: error_class: {}, error_msg: {}",
+               request.getRequestURI(),
+               e.getClass(), e.getMessage()
+           );
            return null;
        }
    }

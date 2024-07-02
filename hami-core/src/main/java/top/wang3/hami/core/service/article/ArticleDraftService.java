@@ -1,11 +1,20 @@
 package top.wang3.hami.core.service.article;
 
+import top.wang3.hami.common.dto.ArticleDraftPageParam;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.dto.article.ArticleDraftParam;
 import top.wang3.hami.common.model.ArticleDraft;
 
 public interface ArticleDraftService {
+
+    /**
+     * 分页获取文章草稿
+     *
+     * @param param 分页参数
+     * @return PageData<ArticleDraft>
+     */
+    PageData<ArticleDraft> listDraft(ArticleDraftPageParam param);
 
     /**
      * 分页获取文章草稿
@@ -29,14 +38,20 @@ public interface ArticleDraftService {
     ArticleDraft updateDraft(ArticleDraftParam param);
 
     /**
-     * 发表文章
-     * @param draftId 参数
-     * @return ArticleDraft
+     * 更新文章状态为审核
+     * @param draftId 草稿ID
      */
-    ArticleDraft publishArticle(Long draftId);
+    void publishOrUpdate(Long draftId);
 
-    boolean deleteDraft(long draftId);
+    /**
+     * 实际发表文章或者更新文章
+     * @param draftId 参数
+     */
+    void publishArticle(Long draftId);
 
-    boolean deleteArticle(int articleId);
+    boolean deleteOriginDraft(long draftId);
 
+    boolean deleteArticle(long draftId);
+
+    void checkDraft(ArticleDraft draft);
 }

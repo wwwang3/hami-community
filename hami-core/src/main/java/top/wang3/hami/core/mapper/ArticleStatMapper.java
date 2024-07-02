@@ -23,9 +23,14 @@ public interface ArticleStatMapper extends BaseMapper<ArticleStat> {
     List<HotCounter> selectOverallHotArticle(@Param("datetime") String datetime);
 
     Long batchUpdateLikes(@Param("stats") List<ArticleStat> stats);
+
     Long batchUpdateComments(@Param("stats") List<ArticleStat> stats);
+
     Long batchUpdateCollects(@Param("stats") List<ArticleStat> stats);
+
     Long batchUpdateViews(@Param("stats") List<ArticleStat> stats);
 
     Long batchInsertArticleStat(@Param("items") List<ArticleStat> items);
+
+//    SiteStat selectSiteStat();
 }

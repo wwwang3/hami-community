@@ -25,6 +25,27 @@
         total_followers
     </sql>
 
+    <resultMap id="SiteStatResultMap" type="top.wang3.hami.common.model.SiteStat">
+        <result column="users" property="users" />
+        <result column="articles" property="articles" />
+        <result column="views" property="views" />
+        <result column="likes" property="likes" />
+        <result column="comments" property="comments" />
+        <result column="collects" property="collects" />
+    </resultMap>
+
+    <select id="selectSiteStat" resultMap="SiteStatResultMap">
+        select
+            COUNT(*) as users,
+            SUM(total_articles) as articles,
+            SUM(total_views) as views,
+            SUM(total_likes) as likes,
+            SUM(total_comments) as comments,
+            SUM(total_collects) collects
+        from user_stat
+
+    </select>
+
 
     <update id="batchUpdateUserStat" parameterType="java.util.List">
         update user_stat

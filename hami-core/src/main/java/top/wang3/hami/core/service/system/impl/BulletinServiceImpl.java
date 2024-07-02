@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import top.wang3.hami.common.dto.PageData;
 import top.wang3.hami.common.dto.PageParam;
 import top.wang3.hami.common.model.Bulletin;
+import top.wang3.hami.core.exception.HamiServiceException;
 import top.wang3.hami.core.mapper.BulletinMapper;
 import top.wang3.hami.core.service.system.BulletinService;
 
@@ -36,5 +37,26 @@ public class BulletinServiceImpl implements BulletinService {
                 .orderByDesc(Bulletin::getCtime)
                 .last("limit 1")
                 .one();
+    }
+
+    @Override
+    public Bulletin publishBulletin(Bulletin bulletin) {
+        Integer id = bulletin.getId();
+        boolean success;
+        bulletin.setDeleted(null);
+        bulletin.setCtime(null);
+        bulletin.setMtime(null);
+        if (id != null) {
+            success = bulletinMapper.updateById(bulletin) == 1;
+        } else {
+            success = bulletinMapper.insert(bulletin) == 1;
+        }
+        if (!success) throw new HamiServiceException("更新失败");
+        return bulletin;
+    }
+
+    @Override
+    public boolean deleteBulletin(long id) {
+        return bulletinMapper.deleteById(id) >= 0;
     }
 }

@@ -29,7 +29,7 @@ public interface NotifyMsgMapper extends BaseMapper<NotifyMsg> {
             value = """
                         INSERT INTO notify_msg (item_id, related_id, sender, receiver, type, detail)
                         VALUES(#{itemId}, #{relatedId}, #{sender}, #{receiver}, #{type}, #{detail})
-                        ON DUPLICATE KEY UPDATE mtime = NOW(3);
+                        ON DUPLICATE KEY UPDATE mtime = NOW(3), `state` = 0, detail = #{detail};
                     """
     )
     int saveNotifyMsg(NotifyMsg msg);

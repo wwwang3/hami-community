@@ -1,14 +1,36 @@
 package top.wang3.hami.web;
 
+import cn.xuyanwu.spring.file.storage.spring.EnableFileStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
-import top.wang3.hami.core.HamiCoreConfig;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import top.wang3.hami.canal.annotation.EnableCanal;
+import top.wang3.hami.common.HamiCommonConfig;
+import top.wang3.hami.core.CoreConfigurer;
+import top.wang3.hami.core.HamiProperties;
+import top.wang3.hami.mail.EnableMail;
+import top.wang3.hami.security.annotation.EnableSecurity;
 
 @Slf4j
 @SpringBootApplication
-@Import(value = {HamiCoreConfig.class})
+@MapperScan(basePackages = "top.wang3.hami.core.mapper")
+@EnableAspectJAutoProxy
+@EnableTransactionManagement
+@EnableScheduling
+@EnableMail
+@EnableCanal
+@EnableCaching
+@EnableSecurity
+@EnableFileStorage
+@EnableConfigurationProperties(HamiProperties.class)
+@Import(value = {HamiCommonConfig.class, CoreConfigurer.class})
 public class HamiCommunityApplication {
 
     public static void main(String[] args) {
