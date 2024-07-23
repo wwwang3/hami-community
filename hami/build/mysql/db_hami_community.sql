@@ -517,4 +517,20 @@ INSERT INTO `tag` VALUES (1058, 'Flink', 1, 10005, 0, '2023-09-05 14:26:08.000',
 INSERT INTO `tag` VALUES (1059, '通义灵码', 1, 0, 0, '2024-01-25 00:08:04.336', '2024-01-25 00:08:13.963');
 INSERT INTO `tag` VALUES (1060, '微服务', 1, 0, 0, '2024-01-25 00:08:23.269', '2024-01-25 00:08:26.123');
 
+
+-- ----------------------------
+-- Table structure for tb_site_stat
+-- ----------------------------
+DROP TABLE IF EXISTS `tb_site_stat`;
+CREATE TABLE `tb_site_stat`  (
+                                 `id` int NOT NULL AUTO_INCREMENT,
+                                 `pv` int NOT NULL DEFAULT 0,
+                                 `uv` int NOT NULL DEFAULT 0,
+                                 PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tb_site_stat
+-- ----------------------------
+INSERT INTO `tb_site_stat` VALUES (1, 2825, 2);
 SET FOREIGN_KEY_CHECKS = 1;
