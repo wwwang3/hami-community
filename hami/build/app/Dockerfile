@@ -1,5 +1,9 @@
 FROM azul/zulu-openjdk-debian:17-jre-headless-latest
 ARG VERSION=0.0.1
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 RUN mkdir /root/hami
 WORKDIR /application
 COPY ./hami-api-${VERSION}.jar ./app.jar
