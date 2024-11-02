@@ -123,7 +123,7 @@ public class CommentServiceImpl implements CommentService {
         Integer articleId = comment.getArticleId();
         Integer owner = articleRepository.getArticleAuthor(articleId);
         int userId = LoginUserContext.getLoginUserId();
-        if (userId != owner || userId != comment.getUserId()) {
+        if (userId != owner && userId != comment.getUserId()) {
             // 自己发表的可以删除
             // 评论区拥有者可以删除
             return false;

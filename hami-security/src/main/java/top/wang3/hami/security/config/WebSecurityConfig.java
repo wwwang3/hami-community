@@ -103,6 +103,7 @@ public class WebSecurityConfig {
                 // 退出登录
                 conf
                     .logoutUrl(properties.getLogoutApi())
+                    .deleteCookies()
                     .logoutSuccessHandler(handler::handleLogoutSuccess);
             })
             /// 过滤器顺序 IP ==> 请求ID ==> Token ==> 请求日志 ==> 限流
